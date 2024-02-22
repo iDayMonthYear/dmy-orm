@@ -1,1 +1,1 @@
-# 复制 https://mybatis-flex.com/zh/others/apt.html 改的。
+# 复制 https://mybatis-flex.com 改的。
