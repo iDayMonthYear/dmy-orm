@@ -1,0 +1,3 @@
+cn.com.idmy.orm.spring.boot.OrmTransactionAutoConfiguration
+cn.com.idmy.orm.spring.boot.MultiDataSourceAutoConfiguration
+cn.com.idmy.orm.spring.boot.OrmAutoConfiguration
