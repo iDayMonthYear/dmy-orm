@@ -2,7 +2,7 @@
 package cn.com.idmy.orm.spring.boot;
 
 import cn.com.idmy.orm.core.row.Db;
-import cn.com.idmy.orm.spring.FlexTransactionManager;
+import cn.com.idmy.orm.spring.OrmTransactionManager;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
@@ -31,12 +31,12 @@ public class OrmTransactionAutoConfiguration implements TransactionManagementCon
      * <p>
      * 需要保证两个对象的一致性。
      */
-    private final FlexTransactionManager flexTransactionManager = new FlexTransactionManager();
+    private final OrmTransactionManager ormTransactionManager = new OrmTransactionManager();
 
     @NonNull
     @Override
     @Bean(name = "transactionManager")
     public PlatformTransactionManager annotationDrivenTransactionManager() {
-        return flexTransactionManager;
+        return ormTransactionManager;
     }
 }

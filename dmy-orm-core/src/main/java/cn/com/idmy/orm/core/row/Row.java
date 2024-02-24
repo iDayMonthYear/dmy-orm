@@ -7,6 +7,7 @@ import cn.com.idmy.orm.core.query.QueryWrapper;
 import cn.com.idmy.orm.core.update.RawValue;
 import cn.com.idmy.orm.core.update.UpdateWrapper;
 import cn.com.idmy.orm.core.util.*;
+import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.StrUtil;
 
 import java.math.BigDecimal;
@@ -538,7 +539,7 @@ public class Row extends LinkedHashMap<String, Object> implements UpdateWrapper<
      * @return 数据内容
      */
     Object[] obtainUpdateValues() {
-        return ArrayUtil.concat(obtainModifyValuesWithoutPk(), obtainsPrimaryValues());
+        return ArrayUtil.addAll(obtainModifyValuesWithoutPk(), obtainsPrimaryValues());
     }
 
 

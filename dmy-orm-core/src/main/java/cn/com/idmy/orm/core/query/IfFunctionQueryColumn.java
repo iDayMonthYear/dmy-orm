@@ -1,7 +1,7 @@
 package cn.com.idmy.orm.core.query;
 
 import cn.com.idmy.orm.core.dialect.Dialect;
-import cn.com.idmy.orm.core.util.ArrayUtil;
+import cn.hutool.core.util.ArrayUtil;
 
 import java.util.List;
 
@@ -36,11 +36,11 @@ public class IfFunctionQueryColumn extends QueryColumn implements HasParamsColum
         // IF 函数嵌套
         if (trueValue instanceof HasParamsColumn) {
             Object[] paramValues = ((HasParamsColumn) trueValue).getParamValues();
-            params = ArrayUtil.concat(params, paramValues);
+            params = ArrayUtil.addAll(params, paramValues);
         }
         if (falseValue instanceof HasParamsColumn) {
             Object[] paramValues = ((HasParamsColumn) falseValue).getParamValues();
-            params = ArrayUtil.concat(params, paramValues);
+            params = ArrayUtil.addAll(params, paramValues);
         }
         return params;
     }

@@ -9,10 +9,10 @@ import cn.com.idmy.orm.core.query.QueryColumn;
 import cn.com.idmy.orm.core.query.QueryWrapperAdapter;
 import cn.com.idmy.orm.core.table.TableInfo;
 import cn.com.idmy.orm.core.table.TableInfoFactory;
-import cn.com.idmy.orm.core.util.ArrayUtil;
 import cn.com.idmy.orm.core.util.ClassUtil;
 import cn.com.idmy.orm.core.util.LambdaGetter;
 import cn.com.idmy.orm.core.util.SqlUtil;
+import cn.hutool.core.util.ArrayUtil;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -131,7 +131,7 @@ public class UpdateChain<T> extends QueryWrapperAdapter<UpdateChain<T>> implemen
         String sql = DialectFactory.getDialect().forUpdateEntityByQuery(tableInfo, entity, true, this);
 
         Object[] values = tableInfo.buildUpdateSqlArgs(entity, true, true);
-        values = ArrayUtil.concat(values, CPI.getValueArray(this));
+        values = ArrayUtil.addAll(values, CPI.getValueArray(this));
 
         return SqlUtil.replaceSqlParams(sql, values);
     }

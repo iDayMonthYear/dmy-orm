@@ -420,7 +420,13 @@ public interface BaseMapper<T> {
      * @return 实体类数据
      */
     default T selectOneByQuery(QueryWrapper queryWrapper) {
-        return MapperUtil.getSelectOneResult(selectListByQuery(queryWrapper));
+        Long limitRows = CPI.getLimitRows(queryWrapper);
+        try {
+            queryWrapper.limit(1);
+            return MapperUtil.getSelectOneResult(selectListByQuery(queryWrapper));
+        } finally {
+            CPI.setLimitRows(queryWrapper, limitRows);
+        }
     }
 
     /**
@@ -431,7 +437,13 @@ public interface BaseMapper<T> {
      * @return 实体类数据
      */
     default <R> R selectOneByQueryAs(QueryWrapper queryWrapper, Class<R> asType) {
-        return MapperUtil.getSelectOneResult(selectListByQueryAs(queryWrapper, asType));
+        Long limitRows = CPI.getLimitRows(queryWrapper);
+        try {
+            queryWrapper.limit(1);
+            return MapperUtil.getSelectOneResult(selectListByQueryAs(queryWrapper, asType));
+        } finally {
+            CPI.setLimitRows(queryWrapper, limitRows);
+        }
     }
 
     /**

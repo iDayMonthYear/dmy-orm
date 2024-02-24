@@ -33,33 +33,33 @@ public class QueryColumn implements CloneSupport<QueryColumn>, Conditional<Query
 
     public QueryColumn(String name) {
         SqlUtil.keepColumnSafely(name);
-        this.name = StringUtil.tryTrim(name);
+        this.name = StrUtil.trim(name);
     }
 
     public QueryColumn(String tableName, String name) {
         SqlUtil.keepColumnSafely(name);
         this.table = new QueryTable(tableName);
-        this.name = StringUtil.tryTrim(name);
+        this.name = StrUtil.trim(name);
     }
 
     public QueryColumn(String schema, String tableName, String name) {
         SqlUtil.keepColumnSafely(name);
         this.table = new QueryTable(schema, tableName);
-        this.name = StringUtil.tryTrim(name);
+        this.name = StrUtil.trim(name);
     }
 
     public QueryColumn(String schema, String tableName, String name, String alias) {
         SqlUtil.keepColumnSafely(name);
         this.returnCopyByAsMethod = true;
         this.table = new QueryTable(schema, tableName);
-        this.name = StringUtil.tryTrim(name);
-        this.alias = StringUtil.tryTrim(alias);
+        this.name = StrUtil.trim(name);
+        this.alias = StrUtil.trim(alias);
     }
 
     public QueryColumn(QueryTable queryTable, String name) {
         SqlUtil.keepColumnSafely(name);
         this.table = queryTable;
-        this.name = StringUtil.tryTrim(name);
+        this.name = StrUtil.trim(name);
     }
 
     public QueryColumn(TableDef tableDef, String name) {

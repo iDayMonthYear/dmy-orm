@@ -248,5 +248,4 @@ public class CPI {
     public static boolean isSameTable(QueryTable queryTable, QueryTable otherTable) {
         return queryTable.isSameTable(otherTable);
     }
-
 }

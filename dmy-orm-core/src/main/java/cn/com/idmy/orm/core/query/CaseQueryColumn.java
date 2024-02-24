@@ -4,9 +4,9 @@ import cn.com.idmy.orm.core.OrmConsts;
 import cn.com.idmy.orm.core.constant.SqlConsts;
 import cn.com.idmy.orm.core.dialect.Dialect;
 import cn.com.idmy.orm.core.exception.OrmExceptions;
-import cn.com.idmy.orm.core.util.ArrayUtil;
 import cn.com.idmy.orm.core.util.CollectionUtil;
 import cn.com.idmy.orm.core.util.ObjectUtil;
+import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.StrUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -68,10 +68,10 @@ public class CaseQueryColumn extends QueryColumn implements HasParamsColumn {
     public Object[] getParamValues() {
         Object[] values = OrmConsts.EMPTY_ARRAY;
         for (When when : whens) {
-            values = ArrayUtil.concat(values, WrapperUtil.getValues(when.whenCondition));
+            values = ArrayUtil.addAll(values, WrapperUtil.getValues(when.whenCondition));
         }
         if (elseValue instanceof HasParamsColumn) {
-            values = ArrayUtil.concat(values, ((HasParamsColumn) elseValue).getParamValues());
+            values = ArrayUtil.addAll(values, ((HasParamsColumn) elseValue).getParamValues());
         }
         return values;
     }

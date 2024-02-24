@@ -1,7 +1,7 @@
 package cn.com.idmy.orm.core.mybatis;
 
 import cn.com.idmy.orm.core.keygen.IMultiKeyGenerator;
-import cn.com.idmy.orm.core.util.ArrayUtil;
+import cn.hutool.core.util.ArrayUtil;
 import org.apache.ibatis.executor.Executor;
 import org.apache.ibatis.executor.keygen.Jdbc3KeyGenerator;
 import org.apache.ibatis.executor.keygen.KeyGenerator;

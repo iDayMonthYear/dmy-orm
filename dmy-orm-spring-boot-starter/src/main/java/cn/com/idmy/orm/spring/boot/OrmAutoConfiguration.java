@@ -89,41 +89,25 @@ import java.util.stream.Stream;
 public class OrmAutoConfiguration implements InitializingBean {
 
     protected static final Logger logger = LoggerFactory.getLogger(OrmAutoConfiguration.class);
-
     protected final OrmProperties properties;
-
     protected final Interceptor[] interceptors;
-
     protected final TypeHandler[] typeHandlers;
-
     protected final LanguageDriver[] languageDrivers;
-
     protected final ResourceLoader resourceLoader;
-
     protected final DatabaseIdProvider databaseIdProvider;
-
     protected final List<ConfigurationCustomizer> configurationCustomizers;
-
     protected final List<SqlSessionFactoryBeanCustomizer> sqlSessionFactoryBeanCustomizers;
-
     //数据源解密器
     protected final DataSourceDecipher dataSourceDecipher;
-
     //动态表名
     protected final DynamicTableProcessor dynamicTableProcessor;
-
     //动态 schema 处理器
     protected final DynamicSchemaProcessor dynamicSchemaProcessor;
-
     //多租户
     protected final TenantFactory tenantFactory;
-
     //自定义逻辑删除处理器
     protected final LogicDeleteProcessor logicDeleteProcessor;
-
-    //初始化监听
-    protected final OrmCustomizer mybatisFlexCustomizer;
-
+    protected final OrmCustomizer ormCustomizer;
 
     public OrmAutoConfiguration(OrmProperties properties, ObjectProvider<Interceptor[]> interceptorsProvider,
                                 ObjectProvider<TypeHandler[]> typeHandlersProvider, ObjectProvider<LanguageDriver[]> languageDriversProvider,
@@ -162,7 +146,7 @@ public class OrmAutoConfiguration implements InitializingBean {
         this.logicDeleteProcessor = logicDeleteProcessorProvider.getIfAvailable();
 
         //初始化监听器
-        this.mybatisFlexCustomizer = mybatisFlexCustomizerProvider.getIfAvailable();
+        this.ormCustomizer = mybatisFlexCustomizerProvider.getIfAvailable();
     }
 
     @Override
@@ -201,8 +185,8 @@ public class OrmAutoConfiguration implements InitializingBean {
         }
 
         //初始化监听器
-        if (mybatisFlexCustomizer != null) {
-            mybatisFlexCustomizer.customize(OrmConfig.getDefaultConfig());
+        if (ormCustomizer != null) {
+            ormCustomizer.customize(OrmConfig.getDefaultConfig());
         }
     }
 
@@ -352,8 +336,7 @@ public class OrmAutoConfiguration implements InitializingBean {
             // for spring-native
             boolean injectSqlSession = environment.getProperty("mybatis.inject-sql-session-on-mapper-scan", Boolean.class,
                     Boolean.TRUE);
-            if (injectSqlSession && this.beanFactory instanceof ListableBeanFactory) {
-                ListableBeanFactory listableBeanFactory = (ListableBeanFactory) this.beanFactory;
+            if (injectSqlSession && this.beanFactory instanceof ListableBeanFactory listableBeanFactory) {
                 Optional<String> sqlSessionTemplateBeanName = Optional
                         .ofNullable(getBeanNameForType(SqlSessionTemplate.class, listableBeanFactory));
                 Optional<String> sqlSessionFactoryBeanName = Optional

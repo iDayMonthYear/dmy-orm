@@ -1,12 +1,12 @@
 package cn.com.idmy.orm.core.util;
 
 
+import cn.hutool.core.util.ArrayUtil;
+
 import java.util.Collection;
 import java.util.function.Function;
-import java.util.regex.Pattern;
 
 public class StringUtil {
-
     private StringUtil() {
     }
 
@@ -145,11 +145,6 @@ public class StringUtil {
     }
 
 
-    public static boolean areNotBlank(String... strings) {
-        return !isAnyBlank();
-    }
-
-
     /**
      * 这个字符串是否是全是数字
      *
@@ -170,20 +165,6 @@ public class StringUtil {
     }
 
 
-    public static boolean startsWithAny(String str, String... prefixes) {
-        if (isBlank(str) || prefixes == null || prefixes.length == 0) {
-            return false;
-        }
-
-        for (String prefix : prefixes) {
-            if (str.startsWith(prefix)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-
     public static boolean endsWithAny(String str, String... suffixes) {
         if (isBlank(str) || suffixes == null || suffixes.length == 0) {
             return false;
@@ -195,26 +176,6 @@ public class StringUtil {
             }
         }
         return false;
-    }
-
-
-    public static String trimOrNull(String string) {
-        return string != null ? string.trim() : null;
-    }
-
-
-    /**
-     * 正则匹配
-     *
-     * @param regex
-     * @param input
-     * @return
-     */
-    public static boolean matches(String regex, String input) {
-        if (null == regex || null == input) {
-            return false;
-        }
-        return Pattern.matches(regex, input);
     }
 
     /**
@@ -293,20 +254,5 @@ public class StringUtil {
         return index <= 0 ? new String[]{tableNameWithAlias, null}
                 : new String[]{tableNameWithAlias.substring(0, index), tableNameWithAlias.substring(index + 1)};
     }
-
-    public static String tryTrim(String string) {
-        return string != null ? string.trim() : null;
-    }
-
-    public static String substringAfterLast(String text, String str) {
-        if (text == null) {
-            return null;
-        }
-        if (str == null) {
-            return text;
-        }
-        return text.substring(text.lastIndexOf(str) + 1);
-    }
-
 
 }

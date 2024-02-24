@@ -105,8 +105,6 @@ public class Brackets extends QueryCondition {
                 }
                 sql.append(childSql);
             } else {
-                //all child conditions are not effective
-                //fixed gitee #I6W89G
                 this.effective = false;
             }
         }
@@ -133,9 +131,7 @@ public class Brackets extends QueryCondition {
     @Override
     public Brackets clone() {
         Brackets clone = (Brackets) super.clone();
-        // deep clone ...
         clone.childCondition = ObjectUtil.clone(this.childCondition);
         return clone;
     }
-
 }

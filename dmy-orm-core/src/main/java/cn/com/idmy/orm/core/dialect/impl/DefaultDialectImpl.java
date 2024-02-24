@@ -13,10 +13,10 @@ import cn.com.idmy.orm.core.row.Row;
 import cn.com.idmy.orm.core.row.RowCPI;
 import cn.com.idmy.orm.core.table.TableInfo;
 import cn.com.idmy.orm.core.update.RawValue;
-import cn.com.idmy.orm.core.util.ArrayUtil;
 import cn.com.idmy.orm.core.util.CollectionUtil;
 import cn.com.idmy.orm.core.util.SqlUtil;
 import cn.com.idmy.orm.core.util.StringUtil;
+import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.StrUtil;
 
 import java.util.*;
@@ -32,9 +32,8 @@ import static cn.com.idmy.orm.core.constant.SqlConsts.*;
  * 创建或获取方言请参考
  */
 public class DefaultDialectImpl implements Dialect {
-
     protected KeywordWrap keywordWrap = KeywordWrap.BACK_QUOTE;
-    private LimitOffsetProcessor limitOffsetProcessor = LimitOffsetProcessor.MYSQL;
+    protected LimitOffsetProcessor limitOffsetProcessor = LimitOffsetProcessor.MYSQL;
 
     public DefaultDialectImpl() {
     }

@@ -3,8 +3,8 @@ package cn.com.idmy.orm.core.query;
 import cn.com.idmy.orm.core.OrmConsts;
 import cn.com.idmy.orm.core.dialect.Dialect;
 import cn.com.idmy.orm.core.exception.OrmExceptions;
-import cn.com.idmy.orm.core.util.ArrayUtil;
 import cn.com.idmy.orm.core.util.CollectionUtil;
+import cn.hutool.core.util.ArrayUtil;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -51,7 +51,7 @@ public class With implements CloneSupport<With> {
     public Object[] getParamValues() {
         Object[] paramValues = OrmConsts.EMPTY_ARRAY;
         for (WithItem withItem : withItems) {
-            paramValues = ArrayUtil.concat(paramValues, withItem.getParamValues());
+            paramValues = ArrayUtil.addAll(paramValues, withItem.getParamValues());
         }
         return paramValues;
     }

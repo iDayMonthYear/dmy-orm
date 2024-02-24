@@ -1,6 +1,7 @@
 package cn.com.idmy.orm.core.util;
 
 import cn.com.idmy.orm.annotation.Column;
+import cn.hutool.core.util.ArrayUtil;
 import lombok.Getter;
 import org.apache.ibatis.reflection.Reflector;
 

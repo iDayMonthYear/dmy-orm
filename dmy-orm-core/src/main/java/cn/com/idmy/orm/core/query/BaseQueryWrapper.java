@@ -31,13 +31,6 @@ public class BaseQueryWrapper<T extends BaseQueryWrapper<T>> implements CloneSup
 
     protected Map<String, Object> context;
 
-    /**
-     * <p>Title: clear. </p>
-     * <p>Description: Default QueryWrapper values. </p>
-     * <p>Notice: When adding new attributes, it is necessary to supplement here. </p>
-     *
-     * @author dragon
-     */
     public void clear() {
         this.with = null;
         this.queryTables = null;
@@ -64,7 +57,6 @@ public class BaseQueryWrapper<T extends BaseQueryWrapper<T>> implements CloneSup
         selectColumns.add(queryColumn);
         return (T) this;
     }
-
 
     protected T addJoin(Join join) {
         if (joins == null) {
@@ -139,7 +131,6 @@ public class BaseQueryWrapper<T extends BaseQueryWrapper<T>> implements CloneSup
         }
         endFragments.add(fragment);
     }
-
 
     protected List<QueryTable> getQueryTables() {
         return queryTables;
@@ -296,5 +287,4 @@ public class BaseQueryWrapper<T extends BaseQueryWrapper<T>> implements CloneSup
             throw OrmExceptions.wrap(e);
         }
     }
-
 }

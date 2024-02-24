@@ -75,7 +75,7 @@ public class OrmProperties {
     /**
      * Locations of MyBatis mapper files.
      */
-    private String[] mapperLocations = new String[]{"classpath*:/mapper/**/*.xml"};
+    private String[] mapperLocations = new String[]{"classpath*:/dao/**/*.xml"};
 
     /**
      * Packages to search type aliases. (Package delimiters are ",; \t\n")

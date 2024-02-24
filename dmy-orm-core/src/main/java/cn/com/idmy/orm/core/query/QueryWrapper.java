@@ -9,6 +9,7 @@ import cn.com.idmy.orm.core.table.TableDef;
 import cn.com.idmy.orm.core.table.TableInfo;
 import cn.com.idmy.orm.core.table.TableInfoFactory;
 import cn.com.idmy.orm.core.util.*;
+import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.StrUtil;
 
 import java.util.*;
@@ -2332,21 +2333,21 @@ public class QueryWrapper extends BaseQueryWrapper<QueryWrapper> {
         //having 参数
         Object[] havingValues = WrapperUtil.getValues(havingQueryCondition);
 
-        Object[] paramValues = ArrayUtil.concat(whereValues, havingValues);
+        Object[] paramValues = ArrayUtil.addAll(whereValues, havingValues);
 
         //unions 参数
         if (CollectionUtil.isNotEmpty(unions)) {
             for (UnionWrapper union : unions) {
                 QueryWrapper queryWrapper = union.getQueryWrapper();
-                paramValues = ArrayUtil.concat(paramValues, queryWrapper.getAllValueArray());
+                paramValues = ArrayUtil.addAll(paramValues, queryWrapper.getAllValueArray());
             }
         }
 
         Object[] returnValues = withValues == null ? OrmConsts.EMPTY_ARRAY : withValues.toArray();
-        returnValues = columnValues != null ? ArrayUtil.concat(returnValues, columnValues.toArray()) : returnValues;
-        returnValues = tableValues != null ? ArrayUtil.concat(returnValues, tableValues.toArray()) : returnValues;
-        returnValues = joinValues != null ? ArrayUtil.concat(returnValues, joinValues.toArray()) : returnValues;
-        returnValues = ArrayUtil.concat(returnValues, paramValues);
+        returnValues = columnValues != null ? ArrayUtil.addAll(returnValues, columnValues.toArray()) : returnValues;
+        returnValues = tableValues != null ? ArrayUtil.addAll(returnValues, tableValues.toArray()) : returnValues;
+        returnValues = joinValues != null ? ArrayUtil.addAll(returnValues, joinValues.toArray()) : returnValues;
+        returnValues = ArrayUtil.addAll(returnValues, paramValues);
 
         return returnValues;
     }
@@ -2396,13 +2397,13 @@ public class QueryWrapper extends BaseQueryWrapper<QueryWrapper> {
         //having 参数
         Object[] havingValues = WrapperUtil.getValues(havingQueryCondition);
 
-        Object[] paramValues = ArrayUtil.concat(whereValues, havingValues);
+        Object[] paramValues = ArrayUtil.addAll(whereValues, havingValues);
 
         //unions 参数
         if (CollectionUtil.isNotEmpty(unions)) {
             for (UnionWrapper union : unions) {
                 QueryWrapper queryWrapper = union.getQueryWrapper();
-                paramValues = ArrayUtil.concat(paramValues, queryWrapper.getAllValueArray());
+                paramValues = ArrayUtil.addAll(paramValues, queryWrapper.getAllValueArray());
             }
         }
 

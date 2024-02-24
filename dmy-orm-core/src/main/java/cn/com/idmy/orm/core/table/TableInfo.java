@@ -20,6 +20,7 @@ import cn.com.idmy.orm.core.tenant.TenantManager;
 import cn.com.idmy.orm.core.update.RawValue;
 import cn.com.idmy.orm.core.update.UpdateWrapper;
 import cn.com.idmy.orm.core.util.*;
+import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.StrUtil;
 import lombok.Getter;
 import lombok.Setter;
@@ -190,7 +191,7 @@ public class TableInfo {
         }
 
         this.columns = columnNames.toArray(new String[]{});
-        this.allColumns = ArrayUtil.concat(allColumns, columns);
+        this.allColumns = ArrayUtil.addAll(allColumns, columns);
     }
 
     void setPrimaryKeyList(List<IdInfo> primaryKeyList) {
@@ -213,7 +214,7 @@ public class TableInfo {
             String[] alias = idInfo.getAlias();
             columnQueryMapping.put(idInfo.column, new QueryColumn(schema, tableName, idInfo.column, alias != null && alias.length > 0 ? alias[0] : null));
         }
-        this.allColumns = ArrayUtil.concat(allColumns, primaryColumns);
+        this.allColumns = ArrayUtil.addAll(allColumns, primaryColumns);
         this.insertPrimaryKeys = insertIdFields.toArray(new String[0]);
     }
 
@@ -256,7 +257,7 @@ public class TableInfo {
      */
     public String[] obtainInsertColumns(Object entity, boolean ignoreNulls) {
         if (!ignoreNulls) {
-            return ArrayUtil.concat(insertPrimaryKeys, columns);
+            return ArrayUtil.addAll(insertPrimaryKeys, columns);
         }
         // 忽略 null 字段，
         else {

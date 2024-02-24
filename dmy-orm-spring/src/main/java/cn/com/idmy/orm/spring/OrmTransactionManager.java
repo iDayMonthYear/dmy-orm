@@ -15,7 +15,7 @@ import org.springframework.transaction.support.DefaultTransactionStatus;
  *
  * @author michael
  */
-public class FlexTransactionManager extends AbstractPlatformTransactionManager {
+public class OrmTransactionManager extends AbstractPlatformTransactionManager {
 
     @Override
     protected Object doGetTransaction() throws TransactionException {

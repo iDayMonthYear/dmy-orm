@@ -10,8 +10,8 @@ import cn.com.idmy.orm.core.row.RowCPI;
 import cn.com.idmy.orm.core.row.RowMapper;
 import cn.com.idmy.orm.core.table.TableInfo;
 import cn.com.idmy.orm.core.table.TableInfoFactory;
-import cn.com.idmy.orm.core.util.ArrayUtil;
 import cn.com.idmy.orm.core.util.ClassUtil;
+import cn.hutool.core.util.ArrayUtil;
 
 import java.util.*;
 
@@ -82,7 +82,7 @@ public class RowSqlProvider {
 
         Object[] values = new Object[]{};
         for (Row row : rows) {
-            values = ArrayUtil.concat(values, row.obtainInsertValues(modifyAttrs));
+            values = ArrayUtil.addAll(values, row.obtainInsertValues(modifyAttrs));
         }
         ProviderUtil.setSqlArgs(params, values);
 
@@ -186,7 +186,7 @@ public class RowSqlProvider {
         Object[] modifyValues = RowCPI.obtainModifyValues(data);
         Object[] valueArray = CPI.getValueArray(queryWrapper);
 
-        ProviderUtil.setSqlArgs(params, ArrayUtil.concat(modifyValues, valueArray));
+        ProviderUtil.setSqlArgs(params, ArrayUtil.addAll(modifyValues, valueArray));
 
         return sql;
     }
@@ -211,7 +211,7 @@ public class RowSqlProvider {
 
         Object[] values = OrmConsts.EMPTY_ARRAY;
         for (Row row : rows) {
-            values = ArrayUtil.concat(values, RowCPI.obtainUpdateValues(row));
+            values = ArrayUtil.addAll(values, RowCPI.obtainUpdateValues(row));
         }
         ProviderUtil.setSqlArgs(params, values);
         return sql;
@@ -243,7 +243,7 @@ public class RowSqlProvider {
 
         OrmAssert.assertAreNotNull(primaryValues, "The value of primary key must not be null, entity[%s]", entity);
 
-        ProviderUtil.setSqlArgs(params, ArrayUtil.concat(updateValues, primaryValues, tenantIdArgs));
+        ProviderUtil.setSqlArgs(params, ArrayUtil.addAll(updateValues, primaryValues, tenantIdArgs));
         return sql;
     }
 

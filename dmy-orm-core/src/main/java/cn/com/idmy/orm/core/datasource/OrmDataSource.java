@@ -4,7 +4,7 @@ import cn.com.idmy.orm.core.dialect.DbType;
 import cn.com.idmy.orm.core.dialect.DbTypeUtil;
 import cn.com.idmy.orm.core.transaction.TransactionContext;
 import cn.com.idmy.orm.core.transaction.TransactionalManager;
-import cn.com.idmy.orm.core.util.ArrayUtil;
+import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.StrUtil;
 import jakarta.annotation.Nullable;
 import lombok.Getter;

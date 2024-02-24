@@ -3,8 +3,10 @@ package cn.com.idmy.orm.core.table;
 import cn.com.idmy.orm.core.OrmConfig;
 import cn.com.idmy.orm.core.mask.CompositeMaskTypeHandler;
 import cn.com.idmy.orm.core.mask.MaskTypeHandler;
-import cn.com.idmy.orm.core.util.ArrayUtil;
+import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.StrUtil;
+import lombok.Getter;
+import lombok.Setter;
 import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.type.JdbcType;
 import org.apache.ibatis.type.TypeHandler;
@@ -15,6 +17,8 @@ import java.time.*;
 import java.time.chrono.JapaneseDate;
 import java.util.Date;
 
+@Getter
+@Setter
 public class ColumnInfo {
 
     private static final Class<?>[] needGetTypeHandlerTypes = {
@@ -70,46 +74,6 @@ public class ColumnInfo {
     protected boolean ignore;
 
 
-    public String getColumn() {
-        return column;
-    }
-
-    public void setColumn(String column) {
-        this.column = column;
-    }
-
-    public String[] getAlias() {
-        return alias;
-    }
-
-    public void setAlias(String[] alias) {
-        this.alias = alias;
-    }
-
-    public String getProperty() {
-        return property;
-    }
-
-    public void setProperty(String property) {
-        this.property = property;
-    }
-
-    public Class<?> getPropertyType() {
-        return propertyType;
-    }
-
-    public void setPropertyType(Class<?> propertyType) {
-        this.propertyType = propertyType;
-    }
-
-    public JdbcType getJdbcType() {
-        return jdbcType;
-    }
-
-    public void setJdbcType(JdbcType jdbcType) {
-        this.jdbcType = jdbcType;
-    }
-
     public TypeHandler<?> buildTypeHandler(Configuration configuration) {
 
         if (buildTypeHandler != null) {
@@ -142,26 +106,5 @@ public class ColumnInfo {
         }
 
         return buildTypeHandler;
-    }
-
-    public void setTypeHandler(TypeHandler<?> typeHandler) {
-        this.typeHandler = typeHandler;
-    }
-
-    public String getMaskType() {
-        return maskType;
-    }
-
-    public void setMaskType(String maskType) {
-        this.maskType = maskType;
-    }
-
-
-    public boolean isIgnore() {
-        return ignore;
-    }
-
-    public void setIgnore(boolean ignore) {
-        this.ignore = ignore;
     }
 }
