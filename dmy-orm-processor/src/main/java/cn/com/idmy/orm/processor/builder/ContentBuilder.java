@@ -79,7 +79,7 @@ public class ContentBuilder {
             }
             content.append(");\n");
         });
-        content.append("    public final QueryColumn ").append(StrUtil.buildFieldName("allColumns", tableDefPropertiesNameStyle)).append(" = new QueryColumn(this, \"*\");\n");
+        content.append("    public final QueryColumn ").append("ALL").append(" = new QueryColumn(this, \"*\");\n");
         StringJoiner defaultColumnJoiner = new StringJoiner(", ");
         columnInfos.forEach(columnInfo -> {
             if (defaultColumns.contains(columnInfo.getColumn())) {
@@ -90,7 +90,7 @@ public class ContentBuilder {
                 defaultColumnJoiner.add(columnPropertyName);
             }
         });
-        content.append("    public final QueryColumn[] ").append(StrUtil.buildFieldName("defaultColumns", tableDefPropertiesNameStyle)).append(" = new QueryColumn[]{").append(defaultColumnJoiner).append("};\n\n");
+        content.append("    public final QueryColumn[] ").append("FULL").append(" = new QueryColumn[]{").append(defaultColumnJoiner).append("};\n\n");
         String schema = !StrUtil.isBlank(tableInfo.getSchema())
                 ? tableInfo.getSchema()
                 : "";
