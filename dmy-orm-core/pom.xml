@@ -19,11 +19,6 @@
             <version>${dmy-orm.version}</version>
         </dependency>
         <dependency>
-            <groupId>cn.com.idmy.orm</groupId>
-            <artifactId>dmy-orm-processor</artifactId>
-            <version>${dmy-orm.version}</version>
-        </dependency>
-        <dependency>
             <groupId>org.mybatis</groupId>
             <artifactId>mybatis</artifactId>
         </dependency>
