@@ -1,12 +1,12 @@
 package cn.com.idmy.orm.core.keygen;
 
 import cn.com.idmy.orm.annotation.KeyType;
-import cn.com.idmy.orm.core.OrmConfig;
 import cn.com.idmy.orm.core.OrmConsts;
+import cn.com.idmy.orm.core.OrmGlobalConfig;
 import cn.com.idmy.orm.core.exception.OrmExceptions;
 import cn.com.idmy.orm.core.table.IdInfo;
 import cn.com.idmy.orm.core.table.TableInfo;
-import cn.hutool.core.util.StrUtil;
+import cn.com.idmy.orm.core.util.StringUtil;
 import org.apache.ibatis.executor.keygen.Jdbc3KeyGenerator;
 import org.apache.ibatis.executor.keygen.KeyGenerator;
 import org.apache.ibatis.executor.keygen.NoKeyGenerator;
@@ -41,13 +41,13 @@ public class MybatisKeyGeneratorUtil {
 
 
     public static KeyGenerator createIdKeyGenerator(TableInfo tableInfo, MappedStatement ms, IdInfo idInfo) {
-        OrmConfig ormConfig = OrmConfig.getConfig(ms.getConfiguration());
+        OrmGlobalConfig flexGlobalConfig = OrmGlobalConfig.getConfig(ms.getConfiguration());
 
-        if (ormConfig == null) {
+        if (flexGlobalConfig == null) {
             return NoKeyGenerator.INSTANCE;
         }
 
-        OrmConfig.KeyConfig globalKeyConfig = ormConfig.getKeyConfig();
+        OrmGlobalConfig.KeyConfig globalKeyConfig = flexGlobalConfig.getKeyConfig();
         KeyType keyType = getKeyType(idInfo, globalKeyConfig);
 
         if (keyType == null || keyType == KeyType.NONE) {
@@ -66,7 +66,7 @@ public class MybatisKeyGeneratorUtil {
 
         //通过序列生成的注解
         String sequence = getKeyValue(idInfo, globalKeyConfig);
-        if (StrUtil.isBlank(sequence)) {
+        if (StringUtil.isBlank(sequence)) {
             throw OrmExceptions.wrap("Please config sequence by @Id(value=\"...\") for field: %s in class: %s"
                     , idInfo.getProperty()
                     , tableInfo.getEntityClass().getName());
@@ -115,7 +115,7 @@ public class MybatisKeyGeneratorUtil {
     /**
      * 获取主键的 keyType，优先通过 @id 获取，获取不到通过全局配置获取
      */
-    public static KeyType getKeyType(IdInfo idInfo, OrmConfig.KeyConfig globalKeyConfig) {
+    public static KeyType getKeyType(IdInfo idInfo, OrmGlobalConfig.KeyConfig globalKeyConfig) {
         KeyType keyType = idInfo.getKeyType();
         if (keyType != KeyType.NONE) {
             return keyType;
@@ -129,16 +129,16 @@ public class MybatisKeyGeneratorUtil {
     }
 
 
-    public static String getKeyValue(IdInfo idInfo, OrmConfig.KeyConfig globalKeyConfig) {
+    public static String getKeyValue(IdInfo idInfo, OrmGlobalConfig.KeyConfig globalKeyConfig) {
         String value = idInfo.getValue();
-        if (StrUtil.isBlank(value) && globalKeyConfig != null) {
+        if (StringUtil.isBlank(value) && globalKeyConfig != null) {
             value = globalKeyConfig.getValue();
         }
         return value;
     }
 
 
-    public static boolean isKeyBefore(IdInfo idInfo, OrmConfig.KeyConfig globalKeyConfig) {
+    public static boolean isKeyBefore(IdInfo idInfo, OrmGlobalConfig.KeyConfig globalKeyConfig) {
         Boolean before = idInfo.getBefore();
         if (before == null && globalKeyConfig != null) {
             return globalKeyConfig.isBefore();

@@ -7,20 +7,6 @@ import cn.com.idmy.orm.core.util.SqlUtil;
 import java.util.List;
 import java.util.Optional;
 
-/**
- * <p>链式 {@link BaseMapper} 查询。
- *
- * <p>要求实现类除了包含有 {@link BaseMapper} 接口的引用外，还必须具有 {@link QueryWrapper}
- * 的查询条件构建功能。在使用时：
- * <ul>
- *     <li>通过 {@link #baseMapper()} 获取该实现类对应的 {@link BaseMapper} 引用。
- *     <li>通过 {@link #toQueryWrapper()} 将该实现类转换为 {@link QueryWrapper} 对象。
- * </ul>
- *
- * @param <T> 实体类类型
- * @author 王帅
- * @since 2023-08-08
- */
 public interface MapperQueryChain<T> extends ChainQuery<T> {
 
     /**

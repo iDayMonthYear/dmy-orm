@@ -3,7 +3,7 @@ package cn.com.idmy.orm.core.query;
 import cn.com.idmy.orm.core.constant.SqlConsts;
 import cn.com.idmy.orm.core.dialect.Dialect;
 import cn.com.idmy.orm.core.util.ObjectUtil;
-import cn.hutool.core.util.StrUtil;
+import cn.com.idmy.orm.core.util.StringUtil;
 import lombok.Getter;
 
 import java.util.List;
@@ -32,7 +32,7 @@ public class OperatorSelectCondition extends QueryCondition {
         //检测是否生效
         if (checkEffective()) {
             String childSql = dialect.buildSelectSql(queryWrapper);
-            if (StrUtil.isNotBlank(childSql)) {
+            if (StringUtil.isNotBlank(childSql)) {
                 QueryCondition prevEffectiveCondition = getPrevEffectiveCondition();
                 if (prevEffectiveCondition != null && this.connector != null) {
                     sql.append(this.connector);

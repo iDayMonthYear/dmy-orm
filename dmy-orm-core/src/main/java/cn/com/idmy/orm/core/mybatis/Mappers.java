@@ -1,15 +1,13 @@
 package cn.com.idmy.orm.core.mybatis;
 
 import cn.com.idmy.orm.core.BaseMapper;
-import cn.com.idmy.orm.core.OrmConfig;
+import cn.com.idmy.orm.core.OrmGlobalConfig;
 import cn.com.idmy.orm.core.exception.OrmExceptions;
-import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
+import cn.com.idmy.orm.core.util.MapUtil;
 import org.apache.ibatis.reflection.ExceptionUtil;
 import org.apache.ibatis.session.ExecutorType;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
-import org.apache.ibatis.util.MapUtil;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
@@ -24,10 +22,14 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author 王帅
  */
 @SuppressWarnings("unchecked")
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class Mappers {
-    private static final Map<Class<?>, Object> mapperObjects = new ConcurrentHashMap<>();
-    private static final Map<Class<?>, Class<?>> entityMappers = new ConcurrentHashMap<>();
+
+    private Mappers() {
+    }
+
+    private static final Map<Class<?>, Object> MAPPER_OBJECTS = new ConcurrentHashMap<>();
+
+    private static final Map<Class<?>, Class<?>> ENTITY_MAPPER_MAP = new ConcurrentHashMap<>();
 
     /**
      * 添加 实体类 与 {@link BaseMapper} 接口实现接口 对应，两者皆为非动态代理类。
@@ -36,7 +38,7 @@ public class Mappers {
      * @param mapperClass {@link BaseMapper} 实现接口
      */
     static void addMapping(Class<?> entityClass, Class<?> mapperClass) {
-        entityMappers.put(entityClass, mapperClass);
+        ENTITY_MAPPER_MAP.put(entityClass, mapperClass);
     }
 
     /**
@@ -47,12 +49,11 @@ public class Mappers {
      * @return {@link BaseMapper} 对象
      */
     public static <E> BaseMapper<E> ofEntityClass(Class<E> entityClass) {
-        Class<?> mapperClass = entityMappers.get(entityClass);
+        Class<?> mapperClass = ENTITY_MAPPER_MAP.get(entityClass);
         if (mapperClass == null) {
             throw OrmExceptions.wrap("Can not find MapperClass by entity: " + entityClass.getName());
-        } else {
-            return (BaseMapper<E>) ofMapperClass(mapperClass);
         }
+        return (BaseMapper<E>) ofMapperClass(mapperClass);
     }
 
     /**
@@ -62,7 +63,7 @@ public class Mappers {
      * @return {@link BaseMapper} 对象
      */
     public static <M> M ofMapperClass(Class<M> mapperClass) {
-        Object mapperObject = MapUtil.computeIfAbsent(mapperObjects, mapperClass, clazz ->
+        Object mapperObject = MapUtil.computeIfAbsent(MAPPER_OBJECTS, mapperClass, clazz ->
                 Proxy.newProxyInstance(mapperClass.getClassLoader()
                         , new Class[]{mapperClass}
                         , new MapperHandler(mapperClass)));
@@ -70,14 +71,18 @@ public class Mappers {
     }
 
     private static class MapperHandler implements InvocationHandler {
+
         private final Class<?> mapperClass;
         private final ExecutorType executorType;
         private final SqlSessionFactory sqlSessionFactory;
 
         public MapperHandler(Class<?> mapperClass) {
             this.mapperClass = mapperClass;
-            this.executorType = OrmConfig.getDefaultConfig().getConfiguration().getDefaultExecutorType();
-            this.sqlSessionFactory = OrmConfig.getDefaultConfig().getSqlSessionFactory();
+            this.executorType = OrmGlobalConfig.getDefaultConfig()
+                    .getConfiguration()
+                    .getDefaultExecutorType();
+            this.sqlSessionFactory = OrmGlobalConfig.getDefaultConfig()
+                    .getSqlSessionFactory();
         }
 
         private SqlSession openSession() {
@@ -89,8 +94,8 @@ public class Mappers {
             try (SqlSession sqlSession = openSession()) {
                 Object mapper = sqlSession.getMapper(mapperClass);
                 return method.invoke(mapper, args);
-            } catch (Throwable e) {
-                throw ExceptionUtil.unwrapThrowable(e);
+            } catch (Throwable throwable) {
+                throw ExceptionUtil.unwrapThrowable(throwable);
             }
         }
     }

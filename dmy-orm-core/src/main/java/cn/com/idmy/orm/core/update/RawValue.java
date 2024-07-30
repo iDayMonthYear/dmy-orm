@@ -2,38 +2,59 @@ package cn.com.idmy.orm.core.update;
 
 import cn.com.idmy.orm.core.constant.SqlConsts;
 import cn.com.idmy.orm.core.dialect.Dialect;
-import cn.com.idmy.orm.core.query.CPI;
-import cn.com.idmy.orm.core.query.QueryColumn;
-import cn.com.idmy.orm.core.query.QueryCondition;
-import cn.com.idmy.orm.core.query.QueryWrapper;
-import lombok.RequiredArgsConstructor;
+import cn.com.idmy.orm.core.query.*;
 
 import java.io.Serializable;
 
 /**
  * @author michael
  */
-@RequiredArgsConstructor
 public class RawValue implements Serializable {
+
     private final Object object;
+
+    public RawValue(Object object) {
+        this.object = object;
+    }
 
     public String toSql(Dialect dialect) {
         if (object instanceof String) {
             return (String) object;
         }
 
-        if (object instanceof QueryWrapper obj) {
-            return SqlConsts.BRACKET_LEFT + dialect.buildSelectSql(obj) + SqlConsts.BRACKET_RIGHT;
+        if (object instanceof QueryWrapper) {
+            return SqlConsts.BRACKET_LEFT + dialect.buildSelectSql((QueryWrapper) object) + SqlConsts.BRACKET_RIGHT;
         }
 
-        if (object instanceof QueryCondition obj) {
-            return obj.toSql(null, dialect);
+        if (object instanceof QueryCondition) {
+            return ((QueryCondition) object).toSql(null, dialect);
         }
 
-        if (object instanceof QueryColumn obj) {
-            return CPI.toSelectSql(obj, null, dialect);
+        if (object instanceof QueryColumn) {
+            return CPI.toSelectSql((QueryColumn) object, null, dialect);
         }
 
         return object.toString();
     }
+
+    public Object[] getParams() {
+        if (object instanceof String) {
+            return new Object[0];
+        }
+
+        if (object instanceof QueryWrapper) {
+            return CPI.getValueArray((QueryWrapper) object);
+        }
+
+        if (object instanceof QueryCondition) {
+            return CPI.getConditionParams((QueryCondition) object);
+        }
+
+        if (object instanceof HasParamsColumn) {
+            return ((HasParamsColumn) object).getParamValues();
+        }
+
+        return new Object[0];
+    }
+
 }

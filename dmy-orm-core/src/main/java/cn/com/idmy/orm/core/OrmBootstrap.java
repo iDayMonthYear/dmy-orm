@@ -5,6 +5,7 @@ import cn.com.idmy.orm.core.exception.OrmAssert;
 import cn.com.idmy.orm.core.mybatis.Mappers;
 import cn.com.idmy.orm.core.mybatis.OrmConfiguration;
 import cn.com.idmy.orm.core.mybatis.OrmSqlSessionFactoryBuilder;
+import lombok.Getter;
 import org.apache.ibatis.logging.Log;
 import org.apache.ibatis.logging.LogFactory;
 import org.apache.ibatis.mapping.Environment;
@@ -17,31 +18,22 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-/**
- * MybatisFlex 的启动类
- *
- * <code>
- * MybatisFlexBootstrap.getInstance()
- * .setDatasource(...)
- * .addMapper(...)
- * .start();
- * <p>
- * <p>
- * MybatisFlexBootstrap.getInstance()
- * .execute(...)
- * </code>
- */
 public class OrmBootstrap {
 
     protected final AtomicBoolean started = new AtomicBoolean(false);
 
+    @Getter
     protected String environmentId = OrmConsts.NAME;
+    @Getter
     protected TransactionFactory transactionFactory;
 
     protected OrmDataSource dataSource;
+    @Getter
     protected Configuration configuration;
+    @Getter
     protected List<Class<?>> mappers;
 
+    @Getter
     protected Class<? extends Log> logImpl;
 
 
@@ -50,6 +42,7 @@ public class OrmBootstrap {
      * 用于创建多个 MybatisFlexBootstrap 实例达到管理多数据源的目的
      */
     public OrmBootstrap() {
+
     }
 
     private static volatile OrmBootstrap instance;
@@ -121,17 +114,9 @@ public class OrmBootstrap {
     }
 
 
-    public String getEnvironmentId() {
-        return environmentId;
-    }
-
     public OrmBootstrap setEnvironmentId(String environmentId) {
         this.environmentId = environmentId;
         return this;
-    }
-
-    public TransactionFactory getTransactionFactory() {
-        return transactionFactory;
     }
 
     public OrmBootstrap setTransactionFactory(TransactionFactory transactionFactory) {
@@ -162,28 +147,14 @@ public class OrmBootstrap {
         return this;
     }
 
-    public Configuration getConfiguration() {
-        return configuration;
-    }
-
     public OrmBootstrap setConfiguration(OrmConfiguration configuration) {
         this.configuration = configuration;
         this.environmentId = configuration.getEnvironment().getId();
         return this;
     }
 
-    public List<Class<?>> getMappers() {
-        return mappers;
-    }
-
-
-    public Class<? extends Log> getLogImpl() {
-        return logImpl;
-    }
-
     public OrmBootstrap setLogImpl(Class<? extends Log> logImpl) {
         this.logImpl = logImpl;
         return this;
     }
-
 }

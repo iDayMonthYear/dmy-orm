@@ -4,8 +4,8 @@ import cn.com.idmy.orm.core.table.TableInfo;
 import cn.com.idmy.orm.core.table.TableInfoFactory;
 import cn.com.idmy.orm.core.util.ClassUtil;
 import cn.com.idmy.orm.core.util.ConvertUtil;
+import cn.com.idmy.orm.core.util.MapUtil;
 import cn.com.idmy.orm.core.util.StringUtil;
-import org.apache.ibatis.util.MapUtil;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;

@@ -2,15 +2,15 @@ package cn.com.idmy.orm.core.query;
 
 import cn.com.idmy.orm.core.table.TableInfo;
 import cn.com.idmy.orm.core.table.TableInfoFactory;
+import cn.com.idmy.orm.core.util.ArrayUtil;
 import cn.com.idmy.orm.core.util.LambdaGetter;
 import cn.com.idmy.orm.core.util.LambdaUtil;
-import cn.hutool.core.util.ArrayUtil;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static cn.com.idmy.orm.core.constant.SqlFunction.*;
+import static cn.com.idmy.orm.core.constant.FunctionName.*;
 
 /**
  * SQL 函数。
@@ -715,28 +715,28 @@ public class QueryMethods {
      * 将字符串 s1，s2 等多个字符串合并为一个字符串。
      */
     public static QueryColumn concat(String columnS1, String columnS2, String... columnN) {
-        return new FunctionQueryColumn(CONCAT, ArrayUtil.addAll(new String[]{columnS1, columnS2}, columnN));
+        return new FunctionQueryColumn(CONCAT, ArrayUtil.concat(new String[]{columnS1, columnS2}, columnN));
     }
 
     /**
      * 将字符串 s1，s2 等多个字符串合并为一个字符串。
      */
     public static QueryColumn concat(QueryColumn columnS1, QueryColumn columnS2, QueryColumn... columnN) {
-        return new FunctionQueryColumn(CONCAT, ArrayUtil.addAll(new QueryColumn[]{columnS1, columnS2}, columnN));
+        return new FunctionQueryColumn(CONCAT, ArrayUtil.concat(new QueryColumn[]{columnS1, columnS2}, columnN));
     }
 
     /**
      * 同 CONCAT(s1, s2, ...)，但是每个字符串之间要加上 x。
      */
     public static QueryColumn concatWs(String columnX, String columnS1, String columnS2, String... columnN) {
-        return new FunctionQueryColumn(CONCAT_WS, ArrayUtil.addAll(new String[]{columnX, columnS1, columnS2}, columnN));
+        return new FunctionQueryColumn(CONCAT_WS, ArrayUtil.concat(new String[]{columnX, columnS1, columnS2}, columnN));
     }
 
     /**
      * 同 CONCAT(s1, s2, ...)，但是每个字符串之间要加上 x。
      */
     public static QueryColumn concatWs(QueryColumn columnX, QueryColumn columnS1, QueryColumn columnS2, QueryColumn... columnN) {
-        return new FunctionQueryColumn(CONCAT_WS, ArrayUtil.addAll(new QueryColumn[]{columnX, columnS1, columnS2}, columnN));
+        return new FunctionQueryColumn(CONCAT_WS, ArrayUtil.concat(new QueryColumn[]{columnX, columnS1, columnS2}, columnN));
     }
 
     /**
@@ -1123,28 +1123,28 @@ public class QueryMethods {
      * 返回第 n 个字符串。
      */
     public static QueryColumn elt(String columnN, String columnS1, String... columnSn) {
-        return new FunctionQueryColumn(ELT, ArrayUtil.addAll(new String[]{columnN, columnS1}, columnSn));
+        return new FunctionQueryColumn(ELT, ArrayUtil.concat(new String[]{columnN, columnS1}, columnSn));
     }
 
     /**
      * 返回第 n 个字符串。
      */
     public static QueryColumn elt(QueryColumn columnN, QueryColumn columnS1, QueryColumn... columnSn) {
-        return new FunctionQueryColumn(ELT, ArrayUtil.addAll(new QueryColumn[]{columnN, columnS1}, columnSn));
+        return new FunctionQueryColumn(ELT, ArrayUtil.concat(new QueryColumn[]{columnN, columnS1}, columnSn));
     }
 
     /**
      * 返回第一个与字符串 s 匹配的字符串的位置。
      */
     public static QueryColumn field(String columnS, String columnS1, String... columnSn) {
-        return new FunctionQueryColumn(FIELD, ArrayUtil.addAll(new String[]{columnS, columnS1}, columnSn));
+        return new FunctionQueryColumn(FIELD, ArrayUtil.concat(new String[]{columnS, columnS1}, columnSn));
     }
 
     /**
      * 返回第一个与字符串 s 匹配的字符串的位置。
      */
     public static QueryColumn field(QueryColumn columnS, QueryColumn columnS1, QueryColumn... columnSn) {
-        return new FunctionQueryColumn(FIELD, ArrayUtil.addAll(new QueryColumn[]{columnS, columnS1}, columnSn));
+        return new FunctionQueryColumn(FIELD, ArrayUtil.concat(new QueryColumn[]{columnS, columnS1}, columnSn));
     }
 
     /**
@@ -2343,14 +2343,14 @@ public class QueryMethods {
     /**
      * 构建 case then when 语句。
      */
-    public static CaseQueryColumn.Builder case0() {
+    public static CaseQueryColumn.Builder case_() {
         return new CaseQueryColumn.Builder();
     }
 
     /**
      * 构建 case then when 语句。
      */
-    public static CaseSearchQueryColumn.Builder case0(QueryColumn column) {
+    public static CaseSearchQueryColumn.Builder case_(QueryColumn column) {
         return new CaseSearchQueryColumn.Builder(column);
     }
 
@@ -2368,21 +2368,21 @@ public class QueryMethods {
     /**
      * 构建 TRUE 常量。
      */
-    public static QueryColumn true0() {
+    public static QueryColumn true_() {
         return new RawQueryColumn("TRUE");
     }
 
     /**
      * 构建 FALSE 常量。
      */
-    public static QueryColumn false0() {
+    public static QueryColumn false_() {
         return new RawQueryColumn("FALSE");
     }
 
     /**
      * 构建 NULL 常量。
      */
-    public static QueryColumn null0() {
+    public static QueryColumn null_() {
         return new RawQueryColumn("NULL");
     }
 
@@ -2479,21 +2479,21 @@ public class QueryMethods {
     /**
      * IF 函数。
      */
-    public static QueryColumn if0(QueryCondition condition, String trueColumn, String falseColumn) {
+    public static QueryColumn if_(QueryCondition condition, String trueColumn, String falseColumn) {
         return new IfFunctionQueryColumn(condition, new QueryColumn(trueColumn), new QueryColumn(falseColumn));
     }
 
     /**
      * IF 函数。
      */
-    public static QueryColumn if0(QueryCondition condition, QueryColumn trueColumn, QueryColumn falseColumn) {
+    public static QueryColumn if_(QueryCondition condition, QueryColumn trueColumn, QueryColumn falseColumn) {
         return new IfFunctionQueryColumn(condition, trueColumn, falseColumn);
     }
 
     /**
      * IF 函数。
      */
-    public static <T, F> QueryColumn if0(QueryCondition condition, LambdaGetter<T> trueColumn, LambdaGetter<F> falseColumn) {
+    public static <T, F> QueryColumn if_(QueryCondition condition, LambdaGetter<T> trueColumn, LambdaGetter<F> falseColumn) {
         return new IfFunctionQueryColumn(condition, LambdaUtil.getQueryColumn(trueColumn), LambdaUtil.getQueryColumn(falseColumn));
     }
 
@@ -2643,6 +2643,15 @@ public class QueryMethods {
      */
     public static QueryColumn groupConcat(QueryColumn columnX) {
         return new FunctionQueryColumn(GROUP_CONCAT, columnX);
+    }
+
+    /**
+     * date 函数
+     *
+     * @return
+     */
+    public static FunctionQueryColumn date(QueryColumn column) {
+        return new FunctionQueryColumn("DATE", column);
     }
 
 }

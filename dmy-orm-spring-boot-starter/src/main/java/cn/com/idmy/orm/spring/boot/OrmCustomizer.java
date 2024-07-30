@@ -1,7 +1,8 @@
 
 package cn.com.idmy.orm.spring.boot;
 
-import cn.com.idmy.orm.core.OrmConfig;
+
+import cn.com.idmy.orm.core.OrmGlobalConfig;
 
 /**
  * <p>MyBatis-Flex 配置。
@@ -29,6 +30,5 @@ public interface OrmCustomizer {
      *
      * @param globalConfig 全局配置
      */
-    void customize(OrmConfig globalConfig);
-
+    void customize(OrmGlobalConfig globalConfig);
 }

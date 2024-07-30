@@ -3,7 +3,7 @@ package cn.com.idmy.orm.core.dialect;
 
 import cn.com.idmy.orm.core.exception.OrmExceptions;
 import cn.com.idmy.orm.core.exception.locale.LocalizedFormats;
-import cn.hutool.core.util.StrUtil;
+import cn.com.idmy.orm.core.util.StringUtil;
 import org.apache.ibatis.datasource.unpooled.UnpooledDataSource;
 
 import javax.sql.DataSource;
@@ -15,6 +15,7 @@ import java.util.regex.Pattern;
  * DbType 解析 工具类
  */
 public class DbTypeUtil {
+
     private DbTypeUtil() {
     }
 
@@ -23,11 +24,12 @@ public class DbTypeUtil {
      */
     public static DbType getDbType(DataSource dataSource) {
         String jdbcUrl = getJdbcUrl(dataSource);
-        if (StrUtil.isNotBlank(jdbcUrl)) {
+
+        if (StringUtil.isNotBlank(jdbcUrl)) {
             return parseDbType(jdbcUrl);
-        } else {
-            throw new IllegalStateException("Can not get dataSource jdbcUrl: " + dataSource.getClass().getName());
         }
+
+        throw new IllegalStateException("Can not get dataSource jdbcUrl: " + dataSource.getClass().getName());
     }
 
     /**
@@ -43,7 +45,8 @@ public class DbTypeUtil {
             try {
                 Method method = dataSource.getClass().getMethod(methodName);
                 return (String) method.invoke(dataSource);
-            } catch (Exception ignore) {
+            } catch (Exception e) {
+                //ignore
             }
         }
 
@@ -54,17 +57,14 @@ public class DbTypeUtil {
         }
     }
 
-
-    /**
-     * 参考 druid  和 MyBatis-plus 的 JdbcUtils
-     *
-     * @param jdbcUrl jdbcURL
-     * @return 返回数据库类型
-     */
     public static DbType parseDbType(String jdbcUrl) {
         jdbcUrl = jdbcUrl.toLowerCase();
-        if (jdbcUrl.contains(":mysql:")) {
+        if (jdbcUrl.contains(":mysql:") || jdbcUrl.contains(":cobar:")) {
             return DbType.MYSQL;
+        } else if (jdbcUrl.contains(":h2:")) {
+            return DbType.H2;
+        } else if (jdbcUrl.contains(":lealone:")) {
+            return DbType.LEALONE;
         } else {
             return DbType.OTHER;
         }
@@ -74,6 +74,10 @@ public class DbTypeUtil {
      * 正则匹配，验证成功返回 true，验证失败返回 false
      */
     public static boolean isMatchedRegex(String regex, String jdbcUrl) {
-        return null != jdbcUrl && Pattern.compile(regex).matcher(jdbcUrl).find();
+        if (null == jdbcUrl) {
+            return false;
+        }
+        return Pattern.compile(regex).matcher(jdbcUrl).find();
     }
+
 }

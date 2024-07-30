@@ -35,4 +35,6 @@ public @interface Id {
      * @return 执行之前还是之后
      */
     boolean before() default true;
+
+    String comment() default "";
 }

@@ -1,6 +1,6 @@
 package cn.com.idmy.orm.core.mybatis;
 
-import cn.com.idmy.orm.core.OrmConfig;
+import cn.com.idmy.orm.core.OrmGlobalConfig;
 import cn.com.idmy.orm.core.exception.OrmExceptions;
 import cn.com.idmy.orm.core.row.RowMapper;
 import org.apache.ibatis.builder.xml.XMLConfigBuilder;
@@ -86,6 +86,7 @@ public class OrmSqlSessionFactoryBuilder extends SqlSessionFactoryBuilder {
         configuration.addMapper(RowMapper.class);
     }
 
+
     /**
      * 设置全局配置
      *
@@ -95,15 +96,18 @@ public class OrmSqlSessionFactoryBuilder extends SqlSessionFactoryBuilder {
     private void initGlobalConfig(Configuration configuration, SqlSessionFactory sessionFactory) {
         String environmentId = configuration.getEnvironment().getId();
 
-        OrmConfig globalConfig = OrmConfig.getConfig(environmentId);
-        if (globalConfig == null) {
-            globalConfig = new OrmConfig();
+        OrmGlobalConfig globalConfig = OrmGlobalConfig.getConfig(environmentId);
+        boolean configUnInitialize = globalConfig == null;
+        if (configUnInitialize) {
+            globalConfig = new OrmGlobalConfig();
         }
 
         globalConfig.setSqlSessionFactory(sessionFactory);
         globalConfig.setConfiguration(configuration);
 
-        OrmConfig.setConfig(environmentId, globalConfig, true);
+        boolean isDefault = OrmGlobalConfig.getDefaultConfig() == globalConfig;
+        // #I9V9MB 多个SqlSessionFactory初始化时，被最后一个覆盖默认配置
+        OrmGlobalConfig.setConfig(environmentId, globalConfig, configUnInitialize || isDefault);
     }
 
 

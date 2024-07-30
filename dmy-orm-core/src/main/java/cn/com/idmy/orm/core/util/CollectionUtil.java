@@ -1,6 +1,7 @@
 package cn.com.idmy.orm.core.util;
 
 import cn.com.idmy.orm.core.query.CloneSupport;
+import jakarta.annotation.Nullable;
 
 import java.util.*;
 import java.util.function.Function;
@@ -84,6 +85,7 @@ public class CollectionUtil {
         return results;
     }
 
+    @Nullable
     @SuppressWarnings("all")
     public static <E extends CloneSupport<E>> List<E> cloneArrayList(List<E> list) {
         if (list == null) {

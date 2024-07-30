@@ -4,26 +4,20 @@ import cn.com.idmy.orm.annotation.Column;
 import cn.com.idmy.orm.annotation.Id;
 import cn.com.idmy.orm.annotation.Table;
 import cn.com.idmy.orm.core.BaseMapper;
-import cn.com.idmy.orm.core.OrmConfig;
+import cn.com.idmy.orm.core.OrmGlobalConfig;
 import cn.com.idmy.orm.core.exception.OrmExceptions;
 import cn.com.idmy.orm.core.query.QueryChain;
 import cn.com.idmy.orm.core.query.QueryColumn;
 import cn.com.idmy.orm.core.query.QueryCondition;
 import cn.com.idmy.orm.core.query.QueryWrapper;
-import cn.com.idmy.orm.core.util.CollectionUtil;
-import cn.com.idmy.orm.core.util.Reflectors;
-import cn.com.idmy.orm.core.util.StringUtil;
+import cn.com.idmy.orm.core.util.*;
 import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.StrUtil;
 import jakarta.annotation.Nullable;
-import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
 import org.apache.ibatis.io.ResolverUtil;
 import org.apache.ibatis.reflection.Reflector;
 import org.apache.ibatis.reflection.TypeParameterResolver;
-import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.type.*;
-import org.apache.ibatis.util.MapUtil;
 
 import java.lang.reflect.*;
 import java.math.BigDecimal;
@@ -35,54 +29,74 @@ import java.time.chrono.JapaneseDate;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class TableInfoFactory {
-    public static final Set<Class<?>> defaultSupportColumnTypes = CollectionUtil.newHashSet(int.class, Integer.class, short.class, Short.class, long.class, Long.class, float.class, Float.class, double.class, Double.class, boolean.class, Boolean.class, Date.class, java.sql.Date.class, Time.class, Timestamp.class, Instant.class, LocalDate.class, LocalDateTime.class, LocalTime.class, OffsetDateTime.class, OffsetTime.class, ZonedDateTime.class, Year.class, Month.class, YearMonth.class, JapaneseDate.class, byte[].class, Byte[].class, Byte.class, BigInteger.class, BigDecimal.class, char.class, String.class, Character.class);
-    private static final Set<Class<?>> ignoreColumnTypes = CollectionUtil.newHashSet(QueryWrapper.class, QueryColumn.class, QueryCondition.class, QueryChain.class);
+    private TableInfoFactory() {
+    }
+
+    public static final Set<Class<?>> defaultSupportColumnTypes = CollectionUtil.newHashSet(
+            int.class, Integer.class,
+            short.class, Short.class,
+            long.class, Long.class,
+            float.class, Float.class,
+            double.class, Double.class,
+            boolean.class, Boolean.class,
+            Date.class, java.sql.Date.class, Time.class, Timestamp.class,
+            Instant.class, LocalDate.class, LocalDateTime.class, LocalTime.class, OffsetDateTime.class, OffsetTime.class, ZonedDateTime.class,
+            Year.class, Month.class, YearMonth.class, JapaneseDate.class,
+            byte[].class, Byte[].class, Byte.class,
+            BigInteger.class, BigDecimal.class,
+            char.class, String.class, Character.class
+    );
+    static final Set<Class<?>> ignoreColumnTypes = CollectionUtil.newHashSet(
+            QueryWrapper.class, QueryColumn.class, QueryCondition.class, QueryChain.class
+    );
     private static final Map<Class<?>, TableInfo> mapperTableInfoMap = new ConcurrentHashMap<>();
     private static final Map<Class<?>, TableInfo> entityTableMap = new ConcurrentHashMap<>();
     private static final Map<String, TableInfo> tableInfoMap = new ConcurrentHashMap<>();
-    private static final Set<String> initialledPackageNames = new HashSet<>();
+    private static final Set<String> initedPackageNames = new HashSet<>();
 
     public synchronized static void init(String mapperPackageName) {
-        if (!initialledPackageNames.contains(mapperPackageName)) {
+        if (!initedPackageNames.contains(mapperPackageName)) {
             ResolverUtil<Class<?>> resolverUtil = new ResolverUtil<>();
             resolverUtil.find(new ResolverUtil.IsA(BaseMapper.class), mapperPackageName);
             Set<Class<? extends Class<?>>> mapperSet = resolverUtil.getClasses();
             for (Class<? extends Class<?>> mapperClass : mapperSet) {
                 ofMapperClass(mapperClass);
             }
-            initialledPackageNames.add(mapperPackageName);
+            initedPackageNames.add(mapperPackageName);
         }
     }
 
+    @Nullable
     public static TableInfo ofMapperClass(Class<?> mapperClass) {
         return MapUtil.computeIfAbsent(mapperTableInfoMap, mapperClass, key -> {
             Class<?> entityClass = getEntityClass(mapperClass);
-            return entityClass == null ? null : ofEntityClass(entityClass);
+            if (entityClass == null) {
+                return null;
+            }
+            return ofEntityClass(entityClass);
         });
     }
 
     public static TableInfo ofEntityClass(Class<?> entityClass) {
         return MapUtil.computeIfAbsent(entityTableMap, entityClass, aClass -> {
             TableInfo tableInfo = createTableInfo(entityClass);
-            tableInfoMap.put(tableInfo.getTableNameWithSchema(), tableInfo);
+            // Entity 和 VO 有相同的表名，以第一次放入的 Entity 解析的 TableInfo 为主
+            tableInfoMap.putIfAbsent(tableInfo.getTableNameWithSchema(), tableInfo);
             return tableInfo;
         });
     }
 
-
     public static TableInfo ofTableName(String tableName) {
-        return StrUtil.isNotBlank(tableName) ? tableInfoMap.get(tableName) : null;
+        return StringUtil.isNotBlank(tableName) ? tableInfoMap.get(tableName) : null;
     }
 
     @Nullable
     private static Class<?> getEntityClass(Class<?> mapperClass) {
         if (mapperClass == null || mapperClass == Object.class) {
             return null;
-        } else {
-            return getEntityClass(mapperClass, null);
         }
+        return getEntityClass(mapperClass, null);
     }
 
     @Nullable
@@ -90,8 +104,9 @@ public class TableInfoFactory {
         // 检查基接口
         Type[] genericInterfaces = mapperClass.getGenericInterfaces();
         for (Type type : genericInterfaces) {
-            if (type instanceof ParameterizedType parameterizedType) {
+            if (type instanceof ParameterizedType) {
                 // 泛型基接口
+                ParameterizedType parameterizedType = (ParameterizedType) type;
                 Type rawType = parameterizedType.getRawType();
                 Type[] typeArguments = parameterizedType.getActualTypeArguments();
                 adjustTypeArguments(mapperClass, actualTypeArguments, typeArguments);
@@ -119,16 +134,16 @@ public class TableInfoFactory {
         Class<?> superclass = mapperClass.getSuperclass();
         if (superclass == null || superclass == Object.class) {
             return null;
-        } else {
-            Type[] typeArguments = superclass.getTypeParameters();
-            adjustTypeArguments(mapperClass, actualTypeArguments, typeArguments);
-            return getEntityClass(superclass, typeArguments);
         }
+        Type[] typeArguments = superclass.getTypeParameters();
+        adjustTypeArguments(mapperClass, actualTypeArguments, typeArguments);
+        return getEntityClass(superclass, typeArguments);
     }
 
     private static void adjustTypeArguments(Class<?> subclass, Type[] subclassTypeArguments, Type[] typeArguments) {
         for (int i = 0; i < typeArguments.length; i++) {
-            if (typeArguments[i] instanceof TypeVariable<?> typeVariable) {
+            if (typeArguments[i] instanceof TypeVariable) {
+                TypeVariable<?> typeVariable = (TypeVariable<?>) typeArguments[i];
                 TypeVariable<?>[] typeParameters = subclass.getTypeParameters();
                 for (int j = 0; j < typeParameters.length; j++) {
                     if (Objects.equals(typeVariable.getName(), typeParameters[j].getName())) {
@@ -145,49 +160,43 @@ public class TableInfoFactory {
         tableInfo.setEntityClass(entityClass);
         Reflector reflector = Reflectors.of(entityClass);
         tableInfo.setReflector(reflector);
-
-        //初始化表名
+        // 初始化表名
         Table table = entityClass.getAnnotation(Table.class);
         if (table == null) {
-            //默认为类名转驼峰下划线
+            // 默认为类名转驼峰下划线
             tableInfo.setTableName(StringUtil.camelToUnderline(entityClass.getSimpleName()));
         } else {
             tableInfo.setSchema(table.schema());
             tableInfo.setTableName(table.value());
-            tableInfo.setCamelToUnderline(table.camelToUnderline());
-            if (StrUtil.isNotBlank(table.dataSource())) {
+            tableInfo.setCamelToUnderline(table.underline());
+            tableInfo.setComment(table.comment());
+            if (StringUtil.isNotBlank(table.dataSource())) {
                 tableInfo.setDataSource(table.dataSource());
             }
         }
-
-        //初始化字段相关
+        // 初始化字段相关
         List<ColumnInfo> columnInfoList = new ArrayList<>();
         List<IdInfo> idInfos = new ArrayList<>();
-
         String logicDeleteColumn = null;
         String versionColumn = null;
         String tenantIdColumn = null;
-
-        //数据插入时，默认插入数据字段
+        // 数据插入时，默认插入数据字段
         Map<String, String> onInsertColumns = new HashMap<>();
-
-        //数据更新时，默认更新内容的字段
+        // 数据更新时，默认更新内容的字段
         Map<String, String> onUpdateColumns = new HashMap<>();
-
-        //大字段列
+        // 大字段列
         Set<String> largeColumns = new LinkedHashSet<>();
-
         // 默认查询列
         Set<String> defaultQueryColumns = new LinkedHashSet<>();
-
         List<Field> entityFields = getColumnFields(entityClass);
-
-        OrmConfig config = OrmConfig.getDefaultConfig();
-
+        OrmGlobalConfig config = OrmGlobalConfig.getDefaultConfig();
+        TypeHandlerRegistry typeHandlerRegistry = null;
+        if (config.getConfiguration() != null) {
+            typeHandlerRegistry = config.getConfiguration().getTypeHandlerRegistry();
+        }
         for (Field field : entityFields) {
             Class<?> fieldType = reflector.getGetterType(field.getName());
-
-            //移除默认的忽略字段
+            // 移除默认的忽略字段
             boolean isIgnoreField = false;
             for (Class<?> ignoreColumnType : ignoreColumnTypes) {
                 if (ignoreColumnType.isAssignableFrom(fieldType)) {
@@ -195,21 +204,24 @@ public class TableInfoFactory {
                     break;
                 }
             }
-
             if (isIgnoreField) {
                 continue;
             }
-
-            Column columnAnnotation = field.getAnnotation(Column.class);
-
-
-            //满足以下 3 种情况，不支持该类型的属性自动映射为字段
-            if ((columnAnnotation == null || columnAnnotation.typeHandler() == UnknownTypeHandler.class) // 未配置 typeHandler
-                    && !fieldType.isEnum()   // 类型不是枚举
-                    && !defaultSupportColumnTypes.contains(fieldType) //默认的自动类型不包含该类型
+            Column column = field.getAnnotation(Column.class);
+            /*
+             * 满足以下 4 种情况，不支持该类型的属性自动映射为字段
+             * 1、注解上未配置 TypeHandler
+             * 2、类型不是枚举
+             * 3、默认的自动类型不包含该类型
+             * 4、没有全局 TypeHandler
+             */
+            if ((column == null || column.typeHandler() == UnknownTypeHandler.class)
+                    && !fieldType.isEnum()
+                    && !defaultSupportColumnTypes.contains(fieldType)
+                    && (typeHandlerRegistry == null || !typeHandlerRegistry.hasTypeHandler(fieldType))
             ) {
                 // 忽略 集合 实体类 解析
-                if (columnAnnotation != null && columnAnnotation.ignore()) {
+                if (column != null && column.ignore()) {
                     continue;
                 }
                 // 集合嵌套
@@ -223,102 +235,88 @@ public class TableInfoFactory {
                     }
                 }
                 // 实体类嵌套
-                else if (!Map.class.isAssignableFrom(fieldType) && !fieldType.isArray()) {
+                else if (!Map.class.isAssignableFrom(fieldType)
+                        && !fieldType.isArray()) {
                     tableInfo.addAssociationType(field.getName(), fieldType);
                 }
                 // 不支持的类型直接跳过
                 continue;
             }
-
-            //列名
-            String columnName = getColumnName(tableInfo.isCamelToUnderline(), field, columnAnnotation);
-
-            //逻辑删除字段
-            if ((columnAnnotation != null && columnAnnotation.isLogicDelete()) || columnName.equals(config.getLogicDeleteColumn())) {
+            // 列名
+            String columnName = getColumnName(tableInfo.isCamelToUnderline(), field, column);
+            // 逻辑删除字段
+            if ((column != null && column.logicDelete()) || columnName.equals(config.getLogicDeleteColumn())) {
                 if (logicDeleteColumn == null) {
                     logicDeleteColumn = columnName;
                 } else {
                     throw OrmExceptions.wrap("The logic delete column of entity[%s] must be less then 2.", entityClass.getName());
                 }
             }
-
-            //乐观锁版本字段
-            if ((columnAnnotation != null && columnAnnotation.version()) || columnName.equals(config.getVersionColumn())) {
+            // 乐观锁版本字段
+            if ((column != null && column.version())
+                    || columnName.equals(config.getVersionColumn())) {
                 if (versionColumn == null) {
                     versionColumn = columnName;
                 } else {
                     throw OrmExceptions.wrap("The version column of entity[%s] must be less then 2.", entityClass.getName());
                 }
             }
-
-            //租户ID 字段
-            if ((columnAnnotation != null && columnAnnotation.tenantId()) || columnName.equals(config.getTenantColumn())) {
+            // 租户ID 字段
+            if ((column != null && column.tenantId())
+                    || columnName.equals(config.getTenantColumn())) {
                 if (tenantIdColumn == null) {
                     tenantIdColumn = columnName;
                 } else {
                     throw OrmExceptions.wrap("The tenantId column of entity[%s] must be less then 2.", entityClass.getName());
                 }
             }
-
-
-            if (columnAnnotation != null && StrUtil.isNotBlank(columnAnnotation.onInsertValue())) {
-                onInsertColumns.put(columnName, columnAnnotation.onInsertValue().trim());
+            if (column != null && StringUtil.isNotBlank(column.onInsertValue())) {
+                onInsertColumns.put(columnName, column.onInsertValue().trim());
             }
-
-
-            if (columnAnnotation != null && StrUtil.isNotBlank(columnAnnotation.onUpdateValue())) {
-                onUpdateColumns.put(columnName, columnAnnotation.onUpdateValue().trim());
+            if (column != null && StringUtil.isNotBlank(column.onUpdateValue())) {
+                onUpdateColumns.put(columnName, column.onUpdateValue().trim());
             }
-
-
-            if (columnAnnotation != null && columnAnnotation.isLarge()) {
+            if (column != null && column.large()) {
                 largeColumns.add(columnName);
             }
-
-            //主键配置
+            // 主键配置
             Id id = field.getAnnotation(Id.class);
             ColumnInfo columnInfo;
-            if (id == null) {
-                columnInfo = new ColumnInfo();
-                columnInfoList.add(columnInfo);
-            } else {
+            if (id != null) {
                 columnInfo = new IdInfo(id);
                 idInfos.add((IdInfo) columnInfo);
+            } else {
+                columnInfo = new ColumnInfo();
+                columnInfoList.add(columnInfo);
             }
-
-
-            if (columnAnnotation != null && ArrayUtil.isNotEmpty(columnAnnotation.alias())) {
-                columnInfo.setAlias(columnAnnotation.alias());
+            if (column != null && ArrayUtil.isNotEmpty(column.alias())) {
+                columnInfo.setAlias(column.alias());
             }
-
             columnInfo.setColumn(columnName);
             columnInfo.setProperty(field.getName());
             columnInfo.setPropertyType(fieldType);
-            columnInfo.setIgnore(columnAnnotation != null && columnAnnotation.ignore());
-
+            columnInfo.setIgnore(column != null && column.ignore());
+            if (column != null) {
+                columnInfo.setComment(column.comment());
+            }
             // 默认查询列 没有忽略且不是大字段
-            if (columnAnnotation == null || (!columnAnnotation.isLarge() && !columnAnnotation.ignore())) {
+            if (column == null || (!column.large() && !column.ignore())) {
                 defaultQueryColumns.add(columnName);
             }
-
-            //typeHandler 配置
-            if (columnAnnotation != null && columnAnnotation.typeHandler() != UnknownTypeHandler.class) {
+            // typeHandler 配置
+            if (column != null && column.typeHandler() != UnknownTypeHandler.class) {
                 TypeHandler<?> typeHandler = null;
-
-                //集合类型，支持泛型
-                //fixed https://gitee.com/mybatis-flex/mybatis-flex/issues/I7S2YE
+                // 集合类型，支持泛型
+                // fixed https://gitee.com/mybatis-flex/mybatis-flex/issues/I7S2YE
                 if (Collection.class.isAssignableFrom(fieldType)) {
-                    typeHandler = createCollectionTypeHandler(entityClass, field, columnAnnotation.typeHandler(), fieldType);
+                    typeHandler = createCollectionTypeHandler(entityClass, field, column.typeHandler(), fieldType);
                 }
-
-                //非集合类型
+                // 非集合类型
                 else {
-                    Class<?> typeHandlerClass = columnAnnotation.typeHandler();
-                    Configuration configuration = config.getConfiguration();
-                    if (configuration != null) {
-                        TypeHandlerRegistry typeHandlerRegistry = configuration.getTypeHandlerRegistry();
+                    Class<?> typeHandlerClass = column.typeHandler();
+                    if (typeHandlerRegistry != null) {
                         Class<?> propertyType = columnInfo.getPropertyType();
-                        JdbcType jdbcType = columnAnnotation.jdbcType();
+                        JdbcType jdbcType = column.jdbcType();
                         if (jdbcType != JdbcType.UNDEFINED) {
                             typeHandler = typeHandlerRegistry.getTypeHandler(propertyType, jdbcType);
                         }
@@ -327,45 +325,36 @@ public class TableInfoFactory {
                         }
                     }
                 }
-
                 columnInfo.setTypeHandler(typeHandler);
             }
-
             // 数据脱敏配置
-            if (columnAnnotation != null && StrUtil.isNotBlank(columnAnnotation.mask())) {
+            if (column != null && StrUtil.isNotBlank(column.mask())) {
                 if (String.class != fieldType) {
                     throw new IllegalStateException("@mask only support for string type field. error: " + entityClass.getName() + "." + field.getName());
                 } else {
-                    columnInfo.setMaskType(columnAnnotation.mask().trim());
+                    columnInfo.setMaskType(column.mask().trim());
                 }
             }
-
             // jdbcType 配置
-            if (columnAnnotation != null && columnAnnotation.jdbcType() != JdbcType.UNDEFINED) {
-                columnInfo.setJdbcType(columnAnnotation.jdbcType());
+            if (column != null && column.jdbcType() != JdbcType.UNDEFINED) {
+                columnInfo.setJdbcType(column.jdbcType());
             }
         }
-
         tableInfo.setLogicDeleteColumn(logicDeleteColumn);
         tableInfo.setVersionColumn(versionColumn);
         tableInfo.setTenantIdColumn(tenantIdColumn);
-
         if (!onInsertColumns.isEmpty()) {
             tableInfo.setOnInsertColumns(onInsertColumns);
         }
-
         if (!onUpdateColumns.isEmpty()) {
             tableInfo.setOnUpdateColumns(onUpdateColumns);
         }
-
         if (!largeColumns.isEmpty()) {
             tableInfo.setLargeColumns(largeColumns.toArray(new String[0]));
         }
-
         if (!defaultQueryColumns.isEmpty()) {
             tableInfo.setDefaultQueryColumns(defaultQueryColumns.toArray(new String[0]));
         }
-
         // 此处需要保证顺序先设置 PrimaryKey，在设置其他 Column，
         // 否则会影响 SQL 的字段构建顺序
         tableInfo.setPrimaryKeyList(idInfos);
@@ -391,7 +380,6 @@ public class TableInfoFactory {
                 genericClass = (Class<?>) actualTypeArgument;
             }
         }
-
         try {
             Constructor<?> constructor = typeHandlerClass.getConstructor(Class.class, Class.class);
             return (TypeHandler<?>) constructor.newInstance(fieldType, genericClass);
@@ -414,15 +402,14 @@ public class TableInfoFactory {
         }
     }
 
-
     static String getColumnName(boolean isCamelToUnderline, Field field, Column column) {
-        if (column != null && StrUtil.isNotBlank(column.value())) {
+        if (column != null && StringUtil.isNotBlank(column.value())) {
             return column.value();
-        } else if (isCamelToUnderline) {
-            return StringUtil.camelToUnderline(field.getName());
-        } else {
-            return field.getName();
         }
+        if (isCamelToUnderline) {
+            return StringUtil.camelToUnderline(field.getName());
+        }
+        return field.getName();
     }
 
     public static List<Field> getColumnFields(Class<?> entityClass) {
@@ -431,23 +418,27 @@ public class TableInfoFactory {
         return fields;
     }
 
-
     private static void doGetFields(Class<?> entityClass, List<Field> fields) {
-        if (entityClass == null || entityClass == Object.class) {
-            return;
-        }
-
-        Field[] declaredFields = entityClass.getDeclaredFields();
-        for (Field declaredField : declaredFields) {
-            if (!Modifier.isStatic(declaredField.getModifiers()) && !existName(fields, declaredField)) {
-                fields.add(declaredField);
+        ClassUtil.applyAllClass(entityClass, currentClass -> {
+            Field[] declaredFields = currentClass.getDeclaredFields();
+            for (Field declaredField : declaredFields) {
+                int modifiers = declaredField.getModifiers();
+                if (!Modifier.isStatic(modifiers)
+                        && !Modifier.isTransient(modifiers)
+                        && !existName(fields, declaredField)) {
+                    fields.add(declaredField);
+                }
             }
-        }
-
-        doGetFields(entityClass.getSuperclass(), fields);
+            return true;
+        });
     }
 
     private static boolean existName(List<Field> fields, Field field) {
-        return fields.stream().anyMatch(f -> f.getName().equalsIgnoreCase(field.getName()));
+        for (Field f : fields) {
+            if (f.getName().equalsIgnoreCase(field.getName())) {
+                return true;
+            }
+        }
+        return false;
     }
 }

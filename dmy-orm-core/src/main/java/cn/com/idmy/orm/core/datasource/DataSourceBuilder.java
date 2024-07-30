@@ -3,23 +3,23 @@ package cn.com.idmy.orm.core.datasource;
 import cn.com.idmy.orm.core.exception.OrmExceptions;
 import cn.com.idmy.orm.core.exception.locale.LocalizedFormats;
 import cn.com.idmy.orm.core.util.ConvertUtil;
-import cn.hutool.core.util.StrUtil;
+import cn.com.idmy.orm.core.util.StringUtil;
 import jakarta.annotation.Nullable;
 import org.apache.ibatis.reflection.Reflector;
 import org.apache.ibatis.reflection.invoker.Invoker;
 
 import javax.sql.DataSource;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 
 public class DataSourceBuilder {
-    private static final Map<String, String> dataSourceAlias = new HashMap<>(2);
+
+    private static final Map<String, String> dataSourceAlias = new HashMap<>();
 
     static {
         dataSourceAlias.put("druid", "com.alibaba.druid.pool.DruidDataSource");
         dataSourceAlias.put("hikari", "com.zaxxer.hikari.HikariDataSource");
+        dataSourceAlias.put("hikaricp", "com.zaxxer.hikari.HikariDataSource");
     }
 
     private final Map<String, String> dataSourceProperties;
@@ -31,14 +31,15 @@ public class DataSourceBuilder {
     public DataSource build() {
         String dataSourceClassName;
         String type = dataSourceProperties.get("type");
-        if (StrUtil.isNotBlank(type)) {
+        if (StringUtil.isNotBlank(type)) {
             dataSourceClassName = dataSourceAlias.getOrDefault(type, type);
         } else {
             dataSourceClassName = detectDataSourceClass();
         }
 
-        if (StrUtil.isBlank(dataSourceClassName)) {
-            if (StrUtil.isBlank(type)) {
+
+        if (StringUtil.isBlank(dataSourceClassName)) {
+            if (StringUtil.isBlank(type)) {
                 throw OrmExceptions.wrap(LocalizedFormats.DATASOURCE_TYPE_BLANK);
             } else {
                 throw OrmExceptions.wrap(LocalizedFormats.DATASOURCE_TYPE_NOT_FIND, type);
@@ -47,7 +48,7 @@ public class DataSourceBuilder {
 
         try {
             Class<?> dataSourceClass = Class.forName(dataSourceClassName);
-            Object dataSourceObject = dataSourceClass.getDeclaredConstructor().newInstance();
+            Object dataSourceObject = dataSourceClass.newInstance();
             setDataSourceProperties(dataSourceObject);
             return (DataSource) dataSourceObject;
         } catch (Exception e) {
@@ -92,14 +93,21 @@ public class DataSourceBuilder {
         return sb.toString();
     }
 
-
     @Nullable
     private String detectDataSourceClass() {
         String[] detectClassNames = new String[]{
                 "com.alibaba.druid.pool.DruidDataSource",
-                "com.zaxxer.hikari.HikariDataSource"
+                "com.zaxxer.hikari.HikariDataSource",
         };
-        return Arrays.stream(detectClassNames).map(this::doDetectDataSourceClass).filter(Objects::nonNull).findFirst().orElse(null);
+
+        for (String detectClassName : detectClassNames) {
+            String result = doDetectDataSourceClass(detectClassName);
+            if (result != null) {
+                return result;
+            }
+        }
+
+        return null;
     }
 
     @Nullable
@@ -111,4 +119,5 @@ public class DataSourceBuilder {
             return null;
         }
     }
+
 }

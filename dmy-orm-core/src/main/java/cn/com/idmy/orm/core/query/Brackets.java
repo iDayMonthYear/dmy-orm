@@ -4,15 +4,13 @@ import cn.com.idmy.orm.core.constant.SqlConnector;
 import cn.com.idmy.orm.core.constant.SqlConsts;
 import cn.com.idmy.orm.core.dialect.Dialect;
 import cn.com.idmy.orm.core.util.ObjectUtil;
-import cn.hutool.core.util.StrUtil;
-import lombok.Getter;
+import cn.com.idmy.orm.core.util.StringUtil;
 
 import java.util.List;
 
 /**
  * 括号
  */
-@Getter
 public class Brackets extends QueryCondition {
 
     private QueryCondition childCondition;
@@ -72,6 +70,10 @@ public class Brackets extends QueryCondition {
         return checkEffective() ? WrapperUtil.getValues(childCondition) : null;
     }
 
+    public QueryCondition getChildCondition() {
+        return childCondition;
+    }
+
     @Override
     public boolean checkEffective() {
         boolean effective = super.checkEffective();
@@ -96,15 +98,17 @@ public class Brackets extends QueryCondition {
         StringBuilder sql = new StringBuilder();
         if (checkEffective()) {
             String childSql = childCondition.toSql(queryTables, dialect);
-            if (StrUtil.isNotBlank(childSql)) {
+            if (StringUtil.isNotBlank(childSql)) {
                 QueryCondition prevEffectiveCondition = getPrevEffectiveCondition();
                 if (prevEffectiveCondition != null && this.connector != null) {
                     childSql = this.connector + SqlConsts.BRACKET_LEFT + childSql + SqlConsts.BRACKET_RIGHT;
-                } else if (StrUtil.isNotBlank(sqlNext)) {
+                } else if (StringUtil.isNotBlank(sqlNext)) {
                     childSql = SqlConsts.BRACKET_LEFT + childSql + SqlConsts.BRACKET_RIGHT;
                 }
                 sql.append(childSql);
             } else {
+                //all child conditions are not effective
+                //fixed gitee #I6W89G
                 this.effective = false;
             }
         }
@@ -131,7 +135,9 @@ public class Brackets extends QueryCondition {
     @Override
     public Brackets clone() {
         Brackets clone = (Brackets) super.clone();
+        // deep clone ...
         clone.childCondition = ObjectUtil.clone(this.childCondition);
         return clone;
     }
+
 }

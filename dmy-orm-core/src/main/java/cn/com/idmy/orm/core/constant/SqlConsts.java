@@ -6,7 +6,6 @@ package cn.com.idmy.orm.core.constant;
  * @author 王帅
  * @since 2023-06-12
  */
-
 public interface SqlConsts {
     // === 常用符号 ===
 
@@ -23,7 +22,6 @@ public interface SqlConsts {
     String BRACKET_RIGHT = ")";
     String HINT_START = "/*+ ";
     String HINT_END = " */ ";
-
 
     // === SQL 关键字 ===
 
@@ -74,6 +72,7 @@ public interface SqlConsts {
     String ROWS_ONLY = " ROWS ONLY";
     String ROWS_FETCH_NEXT = " ROWS FETCH NEXT ";
 
+
     // === 联表查询关键字 ===
 
     String ON = " ON ";
@@ -85,6 +84,7 @@ public interface SqlConsts {
     String RIGHT_JOIN = " RIGHT JOIN ";
     String INNER_JOIN = " INNER JOIN ";
     String CROSS_JOIN = " CROSS JOIN ";
+
 
     // === 逻辑符号 ===
 
@@ -123,4 +123,5 @@ public interface SqlConsts {
 
     String EQUALS_PLACEHOLDER = " = ? ";
     String AND_PLACEHOLDER = BLANK + PLACEHOLDER + AND + PLACEHOLDER + BLANK;
+
 }

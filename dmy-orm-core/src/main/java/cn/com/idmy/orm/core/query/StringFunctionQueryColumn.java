@@ -5,7 +5,6 @@ import cn.com.idmy.orm.core.dialect.Dialect;
 import cn.com.idmy.orm.core.util.CollectionUtil;
 import cn.com.idmy.orm.core.util.SqlUtil;
 import cn.com.idmy.orm.core.util.StringUtil;
-import cn.hutool.core.util.StrUtil;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -32,10 +31,10 @@ public class StringFunctionQueryColumn extends QueryColumn {
     @Override
     public String toSelectSql(List<QueryTable> queryTables, Dialect dialect) {
         String sql = StringUtil.join(SqlConsts.DELIMITER, params);
-        if (StrUtil.isBlank(sql)) {
+        if (StringUtil.isBlank(sql)) {
             return SqlConsts.EMPTY;
         }
-        if (StrUtil.isBlank(alias)) {
+        if (StringUtil.isBlank(alias)) {
             return fnName + WrapperUtil.withBracket(sql);
         }
         return fnName + WrapperUtil.withAlias(sql, alias, dialect);
@@ -44,7 +43,7 @@ public class StringFunctionQueryColumn extends QueryColumn {
     @Override
     String toConditionSql(List<QueryTable> queryTables, Dialect dialect) {
         String sql = StringUtil.join(SqlConsts.DELIMITER, params);
-        if (StrUtil.isBlank(sql)) {
+        if (StringUtil.isBlank(sql)) {
             return SqlConsts.EMPTY;
         }
         return fnName + WrapperUtil.withBracket(sql);

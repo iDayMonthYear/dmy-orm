@@ -5,8 +5,10 @@ import lombok.Getter;
 /**
  * 事务的传递方式，参考 spring
  */
+
 @Getter
 public enum Propagation {
+
     //若存在当前事务，则加入当前事务，若不存在当前事务，则创建新的事务
     REQUIRED(0),
 
@@ -29,7 +31,7 @@ public enum Propagation {
     NESTED(6),
     ;
 
-    private final int value;
+    private int value;
 
     Propagation(int value) {
         this.value = value;

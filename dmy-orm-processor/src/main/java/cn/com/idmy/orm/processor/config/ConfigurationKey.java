@@ -1,16 +1,11 @@
 package cn.com.idmy.orm.processor.config;
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-
 /**
  * 配置键值。
  *
  * @author 王帅
  * @since 2023-06-22
  */
-@Getter
-@RequiredArgsConstructor
 public enum ConfigurationKey {
 
     /**
@@ -28,16 +23,15 @@ public enum ConfigurationKey {
      */
     GEN_PATH("processor.genPath", ""),
 
-
     /**
      * 是否所有的类都生成在 Tables 类里。
      */
-    ALL_IN_TABLES_ENABLE("processor.allInTables.enable", "false"),
+    ALL_IN_TABLES_ENABLE("processor.allInTables.enable", "true"),
 
     /**
      * Tables 类名。
      */
-    ALL_IN_TABLES_CLASS_NAME("processor.allInTables.className", "Tables"),
+    ALL_IN_TABLES_CLASS_NAME("processor.allInTables.className", "$"),
 
     /**
      * 自定义 Tables 生成的包名。
@@ -67,6 +61,11 @@ public enum ConfigurationKey {
 
 
     /**
+     * 自定义 Class 生成的包名。
+     */
+    TABLE_DEF_PACKAGE("processor.tableDef.package", null),
+
+    /**
      * 生成的 Class 的后缀。
      */
     TABLE_DEF_CLASS_SUFFIX("processor.tableDef.classSuffix", "TableDef"),
@@ -87,13 +86,30 @@ public enum ConfigurationKey {
     TABLE_DEF_IGNORE_ENTITY_SUFFIXES("processor.tableDef.ignoreEntitySuffixes", "");
 
 
+    private final String configKey;
+    private final String defaultValue;
+
+    ConfigurationKey(String configKey, String defaultValue) {
+        this.configKey = configKey;
+        this.defaultValue = defaultValue;
+    }
+
     /**
      * 获取配置键。
+     *
+     * @return 键
      */
-    private final String configKey;
+    public String getConfigKey() {
+        return configKey;
+    }
+
     /**
      * 获取配置默认值。
+     *
+     * @return 默认值
      */
-    private final String defaultValue;
+    public String getDefaultValue() {
+        return defaultValue;
+    }
 
 }

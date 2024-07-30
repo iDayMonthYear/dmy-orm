@@ -1,7 +1,7 @@
 package cn.com.idmy.orm.core.util;
 
 import cn.com.idmy.orm.core.BaseMapper;
-import cn.com.idmy.orm.core.OrmConfig;
+import cn.com.idmy.orm.core.OrmGlobalConfig;
 import cn.com.idmy.orm.core.constant.SqlConsts;
 import cn.com.idmy.orm.core.dialect.DbType;
 import cn.com.idmy.orm.core.dialect.DialectFactory;
@@ -11,8 +11,9 @@ import cn.com.idmy.orm.core.field.FieldQueryBuilder;
 import cn.com.idmy.orm.core.field.FieldQueryManager;
 import cn.com.idmy.orm.core.paginate.Page;
 import cn.com.idmy.orm.core.query.*;
-import cn.hutool.core.util.ArrayUtil;
-import cn.hutool.core.util.StrUtil;
+import cn.com.idmy.orm.core.table.TableInfo;
+import cn.com.idmy.orm.core.table.TableInfoFactory;
+import jakarta.annotation.Nullable;
 import org.apache.ibatis.exceptions.TooManyResultsException;
 import org.apache.ibatis.session.defaults.DefaultSqlSession;
 
@@ -108,7 +109,7 @@ public class MapperUtil {
             QueryTable joinQueryTable = CPI.getJoinQueryTable(join);
             if (joinQueryTable != null) {
                 String tableName = joinQueryTable.getName();
-                if (StrUtil.isNotBlank(joinQueryTable.getAlias())) {
+                if (StringUtil.isNotBlank(joinQueryTable.getAlias())) {
                     joinTables.add(tableName + "." + joinQueryTable.getAlias());
                 } else {
                     joinTables.add(tableName);
@@ -124,18 +125,35 @@ public class MapperUtil {
     }
 
     @SafeVarargs
-    public static <T, R> Page<R> doPaginate(BaseMapper<T> mapper, Page<R> page, QueryWrapper queryWrapper, Class<R> asType, Consumer<FieldQueryBuilder<R>>... consumers) {
+    public static <T, R> Page<R> doPaginate(
+            BaseMapper<T> mapper,
+            Page<R> page,
+            QueryWrapper queryWrapper,
+            Class<R> asType,
+            boolean withRelations,
+            Consumer<FieldQueryBuilder<R>>... consumers
+    ) {
+        Long limitRows = CPI.getLimitRows(queryWrapper);
+        Long limitOffset = CPI.getLimitOffset(queryWrapper);
         try {
             // 只有 totalRow 小于 0 的时候才会去查询总量
             // 这样方便用户做总数缓存，而非每次都要去查询总量
             // 一般的分页场景中，只有第一页的时候有必要去查询总量，第二页以后是不需要的
+
             if (page.getTotalRow() < 0) {
+
                 QueryWrapper countQueryWrapper;
+
                 if (page.needOptimizeCountQuery()) {
                     countQueryWrapper = MapperUtil.optimizeCountQueryWrapper(queryWrapper);
                 } else {
                     countQueryWrapper = MapperUtil.rawCountQueryWrapper(queryWrapper);
                 }
+
+                // optimize: 在 count 之前先去掉 limit 参数，避免 count 查询错误
+                CPI.setLimitRows(countQueryWrapper, null);
+                CPI.setLimitOffset(countQueryWrapper, null);
+
                 page.setTotalRow(mapper.selectCountByQuery(countQueryWrapper));
             }
 
@@ -161,8 +179,8 @@ public class MapperUtil {
         } finally {
             // 将之前设置的 limit 清除掉
             // 保险起见把重置代码放到 finally 代码块中
-            CPI.setLimitRows(queryWrapper, null);
-            CPI.setLimitOffset(queryWrapper, null);
+            CPI.setLimitRows(queryWrapper, limitRows);
+            CPI.setLimitOffset(queryWrapper, limitOffset);
         }
     }
 
@@ -189,6 +207,7 @@ public class MapperUtil {
         FieldQueryManager.queryFields(mapper, list, fieldQueryMap);
     }
 
+
     public static Class<? extends Collection> getCollectionWrapType(Class<?> type) {
         if (ClassUtil.canInstance(type.getModifiers())) {
             return (Class<? extends Collection>) type;
@@ -209,6 +228,7 @@ public class MapperUtil {
     /**
      * 搬运加改造 {@link DefaultSqlSession#selectOne(String, Object)}
      */
+    @Nullable
     public static <T> T getSelectOneResult(List<T> list) {
         if (list == null || list.isEmpty()) {
             return null;
@@ -233,7 +253,7 @@ public class MapperUtil {
     }
 
 
-    public static Map<String, Object> preparedParams(Page<?> page, QueryWrapper queryWrapper, Map<String, Object> params) {
+    public static Map<String, Object> preparedParams(BaseMapper<?> baseMapper, Page<?> page, QueryWrapper queryWrapper, Map<String, Object> params) {
         Map<String, Object> newParams = new HashMap<>();
 
         if (params != null) {
@@ -245,9 +265,11 @@ public class MapperUtil {
         newParams.put("pageSize", page.getPageSize());
 
         DbType dbType = DialectFactory.getHintDbType();
-        newParams.put("dbType", dbType != null ? dbType : OrmConfig.getDefaultConfig().getDbType());
+        newParams.put("dbType", dbType != null ? dbType : OrmGlobalConfig.getDefaultConfig().getDbType());
 
         if (queryWrapper != null) {
+            TableInfo tableInfo = TableInfoFactory.ofMapperClass(baseMapper.getClass());
+            tableInfo.appendConditions(null, queryWrapper);
             preparedQueryWrapper(newParams, queryWrapper);
         }
 

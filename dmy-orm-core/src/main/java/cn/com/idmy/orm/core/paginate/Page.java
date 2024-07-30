@@ -1,6 +1,6 @@
 package cn.com.idmy.orm.core.paginate;
 
-import cn.com.idmy.orm.core.OrmConfig;
+import cn.com.idmy.orm.core.OrmGlobalConfig;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -20,25 +20,64 @@ import java.util.function.Function;
 public class Page<T> implements Serializable {
     public static final int INIT_VALUE = -1;
 
+    /**
+     * 当前页数据。
+     * -- GETTER --
+     * 获取当前页的数据。
+     *
+     * @return 当前页的数据
+     */
     @Getter
     private List<T> records = Collections.emptyList();
 
+    /**
+     * 当前页码。
+     * -- GETTER --
+     * 获取当前页码。
+     *
+     * @return 页码
+     */
     @Getter
     private long pageNumber = 1;
 
+    /**
+     * 每页数据数量。
+     * -- GETTER --
+     * 获取当前每页数据数量。
+     *
+     * @return 每页数据数量
+     */
     @Getter
-    private long pageSize = OrmConfig.getDefaultConfig().getDefaultPageSize();
+    private long pageSize = OrmGlobalConfig.getDefaultConfig().getDefaultPageSize();
 
     /**
+     * 每页数据数量最大限制。
+     */
+    private long maxPageSize = OrmGlobalConfig.getDefaultConfig().getDefaultMaxPageSize();
+
+    /**
+     * 总页数。
+     * -- GETTER --
+     * 获取数据总数。
+     * <p>
+     * <p>
      * -- SETTER --
      * 设置总页数。
      *
+     * @return 数据总数
      * @param totalPage 总页数
      */
     @Setter
     @Getter
     private long totalPage = INIT_VALUE;
 
+    /**
+     * 总数据数量。
+     * -- GETTER --
+     * 获取数据总数。
+     *
+     * @return 数据总数
+     */
     @Getter
     private long totalRow = INIT_VALUE;
 
@@ -155,7 +194,7 @@ public class Page<T> implements Serializable {
         if (pageSize <= 0) {
             throw new IllegalArgumentException("pageSize must greater than 0，current value is: " + pageSize);
         }
-        this.pageSize = pageSize;
+        this.pageSize = Math.min(pageSize, maxPageSize);
         this.calcTotalPage();
     }
 
@@ -252,4 +291,5 @@ public class Page<T> implements Serializable {
                 ", records=" + records +
                 '}';
     }
+
 }

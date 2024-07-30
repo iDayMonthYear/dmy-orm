@@ -1,7 +1,8 @@
 package cn.com.idmy.orm.core.query;
 
 import cn.com.idmy.orm.core.dialect.Dialect;
-import cn.hutool.core.util.StrUtil;
+import cn.com.idmy.orm.core.dialect.OperateType;
+import cn.com.idmy.orm.core.util.StringUtil;
 import lombok.Getter;
 
 import java.util.Objects;
@@ -22,7 +23,7 @@ public class RawQueryTable extends QueryTable {
     }
 
     @Override
-    public String toSql(Dialect dialect) {
+    public String toSql(Dialect dialect, OperateType operateType) {
         return this.content + WrapperUtil.buildAlias(alias, dialect);
     }
 
@@ -32,8 +33,8 @@ public class RawQueryTable extends QueryTable {
             return false;
         }
         // 只比较别名，不比较内容
-        if (StrUtil.isNotBlank(alias)
-                && StrUtil.isNotBlank(table.alias)) {
+        if (StringUtil.isNotBlank(alias)
+                && StringUtil.isNotBlank(table.alias)) {
             return Objects.equals(alias, table.alias);
         }
         return false;

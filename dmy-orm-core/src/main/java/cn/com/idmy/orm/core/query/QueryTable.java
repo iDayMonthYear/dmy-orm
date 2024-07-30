@@ -2,33 +2,26 @@ package cn.com.idmy.orm.core.query;
 
 import cn.com.idmy.orm.core.OrmConsts;
 import cn.com.idmy.orm.core.dialect.Dialect;
+import cn.com.idmy.orm.core.dialect.OperateType;
 import cn.com.idmy.orm.core.exception.OrmExceptions;
-import cn.com.idmy.orm.core.table.TableDef;
 import cn.com.idmy.orm.core.util.StringUtil;
-import cn.hutool.core.util.StrUtil;
-import lombok.Data;
+import lombok.Getter;
 
 import java.util.Objects;
 
 /**
- * 查询列，描述的是一张表的字段
+ * 查询表。
+ *
+ * @author michael
+ * @author 王帅
  */
-@Data
+@Getter
 public class QueryTable implements CloneSupport<QueryTable> {
-
-    protected int tableDefHashCode = 0;
     protected String schema;
     protected String name;
     protected String alias;
 
-    public QueryTable() {
-    }
-
-    public QueryTable(TableDef tableDef) {
-        // TableDef的标识符号,0:不确定标识
-        this.tableDefHashCode = tableDef.hashCode();
-        this.schema = tableDef.getSchema();
-        this.name = tableDef.getTable();
+    protected QueryTable() {
     }
 
     public QueryTable(String name) {
@@ -38,18 +31,30 @@ public class QueryTable implements CloneSupport<QueryTable> {
     }
 
     public QueryTable(String schema, String name) {
-        this.schema = StrUtil.trim(schema);
-        this.name = StrUtil.trim(name);
+        this.schema = StringUtil.tryTrim(schema);
+        this.name = StringUtil.tryTrim(name);
     }
 
     public QueryTable(String schema, String table, String alias) {
-        this.schema = StrUtil.trim(schema);
-        this.name = StrUtil.trim(table);
-        this.alias = StrUtil.trim(alias);
+        this.schema = StringUtil.tryTrim(schema);
+        this.name = StringUtil.tryTrim(table);
+        this.alias = StringUtil.tryTrim(alias);
+    }
+
+    public void setSchema(String schema) {
+        this.schema = schema;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getNameWithSchema() {
-        return StrUtil.isNotBlank(schema) ? schema + "." + name : name;
+        return StringUtil.isNotBlank(schema) ? schema + "." + name : name;
+    }
+
+    public void setAlias(String alias) {
+        this.alias = alias;
     }
 
     public QueryTable as(String alias) {
@@ -61,12 +66,12 @@ public class QueryTable implements CloneSupport<QueryTable> {
         if (table == null) {
             return false;
         }
-        if (StrUtil.isNotBlank(alias) && StrUtil.isNotBlank(table.alias) && (Objects.equals(alias, table.alias))) {
-            return false;
+        if (this == table) {
+            return true;
         }
-        //比较对象都有tableDef标记,就用标记比对, 否则就用名称比对
-        if (tableDefHashCode != 0 && table.tableDefHashCode != 0) {
-            return tableDefHashCode == table.tableDefHashCode;
+        if (StringUtil.isNotBlank(alias)
+                && StringUtil.isNotBlank(table.alias)) {
+            return Objects.equals(alias, table.alias);
         }
         return Objects.equals(name, table.name);
     }
@@ -75,13 +80,13 @@ public class QueryTable implements CloneSupport<QueryTable> {
         return OrmConsts.EMPTY_ARRAY;
     }
 
-    public String toSql(Dialect dialect) {
+    public String toSql(Dialect dialect, OperateType operateType) {
         String sql;
-        if (StrUtil.isNotBlank(schema)) {
-            String table = dialect.getRealTable(name);
-            sql = dialect.wrap(dialect.getRealSchema(schema, table)) + "." + dialect.wrap(table) + WrapperUtil.buildAlias(alias, dialect);
+        if (StringUtil.isNotBlank(schema)) {
+            String table = dialect.getRealTable(name, operateType);
+            sql = dialect.wrap(dialect.getRealSchema(schema, table, operateType)) + "." + dialect.wrap(table) + WrapperUtil.buildAlias(alias, dialect);
         } else {
-            sql = dialect.wrap(dialect.getRealTable(name)) + WrapperUtil.buildAlias(alias, dialect);
+            sql = dialect.wrap(dialect.getRealTable(name, operateType)) + WrapperUtil.buildAlias(alias, dialect);
         }
         return sql;
     }

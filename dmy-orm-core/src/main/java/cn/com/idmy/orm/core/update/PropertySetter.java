@@ -260,4 +260,5 @@ public interface PropertySetter<R> {
     default <T, V> R setRaw(LambdaGetter<T> property, V value, Predicate<V> isEffective) {
         return setRaw(property, value, isEffective.test(value));
     }
+
 }

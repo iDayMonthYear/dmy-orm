@@ -1,8 +1,9 @@
 
 package cn.com.idmy.orm.spring.boot;
 
-import cn.com.idmy.orm.core.OrmConfig;
 import cn.com.idmy.orm.core.OrmConsts;
+import cn.com.idmy.orm.core.OrmGlobalConfig;
+import cn.com.idmy.orm.core.OrmGlobalConfig.KeyConfig;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.ibatis.io.VFS;
@@ -383,12 +384,6 @@ public class OrmProperties {
 
     }
 
-    /**
-     * {@link OrmConfig} 配置。
-     *
-     * @author 王帅
-     * @since 2023-06-21
-     */
     @Setter
     @Getter
     public static class GlobalConfig {
@@ -404,7 +399,7 @@ public class OrmProperties {
          * 使用当前全局配置。
          */
         @NestedConfigurationProperty
-        private OrmConfig.KeyConfig keyConfig;
+        private KeyConfig keyConfig;
 
         /**
          * 逻辑删除数据存在标记值。
@@ -443,8 +438,7 @@ public class OrmProperties {
          */
         private String versionColumn;
 
-
-        void applyTo(OrmConfig target) {
+        void applyTo(OrmGlobalConfig target) {
             PropertyMapper mapper = PropertyMapper.get().alwaysApplyingWhenNonNull();
             mapper.from(getKeyConfig()).to(target::setKeyConfig);
             mapper.from(getNormalValueOfLogicDelete()).to(target::setNormalValueOfLogicDelete);
@@ -454,7 +448,6 @@ public class OrmProperties {
             mapper.from(getVersionColumn()).to(target::setVersionColumn);
             mapper.from(getTenantColumn()).to(target::setTenantColumn);
         }
-
     }
 
     /**

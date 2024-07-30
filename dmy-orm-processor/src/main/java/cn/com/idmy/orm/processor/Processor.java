@@ -1,3 +1,19 @@
+/*
+ *  Copyright (c) 2022-2025, Mybatis-Flex (fuhai999@gmail.com).
+ *  <p>
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *  <p>
+ *  http://www.apache.org/licenses/LICENSE-2.0
+ *  <p>
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
+
 package cn.com.idmy.orm.processor;
 
 
@@ -5,12 +21,11 @@ import cn.com.idmy.orm.annotation.Column;
 import cn.com.idmy.orm.annotation.Table;
 import cn.com.idmy.orm.processor.builder.ContentBuilder;
 import cn.com.idmy.orm.processor.config.ConfigurationKey;
-import cn.com.idmy.orm.processor.config.ProcessorConfig;
+import cn.com.idmy.orm.processor.config.MybatisFlexConfig;
 import cn.com.idmy.orm.processor.entity.ColumnInfo;
 import cn.com.idmy.orm.processor.entity.TableInfo;
 import cn.com.idmy.orm.processor.util.FileUtil;
 import cn.com.idmy.orm.processor.util.StrUtil;
-import cn.hutool.core.io.IoUtil;
 import jakarta.annotation.Nullable;
 
 import javax.annotation.processing.AbstractProcessor;
@@ -41,50 +56,50 @@ import java.util.*;
  * @since 2023-06-22
  */
 public class Processor extends AbstractProcessor {
-    private static final List<String> defaultSupportColumnTypes = Arrays.asList(
-            int.class.getName(), Integer.class.getName(),
-            short.class.getName(), Short.class.getName(),
-            long.class.getName(), Long.class.getName(),
-            float.class.getName(), Float.class.getName(),
-            double.class.getName(), Double.class.getName(),
-            boolean.class.getName(), Boolean.class.getName(),
-            Date.class.getName(), java.sql.Date.class.getName(), Time.class.getName(), Timestamp.class.getName(),
-            Instant.class.getName(), LocalDate.class.getName(), LocalDateTime.class.getName(), LocalTime.class.getName(),
-            OffsetDateTime.class.getName(), OffsetTime.class.getName(), ZonedDateTime.class.getName(),
-            Year.class.getName(), Month.class.getName(), YearMonth.class.getName(), JapaneseDate.class.getName(),
-            byte[].class.getName(), Byte[].class.getName(), Byte.class.getName(),
-            BigInteger.class.getName(), BigDecimal.class.getName(),
-            char.class.getName(), String.class.getName(), Character.class.getName()
+
+    private static final List<String> DEFAULT_SUPPORT_COLUMN_TYPES = Arrays.asList(
+        int.class.getName(), Integer.class.getName(),
+        short.class.getName(), Short.class.getName(),
+        long.class.getName(), Long.class.getName(),
+        float.class.getName(), Float.class.getName(),
+        double.class.getName(), Double.class.getName(),
+        boolean.class.getName(), Boolean.class.getName(),
+        Date.class.getName(), java.sql.Date.class.getName(), Time.class.getName(), Timestamp.class.getName(),
+        Instant.class.getName(), LocalDate.class.getName(), LocalDateTime.class.getName(), LocalTime.class.getName(),
+        OffsetDateTime.class.getName(), OffsetTime.class.getName(), ZonedDateTime.class.getName(),
+        Year.class.getName(), Month.class.getName(), YearMonth.class.getName(), JapaneseDate.class.getName(),
+        byte[].class.getName(), Byte[].class.getName(), Byte.class.getName(),
+        BigInteger.class.getName(), BigDecimal.class.getName(),
+        char.class.getName(), String.class.getName(), Character.class.getName()
     );
 
     private Filer filer;
     private Types typeUtils;
     private Elements elementUtils;
-    private ProcessorConfig config;
+    private MybatisFlexConfig configuration;
 
     @Override
-    public synchronized void init(ProcessingEnvironment env) {
-        super.init(env);
-        this.filer = env.getFiler();
-        this.elementUtils = env.getElementUtils();
-        this.typeUtils = env.getTypeUtils();
-        this.config = new ProcessorConfig(filer);
+    public synchronized void init(ProcessingEnvironment processingEnvironment) {
+        super.init(processingEnvironment);
+        this.filer = processingEnvironment.getFiler();
+        this.elementUtils = processingEnvironment.getElementUtils();
+        this.typeUtils = processingEnvironment.getTypeUtils();
+        this.configuration = new MybatisFlexConfig(filer);
     }
 
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
-        System.out.println("###############processor#################");
         if (!roundEnv.processingOver()) {
 
             // 不启用 APT 功能
-            if ("false".equalsIgnoreCase(config.get(ConfigurationKey.ENABLE))) {
+            if ("false".equalsIgnoreCase(configuration.get(ConfigurationKey.ENABLE))) {
                 return true;
             }
 
             System.out.println("mybatis flex processor run start...");
 
             // 是否所有的类常量都生成在 Tables 类里
-            boolean allInTablesEnable = "true".equalsIgnoreCase(config.get(ConfigurationKey.ALL_IN_TABLES_ENABLE));
+            boolean allInTablesEnable = "true".equalsIgnoreCase(configuration.get(ConfigurationKey.ALL_IN_TABLES_ENABLE));
 
             StringBuilder importBuilder;
             StringBuilder fieldBuilder;
@@ -98,23 +113,24 @@ public class Processor extends AbstractProcessor {
             }
 
             // 其他配置选项
-            String genPath = config.get(ConfigurationKey.GEN_PATH);
+            String genPath = configuration.get(ConfigurationKey.GEN_PATH);
 
             // all in Tables 配置
-            String allInTablesPackage = config.get(ConfigurationKey.ALL_IN_TABLES_PACKAGE);
-            String allInTablesClassName = config.get(ConfigurationKey.ALL_IN_TABLES_CLASS_NAME);
+            String allInTablesPackage = configuration.get(ConfigurationKey.ALL_IN_TABLES_PACKAGE);
+            String allInTablesClassName = configuration.get(ConfigurationKey.ALL_IN_TABLES_CLASS_NAME);
 
             // mapper 配置
-            String mapperGenerateEnable = config.get(ConfigurationKey.MAPPER_GENERATE_ENABLE);
-            String mapperAnnotation = config.get(ConfigurationKey.MAPPER_ANNOTATION);
-            String mapperPackage = config.get(ConfigurationKey.MAPPER_PACKAGE);
-            String mapperBaseClass = config.get(ConfigurationKey.MAPPER_BASE_CLASS);
+            String mapperGenerateEnable = configuration.get(ConfigurationKey.MAPPER_GENERATE_ENABLE);
+            String mapperAnnotation = configuration.get(ConfigurationKey.MAPPER_ANNOTATION);
+            String mapperPackage = configuration.get(ConfigurationKey.MAPPER_PACKAGE);
+            String mapperBaseClass = configuration.get(ConfigurationKey.MAPPER_BASE_CLASS);
 
             // tableDef 配置
-            String tableDefClassSuffix = config.get(ConfigurationKey.TABLE_DEF_CLASS_SUFFIX);
-            String tableDefInstanceSuffix = config.get(ConfigurationKey.TABLE_DEF_INSTANCE_SUFFIX);
-            String tableDefPropertiesNameStyle = config.get(ConfigurationKey.TABLE_DEF_PROPERTIES_NAME_STYLE);
-            String[] tableDefIgnoreEntitySuffixes = config.get(ConfigurationKey.TABLE_DEF_IGNORE_ENTITY_SUFFIXES).split(",");
+            String tableDefPackage = configuration.get(ConfigurationKey.TABLE_DEF_PACKAGE);
+            String tableDefClassSuffix = configuration.get(ConfigurationKey.TABLE_DEF_CLASS_SUFFIX);
+            String tableDefInstanceSuffix = configuration.get(ConfigurationKey.TABLE_DEF_INSTANCE_SUFFIX);
+            String tableDefPropertiesNameStyle = configuration.get(ConfigurationKey.TABLE_DEF_PROPERTIES_NAME_STYLE);
+            String[] tableDefIgnoreEntitySuffixes = configuration.get(ConfigurationKey.TABLE_DEF_IGNORE_ENTITY_SUFFIXES).split(",");
 
             // 如果不指定 Tables 生成包，那么 Tables 文件就会和最后一个 entity 文件在同一个包
             String entityClassReference = null;
@@ -138,7 +154,7 @@ public class Processor extends AbstractProcessor {
 
                 do {
                     // 获取类属性和默认查询字段
-                    fillColumnInfoList(columnInfos, defaultColumns, (TypeElement) entityClassElement, classElement, table.camelToUnderline());
+                    fillColumnInfoList(columnInfos, defaultColumns, (TypeElement) entityClassElement, classElement, table.underline());
                     classElement = (TypeElement) typeUtils.asElement(classElement.getSuperclass());
                 } while (classElement != null);
 
@@ -148,7 +164,11 @@ public class Processor extends AbstractProcessor {
 
                 // 处理 entity 后缀
                 for (String entityIgnoreSuffix : tableDefIgnoreEntitySuffixes) {
-                    if (entityClassName.endsWith(entityIgnoreSuffix.trim())) {
+                    entityIgnoreSuffix = entityIgnoreSuffix.trim();
+                    if (entityIgnoreSuffix.isEmpty()) {
+                        continue;
+                    }
+                    if (entityClassName.endsWith(entityIgnoreSuffix)) {
                         entityClassName = entityClassName.substring(0, entityClassName.length() - entityIgnoreSuffix.length());
                         break;
                     }
@@ -162,23 +182,23 @@ public class Processor extends AbstractProcessor {
                 tableInfo.setEntityComment(elementUtils.getDocComment(entityClassElement));
 
                 // 生成 TableDef 文件
-                String tableDefPackage = StrUtil.buildTableDefPackage(entityClass);
+                String realTableDefPackage = StrUtil.isBlank(tableDefPackage) ? StrUtil.buildTableDefPackage(entityClass) : StrUtil.processPackageExpression(entityClass, tableDefPackage);
                 String tableDefClassName = entityClassName.concat(tableDefClassSuffix);
-                String tableDefContent = ContentBuilder.buildTableDef(tableInfo, allInTablesEnable, tableDefPackage, tableDefClassName
-                        , tableDefPropertiesNameStyle, tableDefInstanceSuffix, columnInfos, defaultColumns);
+                String tableDefContent = ContentBuilder.buildTableDef(tableInfo, allInTablesEnable, realTableDefPackage, tableDefClassName
+                    , tableDefPropertiesNameStyle, tableDefInstanceSuffix, columnInfos, defaultColumns);
                 // 将文件所依赖的 Element 传入 Filer 中，表示此 TableDef 依赖这个类，以保证增量编译时不丢失内容。
-                processGenClass(genPath, tableDefPackage, tableDefClassName, tableDefContent, entityClassElement);
+                processGenClass(genPath, realTableDefPackage, tableDefClassName, tableDefContent, entityClassElement);
 
                 if (allInTablesEnable) {
                     // 标记 entity 类，如果没有配置 Tables 生成位置，以 entity 位置为准
                     entityClassReference = entityClass;
                     // 构建 Tables 常量属性及其导包
-                    ContentBuilder.buildTablesField(importBuilder, fieldBuilder, tableInfo, tableDefClassSuffix, tableDefPropertiesNameStyle, tableDefInstanceSuffix);
+                    ContentBuilder.buildTablesField(importBuilder, fieldBuilder, tableInfo, tableDefClassSuffix, tableDefPropertiesNameStyle, tableDefInstanceSuffix, realTableDefPackage);
                 }
 
                 // 是否生成 Mapper 文件
-                if ("true".equalsIgnoreCase(mapperGenerateEnable) && table.mapperGenerateEnable()) {
-                    String realMapperPackage = StrUtil.isBlank(mapperPackage) ? StrUtil.buildMapperPackage(entityClass) : mapperPackage;
+                if ("true".equalsIgnoreCase(mapperGenerateEnable) && table.mapper()) {
+                    String realMapperPackage = StrUtil.isBlank(mapperPackage) ? StrUtil.buildMapperPackage(entityClass) : StrUtil.processPackageExpression(entityClass, mapperPackage);
                     String mapperClassName = entityClassName.concat("Mapper");
                     boolean mapperAnnotationEnable = "true".equalsIgnoreCase(mapperAnnotation);
                     String mapperClassContent = ContentBuilder.buildMapper(tableInfo, realMapperPackage, mapperClassName, mapperBaseClass, mapperAnnotationEnable);
@@ -189,7 +209,7 @@ public class Processor extends AbstractProcessor {
             // 确定了要生成 Tables 类，且拥有至少一个被 Table 注解的类时再生成 Tables 类。
             if (allInTablesEnable && entityClassReference != null) {
                 // 生成 Tables 文件
-                String realTablesPackage = StrUtil.isBlank(allInTablesPackage) ? StrUtil.buildTableDefPackage(entityClassReference) : allInTablesPackage;
+                String realTablesPackage = StrUtil.isBlank(allInTablesPackage) ? StrUtil.buildTableDefPackage(entityClassReference) : StrUtil.processPackageExpression(entityClassReference, allInTablesPackage);
                 String realTablesClassName = StrUtil.isBlank(allInTablesClassName) ? "Tables" : allInTablesClassName;
                 String tablesContent = ContentBuilder.buildTables(importBuilder, fieldBuilder, realTablesPackage, allInTablesClassName);
                 processGenClass(genPath, realTablesPackage, realTablesClassName, tablesContent, elementsAnnotatedWith.toArray(new Element[0]));
@@ -259,8 +279,8 @@ public class Processor extends AbstractProcessor {
 
                 // 未配置 typeHandler 的情况下，只支持基本数据类型，不支持比如 list set 或者自定义的类等
                 if ((column == null || "org.apache.ibatis.type.UnknownTypeHandler".equals(typeHandlerClass[0]))
-                        && !defaultSupportColumnTypes.contains(typeString)
-                        && (typeElement != null && ElementKind.ENUM != typeElement.getKind())
+                    && !DEFAULT_SUPPORT_COLUMN_TYPES.contains(typeString)
+                    && (typeElement != null && ElementKind.ENUM != typeElement.getKind())
                 ) {
                     continue;
                 }
@@ -294,7 +314,7 @@ public class Processor extends AbstractProcessor {
 
                 columnInfos.add(columnInfo);
 
-                if (column == null || (!column.isLarge() && !column.isLogicDelete())) {
+                if (column == null || (!column.large() && !column.logicDelete())) {
                     defaultColumns.add(columnName);
                 }
             }
@@ -323,13 +343,12 @@ public class Processor extends AbstractProcessor {
         return getColumnAliasByGetterMethod((TypeElement) typeUtils.asElement(baseElement.getSuperclass()), property);
     }
 
-
     private void processGenClass(String genBasePath, String genPackageName, String className, String genContent, Element... elements) {
         Writer writer = null;
         try {
             JavaFileObject sourceFile = filer.createSourceFile(genPackageName + "." + className, elements);
             if (genBasePath == null || genBasePath.trim().isEmpty()) {
-                writer = new OutputStreamWriter(sourceFile.openOutputStream(), config.get(ConfigurationKey.CHARSET));
+                writer = new OutputStreamWriter(sourceFile.openOutputStream(), configuration.get(ConfigurationKey.CHARSET));
                 writer.write(genContent);
                 writer.flush();
                 return;
@@ -364,13 +383,19 @@ public class Processor extends AbstractProcessor {
                 return;
             }
 
-            writer = new PrintWriter(genJavaFile, config.get(ConfigurationKey.CHARSET));
+            writer = new PrintWriter(genJavaFile, configuration.get(ConfigurationKey.CHARSET));
             writer.write(genContent);
             writer.flush();
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
-            IoUtil.close(writer);
+            if (writer != null) {
+                try {
+                    writer.close();
+                } catch (IOException ignored) {
+                    // do nothing here.
+                }
+            }
         }
     }
 

@@ -1,26 +1,27 @@
-package cn.com.idmy.orm.core.update;
+package cn.com.idmy.orm.core.util;
 
 import cn.com.idmy.orm.core.table.IdInfo;
 import cn.com.idmy.orm.core.table.TableInfo;
 import cn.com.idmy.orm.core.table.TableInfoFactory;
-import cn.com.idmy.orm.core.util.ClassUtil;
-import cn.com.idmy.orm.core.util.ConvertUtil;
-import cn.com.idmy.orm.core.util.Reflectors;
+import cn.com.idmy.orm.core.update.ModifyAttrsRecordProxyFactory;
 import jakarta.annotation.Nullable;
-import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
 import org.apache.ibatis.reflection.Reflector;
 import org.apache.ibatis.reflection.invoker.Invoker;
 
 import java.lang.reflect.Array;
 import java.util.List;
 
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class UpdateEntity {
+
+    private UpdateEntity() {
+    }
+
+
     public static <T> T of(Class<T> clazz) {
         clazz = ClassUtil.getUsefulClass(clazz);
         return ModifyAttrsRecordProxyFactory.getInstance().get(clazz);
     }
+
 
     public static <T> T of(Class<T> clazz, Object id) {
         clazz = ClassUtil.getUsefulClass(clazz);
@@ -64,6 +65,7 @@ public class UpdateEntity {
 
     public static <T> T ofNotNull(T entity) {
         Class<?> usefulClass = ClassUtil.getUsefulClass(entity.getClass());
+
         T newEntity = (T) of(usefulClass);
 
         Reflector reflector = Reflectors.of(usefulClass);
@@ -71,13 +73,17 @@ public class UpdateEntity {
 
         for (String propertyName : propertyNames) {
             try {
-                Object value = reflector.getGetInvoker(propertyName).invoke(entity, null);
+                Object value = reflector.getGetInvoker(propertyName)
+                        .invoke(entity, null);
                 if (value != null) {
                     reflector.getSetInvoker(propertyName).invoke(newEntity, new Object[]{value});
                 }
             } catch (Exception ignored) {
+                // do nothing here.
             }
         }
+
         return newEntity;
     }
+
 }

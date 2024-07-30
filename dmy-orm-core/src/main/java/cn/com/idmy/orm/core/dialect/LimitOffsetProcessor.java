@@ -4,11 +4,13 @@ import cn.com.idmy.orm.core.query.QueryWrapper;
 
 import static cn.com.idmy.orm.core.constant.SqlConsts.DELIMITER;
 import static cn.com.idmy.orm.core.constant.SqlConsts.LIMIT;
+import static cn.com.idmy.orm.core.constant.SqlConsts.OFFSET;
 
 /**
  * limit 和 offset 参数的处理器
  */
 public interface LimitOffsetProcessor {
+
     /**
      * 处理构建 limit 和 offset
      *
@@ -27,6 +29,14 @@ public interface LimitOffsetProcessor {
     LimitOffsetProcessor MYSQL = (dialect, sql, queryWrapper, limitRows, limitOffset) -> {
         if (limitRows != null && limitOffset != null) {
             sql.append(LIMIT).append(limitOffset).append(DELIMITER).append(limitRows);
+        } else if (limitRows != null) {
+            sql.append(LIMIT).append(limitRows);
+        }
+        return sql;
+    };
+    LimitOffsetProcessor POSTGRESQL = (dialect, sql, queryWrapper, limitRows, limitOffset) -> {
+        if (limitRows != null && limitOffset != null) {
+            sql.append(LIMIT).append(limitRows).append(OFFSET).append(limitOffset);
         } else if (limitRows != null) {
             sql.append(LIMIT).append(limitRows);
         }

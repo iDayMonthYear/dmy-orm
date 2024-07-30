@@ -15,6 +15,7 @@ import java.sql.SQLException;
 import java.util.List;
 
 public class CompositeEnumTypeHandler<E extends Enum<E>> implements TypeHandler<E> {
+
     private final TypeHandler<E> delegate;
 
     public CompositeEnumTypeHandler(Class<E> enumClass) {

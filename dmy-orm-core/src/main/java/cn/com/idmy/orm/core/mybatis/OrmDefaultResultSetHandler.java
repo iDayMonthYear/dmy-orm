@@ -1,5 +1,7 @@
 package cn.com.idmy.orm.core.mybatis;
 
+import cn.com.idmy.orm.core.util.MapUtil;
+import jakarta.annotation.Nullable;
 import org.apache.ibatis.annotations.AutomapConstructor;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.binding.MapperMethod.ParamMap;
@@ -26,9 +28,9 @@ import org.apache.ibatis.session.*;
 import org.apache.ibatis.type.JdbcType;
 import org.apache.ibatis.type.TypeHandler;
 import org.apache.ibatis.type.TypeHandlerRegistry;
-import org.apache.ibatis.util.MapUtil;
 
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Executable;
 import java.lang.reflect.Parameter;
 import java.sql.CallableStatement;
 import java.sql.ResultSet;
@@ -229,6 +231,7 @@ public class OrmDefaultResultSetHandler extends DefaultResultSetHandler {
         return rs != null ? new ResultSetWrapper(rs, configuration) : null;
     }
 
+    @Nullable
     private ResultSetWrapper getNextResultSet(Statement stmt) {
         // Making this method tolerant of bad JDBC drivers
         try {
@@ -763,13 +766,18 @@ public class OrmDefaultResultSetHandler extends DefaultResultSetHandler {
 
     private boolean applyColumnOrderBasedConstructorAutomapping(ResultSetWrapper rsw, List<Class<?>> constructorArgTypes,
                                                                 List<Object> constructorArgs, Constructor<?> constructor, boolean foundValues) throws SQLException {
+
+        // fixed IndexOutOfBoundsException
+        // https://gitee.com/mybatis-flex/mybatis-flex/issues/I98ZO9
+        if (rsw.getColumnNames().size() < constructor.getParameterCount()) {
+            throw new IllegalArgumentException("Can not invoke the constructor[" + buildMethodString(constructor) + "] with value names: "
+                    + Arrays.toString(rsw.getColumnNames().toArray()) + ",\n"
+                    + "Perhaps you can add a default (no parameters) constructor to fix it."
+            );
+        }
+
         for (int i = 0; i < constructor.getParameterTypes().length; i++) {
             Class<?> parameterType = constructor.getParameterTypes()[i];
-
-            // https://github.com/mybatis-flex/mybatis-flex/pull/201
-            // Parameter parameter = constructor.getParameters()[i];
-            // String columnName = StringUtil.camelToUnderline(parameter.getName());
-
             String columnName = rsw.getColumnNames().get(i);
             TypeHandler<?> typeHandler = rsw.getTypeHandler(parameterType, columnName);
             Object value = typeHandler.getResult(rsw.getResultSet(), columnName);
@@ -779,6 +787,27 @@ public class OrmDefaultResultSetHandler extends DefaultResultSetHandler {
         }
         return foundValues;
     }
+
+
+    private static String buildMethodString(Executable method) {
+        StringBuilder sb = new StringBuilder()
+                .append(method.getDeclaringClass().getName())
+                .append(".")
+                .append(method.getName())
+                .append("(");
+
+        Class<?>[] params = method.getParameterTypes();
+        int in = 0;
+        for (Class<?> clazz : params) {
+            sb.append(clazz.getName());
+            if (++in < params.length) {
+                sb.append(",");
+            }
+        }
+
+        return sb.append(")").toString();
+    }
+
 
     private boolean applyArgNameBasedConstructorAutoMapping(ResultSetWrapper rsw, ResultMap resultMap,
                                                             String columnPrefix, List<Class<?>> constructorArgTypes, List<Object> constructorArgs, Constructor<?> constructor,
@@ -911,10 +940,15 @@ public class OrmDefaultResultSetHandler extends DefaultResultSetHandler {
 
     private Object prepareSimpleKeyParameter(ResultSet rs, ResultMapping resultMapping, Class<?> parameterType,
                                              String columnPrefix) throws SQLException {
-        final TypeHandler<?> typeHandler;
-        if (typeHandlerRegistry.hasTypeHandler(parameterType)) {
-            typeHandler = typeHandlerRegistry.getTypeHandler(parameterType);
-        } else {
+//        final TypeHandler<?> typeHandler;
+//        if (typeHandlerRegistry.hasTypeHandler(parameterType)) {
+//            typeHandler = typeHandlerRegistry.getTypeHandler(parameterType);
+//        } else {
+//            typeHandler = typeHandlerRegistry.getUnknownTypeHandler();
+//        }
+
+        TypeHandler<?> typeHandler = typeHandlerRegistry.getTypeHandler(parameterType);
+        if (typeHandler == null) {
             typeHandler = typeHandlerRegistry.getUnknownTypeHandler();
         }
         return typeHandler.getResult(rs, prependPrefix(resultMapping.getColumn(), columnPrefix));
@@ -1219,6 +1253,7 @@ public class OrmDefaultResultSetHandler extends DefaultResultSetHandler {
         }
     }
 
+    @Nullable
     private Object instantiateCollectionPropertyIfAppropriate(ResultMapping resultMapping, MetaObject metaObject) {
         final String propertyName = resultMapping.getProperty();
         Object propertyValue = metaObject.getValue(propertyName);

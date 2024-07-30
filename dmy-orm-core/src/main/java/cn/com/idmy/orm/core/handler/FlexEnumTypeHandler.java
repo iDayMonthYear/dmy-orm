@@ -1,6 +1,7 @@
 package cn.com.idmy.orm.core.handler;
 
 import cn.com.idmy.orm.core.util.EnumWrapper;
+import jakarta.annotation.Nullable;
 import org.apache.ibatis.type.BaseTypeHandler;
 import org.apache.ibatis.type.JdbcType;
 
@@ -26,6 +27,7 @@ public class FlexEnumTypeHandler<E extends Enum<E>> extends BaseTypeHandler<E> {
         }
     }
 
+    @Nullable
     @Override
     public E getNullableResult(ResultSet rs, String columnName) throws SQLException {
         Object value = rs.getObject(columnName, enumWrapper.getPropertyType());
@@ -35,6 +37,7 @@ public class FlexEnumTypeHandler<E extends Enum<E>> extends BaseTypeHandler<E> {
         return enumWrapper.getEnum(value);
     }
 
+    @Nullable
     @Override
     public E getNullableResult(ResultSet rs, int columnIndex) throws SQLException {
         Object value = rs.getObject(columnIndex, enumWrapper.getPropertyType());
@@ -44,6 +47,7 @@ public class FlexEnumTypeHandler<E extends Enum<E>> extends BaseTypeHandler<E> {
         return enumWrapper.getEnum(value);
     }
 
+    @Nullable
     @Override
     public E getNullableResult(CallableStatement cs, int columnIndex) throws SQLException {
         Object value = cs.getObject(columnIndex, enumWrapper.getPropertyType());
@@ -52,5 +56,4 @@ public class FlexEnumTypeHandler<E extends Enum<E>> extends BaseTypeHandler<E> {
         }
         return enumWrapper.getEnum(value);
     }
-
 }

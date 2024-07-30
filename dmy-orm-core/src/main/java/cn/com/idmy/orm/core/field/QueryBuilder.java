@@ -16,4 +16,5 @@ public interface QueryBuilder<T> {
      * @return 查询条件
      */
     QueryWrapper build(T entity);
+
 }

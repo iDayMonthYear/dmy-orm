@@ -1,6 +1,6 @@
 package cn.com.idmy.orm.core.logicdelete.impl;
 
-import cn.com.idmy.orm.core.OrmConfig;
+import cn.com.idmy.orm.core.OrmGlobalConfig;
 import cn.com.idmy.orm.core.dialect.Dialect;
 import cn.com.idmy.orm.core.logicdelete.AbstractLogicDeleteProcessor;
 import cn.com.idmy.orm.core.table.TableInfo;
@@ -27,21 +27,21 @@ public class DefaultLogicDeleteProcessor extends AbstractLogicDeleteProcessor {
 
     @Override
     public Object getLogicNormalValue() {
-        return OrmConfig.getDefaultConfig().getNormalValueOfLogicDelete();
+        return OrmGlobalConfig.getDefaultConfig().getNormalValueOfLogicDelete();
     }
 
     @Override
     public Object getLogicDeletedValue() {
-        return OrmConfig.getDefaultConfig().getDeletedValueOfLogicDelete();
+        return OrmGlobalConfig.getDefaultConfig().getDeletedValueOfLogicDelete();
     }
 
     private static Object prepareValue(Object value) {
         if (value instanceof Number || value instanceof Boolean) {
             return value;
-        } else {
-            return SINGLE_QUOTE + value + SINGLE_QUOTE;
         }
+        return SINGLE_QUOTE + value + SINGLE_QUOTE;
     }
+
 }
 
 

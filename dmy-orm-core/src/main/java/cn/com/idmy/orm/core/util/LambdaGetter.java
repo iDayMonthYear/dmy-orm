@@ -7,6 +7,7 @@ import java.io.Serializable;
  */
 @FunctionalInterface
 public interface LambdaGetter<T> extends Serializable {
+
     /**
      * 返回实体类的属性
      *
@@ -14,5 +15,6 @@ public interface LambdaGetter<T> extends Serializable {
      * @return 实体类的属性
      */
     Object get(T source);
+
 }
 

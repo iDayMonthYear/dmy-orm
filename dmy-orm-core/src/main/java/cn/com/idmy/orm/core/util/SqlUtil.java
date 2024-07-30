@@ -1,7 +1,5 @@
 package cn.com.idmy.orm.core.util;
 
-import cn.hutool.core.util.StrUtil;
-
 import java.lang.reflect.Array;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -9,7 +7,10 @@ import java.util.Date;
 import java.util.StringJoiner;
 import java.util.regex.Matcher;
 
-import static cn.com.idmy.orm.core.constant.SqlConsts.*;
+import static cn.com.idmy.orm.core.constant.SqlConsts.BRACKET_LEFT;
+import static cn.com.idmy.orm.core.constant.SqlConsts.BRACKET_RIGHT;
+import static cn.com.idmy.orm.core.constant.SqlConsts.DELIMITER;
+import static cn.com.idmy.orm.core.constant.SqlConsts.PLACEHOLDER;
 
 public class SqlUtil {
 
@@ -17,7 +18,7 @@ public class SqlUtil {
     }
 
     public static void keepColumnSafely(String column) {
-        if (StrUtil.isBlank(column)) {
+        if (StringUtil.isBlank(column)) {
             throw new IllegalArgumentException("Column must not be empty");
         } else {
             column = column.trim();

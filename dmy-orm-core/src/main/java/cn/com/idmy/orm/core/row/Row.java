@@ -7,8 +7,8 @@ import cn.com.idmy.orm.core.query.QueryWrapper;
 import cn.com.idmy.orm.core.update.RawValue;
 import cn.com.idmy.orm.core.update.UpdateWrapper;
 import cn.com.idmy.orm.core.util.*;
-import cn.hutool.core.util.ArrayUtil;
-import cn.hutool.core.util.StrUtil;
+import jakarta.annotation.Nullable;
+import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -19,6 +19,7 @@ import java.util.*;
 import java.util.function.BooleanSupplier;
 import java.util.function.Predicate;
 
+@Setter
 public class Row extends LinkedHashMap<String, Object> implements UpdateWrapper<Row> {
 
     //主键，多个主键用英文逗号隔开
@@ -74,8 +75,7 @@ public class Row extends LinkedHashMap<String, Object> implements UpdateWrapper<
 
 
     public static Row ofKey(RowKey[] rowKeys, Object[] value) {
-        Row row = new Row();
-        row.getPrimaryKeys().addAll(Arrays.asList(rowKeys));
+        Row row = ofKey(rowKeys);
         for (int i = 0; i < rowKeys.length; i++) {
             row.put(rowKeys[i].keyColumn, value[i]);
         }
@@ -88,7 +88,7 @@ public class Row extends LinkedHashMap<String, Object> implements UpdateWrapper<
             return this;
         }
 
-        if (StrUtil.isBlank(property)) {
+        if (StringUtil.isBlank(property)) {
             throw new IllegalArgumentException("key column not be null or empty.");
         }
 
@@ -244,13 +244,16 @@ public class Row extends LinkedHashMap<String, Object> implements UpdateWrapper<
         return result != null ? result : defaultValue;
     }
 
+    @Nullable
     public Object getIgnoreCase(String key) {
-        String camelKey = null;
-        if (key.contains("_")) {
-            camelKey = StringUtil.deleteChar(key, '_');
+        Object result = super.get(key);
+        if (result != null) {
+            return result;
         }
+
+        String newKey = StringUtil.deleteChar(key, '_', '-');
         for (String innerKey : keySet()) {
-            if (innerKey.equalsIgnoreCase(key) || (camelKey != null && camelKey.equalsIgnoreCase(innerKey))) {
+            if (newKey.equalsIgnoreCase(StringUtil.deleteChar(innerKey, '_', '-'))) {
                 return super.get(innerKey);
             }
         }
@@ -292,7 +295,7 @@ public class Row extends LinkedHashMap<String, Object> implements UpdateWrapper<
             return defaultValue;
         }
         String r = s.toString();
-        return r.trim().length() == 0 ? defaultValue : r;
+        return r.trim().isEmpty() ? defaultValue : r;
     }
 
     public Integer getInt(String key) {
@@ -412,6 +415,7 @@ public class Row extends LinkedHashMap<String, Object> implements UpdateWrapper<
         return (byte[]) super.get(key);
     }
 
+    @Nullable
     @Override
     public Object remove(Object key) {
         for (String innerKey : keySet()) {
@@ -453,10 +457,6 @@ public class Row extends LinkedHashMap<String, Object> implements UpdateWrapper<
         return primaryKeys;
     }
 
-    public void setPrimaryKeys(Set<RowKey> primaryKeys) {
-        this.primaryKeys = primaryKeys;
-    }
-
     public void keep(String... columns) {
         entrySet().removeIf(entry -> !ArrayUtil.contains(columns, entry.getKey()));
     }
@@ -496,7 +496,12 @@ public class Row extends LinkedHashMap<String, Object> implements UpdateWrapper<
         List<Object> values = new ArrayList<>();
         for (String key : keySet()) {
             Object value = get(key);
-            if (!isPk(key) && !(value instanceof RawValue)) {
+            if (isPk(key)) {
+                continue;
+            }
+            if (value instanceof RawValue) {
+                values.addAll(Arrays.asList(((RawValue) value).getParams()));
+            } else {
                 values.add(value);
             }
         }
@@ -539,7 +544,7 @@ public class Row extends LinkedHashMap<String, Object> implements UpdateWrapper<
      * @return 数据内容
      */
     Object[] obtainUpdateValues() {
-        return ArrayUtil.addAll(obtainModifyValuesWithoutPk(), obtainsPrimaryValues());
+        return ArrayUtil.concat(obtainModifyValuesWithoutPk(), obtainsPrimaryValues());
     }
 
 
@@ -556,7 +561,12 @@ public class Row extends LinkedHashMap<String, Object> implements UpdateWrapper<
 
         for (String key : keySet()) {
             Object value = get(key);
-            if (!isPk(key) && !(value instanceof RawValue)) {
+            if (isPk(key)) {
+                continue;
+            }
+            if (value instanceof RawValue) {
+                values.addAll(Arrays.asList(((RawValue) value).getParams()));
+            } else {
                 values.add(value);
             }
         }
@@ -597,6 +607,5 @@ public class Row extends LinkedHashMap<String, Object> implements UpdateWrapper<
         }
         return false;
     }
-
 
 }

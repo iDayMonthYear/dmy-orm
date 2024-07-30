@@ -1,4 +1,25 @@
+/*
+ *  Copyright (c) 2022-2025, Mybatis-Flex (fuhai999@gmail.com).
+ *  <p>
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *  <p>
+ *  http://www.apache.org/licenses/LICENSE-2.0
+ *  <p>
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
+
 package cn.com.idmy.orm.processor.util;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * 字符串工具类。
@@ -8,8 +29,11 @@ package cn.com.idmy.orm.processor.util;
  */
 @SuppressWarnings("all")
 public class StrUtil {
+
     private StrUtil() {
     }
+
+    private static final Pattern PACKAGE_REGEX = Pattern.compile("(?<expression>\\$\\{entityPackage[.parent]*\\})(?<subPackage>.*)");
 
     /**
      * cn.com.idmy.orm.test.entity.Account -> Account
@@ -31,12 +55,16 @@ public class StrUtil {
         for (int i = 0; i < len; i++) {
             char c = str.charAt(i);
             if (Character.isUpperCase(c) && i > 0) {
-                sb.append('_');
+                char prev = str.charAt(i - 1);
+                if (!Character.isUpperCase(prev) && prev != '_') {
+                    sb.append('_');
+                }
             }
             sb.append(Character.toLowerCase(c));
         }
         return sb.toString();
     }
+
 
     public static String firstCharToLowerCase(String str) {
         char firstChar = str.charAt(0);
@@ -65,9 +93,15 @@ public class StrUtil {
             return camelToUnderline(name).toLowerCase();
         } else if ("upperCamelCase".equalsIgnoreCase(tableDefPropertiesNameStyle)) {
             return firstCharToUpperCase(name);
-        } else {
+        } else if ("lowerCamelCase".equalsIgnoreCase(tableDefPropertiesNameStyle)) {
             return firstCharToLowerCase(name);
+        } else {
+            return $(name);
         }
+    }
+
+    public static String $(String str) {
+        return "$" + str;
     }
 
     public static String buildTableDefPackage(String entityClass) {
@@ -91,6 +125,39 @@ public class StrUtil {
                 return "mapper";
             }
         }
+    }
+
+    /**
+     * 解析包名表达式
+     * <p>将{@code `${entityPackage}`}替换为实际实体包名, 表达式中如果存在一个{@code `.parent`}则缩减包名末尾的一位。</p>
+     * <p>示例：{@code `entityClass = com.test1.test2`}<br>
+     * 1. 对于{@code `packageStr = ${entityPackage}`}处理结果为 {@code `com.test1.test2`}<br>
+     * 2. 对于{@code `packageStr = ${entityPackage.parent}`}处理结果为 {@code `com.test1`}<br>
+     * 3. 对于{@code `packageStr = ${entityPackage.parent}.customize`}处理结果为 {@code `com.test1.customize`}
+     * </p>
+     */
+    public static String processPackageExpression(String entityClass, String packageStr) {
+        String entityPackage = entityClass.substring(0, entityClass.lastIndexOf("."));
+        Matcher matcher = PACKAGE_REGEX.matcher(packageStr);
+        if (!matcher.find()) {
+            return entityPackage;
+        }
+        String expression = matcher.group("expression");
+        expression = expression.substring(2, expression.length() - 1);
+        String subPackage = matcher.group("subPackage");
+        List<String> entityPackageSplit = Arrays.asList(entityPackage.split("\\."));
+        while (expression.contains(".parent")) {
+            if (entityPackageSplit.size() == 0) {
+                throw new RuntimeException("Expression [.parent] has exceeded the maximum limit.");
+            }
+            int index = expression.lastIndexOf(".parent");
+            if (index != -1) {
+                expression = expression.substring(0, index);
+                entityPackageSplit = entityPackageSplit.subList(0, entityPackageSplit.size() - 1);
+            }
+        }
+        expression = expression.replace("entityPackage", String.join(".", entityPackageSplit));
+        return expression + subPackage;
     }
 
 

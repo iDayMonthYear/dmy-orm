@@ -1,6 +1,6 @@
 package cn.com.idmy.orm.core.row;
 
-import cn.com.idmy.orm.core.OrmConfig;
+import cn.com.idmy.orm.core.OrmGlobalConfig;
 import cn.com.idmy.orm.core.exception.OrmExceptions;
 import cn.com.idmy.orm.core.paginate.Page;
 import cn.com.idmy.orm.core.query.CPI;
@@ -10,8 +10,8 @@ import cn.com.idmy.orm.core.query.QueryWrapper;
 import cn.com.idmy.orm.core.transaction.Propagation;
 import cn.com.idmy.orm.core.transaction.TransactionalManager;
 import cn.com.idmy.orm.core.util.CollectionUtil;
+import cn.com.idmy.orm.core.util.MapUtil;
 import org.apache.ibatis.session.SqlSessionFactory;
-import org.apache.ibatis.util.MapUtil;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -33,7 +33,7 @@ public class Db {
 
     public static RowMapperInvoker invoker() {
         if (defaultRowMapperInvoker == null) {
-            OrmConfig defaultConfig = OrmConfig.getDefaultConfig();
+            OrmGlobalConfig defaultConfig = OrmGlobalConfig.getDefaultConfig();
             SqlSessionFactory sqlSessionFactory = defaultConfig.getSqlSessionFactory();
             defaultRowMapperInvoker = new RowMapperInvoker(sqlSessionFactory);
         }
@@ -42,7 +42,7 @@ public class Db {
 
     public static RowMapperInvoker invoker(String environmentId) {
         return MapUtil.computeIfAbsent(INVOKER_MAP, environmentId, key -> {
-            SqlSessionFactory sqlSessionFactory = OrmConfig.getConfig(key).getSqlSessionFactory();
+            SqlSessionFactory sqlSessionFactory = OrmGlobalConfig.getConfig(key).getSqlSessionFactory();
             return new RowMapperInvoker(sqlSessionFactory);
         });
     }

@@ -8,9 +8,9 @@ import cn.com.idmy.orm.core.query.QueryTable;
 import cn.com.idmy.orm.core.query.QueryWrapper;
 import cn.com.idmy.orm.core.table.TableInfo;
 import cn.com.idmy.orm.core.table.TableInfoFactory;
+import cn.com.idmy.orm.core.util.ArrayUtil;
 import cn.com.idmy.orm.core.util.CollectionUtil;
-import cn.hutool.core.util.ArrayUtil;
-import cn.hutool.core.util.StrUtil;
+import cn.com.idmy.orm.core.util.StringUtil;
 import org.apache.ibatis.builder.annotation.ProviderContext;
 
 import java.io.Serializable;
@@ -97,6 +97,7 @@ public class EntitySqlProvider {
         return DialectFactory.getDialect().forInsertEntityWithPk(tableInfo, entity, ignoreNulls);
     }
 
+
     /**
      * insertBatch 的 SQL 构建。
      *
@@ -124,7 +125,7 @@ public class EntitySqlProvider {
 
         Object[] allValues = OrmConsts.EMPTY_ARRAY;
         for (Object entity : entities) {
-            allValues = ArrayUtil.addAll(allValues, tableInfo.buildInsertSqlArgs(entity, false));
+            allValues = ArrayUtil.concat(allValues, tableInfo.buildInsertSqlArgs(entity, false));
         }
 
         ProviderUtil.setSqlArgs(params, allValues);
@@ -148,7 +149,7 @@ public class EntitySqlProvider {
 
         TableInfo tableInfo = ProviderUtil.getTableInfo(context);
 
-        Object[] allValues = ArrayUtil.addAll(primaryValues, tableInfo.buildTenantIdArgs());
+        Object[] allValues = ArrayUtil.concat(primaryValues, tableInfo.buildTenantIdArgs());
         ProviderUtil.setSqlArgs(params, allValues);
 
         return DialectFactory.getDialect().forDeleteEntityById(tableInfo);
@@ -171,7 +172,7 @@ public class EntitySqlProvider {
         TableInfo tableInfo = ProviderUtil.getTableInfo(context);
 
         Object[] tenantIdArgs = tableInfo.buildTenantIdArgs();
-        ProviderUtil.setSqlArgs(params, ArrayUtil.addAll(primaryValues, tenantIdArgs));
+        ProviderUtil.setSqlArgs(params, ArrayUtil.concat(primaryValues, tenantIdArgs));
 
         return DialectFactory.getDialect().forDeleteEntityBatchByIds(tableInfo, primaryValues);
     }
@@ -210,7 +211,7 @@ public class EntitySqlProvider {
     public static String update(Map params, ProviderContext context) {
         Object entity = ProviderUtil.getEntity(params);
 
-        OrmAssert.notNull(entity, "entity can not be null");
+        OrmAssert.notNull(entity, "entity can not be null for execute update");
 
         boolean ignoreNulls = ProviderUtil.isIgnoreNulls(params);
 
@@ -223,9 +224,9 @@ public class EntitySqlProvider {
         Object[] primaryValues = tableInfo.buildPkSqlArgs(entity);
         Object[] tenantIdArgs = tableInfo.buildTenantIdArgs();
 
-        OrmAssert.assertAreNotNull(primaryValues, "The value of primary key must not be null, entity[%s]", entity);
+        OrmAssert.assertAreNotNull(primaryValues, "The value of primary key must not be null for execute update an entity, entity[%s]", entity);
 
-        ProviderUtil.setSqlArgs(params, ArrayUtil.addAll(updateValues, primaryValues, tenantIdArgs));
+        ProviderUtil.setSqlArgs(params, ArrayUtil.concat(updateValues, primaryValues, tenantIdArgs));
 
         return DialectFactory.getDialect().forUpdateEntity(tableInfo, entity, ignoreNulls);
     }
@@ -264,7 +265,7 @@ public class EntitySqlProvider {
         Object[] values = tableInfo.buildUpdateSqlArgs(entity, ignoreNulls, true);
         Object[] queryParams = CPI.getConditionValueArray(queryWrapper);
 
-        Object[] paramValues = ArrayUtil.addAll(joinValueArray, ArrayUtil.addAll(values, queryParams));
+        Object[] paramValues = ArrayUtil.concat(joinValueArray, ArrayUtil.concat(values, queryParams));
 
         ProviderUtil.setSqlArgs(params, paramValues);
 
@@ -287,7 +288,7 @@ public class EntitySqlProvider {
 
         TableInfo tableInfo = ProviderUtil.getTableInfo(context);
 
-        Object[] allValues = ArrayUtil.addAll(primaryValues, tableInfo.buildTenantIdArgs());
+        Object[] allValues = ArrayUtil.concat(primaryValues, tableInfo.buildTenantIdArgs());
 
         ProviderUtil.setSqlArgs(params, allValues);
 
@@ -310,7 +311,7 @@ public class EntitySqlProvider {
 
         TableInfo tableInfo = ProviderUtil.getTableInfo(context);
 
-        Object[] allValues = ArrayUtil.addAll(primaryValues, tableInfo.buildTenantIdArgs());
+        Object[] allValues = ArrayUtil.concat(primaryValues, tableInfo.buildTenantIdArgs());
         ProviderUtil.setSqlArgs(params, allValues);
 
         return DialectFactory.getDialect().forSelectEntityListByIds(tableInfo, primaryValues);
@@ -383,6 +384,7 @@ public class EntitySqlProvider {
         }
     }
 
+
     private static List<TableInfo> getTableInfos(ProviderContext context, QueryWrapper queryWrapper) {
         List<TableInfo> tableInfos;
         List<QueryTable> queryTables = CPI.getQueryTables(queryWrapper);
@@ -390,7 +392,7 @@ public class EntitySqlProvider {
             tableInfos = new ArrayList<>();
             for (QueryTable queryTable : queryTables) {
                 String tableNameWithSchema = queryTable.getNameWithSchema();
-                if (StrUtil.isNotBlank(tableNameWithSchema)) {
+                if (StringUtil.isNotBlank(tableNameWithSchema)) {
                     TableInfo tableInfo = TableInfoFactory.ofTableName(tableNameWithSchema);
                     if (tableInfo != null) {
                         tableInfos.add(tableInfo);
@@ -402,4 +404,6 @@ public class EntitySqlProvider {
         }
         return tableInfos;
     }
+
+
 }

@@ -39,14 +39,14 @@ public @interface Column {
     /**
      * 是否是大字段，大字段 APT 不会生成到 DEFAULT_COLUMNS 里。
      */
-    boolean isLarge() default false;
+    boolean large() default false;
 
     /**
      * <p>是否是逻辑删除字段，一张表中只能存在 1 一个逻辑删除字段。
      *
      * <p>逻辑删除的字段，被删除时，会设置为 1，正常状态为 0，可以通过 FlexGlobalConfig 配置来修改 1 和 0 为其他值。
      */
-    boolean isLogicDelete() default false;
+    boolean logicDelete() default false;
 
     /**
      * <p>是否为乐观锁字段。
@@ -74,4 +74,6 @@ public @interface Column {
     String mask() default "";
 
     String[] alias() default "";
+
+    String comment() default "";
 }

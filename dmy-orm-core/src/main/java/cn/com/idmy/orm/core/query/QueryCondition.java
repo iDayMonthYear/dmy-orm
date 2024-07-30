@@ -9,22 +9,34 @@ import cn.com.idmy.orm.core.exception.OrmExceptions;
 import cn.com.idmy.orm.core.util.ClassUtil;
 import cn.com.idmy.orm.core.util.ObjectUtil;
 import cn.com.idmy.orm.core.util.StringUtil;
-import lombok.Data;
+import jakarta.annotation.Nullable;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.lang.reflect.Array;
+import java.util.Collection;
 import java.util.List;
 import java.util.function.BooleanSupplier;
 
-@Data
 public class QueryCondition implements CloneSupport<QueryCondition> {
+
+
+    @Setter
+    @Getter
     protected QueryColumn column;
+    @Setter
+    @Getter
     protected String logic;
+    @Setter
     protected Object value;
     protected boolean effective = true;
+
     //当前条件的上一个条件
     protected QueryCondition prev;
+
     //当前条件的下一个条件
     protected QueryCondition next;
+
     //两个条件直接的连接符
     protected SqlConnector connector;
 
@@ -48,29 +60,29 @@ public class QueryCondition implements CloneSupport<QueryCondition> {
 
 
     public static QueryCondition create(String schema, String table, String column, String logic, Object value) {
-        QueryCondition condition = new QueryCondition();
-        condition.setColumn(new QueryColumn(schema, table, column));
-        condition.setLogic(logic);
-        condition.setValue(value);
-        return condition;
+        return create(new QueryColumn(schema, table, column), logic, value);
     }
 
     public static QueryCondition create(QueryColumn queryColumn, Object value) {
         return create(queryColumn, SqlConsts.EQUALS, value);
     }
 
+    public static QueryCondition create(QueryColumn queryColumn, SqlOperator logic, Collection<?> values) {
+        return create(queryColumn, logic, values == null ? null : values.toArray());
+    }
+
+    public static QueryCondition create(QueryColumn queryColumn, SqlOperator logic, Object value) {
+        return create(queryColumn, logic.getValue(), value);
+    }
+
+    public static QueryCondition create(QueryColumn queryColumn, String logic, Collection<?> values) {
+        return create(queryColumn, logic, values == null ? null : values.toArray());
+    }
+
     public static QueryCondition create(QueryColumn queryColumn, String logic, Object value) {
         QueryCondition condition = new QueryCondition();
         condition.setColumn(queryColumn);
         condition.setLogic(logic);
-        condition.setValue(value);
-        return condition;
-    }
-
-    public static QueryCondition create(QueryColumn queryColumn, SqlOperator logic, Object value) {
-        QueryCondition condition = new QueryCondition();
-        condition.setColumn(queryColumn);
-        condition.setLogic(logic.getValue());
         condition.setValue(value);
         return condition;
     }
@@ -108,6 +120,7 @@ public class QueryCondition implements CloneSupport<QueryCondition> {
     public boolean checkEffective() {
         return effective;
     }
+
 
     public QueryCondition and(String sql) {
         return and(new RawQueryCondition(sql));
@@ -191,6 +204,7 @@ public class QueryCondition implements CloneSupport<QueryCondition> {
      *
      * @return QueryCondition
      */
+    @Nullable
     protected QueryCondition getPrevEffectiveCondition() {
         if (prev == null) {
             return null;
@@ -198,6 +212,7 @@ public class QueryCondition implements CloneSupport<QueryCondition> {
         return prev.checkEffective() ? prev : prev.getPrevEffectiveCondition();
     }
 
+    @Nullable
     protected QueryCondition getNextEffectiveCondition() {
         if (next == null) {
             return null;
@@ -255,13 +270,29 @@ public class QueryCondition implements CloneSupport<QueryCondition> {
         if (column == null || !checkEffective()) {
             return nextContainsTable(tables);
         }
+        if (column instanceof FunctionQueryColumn) {
+            /*
+             * 连表分页查询的where中使用QueryMethods导致count查询优化错误
+             * fix https://github.com/mybatis-flex/mybatis-flex/issues/307
+             */
+            List<QueryColumn> columns = ((FunctionQueryColumn) column).getColumns();
+            for (QueryColumn queryColumn : columns) {
+                if (containsTable(queryColumn, tables)) {
+                    return true;
+                }
+            }
+        }
+        return containsTable(column, tables) || nextContainsTable(tables);
+    }
+
+    boolean containsTable(QueryColumn column, String... tables) {
         for (String table : tables) {
             String tableName = StringUtil.getTableNameWithAlias(table)[0];
             if (column.table != null && tableName.equals(column.table.name)) {
                 return true;
             }
         }
-        return nextContainsTable(tables);
+        return false;
     }
 
     boolean nextContainsTable(String... tables) {
@@ -285,7 +316,6 @@ public class QueryCondition implements CloneSupport<QueryCondition> {
     public QueryCondition clone() {
         try {
             QueryCondition clone = (QueryCondition) super.clone();
-            // deep clone ...
             clone.column = ObjectUtil.clone(this.column);
             clone.value = ObjectUtil.cloneObject(this.value);
             clone.prev = clone.next = null;

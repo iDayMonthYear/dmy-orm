@@ -53,4 +53,5 @@ public class OrmException extends RuntimeException {
         String localizedString = pattern.getLocalizedString(locale);
         return MessageFormat.format(localizedString, arguments);
     }
+
 }

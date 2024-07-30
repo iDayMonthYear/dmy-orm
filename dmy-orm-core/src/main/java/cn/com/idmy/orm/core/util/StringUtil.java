@@ -1,13 +1,34 @@
 package cn.com.idmy.orm.core.util;
 
 
-import cn.hutool.core.util.ArrayUtil;
+import cn.com.idmy.orm.core.exception.OrmExceptions;
+import jakarta.annotation.Nullable;
 
 import java.util.Collection;
+import java.util.Locale;
 import java.util.function.Function;
+import java.util.regex.Pattern;
 
 public class StringUtil {
+
     private StringUtil() {
+    }
+
+    /**
+     * @see org.apache.ibatis.reflection.property.PropertyNamer#methodToProperty(String)
+     */
+    public static String methodToProperty(String name) {
+        if (name.startsWith("is")) {
+            name = name.substring(2);
+        } else if (name.startsWith("get") || name.startsWith("set")) {
+            name = name.substring(3);
+        } else {
+            throw OrmExceptions.wrap("Error parsing property name '%s'.  Didn't start with 'is', 'get' or 'set'.", name);
+        }
+        if (!name.isEmpty()) {
+            name = name.substring(0, 1).toLowerCase(Locale.ENGLISH).concat(name.substring(1));
+        }
+        return name;
     }
 
 
@@ -19,9 +40,9 @@ public class StringUtil {
     public static String firstCharToLowerCase(String string) {
         char firstChar = string.charAt(0);
         if (firstChar >= 'A' && firstChar <= 'Z') {
-            char[] arr = string.toCharArray();
-            arr[0] += ('a' - 'A');
-            return new String(arr);
+            char[] chars = string.toCharArray();
+            chars[0] += ('a' - 'A');
+            return new String(chars);
         }
         return string;
     }
@@ -35,9 +56,9 @@ public class StringUtil {
     public static String firstCharToUpperCase(String string) {
         char firstChar = string.charAt(0);
         if (firstChar >= 'a' && firstChar <= 'z') {
-            char[] arr = string.toCharArray();
-            arr[0] -= ('a' - 'A');
-            return new String(arr);
+            char[] chars = string.toCharArray();
+            chars[0] -= ('a' - 'A');
+            return new String(chars);
         }
         return string;
     }
@@ -57,7 +78,10 @@ public class StringUtil {
         for (int i = 0; i < strLen; i++) {
             char c = string.charAt(i);
             if (Character.isUpperCase(c) && i > 0) {
-                sb.append('_');
+                char prev = string.charAt(i - 1);
+                if (!Character.isUpperCase(prev) && prev != '_') {
+                    sb.append('_');
+                }
             }
             sb.append(Character.toLowerCase(c));
         }
@@ -109,16 +133,30 @@ public class StringUtil {
         return sb.toString();
     }
 
+    public static String deleteChar(String string, char deleteChar1, char deleteChar2) {
+        if (isBlank(string)) {
+            return "";
+        }
+        char[] chars = string.toCharArray();
+        StringBuilder sb = new StringBuilder(string.length());
+        for (char aChar : chars) {
+            if (aChar != deleteChar1 && aChar != deleteChar2) {
+                sb.append(aChar);
+            }
+        }
+        return sb.toString();
+    }
+
     /**
      * 字符串为 null 或者内部字符全部为 ' ', '\t', '\n', '\r' 这四类字符时返回 true
      */
-    public static boolean isBlank(String str) {
-        if (str == null) {
+    public static boolean isBlank(String string) {
+        if (string == null) {
             return true;
         }
 
-        for (int i = 0, len = str.length(); i < len; i++) {
-            if (str.charAt(i) > ' ') {
+        for (int i = 0, len = string.length(); i < len; i++) {
+            if (string.charAt(i) > ' ') {
                 return false;
             }
         }
@@ -128,11 +166,11 @@ public class StringUtil {
 
     public static boolean isAnyBlank(String... strings) {
         if (strings == null || strings.length == 0) {
-            throw new IllegalArgumentException("args is empty.");
+            throw new IllegalArgumentException("strings is null or empty.");
         }
 
-        for (String str : strings) {
-            if (isBlank(str)) {
+        for (String string : strings) {
+            if (isBlank(string)) {
                 return true;
             }
         }
@@ -145,18 +183,23 @@ public class StringUtil {
     }
 
 
+    public static boolean areNotBlank(String... strings) {
+        return !isAnyBlank(strings);
+    }
+
+
     /**
      * 这个字符串是否是全是数字
      *
-     * @param str
-     * @return
+     * @param string
+     * @return 全部数数值时返回 true，否则返回 false
      */
-    public static boolean isNumeric(String str) {
-        if (isBlank(str)) {
+    public static boolean isNumeric(String string) {
+        if (isBlank(string)) {
             return false;
         }
-        for (int i = str.length(); --i >= 0; ) {
-            int chr = str.charAt(i);
+        for (int i = string.length(); --i >= 0; ) {
+            int chr = string.charAt(i);
             if (chr < 48 || chr > 57) {
                 return false;
             }
@@ -165,8 +208,22 @@ public class StringUtil {
     }
 
 
+    public static boolean startsWithAny(String string, String... prefixes) {
+        if (isBlank(string) || prefixes == null) {
+            return false;
+        }
+
+        for (String prefix : prefixes) {
+            if (string.startsWith(prefix)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+
     public static boolean endsWithAny(String str, String... suffixes) {
-        if (isBlank(str) || suffixes == null || suffixes.length == 0) {
+        if (isBlank(str) || suffixes == null) {
             return false;
         }
 
@@ -176,6 +233,21 @@ public class StringUtil {
             }
         }
         return false;
+    }
+
+
+    /**
+     * 正则匹配
+     *
+     * @param regex
+     * @param input
+     * @return
+     */
+    public static boolean matches(String regex, String input) {
+        if (null == regex || null == input) {
+            return false;
+        }
+        return Pattern.matches(regex, input);
     }
 
     /**
@@ -254,5 +326,21 @@ public class StringUtil {
         return index <= 0 ? new String[]{tableNameWithAlias, null}
                 : new String[]{tableNameWithAlias.substring(0, index), tableNameWithAlias.substring(index + 1)};
     }
+
+    public static String tryTrim(String string) {
+        return string != null ? string.trim() : null;
+    }
+
+    @Nullable
+    public static String substringAfterLast(String text, String prefix) {
+        if (text == null) {
+            return null;
+        }
+        if (prefix == null) {
+            return text;
+        }
+        return text.substring(text.lastIndexOf(prefix) + 1);
+    }
+
 
 }

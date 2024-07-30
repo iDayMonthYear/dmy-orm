@@ -1,7 +1,6 @@
 package cn.com.idmy.orm.core.util;
 
 import cn.com.idmy.orm.annotation.Column;
-import cn.hutool.core.util.ArrayUtil;
 import lombok.Getter;
 import org.apache.ibatis.reflection.Reflector;
 
@@ -10,16 +9,15 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+@Getter
 public class FieldWrapper {
+
     public static Map<Class<?>, Map<String, FieldWrapper>> cache = new ConcurrentHashMap<>();
-    @Getter
+
     private Field field;
     private boolean isIgnore = false;
-    @Getter
     private Class<?> fieldType;
-    @Getter
     private Class<?> mappingType;
-    @Getter
     private Class<?> keyType;
     private Method getterMethod;
     private Method setterMethod;
@@ -28,10 +26,7 @@ public class FieldWrapper {
         Map<String, FieldWrapper> wrapperMap = cache.get(clazz);
         if (wrapperMap == null) {
             synchronized (clazz) {
-                if (wrapperMap == null) {
-                    wrapperMap = new ConcurrentHashMap<>();
-                    cache.put(clazz, wrapperMap);
-                }
+                wrapperMap = cache.computeIfAbsent(clazz, k -> new ConcurrentHashMap<>());
             }
         }
 
@@ -40,12 +35,12 @@ public class FieldWrapper {
             synchronized (clazz) {
                 fieldWrapper = wrapperMap.get(fieldName);
                 if (fieldWrapper == null) {
-                    Field findField = ClassUtil.getFirstField(clazz, field -> field.getName().equals(fieldName));
+                    Field findField = ClassUtil.getFirstField(clazz, field -> field.getName().equalsIgnoreCase(fieldName));
                     if (findField == null) {
                         throw new IllegalStateException("Can not find field \"" + fieldName + "\" in class: " + clazz.getName());
                     }
 
-                    String setterName = "set" + StringUtil.firstCharToUpperCase(fieldName);
+                    String setterName = "set" + StringUtil.firstCharToUpperCase(findField.getName());
                     Method setter = ClassUtil.getFirstMethod(clazz, method ->
                             method.getParameterCount() == 1
                                     && Modifier.isPublic(method.getModifiers())
@@ -63,7 +58,7 @@ public class FieldWrapper {
 
                     fieldWrapper.setterMethod = setter;
 
-                    String[] getterNames = new String[]{"get" + StringUtil.firstCharToUpperCase(fieldName), "is" + StringUtil.firstCharToUpperCase(fieldName)};
+                    String[] getterNames = new String[]{"get" + StringUtil.firstCharToUpperCase(findField.getName()), "is" + StringUtil.firstCharToUpperCase(findField.getName())};
                     fieldWrapper.getterMethod = ClassUtil.getFirstMethod(clazz, method -> method.getParameterCount() == 0
                             && Modifier.isPublic(method.getModifiers())
                             && ArrayUtil.contains(getterNames, method.getName()));
@@ -82,9 +77,15 @@ public class FieldWrapper {
 
         if (Collection.class.isAssignableFrom(fieldType)) {
             Type genericType = field.getGenericType();
-            if (genericType instanceof ParameterizedType) {
-                Type actualTypeArgument = ((ParameterizedType) genericType).getActualTypeArguments()[0];
-                fieldWrapper.mappingType = (Class<?>) actualTypeArgument;
+            try {
+                //使用Kotlin时，若Collection泛型类型为协变类型时（如 List<out E>），并且传入的具体泛型类型为open，genericType的具体类型为WildcardType（? extends ExampleClass），该类型不可转为Class（无具体类型），使用instanceOf会抛出转换异常。
+                //该错误目前只在以上情况中发现
+                if (genericType instanceof ParameterizedType) {
+                    Type actualTypeArgument = ((ParameterizedType) genericType).getActualTypeArguments()[0];
+                    fieldWrapper.mappingType = (Class<?>) actualTypeArgument;
+                }
+            } catch (ClassCastException e) {
+                throw new UnsupportedOperationException(String.format("不支持使用[%s]作为集合类型。请使用MutableList", fieldType.getName()));
             }
         } else if (Map.class.isAssignableFrom(fieldType)) {
             Type genericType = field.getGenericType();
@@ -101,6 +102,7 @@ public class FieldWrapper {
             fieldWrapper.mappingType = fieldType;
         }
     }
+
 
     public void set(Object value, Object to) {
         try {

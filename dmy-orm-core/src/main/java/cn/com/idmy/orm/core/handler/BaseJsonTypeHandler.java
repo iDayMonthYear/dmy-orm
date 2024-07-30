@@ -1,6 +1,6 @@
 package cn.com.idmy.orm.core.handler;
 
-import cn.hutool.core.util.StrUtil;
+import cn.com.idmy.orm.core.util.StringUtil;
 import org.apache.ibatis.type.BaseTypeHandler;
 import org.apache.ibatis.type.JdbcType;
 
@@ -19,19 +19,19 @@ public abstract class BaseJsonTypeHandler<T> extends BaseTypeHandler<T> {
     @Override
     public T getNullableResult(ResultSet rs, String columnName) throws SQLException {
         final String json = rs.getString(columnName);
-        return StrUtil.isBlank(json) ? null : parseJson(json);
+        return StringUtil.isBlank(json) ? null : parseJson(json);
     }
 
     @Override
     public T getNullableResult(ResultSet rs, int columnIndex) throws SQLException {
         final String json = rs.getString(columnIndex);
-        return StrUtil.isBlank(json) ? null : parseJson(json);
+        return StringUtil.isBlank(json) ? null : parseJson(json);
     }
 
     @Override
     public T getNullableResult(CallableStatement cs, int columnIndex) throws SQLException {
         final String json = cs.getString(columnIndex);
-        return StrUtil.isBlank(json) ? null : parseJson(json);
+        return StringUtil.isBlank(json) ? null : parseJson(json);
     }
 
     protected abstract T parseJson(String json);

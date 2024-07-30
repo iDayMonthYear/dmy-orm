@@ -10,8 +10,8 @@ import cn.com.idmy.orm.core.row.RowCPI;
 import cn.com.idmy.orm.core.row.RowMapper;
 import cn.com.idmy.orm.core.table.TableInfo;
 import cn.com.idmy.orm.core.table.TableInfoFactory;
+import cn.com.idmy.orm.core.util.ArrayUtil;
 import cn.com.idmy.orm.core.util.ClassUtil;
-import cn.hutool.core.util.ArrayUtil;
 
 import java.util.*;
 
@@ -37,6 +37,7 @@ public class RowSqlProvider {
      * @see RowMapper#updateBySql(String, Object...)
      */
     public static String providerRawSql(Map params) {
+        ProviderUtil.flatten(params);
         return ProviderUtil.getSqlString(params);
     }
 
@@ -77,12 +78,12 @@ public class RowSqlProvider {
         // 这个必须 new 一个 LinkedHashSet，因为 keepModifyAttrs 会清除 row 所有的 modifyAttrs
         Set<String> modifyAttrs = new LinkedHashSet<>(RowCPI.getInsertAttrs(rows.get(0)));
 
-        //sql: INSERT INTO `tb_table`(`name`, `sex`) VALUES (?, ?),(?, ?),(?, ?)
+        // sql: INSERT INTO `tb_table`(`name`, `sex`) VALUES (?, ?),(?, ?),(?, ?)
         String sql = DialectFactory.getDialect().forInsertBatchWithFirstRowColumns(schema, tableName, rows);
 
         Object[] values = new Object[]{};
         for (Row row : rows) {
-            values = ArrayUtil.addAll(values, row.obtainInsertValues(modifyAttrs));
+            values = ArrayUtil.concat(values, row.obtainInsertValues(modifyAttrs));
         }
         ProviderUtil.setSqlArgs(params, values);
 
@@ -141,7 +142,7 @@ public class RowSqlProvider {
         QueryWrapper queryWrapper = ProviderUtil.getQueryWrapper(params);
         CPI.setFromIfNecessary(queryWrapper, schema, tableName);
 
-        //优先构建 sql，再构建参数
+        // 优先构建 sql，再构建参数
         String sql = DialectFactory.getDialect().forDeleteByQuery(queryWrapper);
         Object[] valueArray = CPI.getValueArray(queryWrapper);
         ProviderUtil.setSqlArgs(params, valueArray);
@@ -180,13 +181,13 @@ public class RowSqlProvider {
         QueryWrapper queryWrapper = ProviderUtil.getQueryWrapper(params);
         CPI.setFromIfNecessary(queryWrapper, schema, tableName);
 
-        //优先构建 sql，再构建参数
+        // 优先构建 sql，再构建参数
         String sql = DialectFactory.getDialect().forUpdateByQuery(queryWrapper, data);
 
         Object[] modifyValues = RowCPI.obtainModifyValues(data);
         Object[] valueArray = CPI.getValueArray(queryWrapper);
 
-        ProviderUtil.setSqlArgs(params, ArrayUtil.addAll(modifyValues, valueArray));
+        ProviderUtil.setSqlArgs(params, ArrayUtil.concat(modifyValues, valueArray));
 
         return sql;
     }
@@ -211,7 +212,7 @@ public class RowSqlProvider {
 
         Object[] values = OrmConsts.EMPTY_ARRAY;
         for (Row row : rows) {
-            values = ArrayUtil.addAll(values, RowCPI.obtainUpdateValues(row));
+            values = ArrayUtil.concat(values, RowCPI.obtainUpdateValues(row));
         }
         ProviderUtil.setSqlArgs(params, values);
         return sql;
@@ -227,7 +228,7 @@ public class RowSqlProvider {
     public static String updateEntity(Map params) {
         Object entity = ProviderUtil.getEntity(params);
 
-        OrmAssert.notNull(entity, "entity can not be null");
+        OrmAssert.notNull(entity, "entity can not be null for execute update");
 
         // 该 Mapper 是通用 Mapper  无法通过 ProviderContext 获取，直接使用 TableInfoFactory
 
@@ -241,9 +242,9 @@ public class RowSqlProvider {
         Object[] primaryValues = tableInfo.buildPkSqlArgs(entity);
         Object[] tenantIdArgs = tableInfo.buildTenantIdArgs();
 
-        OrmAssert.assertAreNotNull(primaryValues, "The value of primary key must not be null, entity[%s]", entity);
+        OrmAssert.assertAreNotNull(primaryValues, "The value of primary key must not be null for execute update an entity, entity[%s]", entity);
 
-        ProviderUtil.setSqlArgs(params, ArrayUtil.addAll(updateValues, primaryValues, tenantIdArgs));
+        ProviderUtil.setSqlArgs(params, ArrayUtil.concat(updateValues, primaryValues, tenantIdArgs));
         return sql;
     }
 
@@ -281,7 +282,7 @@ public class RowSqlProvider {
         QueryWrapper queryWrapper = ProviderUtil.getQueryWrapper(params);
         CPI.setFromIfNecessary(queryWrapper, schema, tableName);
 
-        //优先构建 sql，再构建参数
+        // 优先构建 sql，再构建参数
         String sql = DialectFactory.getDialect().forSelectByQuery(queryWrapper);
 
         Object[] valueArray = CPI.getValueArray(queryWrapper);

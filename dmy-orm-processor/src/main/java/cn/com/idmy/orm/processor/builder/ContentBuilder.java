@@ -1,4 +1,21 @@
+/*
+ *  Copyright (c) 2022-2025, Mybatis-Flex (fuhai999@gmail.com).
+ *  <p>
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *  <p>
+ *  http://www.apache.org/licenses/LICENSE-2.0
+ *  <p>
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
+
 package cn.com.idmy.orm.processor.builder;
+
 
 import cn.com.idmy.orm.processor.entity.ColumnInfo;
 import cn.com.idmy.orm.processor.entity.TableInfo;
@@ -23,7 +40,8 @@ public class ContentBuilder {
     /**
      * 构建 Mapper 文件内容。
      */
-    public static String buildMapper(TableInfo tableInfo, String mappersPackage, String mapperClassName, String baseMapperClass, boolean mapperAnnotationEnable) {
+    public static String buildMapper(TableInfo tableInfo, String mappersPackage, String mapperClassName,
+                                     String baseMapperClass, boolean mapperAnnotationEnable) {
         String entityClass = tableInfo.getEntityName();
         StringBuilder content = new StringBuilder("package ");
         content.append(mappersPackage).append(";\n\n");
@@ -50,19 +68,31 @@ public class ContentBuilder {
         content.append(tableDefPackage).append(";\n\n");
         content.append("import cn.com.idmy.orm.core.query.QueryColumn;\n");
         content.append("import cn.com.idmy.orm.core.table.TableDef;\n\n");
-        content.append("public class ").append(tableDefClassName).append(" extends TableDef {\n");
+        content.append("public class ").append(tableDefClassName).append(" extends TableDef {\n\n");
 
         //TableDef 类的属性名称
         String tableDefPropertyName = null;
         if (!allInTablesEnable) {
-            tableDefPropertyName = StrUtil.buildFieldName(tableInfo.getEntitySimpleName().concat(tableDefInstanceSuffix != null ? tableDefInstanceSuffix.trim() : ""), "upperCase");
+            String entityComment = tableInfo.getEntityComment();
+            if (!StrUtil.isBlank(entityComment)) {
+                content.append("    /**\n")
+                        .append("     * ").append(entityComment.trim()).append("\n")
+                        .append("     */\n");
+            }
+            tableDefPropertyName = "$" + tableInfo.getEntitySimpleName();
             content.append("    public static final ").append(tableDefClassName).append(' ').append(tableDefPropertyName)
-                    .append(" = new ").append(tableDefClassName).append("();\n");
+                    .append(" = new ").append(tableDefClassName).append("();\n\n");
         }
-
 
         String finalTableDefPropertyName = tableDefPropertyName;
         columnInfos.forEach(columnInfo -> {
+            String comment = columnInfo.getComment();
+            if (!StrUtil.isBlank(comment)) {
+                content.append("    /**\n")
+                        .append("     * ").append(comment.trim()).append("\n")
+                        .append("     */\n");
+            }
+
             // QueryColumn 属性定义的名称
             String columnPropertyName = StrUtil.buildFieldName(columnInfo.getProperty(), tableDefPropertiesNameStyle);
 
@@ -79,7 +109,10 @@ public class ContentBuilder {
             }
             content.append(");\n");
         });
-        content.append("    public final QueryColumn ").append("ALL").append(" = new QueryColumn(this, \"*\");\n");
+        content.append("    /**\n")
+                .append("     * 所有字段。\n")
+                .append("     */\n");
+        content.append("    public final QueryColumn ALL = new QueryColumn(this, \"*\");\n");
         StringJoiner defaultColumnJoiner = new StringJoiner(", ");
         columnInfos.forEach(columnInfo -> {
             if (defaultColumns.contains(columnInfo.getColumn())) {
@@ -90,7 +123,10 @@ public class ContentBuilder {
                 defaultColumnJoiner.add(columnPropertyName);
             }
         });
-        content.append("    public final QueryColumn[] ").append("FULL").append(" = new QueryColumn[]{").append(defaultColumnJoiner).append("};\n\n");
+        content.append("\n    /**\n")
+                .append("     * 默认字段，不包含逻辑删除或者 large 等字段。\n")
+                .append("     */\n");
+        content.append("    public final QueryColumn[] FULL = new QueryColumn[]{").append(defaultColumnJoiner).append("};\n\n");
         String schema = !StrUtil.isBlank(tableInfo.getSchema())
                 ? tableInfo.getSchema()
                 : "";
@@ -99,7 +135,16 @@ public class ContentBuilder {
                 : StrUtil.firstCharToLowerCase(tableInfo.getEntitySimpleName());
         content.append("    public ").append(tableDefClassName).append("() {\n")
                 .append("        super").append("(\"").append(schema).append("\", \"").append(tableName).append("\");\n")
-                .append("    }\n}\n");
+                .append("    }\n\n");
+
+        content.append("    private ").append(tableDefClassName).append("(String schema, String name, String alisa) {\n")
+                .append("        super(schema, name, alisa);\n")
+                .append("    }\n\n");
+
+        content.append("    public ").append(tableDefClassName).append(" as(String alias) {\n")
+                .append("        String key = getNameWithSchema() + \".\" + alias;\n")
+                .append("        return getCache(key, k -> new ").append(tableDefClassName).append("(\"").append(schema).append("\", \"").append(tableName).append("\", alias));\n")
+                .append("    }\n\n}\n");
         return content.toString();
     }
 
@@ -121,12 +166,19 @@ public class ContentBuilder {
      * 构建 Tables 文件常量属性。
      */
     public static void buildTablesField(StringBuilder importBuilder, StringBuilder fieldBuilder, TableInfo tableInfo,
-                                        String tableDefClassSuffix, String tableDefPropertiesNameStyle, String tableDefInstanceSuffix) {
-        String tableDefPackage = StrUtil.buildTableDefPackage(tableInfo.getEntityName());
+                                        String tableDefClassSuffix, String tableDefPropertiesNameStyle, String tableDefInstanceSuffix, String tableDefPackage) {
         String tableDefClassName = tableInfo.getEntitySimpleName().concat(tableDefClassSuffix);
         importBuilder.append("import ").append(tableDefPackage).append('.').append(tableDefClassName).append(";\n");
+        String entityComment = tableInfo.getEntityComment();
+        if (!StrUtil.isBlank(entityComment)) {
+            fieldBuilder.append("    /**\n")
+                    .append("    * ").append(entityComment).append("\n")
+                    .append("    */\n");
+        }
+
         fieldBuilder.append("    public static final ").append(tableDefClassName).append(' ')
-                .append(StrUtil.buildFieldName(tableInfo.getEntitySimpleName().concat(tableDefInstanceSuffix != null ? tableDefInstanceSuffix.trim() : ""), tableDefPropertiesNameStyle))
+                .append(tableInfo.getEntitySimpleName())
                 .append(" = new ").append(tableDefClassName).append("();\n");
     }
+
 }

@@ -1,5 +1,3 @@
-
-
 package cn.com.idmy.orm.core.listener;
 
 import java.lang.reflect.ParameterizedType;

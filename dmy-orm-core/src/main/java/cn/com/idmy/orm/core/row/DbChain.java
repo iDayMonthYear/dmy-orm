@@ -3,14 +3,18 @@ package cn.com.idmy.orm.core.row;
 import cn.com.idmy.orm.core.exception.OrmExceptions;
 import cn.com.idmy.orm.core.paginate.Page;
 import cn.com.idmy.orm.core.query.QueryColumn;
+import cn.com.idmy.orm.core.query.QueryTable;
 import cn.com.idmy.orm.core.query.QueryWrapper;
 import cn.com.idmy.orm.core.query.QueryWrapperAdapter;
-import cn.com.idmy.orm.core.table.*;
+import cn.com.idmy.orm.core.table.ColumnInfo;
+import cn.com.idmy.orm.core.table.IdInfo;
+import cn.com.idmy.orm.core.table.TableInfo;
+import cn.com.idmy.orm.core.table.TableInfoFactory;
 import cn.com.idmy.orm.core.update.PropertySetter;
+import cn.com.idmy.orm.core.util.FieldWrapper;
 import cn.com.idmy.orm.core.util.LambdaGetter;
 import cn.com.idmy.orm.core.util.SqlUtil;
 
-import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -58,8 +62,8 @@ public class DbChain extends QueryWrapperAdapter<DbChain> implements PropertySet
         return table(tableInfo.getSchema(), tableInfo.getTableName());
     }
 
-    public static DbChain table(TableDef tableDef) {
-        return table(tableDef.getSchema(), tableDef.getTable());
+    public static DbChain table(QueryTable queryTable) {
+        return table(queryTable.getSchema(), queryTable.getName());
     }
 
     private Row getRow() {
@@ -148,9 +152,8 @@ public class DbChain extends QueryWrapperAdapter<DbChain> implements PropertySet
         // 添加非主键列设置的值
         for (ColumnInfo columnInfo : tableInfo.getColumnInfoList()) {
             try {
-                Field declaredField = entityClass.getDeclaredField(columnInfo.getProperty());
-                declaredField.setAccessible(true);
-                Object value = declaredField.get(entity);
+                FieldWrapper fieldWrapper = FieldWrapper.of(entityClass, columnInfo.getProperty());
+                Object value = fieldWrapper.get(entity);
                 if (value != null) {
                     row.put(columnInfo.getColumn(), value);
                 }
@@ -162,9 +165,8 @@ public class DbChain extends QueryWrapperAdapter<DbChain> implements PropertySet
         // 添加主键列设置的值
         for (IdInfo idInfo : tableInfo.getPrimaryKeyList()) {
             try {
-                Field declaredField = entityClass.getDeclaredField(idInfo.getProperty());
-                declaredField.setAccessible(true);
-                Object value = declaredField.get(entity);
+                FieldWrapper fieldWrapper = FieldWrapper.of(entityClass, idInfo.getProperty());
+                Object value = fieldWrapper.get(entity);
                 if (value != null) {
                     RowKey rowKey = RowKey.of(idInfo.getColumn()
                             , idInfo.getKeyType()

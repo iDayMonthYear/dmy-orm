@@ -8,6 +8,8 @@ import java.util.logging.Logger;
 
 
 public abstract class AbstractDataSource implements DataSource {
+
+
     /**
      * Returns 0, indicating the default system timeout is to be used.
      */
@@ -40,7 +42,6 @@ public abstract class AbstractDataSource implements DataSource {
         throw new UnsupportedOperationException("setLogWriter");
     }
 
-
     @Override
     @SuppressWarnings("unchecked")
     public <T> T unwrap(Class<T> iface) throws SQLException {
@@ -56,8 +57,10 @@ public abstract class AbstractDataSource implements DataSource {
         return iface.isInstance(this);
     }
 
+
     @Override
     public Logger getParentLogger() {
         return Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
     }
+
 }

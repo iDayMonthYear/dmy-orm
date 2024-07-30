@@ -13,7 +13,6 @@ public class RowCPI {
     private RowCPI() {
     }
 
-
     public static Set<String> getInsertAttrs(Row row) {
         return row.getInsertAttrs();
     }

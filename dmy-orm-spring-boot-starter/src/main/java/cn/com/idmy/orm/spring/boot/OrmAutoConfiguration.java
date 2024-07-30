@@ -1,7 +1,7 @@
 
 package cn.com.idmy.orm.spring.boot;
 
-import cn.com.idmy.orm.core.OrmConfig;
+import cn.com.idmy.orm.core.OrmGlobalConfig;
 import cn.com.idmy.orm.core.datasource.DataSourceDecipher;
 import cn.com.idmy.orm.core.datasource.DataSourceManager;
 import cn.com.idmy.orm.core.logicdelete.LogicDeleteManager;
@@ -156,12 +156,12 @@ public class OrmAutoConfiguration implements InitializingBean {
 
         // 添加 MyBatis-Flex 全局配置
         if (properties.getGlobalConfig() != null) {
-            properties.getGlobalConfig().applyTo(OrmConfig.getDefaultConfig());
+            properties.getGlobalConfig().applyTo(OrmGlobalConfig.getDefaultConfig());
         }
 
         //数据源解密器
         if (dataSourceDecipher != null) {
-            DataSourceManager.setDataSourceDecipher(dataSourceDecipher);
+            DataSourceManager.setDecipher(dataSourceDecipher);
         }
 
         // 动态表名配置
@@ -186,7 +186,7 @@ public class OrmAutoConfiguration implements InitializingBean {
 
         //初始化监听器
         if (ormCustomizer != null) {
-            ormCustomizer.customize(OrmConfig.getDefaultConfig());
+            ormCustomizer.customize(OrmGlobalConfig.getDefaultConfig());
         }
     }
 

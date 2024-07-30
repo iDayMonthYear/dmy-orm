@@ -9,6 +9,8 @@ import java.util.*;
 
 @SuppressWarnings({"unchecked", "unused"})
 public class BaseQueryWrapper<T extends BaseQueryWrapper<T>> implements CloneSupport<T> {
+
+
     protected With with;
     protected List<QueryTable> queryTables;
     protected String dataSource;
@@ -31,6 +33,15 @@ public class BaseQueryWrapper<T extends BaseQueryWrapper<T>> implements CloneSup
 
     protected Map<String, Object> context;
 
+//    protected boolean ignoreBlankStrings = false;
+
+    /**
+     * <p>Title: clear. </p>
+     * <p>Description: Default QueryWrapper values. </p>
+     * <p>Notice: When adding new attributes, it is necessary to supplement here. </p>
+     *
+     * @author dragon
+     */
     public void clear() {
         this.with = null;
         this.queryTables = null;
@@ -54,9 +65,11 @@ public class BaseQueryWrapper<T extends BaseQueryWrapper<T>> implements CloneSup
         if (selectColumns == null) {
             selectColumns = new ArrayList<>();
         }
+
         selectColumns.add(queryColumn);
         return (T) this;
     }
+
 
     protected T addJoin(Join join) {
         if (joins == null) {
@@ -66,8 +79,12 @@ public class BaseQueryWrapper<T extends BaseQueryWrapper<T>> implements CloneSup
         return (T) this;
     }
 
-
     protected T setWhereQueryCondition(QueryCondition queryCondition) {
+        whereQueryCondition = queryCondition;
+        return (T) this;
+    }
+
+    protected T addWhereQueryCondition(QueryCondition queryCondition) {
         if (queryCondition != null) {
             if (whereQueryCondition != null) {
                 queryCondition.connect(whereQueryCondition, SqlConnector.AND);
@@ -131,6 +148,7 @@ public class BaseQueryWrapper<T extends BaseQueryWrapper<T>> implements CloneSup
         }
         endFragments.add(fragment);
     }
+
 
     protected List<QueryTable> getQueryTables() {
         return queryTables;
@@ -287,4 +305,5 @@ public class BaseQueryWrapper<T extends BaseQueryWrapper<T>> implements CloneSup
             throw OrmExceptions.wrap(e);
         }
     }
+
 }

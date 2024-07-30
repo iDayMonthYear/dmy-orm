@@ -10,7 +10,6 @@ public final class OrmExceptions {
     private OrmExceptions() {
     }
 
-
     /**
      * 封装 MybatisFlexException 异常
      *
@@ -55,5 +54,4 @@ public final class OrmExceptions {
     public static OrmException wrap(Localizable pattern, Object... args) {
         return new OrmException(pattern, args);
     }
-
 }

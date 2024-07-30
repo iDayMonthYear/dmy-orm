@@ -1,7 +1,8 @@
 package cn.com.idmy.orm.core.util;
 
-import cn.hutool.core.util.StrUtil;
+import jakarta.annotation.Nullable;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.LocalDate;
@@ -20,16 +21,20 @@ public class ConvertUtil {
         return convert(value, targetClass, false);
     }
 
+    @Nullable
     @SuppressWarnings({"unchecked", "rawtypes"})
     public static Object convert(Object value, Class targetClass, boolean ignoreConvertError) {
         if (value == null && targetClass.isPrimitive()) {
             return getPrimitiveDefaultValue(targetClass);
         }
         if (value == null || (targetClass != String.class && value.getClass() == String.class
-                && StrUtil.isBlank((String) value))) {
+                && StringUtil.isBlank((String) value))) {
             return null;
         }
         if (value.getClass().isAssignableFrom(targetClass)) {
+            return value;
+        }
+        if (targetClass == Serializable.class && value instanceof Serializable) {
             return value;
         }
         if (targetClass == String.class) {
@@ -115,6 +120,28 @@ public class ConvertUtil {
         }
     }
 
+    public static Class<?> primitiveToBoxed(Class<?> paraClass) {
+        if (paraClass == Integer.TYPE) {
+            return Integer.class;
+        } else if (paraClass == Long.TYPE) {
+            return Long.class;
+        } else if (paraClass == Double.TYPE) {
+            return Double.class;
+        } else if (paraClass == Float.TYPE) {
+            return Float.class;
+        } else if (paraClass == Boolean.TYPE) {
+            return Boolean.class;
+        } else if (paraClass == Short.TYPE) {
+            return Short.class;
+        } else if (paraClass == Byte.TYPE) {
+            return Byte.class;
+        } else if (paraClass == Character.TYPE) {
+            return Character.class;
+        } else {
+            throw new IllegalArgumentException("Can not convert primitive class for type: " + paraClass);
+        }
+    }
+
 
     public static Integer toInt(Object i) {
         if (i instanceof Integer) {
@@ -144,6 +171,7 @@ public class ConvertUtil {
         return d != null ? Double.parseDouble(d.toString()) : null;
     }
 
+    @Nullable
     public static BigDecimal toBigDecimal(Object b) {
         if (b instanceof BigDecimal) {
             return (BigDecimal) b;
@@ -200,6 +228,7 @@ public class ConvertUtil {
         return b != null ? Byte.parseByte(b.toString()) : null;
     }
 
+    @Nullable
     public static Boolean toBoolean(Object b) {
         if (b instanceof Boolean) {
             return (Boolean) b;

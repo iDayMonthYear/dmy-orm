@@ -2,6 +2,7 @@ package cn.com.idmy.orm.core.query;
 
 import cn.com.idmy.orm.core.constant.SqlConsts;
 import cn.com.idmy.orm.core.dialect.Dialect;
+import cn.com.idmy.orm.core.dialect.OperateType;
 import cn.com.idmy.orm.core.exception.OrmExceptions;
 import cn.com.idmy.orm.core.util.ObjectUtil;
 
@@ -80,10 +81,10 @@ public class Join implements CloneSupport<Join> {
         this.effective = fn.get();
     }
 
-    public String toSql(List<QueryTable> queryTables, Dialect dialect) {
+    public String toSql(List<QueryTable> queryTables, Dialect dialect, OperateType operateType) {
         //left join, right join,  inner join ...
         StringBuilder sql = new StringBuilder(type);
-        sql.append(queryTable.toSql(dialect));
+        sql.append(queryTable.toSql(dialect, operateType));
 
         //left join xxx as xxx2 on xxx2.id = xxx3.other
         List<QueryTable> newQueryTables = new ArrayList<>(queryTables);
@@ -96,6 +97,7 @@ public class Join implements CloneSupport<Join> {
     public Join clone() {
         try {
             Join clone = (Join) super.clone();
+            // deep clone ...
             clone.queryTable = ObjectUtil.clone(this.queryTable);
             clone.on = ObjectUtil.clone(this.on);
             return clone;
@@ -103,4 +105,5 @@ public class Join implements CloneSupport<Join> {
             throw OrmExceptions.wrap(e);
         }
     }
+
 }

@@ -2,7 +2,6 @@ package cn.com.idmy.orm.core.mybatis;
 
 import cn.com.idmy.orm.core.transaction.TransactionContext;
 import jakarta.annotation.Nullable;
-import lombok.experimental.Delegate;
 import org.apache.ibatis.cursor.Cursor;
 import org.apache.ibatis.executor.Executor;
 import org.apache.ibatis.executor.parameter.ParameterHandler;
@@ -18,6 +17,7 @@ import org.apache.ibatis.type.TypeHandler;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 
@@ -75,9 +75,8 @@ public class OrmResultSetHandler extends OrmDefaultResultSetHandler {
             Collection<String> mappedColumnNames = rsw.getMappedColumnNames(resultMap, columnPrefix);
             if (columnName != null && mappedColumnNames.contains(columnName.toUpperCase(Locale.ENGLISH))) {
                 return typeHandler.getResult(rsw.getResultSet(), columnName);
-            } else {
-                return null;
             }
+            return null;
         } else {
             String columnName = rsw.getColumnNames().get(0);
             TypeHandler<?> typeHandler = rsw.getTypeHandler(resultType, columnName);
@@ -85,8 +84,9 @@ public class OrmResultSetHandler extends OrmDefaultResultSetHandler {
         }
     }
 
+
     static class FlexCursor<T> implements Cursor<T> {
-        @Delegate
+
         private final Cursor<T> originalCursor;
 
         public FlexCursor(Cursor<T> cursor) {
@@ -96,7 +96,29 @@ public class OrmResultSetHandler extends OrmDefaultResultSetHandler {
 
         @Override
         public void close() {
-            // 由 TransactionContext 去关闭
+            // do nothing，由 TransactionContext 去关闭
         }
+
+        @Override
+        public boolean isOpen() {
+            return originalCursor.isOpen();
+        }
+
+        @Override
+        public boolean isConsumed() {
+            return originalCursor.isConsumed();
+        }
+
+        @Override
+        public int getCurrentIndex() {
+            return originalCursor.getCurrentIndex();
+        }
+
+        @Override
+        public Iterator<T> iterator() {
+            return originalCursor.iterator();
+        }
+
     }
+
 }

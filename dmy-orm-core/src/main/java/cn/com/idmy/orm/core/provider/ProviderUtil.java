@@ -8,9 +8,7 @@ import cn.com.idmy.orm.core.query.QueryWrapper;
 import cn.com.idmy.orm.core.row.Row;
 import cn.com.idmy.orm.core.table.TableInfo;
 import cn.com.idmy.orm.core.table.TableInfoFactory;
-import cn.hutool.core.util.StrUtil;
-import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
+import cn.com.idmy.orm.core.util.StringUtil;
 import org.apache.ibatis.builder.annotation.ProviderContext;
 
 import java.util.Collection;
@@ -18,10 +16,22 @@ import java.util.List;
 import java.util.Map;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
 class ProviderUtil {
+
+    private ProviderUtil() {
+    }
+
     public static String getSqlString(Map params) {
         return (String) params.get(OrmConsts.SQL);
+    }
+
+    public static void flatten(Map params) {
+        Object[] o = (Object[]) params.get(OrmConsts.SQL_ARGS);
+        Object map;
+        if (o != null && o.length == 1 && (map = o[0]) instanceof Map) {
+            params.putAll((Map) map);
+            params.put(OrmConsts.RAW_ARGS, Boolean.TRUE);
+        }
     }
 
     public static void setSqlArgs(Map params, Object[] args) {
@@ -40,7 +50,7 @@ class ProviderUtil {
 
     public static String[] getPrimaryKeys(Map params) {
         String primaryKey = (String) params.get(OrmConsts.PRIMARY_KEY);
-        if (StrUtil.isBlank(primaryKey)) {
+        if (StringUtil.isBlank(primaryKey)) {
             throw OrmExceptions.wrap(LocalizedFormats.OBJECT_NULL_OR_BLANK, "primaryKey");
         }
         String[] primaryKeys = primaryKey.split(",");
@@ -101,4 +111,6 @@ class ProviderUtil {
     public static boolean isIgnoreNulls(Map params) {
         return params.containsKey(OrmConsts.IGNORE_NULLS) && (boolean) params.get(OrmConsts.IGNORE_NULLS);
     }
+
+
 }

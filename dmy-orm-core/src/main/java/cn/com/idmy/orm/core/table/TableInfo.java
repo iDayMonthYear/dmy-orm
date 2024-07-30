@@ -2,11 +2,12 @@ package cn.com.idmy.orm.core.table;
 
 import cn.com.idmy.orm.annotation.Column;
 import cn.com.idmy.orm.annotation.KeyType;
-import cn.com.idmy.orm.core.OrmConfig;
 import cn.com.idmy.orm.core.OrmConsts;
+import cn.com.idmy.orm.core.OrmGlobalConfig;
 import cn.com.idmy.orm.core.constant.SqlConsts;
 import cn.com.idmy.orm.core.constant.SqlOperator;
 import cn.com.idmy.orm.core.dialect.Dialect;
+import cn.com.idmy.orm.core.dialect.OperateType;
 import cn.com.idmy.orm.core.exception.OrmExceptions;
 import cn.com.idmy.orm.core.exception.locale.LocalizedFormats;
 import cn.com.idmy.orm.core.listener.InsertListener;
@@ -20,10 +21,7 @@ import cn.com.idmy.orm.core.tenant.TenantManager;
 import cn.com.idmy.orm.core.update.RawValue;
 import cn.com.idmy.orm.core.update.UpdateWrapper;
 import cn.com.idmy.orm.core.util.*;
-import cn.hutool.core.util.ArrayUtil;
-import cn.hutool.core.util.StrUtil;
-import lombok.Getter;
-import lombok.Setter;
+import jakarta.annotation.Nullable;
 import org.apache.ibatis.mapping.ResultFlag;
 import org.apache.ibatis.mapping.ResultMap;
 import org.apache.ibatis.mapping.ResultMapping;
@@ -32,7 +30,6 @@ import org.apache.ibatis.reflection.Reflector;
 import org.apache.ibatis.reflection.ReflectorFactory;
 import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.type.TypeHandler;
-import org.apache.ibatis.util.MapUtil;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Proxy;
@@ -42,61 +39,52 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
-import static cn.com.idmy.orm.core.constant.SqlConsts.*;
+import static cn.com.idmy.orm.core.constant.SqlConsts.AND;
+import static cn.com.idmy.orm.core.constant.SqlConsts.EQUALS_PLACEHOLDER;
+import static cn.com.idmy.orm.core.constant.SqlConsts.IN;
 
-@Setter
-@Getter
 public class TableInfo {
-    private String schema; //schema
-    private String tableName; //表名
-    private Class<?> entityClass; //实体类
+
+    // column 和 java 属性的称的关系映射
+    private final Map<String, ColumnInfo> columnInfoMapping = new HashMap<>();
+    // property:column
+    private final Map<String, String> propertyColumnMapping = new LinkedHashMap<>();
+    private String schema; // schema
     private boolean camelToUnderline = true;
     private String dataSource;
 
-    //逻辑删除数据库列名
+    private String comment;
+    private String tableName; // 表名
+    private Class<?> entityClass; // 实体类
+    // 逻辑删除数据库列名
     private String logicDeleteColumn;
-
-    //乐观锁字段
+    // 乐观锁字段
     private String versionColumn;
-
-    //租户ID 字段
+    // 租户ID 字段
     private String tenantIdColumn;
-
-    //数据插入时，默认插入数据字段
+    // 数据插入时，默认插入数据字段
     private Map<String, String> onInsertColumns;
 
-    //数据更新时，默认更新内容的字段
-    private Map<String, String> onUpdateColumns;
-
-    //大字段列
-    private String[] largeColumns = new String[0];
-
     private String[] allColumns = new String[0];
-
-    //所有的字段，但除了主键的列
-    private String[] columns = new String[0];
-
-    //主键字段
-    private String[] primaryColumns = new String[0];
+    // 数据更新时，默认更新内容的字段
+    private Map<String, String> onUpdateColumns;
+    // 大字段列
+    private String[] largeColumns = new String[0];
 
     // 默认查询列，排除 large 等字段
     private String[] defaultQueryColumns = new String[0];
-
-    //在插入数据的时候，支持主动插入的主键字段，自增字段不需要主动插入
-    //但通过自定义生成器生成 或者 Sequence 在 before 生成的时候，是需要主动插入数据的
-    private String[] insertPrimaryKeys;
+    // 所有的字段，但除了主键的列
+    private String[] columns = new String[0];
 
     private List<ColumnInfo> columnInfoList;
     private List<IdInfo> primaryKeyList;
-
-    //column 和 java 属性的称的关系映射
-    private final Map<String, ColumnInfo> columnInfoMapping = new HashMap<>();
+    // 主键字段
+    private String[] primaryColumns = new String[0];
     private final Map<String, QueryColumn> columnQueryMapping = new HashMap<>();
-
-    //property:column
-    private final Map<String, String> propertyColumnMapping = new LinkedHashMap<>();
+    // 在插入数据的时候，支持主动插入的主键字段，自增字段不需要主动插入
+    // 但通过自定义生成器生成 或者 Sequence 在 before 生成的时候，是需要主动插入数据的
+    private String[] insertPrimaryKeys;
 
     private List<InsertListener> onInsertListeners;
     private List<UpdateListener> onUpdateListeners;
@@ -119,26 +107,41 @@ public class TableInfo {
             return getReflector();
         }
     };
+    private Reflector reflector; // 反射工具
 
-    private Reflector reflector; //反射工具
+    public String getSchema() {
+        return schema;
+    }
+
+    public void setSchema(String schema) {
+        this.schema = schema;
+    }
+
+    public Map<String, String> getPropertyColumnMapping() {
+        return this.propertyColumnMapping;
+    }
+
+    public String getTableName() {
+        return tableName;
+    }
 
     public String getTableNameWithSchema() {
         return StringUtil.buildSchemaWithTable(schema, tableName);
     }
 
-    public String getWrapSchemaAndTableName(Dialect dialect) {
-        if (StrUtil.isNotBlank(schema)) {
-            String table = dialect.getRealTable(tableName);
-            return dialect.wrap(dialect.getRealSchema(schema, table)) + "." + dialect.wrap(table);
+    public String getWrapSchemaAndTableName(Dialect dialect, OperateType operateType) {
+        if (StringUtil.isNotBlank(schema)) {
+            String table = dialect.getRealTable(tableName, operateType);
+            return dialect.wrap(dialect.getRealSchema(schema, table, operateType)) + "." + dialect.wrap(table);
         } else {
-            return dialect.wrap(dialect.getRealTable(tableName));
+            return dialect.wrap(dialect.getRealTable(tableName, operateType));
         }
     }
 
     public void setTableName(String tableName) {
         int indexOf = tableName.indexOf(".");
         if (indexOf > 0) {
-            if (StrUtil.isBlank(schema)) {
+            if (StringUtil.isBlank(schema)) {
                 this.schema = tableName.substring(0, indexOf);
                 this.tableName = tableName.substring(indexOf + 1);
             } else {
@@ -149,14 +152,193 @@ public class TableInfo {
         }
     }
 
+    public Class<?> getEntityClass() {
+        return entityClass;
+    }
+
+    public void setEntityClass(Class<?> entityClass) {
+        this.entityClass = entityClass;
+    }
+
+    public boolean isCamelToUnderline() {
+        return camelToUnderline;
+    }
+
+    public void setCamelToUnderline(boolean camelToUnderline) {
+        this.camelToUnderline = camelToUnderline;
+    }
+
+    public String getDataSource() {
+        return dataSource;
+    }
+
+    public void setDataSource(String dataSource) {
+        this.dataSource = dataSource;
+    }
+
+    public String getComment() {
+        return comment;
+    }
+
+    public void setComment(String comment) {
+        this.comment = comment;
+    }
 
     public String getLogicDeleteColumnOrSkip() {
         return LogicDeleteManager.getLogicDeleteColumn(logicDeleteColumn);
     }
 
+    public String getLogicDeleteColumn() {
+        return logicDeleteColumn;
+    }
+
+    public void setLogicDeleteColumn(String logicDeleteColumn) {
+        this.logicDeleteColumn = logicDeleteColumn;
+    }
+
+    public String getVersionColumn() {
+        return versionColumn;
+    }
+
+    public void setVersionColumn(String versionColumn) {
+        this.versionColumn = versionColumn;
+    }
+
+    public String getTenantIdColumn() {
+        return tenantIdColumn;
+    }
+
+    public void setTenantIdColumn(String tenantIdColumn) {
+        this.tenantIdColumn = tenantIdColumn;
+    }
+
+    public Map<String, String> getOnInsertColumns() {
+        return onInsertColumns;
+    }
+
+    public void setOnInsertColumns(Map<String, String> onInsertColumns) {
+        this.onInsertColumns = onInsertColumns;
+    }
+
+    public Map<String, String> getOnUpdateColumns() {
+        return onUpdateColumns;
+    }
+
+    public void setOnUpdateColumns(Map<String, String> onUpdateColumns) {
+        this.onUpdateColumns = onUpdateColumns;
+    }
+
+    public String[] getLargeColumns() {
+        return largeColumns;
+    }
+
+    public void setLargeColumns(String[] largeColumns) {
+        this.largeColumns = largeColumns;
+    }
+
+    public String[] getDefaultQueryColumns() {
+        return defaultQueryColumns;
+    }
+
+    public void setDefaultQueryColumns(String[] defaultQueryColumns) {
+        this.defaultQueryColumns = defaultQueryColumns;
+    }
+
+    public String[] getInsertPrimaryKeys() {
+        return insertPrimaryKeys;
+    }
+
+    public void setInsertPrimaryKeys(String[] insertPrimaryKeys) {
+        this.insertPrimaryKeys = insertPrimaryKeys;
+    }
+
+    public Reflector getReflector() {
+        return reflector;
+    }
+
+    public ReflectorFactory getReflectorFactory() {
+        return reflectorFactory;
+    }
+
+    public void setReflector(Reflector reflector) {
+        this.reflector = reflector;
+    }
+
+    public String[] getAllColumns() {
+        return allColumns;
+    }
+
+    public void setAllColumns(String[] allColumns) {
+        this.allColumns = allColumns;
+    }
+
+    public String[] getColumns() {
+        return columns;
+    }
+
+
+    public void setColumns(String[] columns) {
+        this.columns = columns;
+    }
+
+    public String[] getPrimaryColumns() {
+        return primaryColumns;
+    }
+
+    public void setPrimaryColumns(String[] primaryColumns) {
+        this.primaryColumns = primaryColumns;
+    }
+
+
+    public List<InsertListener> getOnInsertListeners() {
+        return onInsertListeners;
+    }
+
+    public void setOnInsertListeners(List<InsertListener> onInsertListeners) {
+        this.onInsertListeners = onInsertListeners;
+    }
+
+    public List<UpdateListener> getOnUpdateListeners() {
+        return onUpdateListeners;
+    }
+
+    public void setOnUpdateListeners(List<UpdateListener> onUpdateListeners) {
+        this.onUpdateListeners = onUpdateListeners;
+    }
+
+    public List<SetListener> getOnSetListeners() {
+        return onSetListeners;
+    }
+
+    public void setOnSetListeners(List<SetListener> onSetListeners) {
+        this.onSetListeners = onSetListeners;
+    }
+
+    public List<ColumnInfo> getColumnInfoList() {
+        return columnInfoList;
+    }
+
     public String getColumnByProperty(String property) {
         String column = propertyColumnMapping.get(property);
-        return StrUtil.isNotBlank(column) ? column : property;
+        // 用于兼容字段MM不规范的情况
+        // fix https://gitee.com/mybatis-flex/mybatis-flex/issues/I9PDYO
+        if (column == null) {
+            for (Map.Entry<String, String> entry : propertyColumnMapping.entrySet()) {
+                if (property.equalsIgnoreCase(entry.getKey())) {
+                    column = entry.getValue();
+                    break;
+                }
+            }
+        }
+        return StringUtil.isNotBlank(column) ? column : property;
+    }
+
+    public Map<String, Class<?>> getAssociationType() {
+        return associationType;
+    }
+
+    public void setAssociationType(Map<String, Class<?>> associationType) {
+        this.associationType = associationType;
     }
 
     public void addAssociationType(String fieldName, Class<?> clazz) {
@@ -164,6 +346,14 @@ public class TableInfo {
             associationType = new HashMap<>();
         }
         associationType.put(fieldName, clazz);
+    }
+
+    public Map<Field, Class<?>> getCollectionType() {
+        return collectionType;
+    }
+
+    public void setCollectionType(Map<Field, Class<?>> collectionType) {
+        this.collectionType = collectionType;
     }
 
     public void addCollectionType(Field field, Class<?> genericClass) {
@@ -178,7 +368,7 @@ public class TableInfo {
         List<String> columnNames = new ArrayList<>();
         for (int i = 0; i < columnInfoList.size(); i++) {
             ColumnInfo columnInfo = columnInfoList.get(i);
-            //真正的字段（没有做忽略标识）
+            // 真正的字段（没有做忽略标识）
             if (!columnInfo.isIgnore()) {
                 columnNames.add(columnInfo.column);
 
@@ -191,7 +381,12 @@ public class TableInfo {
         }
 
         this.columns = columnNames.toArray(new String[]{});
-        this.allColumns = ArrayUtil.addAll(allColumns, columns);
+        this.allColumns = ArrayUtil.concat(allColumns, columns);
+    }
+
+
+    public List<IdInfo> getPrimaryKeyList() {
+        return primaryKeyList;
     }
 
     void setPrimaryKeyList(List<IdInfo> primaryKeyList) {
@@ -204,7 +399,9 @@ public class TableInfo {
             IdInfo idInfo = primaryKeyList.get(i);
             primaryColumns[i] = idInfo.getColumn();
 
-            if (idInfo.getKeyType() != KeyType.AUTO && (idInfo.getBefore() != null && idInfo.getBefore())) {
+            if (idInfo.getKeyType() != KeyType.AUTO
+                    && (idInfo.getBefore() != null && idInfo.getBefore())
+            ) {
                 insertIdFields.add(idInfo.getColumn());
             }
 
@@ -214,7 +411,7 @@ public class TableInfo {
             String[] alias = idInfo.getAlias();
             columnQueryMapping.put(idInfo.column, new QueryColumn(schema, tableName, idInfo.column, alias != null && alias.length > 0 ? alias[0] : null));
         }
-        this.allColumns = ArrayUtil.addAll(allColumns, primaryColumns);
+        this.allColumns = ArrayUtil.concat(allColumns, primaryColumns);
         this.insertPrimaryKeys = insertIdFields.toArray(new String[0]);
     }
 
@@ -232,10 +429,11 @@ public class TableInfo {
 
         Map<String, RawValue> rawValueMap = obtainUpdateRawValueMap(entity);
 
-        List<Object> values = new ArrayList<>(insertColumns.length);
+        List<Object> values = new ArrayList<>();
         for (String insertColumn : insertColumns) {
             if (onInsertColumns == null || !onInsertColumns.containsKey(insertColumn)) {
                 if (rawValueMap.containsKey(insertColumn)) {
+                    values.addAll(Arrays.asList(rawValueMap.remove(insertColumn).getParams()));
                     continue;
                 }
                 Object value = buildColumnSqlArg(metaObject, insertColumn);
@@ -245,6 +443,10 @@ public class TableInfo {
                 values.add(value);
             }
         }
+        values.addAll(rawValueMap.values()
+                .stream()
+                .flatMap(e -> Arrays.stream(e.getParams()))
+                .collect(Collectors.toList()));
         return values.toArray();
     }
 
@@ -257,7 +459,7 @@ public class TableInfo {
      */
     public String[] obtainInsertColumns(Object entity, boolean ignoreNulls) {
         if (!ignoreNulls) {
-            return ArrayUtil.addAll(insertPrimaryKeys, columns);
+            return ArrayUtil.concat(insertPrimaryKeys, columns);
         }
         // 忽略 null 字段，
         else {
@@ -268,9 +470,10 @@ public class TableInfo {
                     retColumns.add(insertColumn);
                 } else {
                     Object value = buildColumnSqlArg(metaObject, insertColumn);
-                    if (value != null) {
-                        retColumns.add(insertColumn);
+                    if (value == null) {
+                        continue;
                     }
+                    retColumns.add(insertColumn);
                 }
             }
             return retColumns.toArray(new String[0]);
@@ -321,9 +524,10 @@ public class TableInfo {
                     retColumns.add(insertColumn);
                 } else {
                     Object value = buildColumnSqlArg(metaObject, insertColumn);
-                    if (value != null) {
-                        retColumns.add(insertColumn);
+                    if (value == null) {
+                        continue;
                     }
+                    retColumns.add(insertColumn);
                 }
             }
             return retColumns.toArray(new String[0]);
@@ -361,7 +565,7 @@ public class TableInfo {
      */
     public Set<String> obtainUpdateColumns(Object entity, boolean ignoreNulls, boolean includePrimary) {
         MetaObject metaObject = EntityMetaObject.forObject(entity, reflectorFactory);
-        Set<String> columns = new LinkedHashSet<>(); //需使用 LinkedHashSet 保证 columns 的顺序
+        Set<String> columns = new LinkedHashSet<>(); // 需使用 LinkedHashSet 保证 columns 的顺序
         if (entity instanceof UpdateWrapper) {
             Map<String, Object> updates = ((UpdateWrapper) entity).getUpdates();
             if (updates.isEmpty()) {
@@ -375,7 +579,7 @@ public class TableInfo {
                     continue;
                 }
 
-                //过滤乐观锁字段 和 租户字段
+                // 过滤乐观锁字段 和 租户字段
                 if (ObjectUtil.equalsAny(column, versionColumn, tenantIdColumn)) {
                     continue;
                 }
@@ -384,15 +588,23 @@ public class TableInfo {
                     continue;
                 }
 
+//                Object value = updates.get(property);
+                // ModifyAttrsRecord 忽略 ignoreNulls 的设置
+                // Object value = getPropertyValue(metaObject, property);
+                // if (ignoreNulls && value == null) {
+                //     continue;
+                // }
                 columns.add(column);
             }
-        } else {
+        }
+        // not ModifyAttrsRecord
+        else {
             for (String column : this.columns) {
                 if (onUpdateColumns != null && onUpdateColumns.containsKey(column)) {
                     continue;
                 }
 
-                //过滤乐观锁字段 和 租户字段
+                // 过滤乐观锁字段 和 租户字段
                 if (ObjectUtil.equalsAny(column, versionColumn, tenantIdColumn)) {
                     continue;
                 }
@@ -429,7 +641,7 @@ public class TableInfo {
                 if (onUpdateColumns != null && onUpdateColumns.containsKey(column)) {
                     continue;
                 }
-                //过滤乐观锁字段 和 租户字段
+                // 过滤乐观锁字段 和 租户字段
                 if (ObjectUtil.equalsAny(column, versionColumn, tenantIdColumn)) {
                     continue;
                 }
@@ -440,6 +652,7 @@ public class TableInfo {
 
                 Object value = updates.get(property);
                 if (value instanceof RawValue) {
+                    values.addAll(Arrays.asList(((RawValue) value).getParams()));
                     continue;
                 }
 
@@ -455,17 +668,20 @@ public class TableInfo {
                     // fixed: https://gitee.com/mybatis-flex/mybatis-flex/issues/I7TFBK
                     if (value.getClass().isEnum()) {
                         EnumWrapper enumWrapper = EnumWrapper.of(value.getClass());
-                        if (enumWrapper.hasEnumValueAnnotation()) {
-                            value = enumWrapper.getEnumValue((Enum) value);
-                        } else {
-                            value = ((Enum<?>) value).name();
-                        }
+                        value = enumWrapper.getEnumValue((Enum) value);
                     }
                 }
 
+                // ModifyAttrsRecord 忽略 ignoreNulls 的设置，
+                // 当使用 ModifyAttrsRecord 时，可以理解为要对字段进行 null 值进行更新，否则没必要使用 ModifyAttrsRecord
+                // if (ignoreNulls && value == null) {
+                //    continue;
+                // }
                 values.add(value);
             }
-        } else {
+        }
+        // normal entity. not ModifyAttrsRecord
+        else {
             MetaObject metaObject = EntityMetaObject.forObject(entity, reflectorFactory);
 
             for (String column : this.columns) {
@@ -473,13 +689,16 @@ public class TableInfo {
                     continue;
                 }
 
-                //过滤乐观锁字段 和 租户字段
+                // 过滤乐观锁字段 和 租户字段
                 if (ObjectUtil.equalsAny(column, versionColumn, tenantIdColumn)) {
                     continue;
                 }
 
                 // 普通 entity 忽略 includePrimary 的设置，
                 // 因为 for 循环中的 this.columns 本身就不包含有主键
+                // if (includePrimary) {
+                // }
+
                 Object value = buildColumnSqlArg(metaObject, column);
                 if (ignoreNulls && value == null) {
                     continue;
@@ -518,14 +737,15 @@ public class TableInfo {
      * @param entity
      * @return 主键值，有多个主键时返回数组
      */
+    @Nullable
     public Object getPkValue(Object entity) {
-        //绝大多数情况为 1 个主键
+        // 绝大多数情况为 1 个主键
         if (primaryColumns.length == 1) {
             MetaObject metaObject = EntityMetaObject.forObject(entity, reflectorFactory);
             ColumnInfo columnInfo = columnInfoMapping.get(primaryColumns[0]);
             return getPropertyValue(metaObject, columnInfo.property);
         }
-        //多个主键
+        // 多个主键
         else if (primaryColumns.length > 1) {
             MetaObject metaObject = EntityMetaObject.forObject(entity, reflectorFactory);
             Object[] values = new Object[primaryColumns.length];
@@ -535,19 +755,20 @@ public class TableInfo {
             }
             return values;
         }
-        //无主键
+        // 无主键
         else {
             return null;
         }
     }
 
 
+    @Nullable
     public Object[] buildTenantIdArgs() {
-        if (StrUtil.isBlank(tenantIdColumn)) {
+        if (StringUtil.isBlank(tenantIdColumn)) {
             return null;
         }
 
-        return TenantManager.getTenantIds();
+        return TenantManager.getTenantIds(tableName);
     }
 
 
@@ -597,7 +818,7 @@ public class TableInfo {
             CPI.putContext(queryWrapper, APPEND_CONDITIONS_FLAG, Boolean.TRUE);
         }
 
-        //select xxx.id,(select..) from xxx
+        // select xxx.id,(select..) from xxx
         List<QueryColumn> selectColumns = CPI.getSelectColumns(queryWrapper);
         if (selectColumns != null && !selectColumns.isEmpty()) {
             for (QueryColumn queryColumn : selectColumns) {
@@ -608,7 +829,7 @@ public class TableInfo {
             }
         }
 
-        //select * from (select ... from ) 中的子查询处理
+        // select * from (select ... from ) 中的子查询处理
         List<QueryTable> queryTables = CPI.getQueryTables(queryWrapper);
         if (queryTables != null && !queryTables.isEmpty()) {
             for (QueryTable queryTable : queryTables) {
@@ -619,8 +840,8 @@ public class TableInfo {
             }
         }
 
-        //添加乐观锁条件，只有在 update 的时候进行处理
-        if (StrUtil.isNotBlank(versionColumn) && entity != null) {
+        // 添加乐观锁条件，只有在 update 的时候进行处理
+        if (StringUtil.isNotBlank(versionColumn) && entity != null) {
             Object versionValue = buildColumnSqlArg(entity, versionColumn);
             if (versionValue == null) {
                 throw OrmExceptions.wrap(LocalizedFormats.ENTITY_VERSION_NULL, entity);
@@ -628,17 +849,25 @@ public class TableInfo {
             queryWrapper.and(QueryCondition.create(schema, tableName, versionColumn, SqlConsts.EQUALS, versionValue));
         }
 
-        //逻辑删除
-        if (StrUtil.isNotBlank(getLogicDeleteColumnOrSkip())) {
+        // 逻辑删除
+        if (StringUtil.isNotBlank(getLogicDeleteColumnOrSkip())) {
+            // 逻辑删除时 保证前面的条件被括号包裹
+            // fix:https://gitee.com/mybatis-flex/mybatis-flex/issues/I9163G
+            QueryCondition whereCondition = CPI.getWhereQueryCondition(queryWrapper);
+            if (whereCondition != null && !(whereCondition instanceof Brackets)) {
+                QueryCondition wrappedCondition = new Brackets(whereCondition);
+                CPI.setWhereQueryCondition(queryWrapper, wrappedCondition);
+            }
+
             String joinTableAlias = CPI.getContext(queryWrapper, "joinTableAlias");
             LogicDeleteManager.getProcessor().buildQueryCondition(queryWrapper, this, joinTableAlias);
         }
 
-        //多租户
+        // 多租户
         buildTenantCondition(queryWrapper);
 
 
-        //子查询
+        // 子查询
         List<QueryWrapper> childSelects = CPI.getChildSelect(queryWrapper);
         if (CollectionUtil.isNotEmpty(childSelects)) {
             for (QueryWrapper childQueryWrapper : childSelects) {
@@ -647,25 +876,29 @@ public class TableInfo {
         }
 
 
-        //join
+        // join
         List<Join> joins = CPI.getJoins(queryWrapper);
         if (CollectionUtil.isNotEmpty(joins)) {
             for (Join join : joins) {
+                if (!join.checkEffective()) {
+                    continue;
+                }
                 QueryTable joinQueryTable = CPI.getJoinQueryTable(join);
 
-                //join select
+                // join select
                 if (joinQueryTable instanceof SelectQueryTable) {
                     QueryWrapper childQuery = ((SelectQueryTable) joinQueryTable).getQueryWrapper();
                     doAppendConditions(entity, childQuery);
                 }
-                //join table
+                // join table
                 else {
                     String nameWithSchema = joinQueryTable.getNameWithSchema();
-                    if (StrUtil.isNotBlank(nameWithSchema)) {
+                    if (StringUtil.isNotBlank(nameWithSchema)) {
                         TableInfo tableInfo = TableInfoFactory.ofTableName(nameWithSchema);
                         if (tableInfo != null) {
                             QueryCondition joinQueryCondition = CPI.getJoinQueryCondition(join);
-                            QueryWrapper newWrapper = QueryWrapper.create().where(joinQueryCondition);
+                            QueryWrapper newWrapper = QueryWrapper.create()
+                                    .where(joinQueryCondition);
                             CPI.putContext(newWrapper, "joinTableAlias", joinQueryTable.getAlias());
                             tableInfo.appendConditions(entity, newWrapper);
                             QueryCondition whereQueryCondition = CPI.getWhereQueryCondition(newWrapper);
@@ -676,7 +909,7 @@ public class TableInfo {
             }
         }
 
-        //union
+        // union
         List<UnionWrapper> unions = CPI.getUnions(queryWrapper);
         if (CollectionUtil.isNotEmpty(unions)) {
             for (UnionWrapper union : unions) {
@@ -696,7 +929,7 @@ public class TableInfo {
                     doAppendConditions(entity, childQuery);
                 } else {
                     String nameWithSchema = queryTable.getNameWithSchema();
-                    if (StrUtil.isNotBlank(nameWithSchema)) {
+                    if (StringUtil.isNotBlank(nameWithSchema)) {
                         TableInfo tableInfo = TableInfoFactory.ofTableName(nameWithSchema);
                         if (tableInfo != null) {
                             tableInfo.appendConditions(entity, queryWrapper);
@@ -726,11 +959,23 @@ public class TableInfo {
             }
             Object value = metaObject.getValue(property);
             if (value != null && !"".equals(value)) {
-                QueryColumn queryColumn = buildQueryColumn(column);
-                if (operators != null && operators.containsKey(property)) {
+                QueryColumn queryColumn = Arrays.stream(queryColumns)
+                        .filter(e -> e.getName().equals(column))
+                        .findFirst()
+                        .orElse(QueryMethods.column(getTableNameWithSchema(), column));
+                if (operators != null) {
                     SqlOperator operator = operators.get(property);
+                    if (operator == null) {
+                        operator = SqlOperator.EQUALS;
+                    } else if (operator == SqlOperator.IGNORE) {
+                        return;
+                    }
                     if (operator == SqlOperator.LIKE || operator == SqlOperator.NOT_LIKE) {
                         value = "%" + value + "%";
+                    } else if (operator == SqlOperator.LIKE_LEFT || operator == SqlOperator.NOT_LIKE_LEFT) {
+                        value = value + "%";
+                    } else if (operator == SqlOperator.LIKE_RIGHT || operator == SqlOperator.NOT_LIKE_RIGHT) {
+                        value = "%" + value;
                     }
                     queryWrapper.and(QueryCondition.create(queryColumn, operator, value));
                 } else {
@@ -740,17 +985,6 @@ public class TableInfo {
         });
         return queryWrapper;
     }
-
-
-    public QueryColumn buildQueryColumn(String column) {
-        String tableNameWithSchema = getTableNameWithSchema();
-        QueryColumn queryColumn = TableDefs.getQueryColumn(entityClass, tableNameWithSchema, column);
-        if (queryColumn == null) {
-            queryColumn = QueryMethods.column(tableNameWithSchema, column);
-        }
-        return queryColumn;
-    }
-
 
     public String getKeyProperties() {
         StringJoiner joiner = new StringJoiner(",");
@@ -770,23 +1004,51 @@ public class TableInfo {
     }
 
     public List<QueryColumn> getDefaultQueryColumn() {
-        return Arrays.stream(defaultQueryColumns).map(columnQueryMapping::get).collect(Collectors.toList());
+        return Arrays.stream(defaultQueryColumns)
+                .map(columnQueryMapping::get)
+                .collect(Collectors.toList());
     }
 
+    private void getCombinedColumns(List<Class<?>> existedEntities, Class<?> entityClass, List<String> combinedColumns) {
+        if (existedEntities.contains(entityClass)) {
+            return;
+        }
+
+        existedEntities.add(entityClass);
+
+        TableInfo tableInfo = TableInfoFactory.ofEntityClass(entityClass);
+
+        combinedColumns.addAll(Arrays.asList(tableInfo.allColumns));
+
+        if (tableInfo.collectionType != null) {
+            tableInfo.collectionType.values()
+                    .forEach(e -> getCombinedColumns(existedEntities, e, combinedColumns));
+        }
+
+        if (tableInfo.associationType != null) {
+            tableInfo.associationType.values()
+                    .forEach(e -> getCombinedColumns(existedEntities, e, combinedColumns));
+        }
+    }
 
     public ResultMap buildResultMap(Configuration configuration) {
-        // 所有的嵌套类对象引用
-        Stream<Class<?>> ct = collectionType == null ? Stream.empty() : collectionType.values().stream();
-        Stream<Class<?>> at = associationType == null ? Stream.empty() : associationType.values().stream();
+        List<String> combinedColumns = new ArrayList<>();
 
-        Stream<String> nestedColumns = Stream.concat(at, ct).map(TableInfoFactory::ofEntityClass).flatMap(e -> Arrays.stream(e.allColumns));
+        getCombinedColumns(new ArrayList<>(), entityClass, combinedColumns);
 
         // 预加载所有重复列，用于判断重名属性
-        List<String> existedColumns = Stream.concat(Arrays.stream(allColumns), nestedColumns).collect(Collectors.groupingBy(Function.identity(), Collectors.counting())).entrySet().stream().filter(e -> e.getValue().intValue() > 1).map(Map.Entry::getKey).collect(Collectors.toList());
+        List<String> existedColumns = combinedColumns.stream()
+                .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()))
+                .entrySet()
+                .stream()
+                .filter(e -> e.getValue().intValue() > 1)
+                .map(Map.Entry::getKey)
+                .collect(Collectors.toList());
 
         return doBuildResultMap(configuration, new HashSet<>(), existedColumns, false, getTableNameWithSchema());
     }
 
+    @Nullable
     private ResultMap doBuildResultMap(Configuration configuration, Set<String> resultMapIds, List<String> existedColumns, boolean isNested, String nestedPrefix) {
 
         String resultMapId = isNested ? "nested-" + nestedPrefix + ":" + entityClass.getName() : entityClass.getName();
@@ -823,7 +1085,10 @@ public class TableInfo {
                 // 构建嵌套类型的 ResultMap 对象，也就是 <association> 标签下的内容
                 ResultMap nestedResultMap = tableInfo.doBuildResultMap(configuration, resultMapIds, existedColumns, true, nestedPrefix);
                 if (nestedResultMap != null) {
-                    resultMappings.add(new ResultMapping.Builder(configuration, fieldName).javaType(fieldType).nestedResultMapId(nestedResultMap.getId()).build());
+                    resultMappings.add(new ResultMapping.Builder(configuration, fieldName)
+                            .javaType(fieldType)
+                            .nestedResultMapId(nestedResultMap.getId())
+                            .build());
                 }
             });
         }
@@ -835,7 +1100,10 @@ public class TableInfo {
                     // List<String> List<Integer> 等
                     String columnName = TableInfoFactory.getColumnName(camelToUnderline, field, field.getAnnotation(Column.class));
                     // 映射 <result column="..."/>
-                    ResultMapping resultMapping = new ResultMapping.Builder(configuration, null).column(columnName).typeHandler(configuration.getTypeHandlerRegistry().getTypeHandler(genericClass)).build();
+                    ResultMapping resultMapping = new ResultMapping.Builder(configuration, null)
+                            .column(columnName)
+                            .typeHandler(configuration.getTypeHandlerRegistry().getTypeHandler(genericClass))
+                            .build();
                     String nestedResultMapId = entityClass.getName() + "." + field.getName();
                     ResultMap nestedResultMap;
                     if (configuration.hasResultMap(nestedResultMapId)) {
@@ -845,14 +1113,20 @@ public class TableInfo {
                         configuration.addResultMap(nestedResultMap);
                     }
                     // 映射 <collection property="..." ofType="genericClass">
-                    resultMappings.add(new ResultMapping.Builder(configuration, field.getName()).javaType(field.getType()).nestedResultMapId(nestedResultMap.getId()).build());
+                    resultMappings.add(new ResultMapping.Builder(configuration, field.getName())
+                            .javaType(field.getType())
+                            .nestedResultMapId(nestedResultMap.getId())
+                            .build());
                 } else {
                     // 获取集合泛型类型的信息，也就是 ofType 属性
                     TableInfo tableInfo = TableInfoFactory.ofEntityClass(genericClass);
                     // 构建嵌套类型的 ResultMap 对象，也就是 <collection> 标签下的内容
                     ResultMap nestedResultMap = tableInfo.doBuildResultMap(configuration, resultMapIds, existedColumns, true, nestedPrefix);
                     if (nestedResultMap != null) {
-                        resultMappings.add(new ResultMapping.Builder(configuration, field.getName()).javaType(field.getType()).nestedResultMapId(nestedResultMap.getId()).build());
+                        resultMappings.add(new ResultMapping.Builder(configuration, field.getName())
+                                .javaType(field.getType())
+                                .nestedResultMapId(nestedResultMap.getId())
+                                .build());
                     }
                 }
             });
@@ -864,18 +1138,33 @@ public class TableInfo {
         return resultMap;
     }
 
-    private void doBuildColumnResultMapping(Configuration configuration, List<ResultMapping> resultMappings, List<String> existedColumns, ColumnInfo columnInfo, List<ResultFlag> flags, boolean isNested) {
+    private void doBuildColumnResultMapping(Configuration configuration, List<ResultMapping> resultMappings
+            , List<String> existedColumns, ColumnInfo columnInfo, List<ResultFlag> flags, boolean isNested) {
 
         if (!isNested) {
             if (existedColumns.contains(columnInfo.column)) {
                 // userName -> tb_user$user_name
-                resultMappings.add(new ResultMapping.Builder(configuration, columnInfo.property, tableName + "$" + columnInfo.column, columnInfo.propertyType).jdbcType(columnInfo.getJdbcType()).flags(flags).typeHandler(columnInfo.buildTypeHandler(configuration)).build());
+                resultMappings.add(new ResultMapping.Builder(configuration
+                        , columnInfo.property
+                        , tableName + "$" + columnInfo.column
+                        , columnInfo.propertyType)
+                        .jdbcType(columnInfo.getJdbcType())
+                        .flags(flags)
+                        .typeHandler(columnInfo.buildTypeHandler(configuration))
+                        .build());
             }
             buildDefaultResultMapping(configuration, resultMappings, columnInfo, flags);
         } else {
             if (existedColumns.contains(columnInfo.column)) {
                 // userName -> tb_user$user_name
-                resultMappings.add(new ResultMapping.Builder(configuration, columnInfo.property, tableName + "$" + columnInfo.column, columnInfo.propertyType).jdbcType(columnInfo.getJdbcType()).flags(flags).typeHandler(columnInfo.buildTypeHandler(configuration)).build());
+                resultMappings.add(new ResultMapping.Builder(configuration
+                        , columnInfo.property
+                        , tableName + "$" + columnInfo.column
+                        , columnInfo.propertyType)
+                        .jdbcType(columnInfo.getJdbcType())
+                        .flags(flags)
+                        .typeHandler(columnInfo.buildTypeHandler(configuration))
+                        .build());
             } else {
                 buildDefaultResultMapping(configuration, resultMappings, columnInfo, flags);
             }
@@ -884,7 +1173,14 @@ public class TableInfo {
         if (ArrayUtil.isNotEmpty(columnInfo.alias)) {
             for (String alias : columnInfo.alias) {
                 // userName -> alias
-                resultMappings.add(new ResultMapping.Builder(configuration, columnInfo.property, alias, columnInfo.propertyType).jdbcType(columnInfo.getJdbcType()).flags(flags).typeHandler(columnInfo.buildTypeHandler(configuration)).build());
+                resultMappings.add(new ResultMapping.Builder(configuration
+                        , columnInfo.property
+                        , alias
+                        , columnInfo.propertyType)
+                        .jdbcType(columnInfo.getJdbcType())
+                        .flags(flags)
+                        .typeHandler(columnInfo.buildTypeHandler(configuration))
+                        .build());
             }
         }
 
@@ -892,11 +1188,25 @@ public class TableInfo {
 
     private void buildDefaultResultMapping(Configuration configuration, List<ResultMapping> resultMappings, ColumnInfo columnInfo, List<ResultFlag> flags) {
         // userName -> user_name
-        resultMappings.add(new ResultMapping.Builder(configuration, columnInfo.property, columnInfo.column, columnInfo.propertyType).jdbcType(columnInfo.getJdbcType()).flags(flags).typeHandler(columnInfo.buildTypeHandler(configuration)).build());
+        resultMappings.add(new ResultMapping.Builder(configuration
+                , columnInfo.property
+                , columnInfo.column
+                , columnInfo.propertyType)
+                .jdbcType(columnInfo.getJdbcType())
+                .flags(flags)
+                .typeHandler(columnInfo.buildTypeHandler(configuration))
+                .build());
 
         if (!Objects.equals(columnInfo.column, columnInfo.property)) {
             // userName -> userName
-            resultMappings.add(new ResultMapping.Builder(configuration, columnInfo.property, columnInfo.property, columnInfo.propertyType).jdbcType(columnInfo.getJdbcType()).flags(flags).typeHandler(columnInfo.buildTypeHandler(configuration)).build());
+            resultMappings.add(new ResultMapping.Builder(configuration
+                    , columnInfo.property
+                    , columnInfo.property
+                    , columnInfo.propertyType)
+                    .jdbcType(columnInfo.getJdbcType())
+                    .flags(flags)
+                    .typeHandler(columnInfo.buildTypeHandler(configuration))
+                    .build());
         }
     }
 
@@ -919,7 +1229,7 @@ public class TableInfo {
         return buildColumnSqlArg(metaObject, column);
     }
 
-
+    @Nullable
     public Object getPropertyValue(MetaObject metaObject, String property) {
         if (property != null && metaObject.hasGetter(property)) {
             return metaObject.getValue(property);
@@ -939,9 +1249,10 @@ public class TableInfo {
         Set<String> rowKeys = row.keySet();
         columnInfoMapping.forEach((column, columnInfo) -> {
             if (index <= 0) {
+                String replace = column.replace("_", "");
                 for (String rowKey : rowKeys) {
                     // 修复: 开启 mapUnderscoreToCamelCase = true 时， row 无法转换 entity 的问题
-                    if (rowKey.equalsIgnoreCase(column) || rowKey.equalsIgnoreCase(column.replace("_", ""))) {
+                    if (rowKey.equalsIgnoreCase(column) || rowKey.equalsIgnoreCase(replace)) {
                         setInstancePropertyValue(row, instance, metaObject, columnInfo, rowKey);
                     }
                 }
@@ -949,9 +1260,10 @@ public class TableInfo {
                 for (int i = index; i >= 0; i--) {
                     String newColumn = i <= 0 ? column : column + "$" + i;
                     boolean fillValue = false;
+                    String replace = column.replace("_", "");
                     for (String rowKey : rowKeys) {
                         // 修复: 开启 mapUnderscoreToCamelCase = true 时， row 无法转换 entity 的问题
-                        if (rowKey.equalsIgnoreCase(column) || rowKey.equalsIgnoreCase(column.replace("_", ""))) {
+                        if (rowKey.equalsIgnoreCase(newColumn) || rowKey.equalsIgnoreCase(replace)) {
                             setInstancePropertyValue(row, instance, metaObject, columnInfo, rowKey);
                             fillValue = true;
                             break;
@@ -963,6 +1275,7 @@ public class TableInfo {
                 }
             }
         });
+        // noinspection unchecked
         return (T) instance;
     }
 
@@ -972,10 +1285,10 @@ public class TableInfo {
         TypeHandler<?> typeHandler = columnInfo.buildTypeHandler(null);
         if (typeHandler != null) {
             try {
-                //通过 typeHandler 转换数据
+                // 通过 typeHandler 转换数据
                 rowValue = typeHandler.getResult(getResultSet(rowValue), 0);
             } catch (SQLException e) {
-                //ignore
+                // ignore
             }
         }
         if (rowValue != null && !metaObject.getSetterType(columnInfo.property).isAssignableFrom(rowValue.getClass())) {
@@ -987,7 +1300,8 @@ public class TableInfo {
 
 
     private ResultSet getResultSet(Object value) {
-        return (ResultSet) Proxy.newProxyInstance(TableInfo.class.getClassLoader(), new Class[]{ResultSet.class}, (proxy, method, args) -> value);
+        return (ResultSet) Proxy.newProxyInstance(TableInfo.class.getClassLoader(),
+                new Class[]{ResultSet.class}, (proxy, method, args) -> value);
     }
 
 
@@ -997,7 +1311,7 @@ public class TableInfo {
      * @param entityObject
      */
     public void initVersionValueIfNecessary(Object entityObject) {
-        if (StrUtil.isBlank(versionColumn)) {
+        if (StringUtil.isBlank(versionColumn)) {
             return;
         }
 
@@ -1016,17 +1330,17 @@ public class TableInfo {
      * @param entityObject
      */
     public void initTenantIdIfNecessary(Object entityObject) {
-        if (StrUtil.isBlank(tenantIdColumn)) {
+        if (StringUtil.isBlank(tenantIdColumn)) {
             return;
         }
 
         MetaObject metaObject = EntityMetaObject.forObject(entityObject, reflectorFactory);
-        Object[] tenantIds = TenantManager.getTenantIds();
+        Object[] tenantIds = TenantManager.getTenantIds(tableName);
         if (tenantIds == null || tenantIds.length == 0) {
             return;
         }
 
-        //默认使用第一个作为插入的租户ID
+        // 默认使用第一个作为插入的租户ID
         Object tenantId = tenantIds[0];
         if (tenantId != null) {
             String property = columnInfoMapping.get(tenantIdColumn).property;
@@ -1041,7 +1355,7 @@ public class TableInfo {
      * @param entityObject
      */
     public void initLogicDeleteValueIfNecessary(Object entityObject) {
-        if (StrUtil.isBlank(getLogicDeleteColumnOrSkip())) {
+        if (StringUtil.isBlank(getLogicDeleteColumnOrSkip())) {
             return;
         }
 
@@ -1063,7 +1377,8 @@ public class TableInfo {
 
     public void invokeOnInsertListener(Object entity) {
         List<InsertListener> listeners = MapUtil.computeIfAbsent(insertListenerCache, entityClass, aClass -> {
-            List<InsertListener> globalListeners = OrmConfig.getDefaultConfig().findSupportedInsertListener(entityClass);
+            List<InsertListener> globalListeners = OrmGlobalConfig.getDefaultConfig()
+                    .getSupportedInsertListener(entityClass);
             List<InsertListener> allListeners = CollectionUtil.merge(onInsertListeners, globalListeners);
             Collections.sort(allListeners);
             return allListeners;
@@ -1071,11 +1386,13 @@ public class TableInfo {
         listeners.forEach(insertListener -> insertListener.onInsert(entity));
     }
 
+
     private static final Map<Class<?>, List<UpdateListener>> updateListenerCache = new ConcurrentHashMap<>();
 
     public void invokeOnUpdateListener(Object entity) {
         List<UpdateListener> listeners = MapUtil.computeIfAbsent(updateListenerCache, entityClass, aClass -> {
-            List<UpdateListener> globalListeners = OrmConfig.getDefaultConfig().findSupportedUpdateListener(entityClass);
+            List<UpdateListener> globalListeners = OrmGlobalConfig.getDefaultConfig()
+                    .getSupportedUpdateListener(entityClass);
             List<UpdateListener> allListeners = CollectionUtil.merge(onUpdateListeners, globalListeners);
             Collections.sort(allListeners);
             return allListeners;
@@ -1083,11 +1400,13 @@ public class TableInfo {
         listeners.forEach(insertListener -> insertListener.onUpdate(entity));
     }
 
+
     private static final Map<Class<?>, List<SetListener>> setListenerCache = new ConcurrentHashMap<>();
 
     public Object invokeOnSetListener(Object entity, String property, Object value) {
         List<SetListener> listeners = MapUtil.computeIfAbsent(setListenerCache, entityClass, aClass -> {
-            List<SetListener> globalListeners = OrmConfig.getDefaultConfig().getSupportedSetListener(entityClass);
+            List<SetListener> globalListeners = OrmGlobalConfig.getDefaultConfig()
+                    .getSupportedSetListener(entityClass);
             List<SetListener> allListeners = CollectionUtil.merge(onSetListeners, globalListeners);
             Collections.sort(allListeners);
             return allListeners;

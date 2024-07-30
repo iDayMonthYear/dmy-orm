@@ -1,7 +1,7 @@
 package cn.com.idmy.orm.core.mybatis;
 
 import cn.com.idmy.orm.core.keygen.IMultiKeyGenerator;
-import cn.hutool.core.util.ArrayUtil;
+import cn.com.idmy.orm.core.util.ArrayUtil;
 import org.apache.ibatis.executor.Executor;
 import org.apache.ibatis.executor.keygen.Jdbc3KeyGenerator;
 import org.apache.ibatis.executor.keygen.KeyGenerator;
@@ -22,7 +22,6 @@ public class OrmPreparedStatementHandler extends PreparedStatementHandler {
     public OrmPreparedStatementHandler(Executor executor, MappedStatement mappedStatement, Object parameter, RowBounds rowBounds, ResultHandler resultHandler, BoundSql boundSql) {
         super(executor, mappedStatement, parameter, rowBounds, resultHandler, boundSql);
     }
-
 
     @Override
     protected Statement instantiateStatement(Connection connection) throws SQLException {
@@ -54,6 +53,5 @@ public class OrmPreparedStatementHandler extends PreparedStatementHandler {
             return connection.prepareStatement(sql, mappedStatement.getResultSetType().getValue(), ResultSet.CONCUR_READ_ONLY);
         }
     }
-
 
 }

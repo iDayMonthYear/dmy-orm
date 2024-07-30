@@ -360,6 +360,7 @@ public interface RowMapper {
      * @param queryWrapper queryWrapper
      * @return 数据
      */
+    @Nullable
     default Object selectObjectByQuery(String schema, String tableName, QueryWrapper queryWrapper) {
         queryWrapper.limit(1L);
         List<Object> objects = selectObjectListByQuery(schema, tableName, queryWrapper);
@@ -446,4 +447,6 @@ public interface RowMapper {
         }
 
     }
+
+
 }

@@ -11,6 +11,7 @@ import cn.com.idmy.orm.core.util.LambdaUtil;
  */
 @SuppressWarnings("unchecked")
 public class QueryOrderByBuilder<Wrapper extends QueryWrapper> {
+
     private final Wrapper queryWrapper;
     private final QueryColumn orderByColumn;
 

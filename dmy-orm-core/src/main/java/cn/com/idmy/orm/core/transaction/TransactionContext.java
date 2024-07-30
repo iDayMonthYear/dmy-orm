@@ -1,8 +1,6 @@
 package cn.com.idmy.orm.core.transaction;
 
 
-import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
 import org.apache.ibatis.cursor.Cursor;
 
 import java.io.IOException;
@@ -11,37 +9,42 @@ import java.io.IOException;
  * @author michael
  * 事务管理器上下文
  */
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class TransactionContext {
-    private static final ThreadLocal<String> xidHolder = new ThreadLocal<>();
-    private static final ThreadLocal<Cursor<?>> cursorHolder = new ThreadLocal<>();
+
+    private TransactionContext() {
+    }
+
+    private static final ThreadLocal<String> XID_HOLDER = new ThreadLocal<>();
+    private static final ThreadLocal<Cursor<?>> CURSOR_HOLDER = new ThreadLocal<>();
 
     public static String getXID() {
-        return xidHolder.get();
+        return XID_HOLDER.get();
     }
 
     public static void release() {
-        xidHolder.remove();
+        XID_HOLDER.remove();
         closeCursor();
     }
 
     private static void closeCursor() {
-        Cursor<?> cursor = cursorHolder.get();
+        Cursor<?> cursor = CURSOR_HOLDER.get();
         if (cursor != null) {
             try {
                 cursor.close();
-            } catch (IOException ignore) {
+            } catch (IOException e) {
+                //ignore
             } finally {
-                cursorHolder.remove();
+                CURSOR_HOLDER.remove();
             }
         }
     }
 
     public static void holdXID(String xid) {
-        xidHolder.set(xid);
+        XID_HOLDER.set(xid);
     }
 
     public static void holdCursor(Cursor<?> cursor) {
-        cursorHolder.set(cursor);
+        CURSOR_HOLDER.set(cursor);
     }
+
 }

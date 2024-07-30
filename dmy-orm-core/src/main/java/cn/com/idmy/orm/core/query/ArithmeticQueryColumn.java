@@ -4,16 +4,19 @@ import cn.com.idmy.orm.core.constant.SqlConsts;
 import cn.com.idmy.orm.core.dialect.Dialect;
 import cn.com.idmy.orm.core.exception.OrmExceptions;
 import cn.com.idmy.orm.core.util.CollectionUtil;
-import cn.hutool.core.util.StrUtil;
-import lombok.RequiredArgsConstructor;
+import cn.com.idmy.orm.core.util.StringUtil;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static cn.com.idmy.orm.core.constant.SqlConsts.*;
+import static cn.com.idmy.orm.core.constant.SqlConsts.DIVISION_SIGN;
+import static cn.com.idmy.orm.core.constant.SqlConsts.MINUS_SIGN;
+import static cn.com.idmy.orm.core.constant.SqlConsts.MULTIPLICATION_SIGN;
+import static cn.com.idmy.orm.core.constant.SqlConsts.PLUS_SIGN;
 
 public class ArithmeticQueryColumn extends QueryColumn implements HasParamsColumn {
+
     private List<ArithmeticInfo> arithmeticInfos;
 
     public ArithmeticQueryColumn(Object value) {
@@ -76,17 +79,16 @@ public class ArithmeticQueryColumn extends QueryColumn implements HasParamsColum
         for (int i = 0; i < arithmeticInfos.size(); i++) {
             sql.append(arithmeticInfos.get(i).toSql(queryTables, dialect, i));
         }
-
-        if (StrUtil.isNotBlank(alias)) {
+        if (StringUtil.isNotBlank(alias)) {
             return WrapperUtil.withAlias(sql.toString(), alias, dialect);
-        } else {
-            return sql.toString();
         }
+        return sql.toString();
     }
 
     @Override
     public ArithmeticQueryColumn clone() {
         ArithmeticQueryColumn clone = (ArithmeticQueryColumn) super.clone();
+        // deep clone ...
         clone.arithmeticInfos = CollectionUtil.cloneArrayList(this.arithmeticInfos);
         return clone;
     }
@@ -105,20 +107,25 @@ public class ArithmeticQueryColumn extends QueryColumn implements HasParamsColum
     public Object[] getParamValues() {
         return arithmeticInfos.stream()
                 .map(arithmeticInfo -> arithmeticInfo.value)
-                .filter(value -> value instanceof HasParamsColumn)
+                .filter(HasParamsColumn.class::isInstance)
                 .map(value -> ((HasParamsColumn) value).getParamValues())
                 .flatMap(Arrays::stream)
                 .toArray();
     }
 
 
-    @RequiredArgsConstructor
     static class ArithmeticInfo implements CloneSupport<ArithmeticInfo> {
+
         private final String symbol;
         private final Object value;
 
         public ArithmeticInfo(Object value) {
             this(null, value);
+        }
+
+        public ArithmeticInfo(String symbol, Object value) {
+            this.symbol = symbol;
+            this.value = value;
         }
 
         private String toSql(List<QueryTable> queryTables, Dialect dialect, int index) {
@@ -139,5 +146,7 @@ public class ArithmeticQueryColumn extends QueryColumn implements HasParamsColum
                 throw OrmExceptions.wrap(e);
             }
         }
+
     }
+
 }

@@ -7,7 +7,7 @@ import cn.com.idmy.orm.core.dialect.Dialect;
 import cn.com.idmy.orm.core.dialect.DialectFactory;
 import cn.com.idmy.orm.core.util.ClassUtil;
 import cn.com.idmy.orm.core.util.EnumWrapper;
-import cn.hutool.core.util.StrUtil;
+import cn.com.idmy.orm.core.util.StringUtil;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
@@ -16,6 +16,7 @@ import java.util.Collections;
 import java.util.List;
 
 class WrapperUtil {
+
     private WrapperUtil() {
     }
 
@@ -78,10 +79,28 @@ class WrapperUtil {
             return;
         }
 
+        QueryColumn column = condition.getColumn();
+        if (column instanceof HasParamsColumn) {
+            addParam(params, ((HasParamsColumn) column).getParamValues());
+        }
+
         Object value = condition.getValue();
-        if (value == null
-                || value instanceof QueryColumn
-                || value instanceof RawQueryCondition) {
+
+        if (value == null) {
+            // column = user_name; logic = eq; value = null
+            // sql: user_name = null
+            String logic;
+            if (condition.checkEffective()
+                    && (logic = condition.getLogic()) != null
+                    && !logic.equals(SqlConsts.IS_NULL)
+                    && !logic.equals(SqlConsts.IS_NOT_NULL)) {
+                params.add(null);
+            }
+            getValues(condition.next, params);
+            return;
+        }
+
+        if (value instanceof QueryColumn || value instanceof RawQueryCondition) {
             getValues(condition.next, params);
             return;
         }
@@ -90,6 +109,7 @@ class WrapperUtil {
         getValues(condition.next, params);
     }
 
+    @SuppressWarnings("all")
     private static void addParam(List<Object> paras, Object value) {
         if (value == null) {
             paras.add(null);
@@ -100,13 +120,12 @@ class WrapperUtil {
         } else if (value instanceof QueryWrapper) {
             Object[] valueArray = ((QueryWrapper) value).getAllValueArray();
             paras.addAll(Arrays.asList(valueArray));
-        } else if (value.getClass().isEnum()) {
+        } else if (value instanceof Enum) {
+            // 枚举类型，处理枚举实际值
             EnumWrapper enumWrapper = EnumWrapper.of(value.getClass());
-            if (enumWrapper.hasEnumValueAnnotation()) {
-                paras.add(enumWrapper.getEnumValue((Enum) value));
-            } else {
-                paras.add(((Enum<?>) value).name());
-            }
+            // 如果是使用注解标识枚举实际值，则直接获取实际值，但如果是依靠全局枚举TypeHandler处理，则此处只能先存入枚举实例，在SQL执行时才能处理实际值
+            value = enumWrapper.hasEnumValueAnnotation() ? enumWrapper.getEnumValue((Enum) value) : value;
+            paras.add(value);
         } else {
             paras.add(value);
         }
@@ -135,11 +154,11 @@ class WrapperUtil {
     }
 
     static String buildAlias(String alias, Dialect dialect) {
-        return StrUtil.isBlank(alias) ? SqlConsts.EMPTY : getAsKeyWord(dialect) + dialect.wrap(alias);
+        return StringUtil.isBlank(alias) ? SqlConsts.EMPTY : getAsKeyWord(dialect) + dialect.wrap(alias);
     }
 
     static String buildColumnAlias(String alias, Dialect dialect) {
-        return StrUtil.isBlank(alias) ? SqlConsts.EMPTY : getAsKeyWord(dialect) + dialect.wrapColumnAlias(alias);
+        return StringUtil.isBlank(alias) ? SqlConsts.EMPTY : getAsKeyWord(dialect) + dialect.wrapColumnAlias(alias);
     }
 
     private static String getAsKeyWord(Dialect dialect) {

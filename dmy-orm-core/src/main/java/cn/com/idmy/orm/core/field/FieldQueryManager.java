@@ -19,6 +19,7 @@ import static cn.com.idmy.orm.core.table.TableInfoFactory.defaultSupportColumnTy
  * @since 2023-07-15
  */
 public class FieldQueryManager {
+
     private FieldQueryManager() {
     }
 
@@ -125,9 +126,9 @@ public class FieldQueryManager {
             Map map = (Map) ClassUtil.newInstance(fieldType);
             map.putAll(value);
             return map;
-        } else {
-            return new HashMap<>(value);
         }
+
+        return new HashMap<>(value);
     }
 
     @SuppressWarnings("unchecked")
@@ -137,9 +138,11 @@ public class FieldQueryManager {
         }
 
         T[] array = (T[]) Array.newInstance(componentType, list.size());
+
         for (int rows = 0; rows < list.size(); rows++) {
             array[rows] = list.get(rows);
         }
+
         return array;
     }
 

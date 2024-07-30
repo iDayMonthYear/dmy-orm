@@ -11,16 +11,17 @@ import java.util.List;
  * @author michael
  */
 public interface Dialect {
+
     String wrap(String keyword);
 
     String wrapColumnAlias(String keyword);
 
-    default String getRealTable(String table) {
-        return TableManager.getRealTable(table);
+    default String getRealTable(String table, OperateType operateType) {
+        return TableManager.getRealTable(table, operateType);
     }
 
-    default String getRealSchema(String schema, String table) {
-        return TableManager.getRealSchema(schema, table);
+    default String getRealSchema(String schema, String table, OperateType operateType) {
+        return TableManager.getRealSchema(schema, table, operateType);
     }
 
     String forHint(String hintString);
@@ -52,6 +53,7 @@ public interface Dialect {
     String buildDeleteSql(QueryWrapper queryWrapper);
 
     String buildWhereConditionSql(QueryWrapper queryWrapper);
+
 
     //////for entity /////
     String forInsertEntity(TableInfo tableInfo, Object entity, boolean ignoreNulls);

@@ -9,10 +9,7 @@ import cn.com.idmy.orm.core.query.QueryColumn;
 import cn.com.idmy.orm.core.query.QueryWrapperAdapter;
 import cn.com.idmy.orm.core.table.TableInfo;
 import cn.com.idmy.orm.core.table.TableInfoFactory;
-import cn.com.idmy.orm.core.util.ClassUtil;
-import cn.com.idmy.orm.core.util.LambdaGetter;
-import cn.com.idmy.orm.core.util.SqlUtil;
-import cn.hutool.core.util.ArrayUtil;
+import cn.com.idmy.orm.core.util.*;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -25,9 +22,10 @@ import java.lang.reflect.Type;
  */
 @SuppressWarnings("unchecked")
 public class UpdateChain<T> extends QueryWrapperAdapter<UpdateChain<T>> implements PropertySetter<UpdateChain<T>> {
+
     private final BaseMapper<T> baseMapper;
     private final T entity;
-    private final UpdateWrapper<T> entityWrapper;
+    private final UpdateWrapper<?> entityWrapper;
 
     public static <T> UpdateChain<T> of(Class<T> entityClass) {
         BaseMapper<T> baseMapper = Mappers.ofEntityClass(entityClass);
@@ -52,7 +50,7 @@ public class UpdateChain<T> extends QueryWrapperAdapter<UpdateChain<T>> implemen
     public UpdateChain(BaseMapper<T> baseMapper) {
         this.baseMapper = baseMapper;
         this.entity = createEntity(ClassUtil.getUsefulClass(baseMapper.getClass()));
-        this.entityWrapper = (UpdateWrapper) entity;
+        this.entityWrapper = (UpdateWrapper<?>) entity;
     }
 
 
@@ -60,7 +58,7 @@ public class UpdateChain<T> extends QueryWrapperAdapter<UpdateChain<T>> implemen
         this.baseMapper = baseMapper;
         entityObject = (T) UpdateWrapper.of(entityObject);
         this.entity = entityObject;
-        this.entityWrapper = (UpdateWrapper) entityObject;
+        this.entityWrapper = (UpdateWrapper<?>) entityObject;
     }
 
     private T createEntity(Class<?> mapperClass) {
@@ -131,8 +129,9 @@ public class UpdateChain<T> extends QueryWrapperAdapter<UpdateChain<T>> implemen
         String sql = DialectFactory.getDialect().forUpdateEntityByQuery(tableInfo, entity, true, this);
 
         Object[] values = tableInfo.buildUpdateSqlArgs(entity, true, true);
-        values = ArrayUtil.addAll(values, CPI.getValueArray(this));
+        values = ArrayUtil.concat(values, CPI.getValueArray(this));
 
         return SqlUtil.replaceSqlParams(sql, values);
     }
+
 }

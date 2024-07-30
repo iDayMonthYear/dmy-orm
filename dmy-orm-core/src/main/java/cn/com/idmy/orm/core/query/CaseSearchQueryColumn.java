@@ -4,12 +4,10 @@ import cn.com.idmy.orm.core.OrmConsts;
 import cn.com.idmy.orm.core.constant.SqlConsts;
 import cn.com.idmy.orm.core.dialect.Dialect;
 import cn.com.idmy.orm.core.exception.OrmExceptions;
+import cn.com.idmy.orm.core.util.ArrayUtil;
 import cn.com.idmy.orm.core.util.CollectionUtil;
 import cn.com.idmy.orm.core.util.ObjectUtil;
-import cn.hutool.core.util.ArrayUtil;
-import cn.hutool.core.util.StrUtil;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
+import cn.com.idmy.orm.core.util.StringUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,11 +21,10 @@ public class CaseSearchQueryColumn extends QueryColumn implements HasParamsColum
     @Override
     String toSelectSql(List<QueryTable> queryTables, Dialect dialect) {
         String sql = buildSql(queryTables, dialect);
-        if (StrUtil.isNotBlank(alias)) {
+        if (StringUtil.isNotBlank(alias)) {
             return WrapperUtil.withAlias(sql, alias, dialect);
-        } else {
-            return sql;
         }
+        return sql;
     }
 
     private String buildSql(List<QueryTable> queryTables, Dialect dialect) {
@@ -47,6 +44,7 @@ public class CaseSearchQueryColumn extends QueryColumn implements HasParamsColum
     @Override
     public CaseSearchQueryColumn clone() {
         CaseSearchQueryColumn clone = (CaseSearchQueryColumn) super.clone();
+        // deep clone ...
         clone.queryColumn = ObjectUtil.clone(this.queryColumn);
         clone.whens = CollectionUtil.cloneArrayList(this.whens);
         clone.elseValue = ObjectUtil.cloneObject(this.elseValue);
@@ -71,25 +69,30 @@ public class CaseSearchQueryColumn extends QueryColumn implements HasParamsColum
     public Object[] getParamValues() {
         Object[] values = OrmConsts.EMPTY_ARRAY;
         if (elseValue instanceof HasParamsColumn) {
-            values = ArrayUtil.addAll(values, ((HasParamsColumn) elseValue).getParamValues());
+            values = ArrayUtil.concat(values, ((HasParamsColumn) elseValue).getParamValues());
         }
         return values;
     }
 
 
     public static class When implements CloneSupport<When> {
+
         private Object searchValue;
-        @Setter
         private Object thenValue;
 
         public When(Object searchValue) {
             this.searchValue = searchValue;
         }
 
+        public void setThenValue(Object thenValue) {
+            this.thenValue = thenValue;
+        }
+
         @Override
         public When clone() {
             try {
                 When clone = (When) super.clone();
+                // deep clone ...
                 clone.searchValue = ObjectUtil.cloneObject(this.searchValue);
                 clone.thenValue = ObjectUtil.cloneObject(this.thenValue);
                 return clone;
@@ -102,7 +105,8 @@ public class CaseSearchQueryColumn extends QueryColumn implements HasParamsColum
 
 
     public static class Builder {
-        private final CaseSearchQueryColumn caseQueryColumn = new CaseSearchQueryColumn();
+
+        private CaseSearchQueryColumn caseQueryColumn = new CaseSearchQueryColumn();
         private When lastWhen;
 
         public Builder(QueryColumn queryColumn) {
@@ -114,7 +118,7 @@ public class CaseSearchQueryColumn extends QueryColumn implements HasParamsColum
             return new Then(this);
         }
 
-        public Builder else0(Object elseValue) {
+        public Builder else_(Object elseValue) {
             caseQueryColumn.elseValue = elseValue;
             return this;
         }
@@ -123,9 +127,13 @@ public class CaseSearchQueryColumn extends QueryColumn implements HasParamsColum
             return caseQueryColumn;
         }
 
-        @RequiredArgsConstructor
         public static class Then {
-            private final Builder builder;
+
+            private Builder builder;
+
+            public Then(Builder builder) {
+                this.builder = builder;
+            }
 
             public Builder then(Object thenValue) {
                 this.builder.lastWhen.setThenValue(thenValue);

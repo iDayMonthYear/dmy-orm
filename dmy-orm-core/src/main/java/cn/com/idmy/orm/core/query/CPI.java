@@ -3,7 +3,7 @@ package cn.com.idmy.orm.core.query;
 import cn.com.idmy.orm.core.constant.SqlConnector;
 import cn.com.idmy.orm.core.dialect.Dialect;
 import cn.com.idmy.orm.core.util.CollectionUtil;
-import cn.hutool.core.util.StrUtil;
+import cn.com.idmy.orm.core.util.StringUtil;
 
 import java.util.List;
 import java.util.Map;
@@ -29,6 +29,10 @@ public class CPI {
 
     public static Object[] getConditionValueArray(QueryWrapper queryWrapper) {
         return queryWrapper.getConditionValueArray();
+    }
+
+    public static Object[] getConditionParams(QueryCondition queryCondition) {
+        return WrapperUtil.getValues(queryCondition);
     }
 
     public static List<QueryWrapper> getChildSelect(QueryWrapper queryWrapper) {
@@ -135,6 +139,10 @@ public class CPI {
         queryWrapper.setWhereQueryCondition(queryCondition);
     }
 
+    public static void addWhereQueryCondition(QueryWrapper queryWrapper, QueryCondition queryCondition) {
+        queryWrapper.addWhereQueryCondition(queryCondition);
+    }
+
     public static void addWhereQueryCondition(QueryWrapper queryWrapper, QueryCondition queryCondition, SqlConnector connector) {
         queryWrapper.addWhereQueryCondition(queryCondition, connector);
     }
@@ -224,14 +232,14 @@ public class CPI {
     }
 
     public static void setFromIfNecessary(QueryWrapper queryWrapper, String tableName) {
-        if (StrUtil.isNotBlank(tableName)
+        if (StringUtil.isNotBlank(tableName)
                 && CollectionUtil.isEmpty(queryWrapper.getQueryTables())) {
             queryWrapper.from(tableName);
         }
     }
 
     public static void setFromIfNecessary(QueryWrapper queryWrapper, String schema, String tableName) {
-        if (StrUtil.isNotBlank(tableName)
+        if (StringUtil.isNotBlank(tableName)
                 && CollectionUtil.isEmpty(queryWrapper.getQueryTables())) {
             queryWrapper.from(new QueryTable(schema, tableName));
         }
@@ -248,4 +256,5 @@ public class CPI {
     public static boolean isSameTable(QueryTable queryTable, QueryTable otherTable) {
         return queryTable.isSameTable(otherTable);
     }
+
 }

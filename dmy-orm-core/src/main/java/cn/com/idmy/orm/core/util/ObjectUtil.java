@@ -1,6 +1,7 @@
 package cn.com.idmy.orm.core.util;
 
 import cn.com.idmy.orm.core.query.CloneSupport;
+import jakarta.annotation.Nullable;
 
 import java.util.Objects;
 
@@ -17,6 +18,7 @@ public class ObjectUtil {
         return value;
     }
 
+    @Nullable
     public static <T extends CloneSupport<T>> T clone(T value) {
         if (value != null) {
             return value.clone();

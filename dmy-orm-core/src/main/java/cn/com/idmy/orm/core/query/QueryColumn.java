@@ -4,10 +4,10 @@ package cn.com.idmy.orm.core.query;
 import cn.com.idmy.orm.core.constant.SqlConsts;
 import cn.com.idmy.orm.core.constant.SqlOperator;
 import cn.com.idmy.orm.core.dialect.Dialect;
+import cn.com.idmy.orm.core.dialect.OperateType;
 import cn.com.idmy.orm.core.exception.OrmExceptions;
-import cn.com.idmy.orm.core.table.TableDef;
 import cn.com.idmy.orm.core.util.*;
-import cn.hutool.core.util.StrUtil;
+import jakarta.annotation.Nullable;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -20,58 +20,62 @@ import java.util.function.Predicate;
 /**
  * 查询列，描述的是一张表的字段
  */
-@Getter
-@Setter
 public class QueryColumn implements CloneSupport<QueryColumn>, Conditional<QueryCondition> {
+
+    @Setter
+    @Getter
     protected QueryTable table;
+    @Setter
+    @Getter
     protected String name;
+    @Setter
+    @Getter
     protected String alias;
+
     private boolean returnCopyByAsMethod = false;
+
 
     public QueryColumn() {
     }
 
     public QueryColumn(String name) {
         SqlUtil.keepColumnSafely(name);
-        this.name = StrUtil.trim(name);
+        this.name = StringUtil.tryTrim(name);
     }
 
     public QueryColumn(String tableName, String name) {
         SqlUtil.keepColumnSafely(name);
         this.table = new QueryTable(tableName);
-        this.name = StrUtil.trim(name);
+        this.name = StringUtil.tryTrim(name);
     }
 
     public QueryColumn(String schema, String tableName, String name) {
         SqlUtil.keepColumnSafely(name);
         this.table = new QueryTable(schema, tableName);
-        this.name = StrUtil.trim(name);
+        this.name = StringUtil.tryTrim(name);
     }
 
     public QueryColumn(String schema, String tableName, String name, String alias) {
         SqlUtil.keepColumnSafely(name);
         this.returnCopyByAsMethod = true;
         this.table = new QueryTable(schema, tableName);
-        this.name = StrUtil.trim(name);
-        this.alias = StrUtil.trim(alias);
+        this.name = StringUtil.tryTrim(name);
+        this.alias = StringUtil.tryTrim(alias);
     }
 
     public QueryColumn(QueryTable queryTable, String name) {
         SqlUtil.keepColumnSafely(name);
         this.table = queryTable;
-        this.name = StrUtil.trim(name);
+        this.name = StringUtil.tryTrim(name);
+        this.returnCopyByAsMethod = true;
     }
 
-    public QueryColumn(TableDef tableDef, String name) {
-        this(tableDef, name, null);
-    }
-
-    public QueryColumn(TableDef tableDef, String name, String alias) {
+    public QueryColumn(QueryTable queryTable, String name, String alias) {
         SqlUtil.keepColumnSafely(name);
         this.returnCopyByAsMethod = true;
-        this.table = new QueryTable(tableDef);
-        this.name = name;
-        this.alias = alias;
+        this.table = queryTable;
+        this.name = StringUtil.tryTrim(name);
+        this.alias = StringUtil.tryTrim(alias);
     }
 
     public <T> QueryColumn as(LambdaGetter<T> fn) {
@@ -540,6 +544,24 @@ public class QueryColumn implements CloneSupport<QueryColumn>, Conditional<Query
     }
 
     @Override
+    public QueryCondition between(Object[] values) {
+        if (QueryColumnBehavior.shouldIgnoreValue(values) || values.length < 2) {
+            return QueryCondition.createEmpty();
+        }
+
+        return between(values[0], values[values.length - 1]);
+    }
+
+    @Override
+    public QueryCondition between(Object[] values, boolean isEffective) {
+        if (QueryColumnBehavior.shouldIgnoreValue(values) || values.length < 2) {
+            return QueryCondition.createEmpty();
+        }
+
+        return between(values[0], values[values.length - 1], isEffective);
+    }
+
+    @Override
     public QueryCondition between(Object start, Object end) {
         if (QueryColumnBehavior.shouldIgnoreValue(start) || QueryColumnBehavior.shouldIgnoreValue(end)) {
             return QueryCondition.createEmpty();
@@ -569,6 +591,24 @@ public class QueryColumn implements CloneSupport<QueryColumn>, Conditional<Query
             return QueryCondition.createEmpty();
         }
         return QueryColumnBehavior.castCondition(QueryCondition.create(this, SqlOperator.BETWEEN, new Object[]{start, end}).when(isEffective.test(start, end)));
+    }
+
+    @Override
+    public QueryCondition notBetween(Object[] values) {
+        if (QueryColumnBehavior.shouldIgnoreValue(values) || values.length < 2) {
+            return QueryCondition.createEmpty();
+        }
+
+        return notBetween(values[0], values[values.length - 1]);
+    }
+
+    @Override
+    public QueryCondition notBetween(Object[] values, boolean isEffective) {
+        if (QueryColumnBehavior.shouldIgnoreValue(values) || values.length < 2) {
+            return QueryCondition.createEmpty();
+        }
+
+        return notBetween(values[0], values[values.length - 1], isEffective);
     }
 
     @Override
@@ -936,14 +976,14 @@ public class QueryColumn implements CloneSupport<QueryColumn>, Conditional<Query
         if (selectTable == null) {
             return dialect.wrap(name);
         } else {
-            if (StrUtil.isNotBlank(selectTable.alias)) {
+            if (StringUtil.isNotBlank(selectTable.alias)) {
                 return dialect.wrap(selectTable.alias) + SqlConsts.REFERENCE + dialect.wrap(name);
-            } else if (StrUtil.isNotBlank(selectTable.getSchema()) && StrUtil.isNotBlank(selectTable.getName())) {
-                String realTable = dialect.getRealTable(selectTable.getName());
-                return dialect.wrap(dialect.getRealSchema(selectTable.schema, realTable)) + SqlConsts.REFERENCE + dialect.wrap(realTable)
+            } else if (StringUtil.isNotBlank(selectTable.getSchema()) && StringUtil.isNotBlank(selectTable.getName())) {
+                String realTable = dialect.getRealTable(selectTable.getName(), OperateType.SELECT);
+                return dialect.wrap(dialect.getRealSchema(selectTable.schema, realTable, OperateType.SELECT)) + SqlConsts.REFERENCE + dialect.wrap(realTable)
                         + SqlConsts.REFERENCE + dialect.wrap(name);
-            } else if (StrUtil.isNotBlank(selectTable.getName())) {
-                return dialect.wrap(dialect.getRealTable(selectTable.getName())) + SqlConsts.REFERENCE + dialect.wrap(name);
+            } else if (StringUtil.isNotBlank(selectTable.getName())) {
+                return dialect.wrap(dialect.getRealTable(selectTable.getName(), OperateType.SELECT)) + SqlConsts.REFERENCE + dialect.wrap(name);
             } else {
                 return dialect.wrap(name);
             }
@@ -955,19 +995,19 @@ public class QueryColumn implements CloneSupport<QueryColumn>, Conditional<Query
         return toConditionSql(queryTables, dialect) + WrapperUtil.buildColumnAlias(alias, dialect);
     }
 
-
+    @Nullable
     QueryTable getSelectTable(List<QueryTable> queryTables, QueryTable selfTable) {
-        //未查询任何表
+        // 未查询任何表
         if (queryTables == null || queryTables.isEmpty()) {
             return null;
         }
 
-        if (selfTable != null && StrUtil.isNotBlank(selfTable.alias)) {
+        if (selfTable != null && StringUtil.isNotBlank(selfTable.alias)) {
             return selfTable;
         }
 
         if (queryTables.size() == 1 && queryTables.get(0).isSameTable(selfTable)) {
-            //ignore table
+            // ignore table
             return null;
         }
 

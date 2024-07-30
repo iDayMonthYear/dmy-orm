@@ -1,18 +1,42 @@
 package cn.com.idmy.orm.core.row;
 
 import cn.com.idmy.orm.annotation.KeyType;
+import cn.com.idmy.orm.core.keygen.KeyGenerator;
 import cn.com.idmy.orm.core.util.SqlUtil;
 import lombok.Getter;
+
+import java.io.Serializable;
 
 /**
  * row 的主键策略
  */
 @Getter
-public class RowKey {
+public class RowKey implements Serializable {
+
     /**
      * 自增 ID
      */
     public static final RowKey AUTO = RowKey.of("id", KeyType.AUTO, null, false);
+
+    /**
+     * UUID 的 ID
+     */
+    public static final RowKey UUID = RowKey.of("id", KeyType.GENERATOR, KeyGenerator.UUID, true);
+
+    /**
+     * flexId
+     */
+    public static final RowKey FLEX_ID = RowKey.of("id", KeyType.GENERATOR, KeyGenerator.FLEX_ID, true);
+
+    /**
+     * snowFlakeId
+     */
+    public static final RowKey SNOW_FLAKE_ID = RowKey.of("id", KeyType.GENERATOR, KeyGenerator.SNOWFLAKE_ID, true);
+
+    /**
+     * ulid
+     */
+    public static final RowKey ULID = RowKey.of("id", KeyType.GENERATOR, KeyGenerator.ULID, true);
 
     public static RowKey of(String keyColumn) {
         SqlUtil.keepColumnSafely(keyColumn);
@@ -22,28 +46,19 @@ public class RowKey {
     }
 
     public static RowKey of(String keyColumn, KeyType keyType) {
-        SqlUtil.keepColumnSafely(keyColumn);
-        RowKey rowKey = new RowKey();
-        rowKey.keyColumn = keyColumn;
+        RowKey rowKey = of(keyColumn);
         rowKey.keyType = keyType;
         return rowKey;
     }
 
     public static RowKey of(String keyColumn, KeyType keyType, String keyTypeValue) {
-        SqlUtil.keepColumnSafely(keyColumn);
-        RowKey rowKey = new RowKey();
-        rowKey.keyColumn = keyColumn;
-        rowKey.keyType = keyType;
+        RowKey rowKey = of(keyColumn, keyType);
         rowKey.value = keyTypeValue;
         return rowKey;
     }
 
     public static RowKey of(String keyColumn, KeyType keyType, String keyTypeValue, boolean before) {
-        SqlUtil.keepColumnSafely(keyColumn);
-        RowKey rowKey = new RowKey();
-        rowKey.keyColumn = keyColumn;
-        rowKey.keyType = keyType;
-        rowKey.value = keyTypeValue;
+        RowKey rowKey = of(keyColumn, keyType, keyTypeValue);
         rowKey.before = before;
         return rowKey;
     }
@@ -67,9 +82,6 @@ public class RowKey {
      * 是否前执行
      */
     protected boolean before = true;
-
-    private RowKey() {
-    }
 
 
     @Override

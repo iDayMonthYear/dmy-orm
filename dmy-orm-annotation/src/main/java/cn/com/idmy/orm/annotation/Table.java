@@ -32,10 +32,12 @@ public @interface Table {
     /**
      * 默认为 驼峰属性 转换为 下划线字段。
      */
-    boolean camelToUnderline() default false;
+    boolean underline() default false;
 
     /**
      * 在某些场景下，我们需要手动编写 Mapper，可以通过这个注解来关闭 APT 的 Mapper 生成。
      */
-    boolean mapperGenerateEnable() default true;
+    boolean mapper() default true;
+
+    String comment() default "";
 }

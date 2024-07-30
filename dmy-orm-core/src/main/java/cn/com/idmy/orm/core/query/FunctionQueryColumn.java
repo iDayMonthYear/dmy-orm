@@ -5,9 +5,7 @@ import cn.com.idmy.orm.core.constant.SqlConsts;
 import cn.com.idmy.orm.core.dialect.Dialect;
 import cn.com.idmy.orm.core.util.CollectionUtil;
 import cn.com.idmy.orm.core.util.SqlUtil;
-import cn.hutool.core.util.StrUtil;
-import lombok.Getter;
-import lombok.Setter;
+import cn.com.idmy.orm.core.util.StringUtil;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -18,8 +16,6 @@ import java.util.stream.Collectors;
 /**
  * 数据库 聚合函数，例如 count(id) ，max(account.age) 等等
  */
-@Setter
-@Getter
 public class FunctionQueryColumn extends QueryColumn implements HasParamsColumn {
 
     protected String fnName;
@@ -34,6 +30,7 @@ public class FunctionQueryColumn extends QueryColumn implements HasParamsColumn 
     public FunctionQueryColumn(String fnName, String... columns) {
         this(fnName);
         for (String column : columns) {
+            // SqlUtil.keepColumnSafely(column)
             this.columns.add(new QueryColumn(column));
         }
     }
@@ -41,6 +38,22 @@ public class FunctionQueryColumn extends QueryColumn implements HasParamsColumn 
     public FunctionQueryColumn(String fnName, QueryColumn... columns) {
         this(fnName);
         this.columns.addAll(Arrays.asList(columns));
+    }
+
+    public String getFnName() {
+        return fnName;
+    }
+
+    public void setFnName(String fnName) {
+        this.fnName = fnName;
+    }
+
+    public List<QueryColumn> getColumns() {
+        return columns;
+    }
+
+    public void setColumns(List<QueryColumn> columns) {
+        this.columns = columns;
     }
 
     @Override
@@ -64,7 +77,7 @@ public class FunctionQueryColumn extends QueryColumn implements HasParamsColumn 
     @Override
     public String toSelectSql(List<QueryTable> queryTables, Dialect dialect) {
         String sql = getSql(queryTables, dialect);
-        if (StrUtil.isBlank(alias)) {
+        if (StringUtil.isBlank(alias)) {
             return fnName + WrapperUtil.withBracket(sql);
         }
         return fnName + WrapperUtil.withAlias(sql, alias, dialect);
@@ -97,7 +110,7 @@ public class FunctionQueryColumn extends QueryColumn implements HasParamsColumn 
                 .map(c -> c.toSelectSql(queryTables, dialect))
                 .collect(Collectors.joining(SqlConsts.DELIMITER));
 
-        if (StrUtil.isBlank(sql)) {
+        if (StringUtil.isBlank(sql)) {
             return SqlConsts.EMPTY;
         }
 

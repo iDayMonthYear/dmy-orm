@@ -1,6 +1,6 @@
 package cn.com.idmy.orm.core;
 
-import cn.com.idmy.orm.core.constant.SqlFunction;
+import cn.com.idmy.orm.core.constant.FunctionName;
 import cn.com.idmy.orm.core.exception.OrmAssert;
 import cn.com.idmy.orm.core.field.FieldQueryBuilder;
 import cn.com.idmy.orm.core.mybatis.MappedStatementTypes;
@@ -41,6 +41,7 @@ import static cn.com.idmy.orm.core.query.QueryMethods.count;
  */
 @SuppressWarnings({"varargs", "unchecked", "unused"})
 public interface BaseMapper<T> {
+
     /**
      * 默认批量处理切片数量。
      */
@@ -130,6 +131,11 @@ public interface BaseMapper<T> {
      * @return 受影响的行数
      */
     default int insertBatch(List<T> entities, int size) {
+
+        // 让 insertBatch(List<T> entities, int size) 和 insertBatch(List<T> entities) 保持一样的验证行为
+        // https://gitee.com/mybatis-flex/mybatis-flex/issues/I9EGWA
+        OrmAssert.notEmpty(entities, "entities");
+
         if (size <= 0) {
             size = DEFAULT_BATCH_SIZE;
         }
@@ -420,6 +426,10 @@ public interface BaseMapper<T> {
      * @return 实体类数据
      */
     default T selectOneByQuery(QueryWrapper queryWrapper) {
+        List<Join> joins = CPI.getJoins(queryWrapper);
+        if (CollectionUtil.isNotEmpty(joins)) {
+            return MapperUtil.getSelectOneResult(selectListByQuery(queryWrapper));
+        }
         Long limitRows = CPI.getLimitRows(queryWrapper);
         try {
             queryWrapper.limit(1);
@@ -437,6 +447,10 @@ public interface BaseMapper<T> {
      * @return 实体类数据
      */
     default <R> R selectOneByQueryAs(QueryWrapper queryWrapper, Class<R> asType) {
+        List<Join> joins = CPI.getJoins(queryWrapper);
+        if (CollectionUtil.isNotEmpty(joins)) {
+            return MapperUtil.getSelectOneResult(selectListByQueryAs(queryWrapper, asType));
+        }
         Long limitRows = CPI.getLimitRows(queryWrapper);
         try {
             queryWrapper.limit(1);
@@ -536,6 +550,22 @@ public interface BaseMapper<T> {
      */
     @SelectProvider(type = EntitySqlProvider.class, method = "selectListByQuery")
     Cursor<T> selectCursorByQuery(@Param(OrmConsts.QUERY) QueryWrapper queryWrapper);
+
+    /**
+     * 根据查询条件查询游标数据，要求返回的数据为 asType 类型。该方法必须在事务中才能正常使用，非事务下无法获取数据。
+     *
+     * @param queryWrapper 条件
+     * @param asType       接收的数据类型
+     * @return 游标数据
+     */
+    default <R> Cursor<R> selectCursorByQueryAs(QueryWrapper queryWrapper, Class<R> asType) {
+        try {
+            MappedStatementTypes.setCurrentType(asType);
+            return (Cursor<R>) selectCursorByQuery(queryWrapper);
+        } finally {
+            MappedStatementTypes.clear();
+        }
+    }
 
     /**
      * 根据查询条件查询 Row 数据。
@@ -669,7 +699,7 @@ public interface BaseMapper<T> {
                 objects = selectObjectListByQuery(queryWrapper);
             } else if (selectColumns.get(0) instanceof FunctionQueryColumn) {
                 // COUNT 函数必须在第一列
-                if (!SqlFunction.COUNT.equalsIgnoreCase(
+                if (!FunctionName.COUNT.equalsIgnoreCase(
                         ((FunctionQueryColumn) selectColumns.get(0)).getFnName()
                 )) {
                     // 第一个查询列不是 COUNT 函数，使用 COUNT(*) 替换所有的查询列
@@ -691,7 +721,7 @@ public interface BaseMapper<T> {
             }
             return MapperUtil.getLongNumber(objects);
         } finally {
-            //fixed https://github.com/mybatis-flex/mybatis-flex/issues/49
+            // fixed https://github.com/mybatis-flex/mybatis-flex/issues/49
             CPI.setSelectColumns(queryWrapper, selectColumns);
         }
     }
@@ -719,6 +749,7 @@ public interface BaseMapper<T> {
         Page<T> page = new Page<>(pageNumber, pageSize);
         return paginate(page, queryWrapper);
     }
+
 
     /**
      * 分页查询。
@@ -762,7 +793,6 @@ public interface BaseMapper<T> {
         return paginate(page, new QueryWrapper().where(whereConditions));
     }
 
-
     /**
      * 分页查询。
      *
@@ -786,7 +816,6 @@ public interface BaseMapper<T> {
         return paginateAs(page, queryWrapper, null, consumers);
     }
 
-
     /**
      * 分页查询。
      *
@@ -798,7 +827,7 @@ public interface BaseMapper<T> {
      */
     default <R> Page<R> paginateAs(Number pageNumber, Number pageSize, QueryWrapper queryWrapper, Class<R> asType) {
         Page<R> page = new Page<>(pageNumber, pageSize);
-        return MapperUtil.doPaginate(this, page, queryWrapper, asType);
+        return MapperUtil.doPaginate(this, page, queryWrapper, asType, false);
     }
 
     /**
@@ -813,7 +842,7 @@ public interface BaseMapper<T> {
      */
     default <R> Page<R> paginateAs(Number pageNumber, Number pageSize, Number totalRow, QueryWrapper queryWrapper, Class<R> asType) {
         Page<R> page = new Page<>(pageNumber, pageSize, totalRow);
-        return MapperUtil.doPaginate(this, page, queryWrapper, asType);
+        return MapperUtil.doPaginate(this, page, queryWrapper, asType, false);
     }
 
     /**
@@ -825,7 +854,7 @@ public interface BaseMapper<T> {
      * @return 分页数据
      */
     default <R> Page<R> paginateAs(Page<R> page, QueryWrapper queryWrapper, Class<R> asType) {
-        return MapperUtil.doPaginate(this, page, queryWrapper, asType);
+        return MapperUtil.doPaginate(this, page, queryWrapper, asType, false);
     }
 
     /**
@@ -838,9 +867,8 @@ public interface BaseMapper<T> {
      * @return 分页数据
      */
     default <R> Page<R> paginateAs(Page<R> page, QueryWrapper queryWrapper, Class<R> asType, Consumer<FieldQueryBuilder<R>>... consumers) {
-        return MapperUtil.doPaginate(this, page, queryWrapper, asType, consumers);
+        return MapperUtil.doPaginate(this, page, queryWrapper, asType, false, consumers);
     }
-
 
     default <E> Page<E> xmlPaginate(String dataSelectId, Page<E> page, QueryWrapper queryWrapper) {
         return xmlPaginate(dataSelectId, dataSelectId + "_COUNT", page, queryWrapper, null);
@@ -855,11 +883,11 @@ public interface BaseMapper<T> {
     }
 
     default <E> Page<E> xmlPaginate(String dataSelectId, String countSelectId, Page<E> page, QueryWrapper queryWrapper, Map<String, Object> otherParams) {
-        SqlSessionFactory sqlSessionFactory = OrmConfig.getDefaultConfig().getSqlSessionFactory();
-        ExecutorType executorType = OrmConfig.getDefaultConfig().getConfiguration().getDefaultExecutorType();
+        SqlSessionFactory sqlSessionFactory = OrmGlobalConfig.getDefaultConfig().getSqlSessionFactory();
+        ExecutorType executorType = OrmGlobalConfig.getDefaultConfig().getConfiguration().getDefaultExecutorType();
         String mapperClassName = ClassUtil.getUsefulClass(this.getClass()).getName();
 
-        Map<String, Object> preparedParams = MapperUtil.preparedParams(page, queryWrapper, otherParams);
+        Map<String, Object> preparedParams = MapperUtil.preparedParams(this, page, queryWrapper, otherParams);
         if (!dataSelectId.contains(".")) {
             dataSelectId = mapperClassName + "." + dataSelectId;
         }

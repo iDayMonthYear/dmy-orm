@@ -10,13 +10,18 @@ import lombok.Setter;
 
 import java.util.List;
 
-import static cn.com.idmy.orm.core.constant.SqlConsts.*;
+import static cn.com.idmy.orm.core.constant.SqlConsts.AS;
+import static cn.com.idmy.orm.core.constant.SqlConsts.BRACKET_LEFT;
+import static cn.com.idmy.orm.core.constant.SqlConsts.BRACKET_RIGHT;
+import static cn.com.idmy.orm.core.constant.SqlConsts.DELIMITER;
 
 @Setter
 @Getter
 public class WithItem implements CloneSupport<WithItem> {
+
     private String name;
     private List<String> params;
+
     private WithDetail withDetail;
 
     public WithItem() {

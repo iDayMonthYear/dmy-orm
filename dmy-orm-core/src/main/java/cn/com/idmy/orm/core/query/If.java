@@ -1,6 +1,6 @@
 package cn.com.idmy.orm.core.query;
 
-import cn.hutool.core.util.StrUtil;
+import cn.com.idmy.orm.core.util.StringUtil;
 
 import java.util.Collection;
 import java.util.Map;
@@ -52,7 +52,7 @@ public class If {
      * 查看某个 string 对象是否有文本内容
      */
     public static boolean hasText(String string) {
-        return StrUtil.isNotBlank(string);
+        return StringUtil.isNotBlank(string);
     }
 
 }

@@ -12,7 +12,7 @@
     <groupId>cn.com.idmy.orm</groupId>
     <artifactId>dmy-orm</artifactId>
     <packaging>pom</packaging>
-    <version>1.7.9</version>
+    <version>1.9.4</version>
 
     <modules>
         <module>dmy-orm-annotation</module>
@@ -23,7 +23,7 @@
     </modules>
 
     <properties>
-        <dmy-orm.version>1.7.9</dmy-orm.version>
+        <dmy-orm.version>1.9.4</dmy-orm.version>
 
         <mybatis.version>3.5.15</mybatis.version>
         <mybatis-spring.version>3.0.3</mybatis-spring.version>

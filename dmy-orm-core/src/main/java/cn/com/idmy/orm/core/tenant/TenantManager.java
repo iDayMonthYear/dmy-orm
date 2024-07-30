@@ -1,42 +1,45 @@
 package cn.com.idmy.orm.core.tenant;
 
 import jakarta.annotation.Nullable;
-import lombok.AccessLevel;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 import java.util.function.Supplier;
 
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class TenantManager {
-    private static final ThreadLocal<Boolean> ignore = new ThreadLocal<>();
+
+    private TenantManager() {
+    }
+
+    private static final ThreadLocal<Boolean> ignoreFlags = new ThreadLocal<>();
 
     @Getter
-    @Setter
     private static TenantFactory tenantFactory;
 
+    public static void setTenantFactory(TenantFactory tenantFactory) {
+        TenantManager.tenantFactory = tenantFactory;
+    }
+
     /**
      * 忽略 tenant 条件
      */
-    public static <T> T ignore(Supplier<T> supplier) {
+    public static <T> T withoutTenantCondition(Supplier<T> supplier) {
         try {
-            start();
+            ignoreTenantCondition();
             return supplier.get();
         } finally {
-            restore();
+            restoreTenantCondition();
         }
     }
 
     /**
      * 忽略 tenant 条件
      */
-    public static void ignore(Runnable runnable) {
+    public static void withoutTenantCondition(Runnable runnable) {
         try {
-            start();
+            ignoreTenantCondition();
             runnable.run();
         } finally {
-            restore();
+            restoreTenantCondition();
         }
     }
 
@@ -44,25 +47,32 @@ public class TenantManager {
     /**
      * 忽略 tenant 条件
      */
-    public static void start() {
-        ignore.set(Boolean.TRUE);
+    public static void ignoreTenantCondition() {
+        ignoreFlags.set(Boolean.TRUE);
     }
 
 
     /**
      * 恢复 tenant 条件
      */
-    public static void restore() {
-        ignore.remove();
+    public static void restoreTenantCondition() {
+        ignoreFlags.remove();
+    }
+
+    /**
+     * @deprecated 使用 {@link #getTenantIds(String)} 代替。
+     */
+    @Deprecated
+    public static Object[] getTenantIds() {
+        return getTenantIds(null);
     }
 
     @Nullable
-    public static Object[] getTenantIds() {
-        Boolean bol = ignore.get();
-        if (bol != null && bol) {
+    public static Object[] getTenantIds(String tableName) {
+        Boolean ignoreFlag = ignoreFlags.get();
+        if (ignoreFlag != null && ignoreFlag) {
             return null;
-        } else {
-            return tenantFactory != null ? tenantFactory.getTenantIds() : null;
         }
+        return tenantFactory != null ? tenantFactory.getTenantIds(tableName) : null;
     }
 }

@@ -26,9 +26,8 @@ public class OrmWrapperFactory implements ObjectWrapperFactory {
             return false;
         } else if (Map.class.isAssignableFrom(objectClass)) {
             return true;
-        } else {
-            return TableInfoFactory.ofEntityClass(objectClass) != null;
         }
+        return TableInfoFactory.ofEntityClass(objectClass) != null;
     }
 
     @SuppressWarnings("unchecked")
@@ -36,16 +35,18 @@ public class OrmWrapperFactory implements ObjectWrapperFactory {
     public ObjectWrapper getWrapperFor(MetaObject metaObject, Object object) {
         if (Map.class.isAssignableFrom(object.getClass())) {
             if (object.getClass() == Row.class) {
+                //取消 row 的 user_name 转换为 userName，否则再次保存时无法进行保存
+                //https://github.com/mybatis-flex/mybatis-flex/issues/244
                 return new MapWrapper(metaObject, (Map<String, Object>) object);
-            } else {
-                return new FlexMapWrapper(metaObject, (Map<String, Object>) object);
             }
+            return new FlexMapWrapper(metaObject, (Map<String, Object>) object);
         } else {
             return new FlexBeanWrapper(metaObject, object);
         }
     }
 
     static class FlexBeanWrapper extends BeanWrapper {
+
         private final Object entity;
         private final TableInfo tableInfo;
 
@@ -62,7 +63,9 @@ public class OrmWrapperFactory implements ObjectWrapperFactory {
         }
     }
 
+
     static class FlexMapWrapper extends MapWrapper {
+
         public FlexMapWrapper(MetaObject metaObject, Map<String, Object> map) {
             super(metaObject, map);
         }
@@ -72,4 +75,5 @@ public class OrmWrapperFactory implements ObjectWrapperFactory {
             return useCamelCaseMapping && (Character.isUpperCase(name.charAt(0)) || name.contains("_")) ? StringUtil.underlineToCamel(name) : name;
         }
     }
+
 }

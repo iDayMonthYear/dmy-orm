@@ -7,30 +7,29 @@ import cn.com.idmy.orm.core.keygen.MultiEntityKeyGenerator;
 import cn.com.idmy.orm.core.keygen.MultiRowKeyGenerator;
 import cn.com.idmy.orm.core.keygen.MybatisKeyGeneratorUtil;
 import cn.com.idmy.orm.core.keygen.RowKeyGenerator;
-import cn.com.idmy.orm.core.mybatis.executor.OrmBatchExecutor;
-import cn.com.idmy.orm.core.mybatis.executor.OrmReuseExecutor;
-import cn.com.idmy.orm.core.mybatis.executor.OrmSimpleExecutor;
+import cn.com.idmy.orm.core.mybatis.binding.MapperRegistry;
+import cn.com.idmy.orm.core.mybatis.executor.BatchExecutor;
+import cn.com.idmy.orm.core.mybatis.executor.ReuseExecutor;
+import cn.com.idmy.orm.core.mybatis.executor.SimpleExecutor;
 import cn.com.idmy.orm.core.table.TableInfo;
 import cn.com.idmy.orm.core.table.TableInfoFactory;
+import cn.com.idmy.orm.core.util.MapUtil;
 import cn.com.idmy.orm.core.util.StringUtil;
+import jakarta.annotation.Nullable;
 import org.apache.ibatis.executor.CachingExecutor;
 import org.apache.ibatis.executor.Executor;
 import org.apache.ibatis.executor.keygen.KeyGenerator;
 import org.apache.ibatis.executor.keygen.NoKeyGenerator;
 import org.apache.ibatis.executor.keygen.SelectKeyGenerator;
 import org.apache.ibatis.executor.parameter.ParameterHandler;
-import org.apache.ibatis.executor.resultset.ResultSetHandler;
-import org.apache.ibatis.executor.statement.StatementHandler;
 import org.apache.ibatis.mapping.BoundSql;
 import org.apache.ibatis.mapping.Environment;
 import org.apache.ibatis.mapping.MappedStatement;
 import org.apache.ibatis.mapping.ResultMap;
 import org.apache.ibatis.session.*;
 import org.apache.ibatis.transaction.Transaction;
-import org.apache.ibatis.util.MapUtil;
 
 import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Proxy;
 import java.lang.reflect.Type;
 import java.util.Collections;
 import java.util.List;
@@ -44,6 +43,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class OrmConfiguration extends Configuration {
 
     private static final Map<String, MappedStatement> dynamicMappedStatementCache = new ConcurrentHashMap<>();
+    private final org.apache.ibatis.binding.MapperRegistry mapperRegistry = new MapperRegistry(this);
 
     public OrmConfiguration() {
         setObjectWrapperFactory(new OrmWrapperFactory());
@@ -70,7 +70,7 @@ public class OrmConfiguration extends Configuration {
         if (!mappedStatementId.endsWith(SelectKeyGenerator.SELECT_KEY_SUFFIX)
                 && parameterObject instanceof Map
                 && ((Map<?, ?>) parameterObject).containsKey(OrmConsts.SQL_ARGS)) {
-            SqlArgsParameterHandler sqlArgsParameterHandler = new SqlArgsParameterHandler(mappedStatement, (Map) parameterObject, boundSql);
+            SqlArgsParameterHandler sqlArgsParameterHandler = new SqlArgsParameterHandler(mappedStatement, parameterObject, boundSql);
             return (ParameterHandler) interceptorChain.pluginAll(sqlArgsParameterHandler);
         } else {
             return super.newParameterHandler(mappedStatement, parameterObject, boundSql);
@@ -79,11 +79,11 @@ public class OrmConfiguration extends Configuration {
 
 
     @Override
-    public ResultSetHandler newResultSetHandler(Executor executor, MappedStatement mappedStatement
+    public org.apache.ibatis.executor.resultset.ResultSetHandler newResultSetHandler(Executor executor, MappedStatement mappedStatement
             , RowBounds rowBounds, ParameterHandler parameterHandler, ResultHandler resultHandler, BoundSql boundSql) {
-        ResultSetHandler resultSetHandler = new OrmResultSetHandler(executor, mappedStatement, parameterHandler,
+        org.apache.ibatis.executor.resultset.ResultSetHandler resultSetHandler = new OrmResultSetHandler(executor, mappedStatement, parameterHandler,
                 resultHandler, boundSql, rowBounds);
-        return (ResultSetHandler) interceptorChain.pluginAll(resultSetHandler);
+        return (org.apache.ibatis.executor.resultset.ResultSetHandler) interceptorChain.pluginAll(resultSetHandler);
     }
 
     /**
@@ -91,9 +91,9 @@ public class OrmConfiguration extends Configuration {
      * FlexStatementHandler 和 原生的 RoutingStatementHandler 对比，没有任何性能影响
      */
     @Override
-    public StatementHandler newStatementHandler(Executor executor, MappedStatement mappedStatement, Object parameterObject, RowBounds rowBounds, ResultHandler resultHandler, BoundSql boundSql) {
-        StatementHandler statementHandler = new OrmStatementHandler(executor, mappedStatement, parameterObject, rowBounds, resultHandler, boundSql);
-        statementHandler = (StatementHandler) interceptorChain.pluginAll(statementHandler);
+    public org.apache.ibatis.executor.statement.StatementHandler newStatementHandler(Executor executor, MappedStatement mappedStatement, Object parameterObject, RowBounds rowBounds, ResultHandler resultHandler, BoundSql boundSql) {
+        org.apache.ibatis.executor.statement.StatementHandler statementHandler = new OrmStatementHandler(executor, mappedStatement, parameterObject, rowBounds, resultHandler, boundSql);
+        statementHandler = (org.apache.ibatis.executor.statement.StatementHandler) interceptorChain.pluginAll(statementHandler);
         return statementHandler;
     }
 
@@ -107,11 +107,11 @@ public class OrmConfiguration extends Configuration {
         executorType = executorType == null ? defaultExecutorType : executorType;
         Executor executor;
         if (ExecutorType.BATCH == executorType) {
-            executor = new OrmBatchExecutor(this, transaction);
+            executor = new BatchExecutor(this, transaction);
         } else if (ExecutorType.REUSE == executorType) {
-            executor = new OrmReuseExecutor(this, transaction);
+            executor = new ReuseExecutor(this, transaction);
         } else {
-            executor = new OrmSimpleExecutor(this, transaction);
+            executor = new SimpleExecutor(this, transaction);
         }
         if (cacheEnabled) {
             executor = new CachingExecutor(executor);
@@ -300,7 +300,7 @@ public class OrmConfiguration extends Configuration {
                 .build();
     }
 
-
+    @Nullable
     private TableInfo getTableInfo(MappedStatement ms) {
         String mapperClassName = ms.getId().substring(0, ms.getId().lastIndexOf("."));
         try {
@@ -330,17 +330,35 @@ public class OrmConfiguration extends Configuration {
 
         //不支持泛型类添加
         if (!isGenericInterface) {
-            super.addMapper(type);
+            mapperRegistry.addMapper(type);
         }
     }
 
 
-    @SuppressWarnings("unchecked")
+    @Override
+    public org.apache.ibatis.binding.MapperRegistry getMapperRegistry() {
+        return mapperRegistry;
+    }
+
+    @Override
+    public void addMappers(String packageName, Class<?> superType) {
+        mapperRegistry.addMappers(packageName, superType);
+    }
+
+    @Override
+    public void addMappers(String packageName) {
+        mapperRegistry.addMappers(packageName);
+    }
+
     @Override
     public <T> T getMapper(Class<T> type, SqlSession sqlSession) {
-        T mapper = super.getMapper(type, sqlSession);
-        return (T) Proxy.newProxyInstance(type.getClassLoader(), new Class[]{type}
-                , new MapperInvocationHandler(mapper, environment.getDataSource()));
+        return mapperRegistry.getMapper(type, sqlSession);
     }
+
+    @Override
+    public boolean hasMapper(Class<?> type) {
+        return mapperRegistry.hasMapper(type);
+    }
+
 
 }

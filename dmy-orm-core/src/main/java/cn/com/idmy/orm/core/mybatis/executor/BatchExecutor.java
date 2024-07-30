@@ -2,7 +2,6 @@ package cn.com.idmy.orm.core.mybatis.executor;
 
 import cn.com.idmy.orm.core.keygen.RowKeyGenerator;
 import org.apache.ibatis.cache.CacheKey;
-import org.apache.ibatis.executor.BatchExecutor;
 import org.apache.ibatis.executor.BatchExecutorException;
 import org.apache.ibatis.executor.BatchResult;
 import org.apache.ibatis.executor.keygen.Jdbc3KeyGenerator;
@@ -23,14 +22,15 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class OrmBatchExecutor extends BatchExecutor implements CacheKeyBuilder {
+public class BatchExecutor extends org.apache.ibatis.executor.BatchExecutor implements CacheKeyBuilder {
+
     private final List<Statement> statementList = new ArrayList<>();
     private final List<BatchResult> batchResultList = new ArrayList<>();
     private String currentSql;
     private MappedStatement currentStatement;
 
 
-    public OrmBatchExecutor(Configuration configuration, Transaction transaction) {
+    public BatchExecutor(Configuration configuration, Transaction transaction) {
         super(configuration, transaction);
     }
 
@@ -127,4 +127,5 @@ public class OrmBatchExecutor extends BatchExecutor implements CacheKeyBuilder {
             batchResultList.clear();
         }
     }
+
 }

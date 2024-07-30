@@ -2,8 +2,8 @@ package cn.com.idmy.orm.core.util;
 
 import cn.com.idmy.orm.annotation.EnumValue;
 import cn.com.idmy.orm.core.exception.OrmExceptions;
+import jakarta.annotation.Nullable;
 import lombok.Getter;
-import org.apache.ibatis.util.MapUtil;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -11,18 +11,14 @@ import java.lang.reflect.Modifier;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+@Getter
 public class EnumWrapper<E extends Enum<E>> {
     private static final Map<Class, EnumWrapper> cache = new ConcurrentHashMap<>();
     private boolean hasEnumValueAnnotation = false;
-    @Getter
-    private Class<?> enumClass;
-    @Getter
-    private E[] enums;
-    @Getter
+    private final Class<?> enumClass;
+    private final E[] enums;
     private Field property;
-    @Getter
     private Class<?> propertyType;
-    @Getter
     private Method getterMethod;
 
     public static <R extends Enum<R>> EnumWrapper<R> of(Class<?> enumClass) {
@@ -68,20 +64,41 @@ public class EnumWrapper<E extends Enum<E>> {
                 }
                 this.getterMethod = enumValueMethod;
                 this.hasEnumValueAnnotation = true;
+                Class<?> returnType = enumValueMethod.getReturnType();
+                if (returnType.isPrimitive()) {
+                    returnType = ConvertUtil.primitiveToBoxed(returnType);
+                }
+                this.propertyType = returnType;
             }
         }
     }
 
-
+    /**
+     * 获取枚举值
+     * 顺序：
+     * 1、@EnumValue标识的get方法
+     * 2、@EnumValue标识的属性
+     * 3、没有使用@EnumValue，取枚举name
+     *
+     * @param object
+     * @return
+     */
     public Object getEnumValue(E object) {
         try {
-            return getterMethod != null ? getterMethod.invoke(object) : property.get(object);
+            if (getterMethod != null) {
+                return getterMethod.invoke(object);
+            } else if (property != null) {
+                return property.get(object);
+            } else {
+                return object.name();
+            }
         } catch (Exception e) {
             throw OrmExceptions.wrap(e);
         }
     }
 
 
+    @Nullable
     public E getEnum(Object value) {
         if (value != null) {
             for (E e : enums) {
@@ -92,6 +109,7 @@ public class EnumWrapper<E extends Enum<E>> {
         }
         return null;
     }
+
 
     public boolean hasEnumValueAnnotation() {
         return hasEnumValueAnnotation;

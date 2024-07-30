@@ -2,6 +2,7 @@ package cn.com.idmy.orm.core.query;
 
 import cn.com.idmy.orm.core.constant.SqlConsts;
 import cn.com.idmy.orm.core.constant.SqlOperator;
+import lombok.Getter;
 
 import java.util.Iterator;
 import java.util.Objects;
@@ -24,8 +25,9 @@ public class QueryColumnBehavior {
      * 内置的可选的忽略规则
      */
     public static final Predicate<Object> IGNORE_NULL = Objects::isNull;
+    public static final Predicate<Object> IGNORE_NONE = o -> Boolean.FALSE;
     public static final Predicate<Object> IGNORE_EMPTY = o -> o == null || "".equals(o);
-    public static final Predicate<Object> IGNORE_BLANK = o -> o == null || "".equals(o.toString().trim());
+    public static final Predicate<Object> IGNORE_BLANK = o -> o == null || o.toString().trim().isEmpty();
 
     /**
      * 在满足输入的数组或可迭代对象中的容量为 1 （即只有一个元素）时，自动将条件中的 in 转换为 =
@@ -68,6 +70,7 @@ public class QueryColumnBehavior {
     /**
      * 自定义全局的自动忽略参数的方法。
      */
+    @Getter
     private static Predicate<Object> ignoreFunction = IGNORE_NULL;
 
     /**
@@ -78,18 +81,11 @@ public class QueryColumnBehavior {
     /**
      * 当 {@code IN(...)} 条件只有 1 个参数时，是否自动把的内容转换为相等。
      */
+    @Getter
     private static boolean smartConvertInToEquals = false;
-
-    public static Predicate<Object> getIgnoreFunction() {
-        return ignoreFunction;
-    }
 
     public static void setIgnoreFunction(Predicate<Object> ignoreFunction) {
         QueryColumnBehavior.ignoreFunction = ignoreFunction;
-    }
-
-    public static boolean isSmartConvertInToEquals() {
-        return smartConvertInToEquals;
     }
 
     public static void setSmartConvertInToEquals(boolean smartConvertInToEquals) {
@@ -111,4 +107,5 @@ public class QueryColumnBehavior {
     public static QueryCondition castCondition(QueryCondition condition) {
         return getConditionCaster().apply(condition);
     }
+
 }

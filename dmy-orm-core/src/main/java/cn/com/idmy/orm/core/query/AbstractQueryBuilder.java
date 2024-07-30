@@ -1,7 +1,6 @@
 package cn.com.idmy.orm.core.query;
 
 import cn.com.idmy.orm.core.BaseMapper;
-import lombok.RequiredArgsConstructor;
 
 /**
  * 抽象关联查询。
@@ -9,9 +8,13 @@ import lombok.RequiredArgsConstructor;
  * @author 王帅
  * @since 2023-08-08
  */
-@RequiredArgsConstructor
 public abstract class AbstractQueryBuilder<T> implements ChainQuery<T> {
+
     protected final MapperQueryChain<T> delegate;
+
+    protected AbstractQueryBuilder(MapperQueryChain<T> delegate) {
+        this.delegate = delegate;
+    }
 
     /**
      * @return BaseMapper
@@ -26,4 +29,5 @@ public abstract class AbstractQueryBuilder<T> implements ChainQuery<T> {
     protected QueryWrapper queryWrapper() {
         return delegate.toQueryWrapper();
     }
+
 }

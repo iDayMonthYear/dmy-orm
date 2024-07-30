@@ -4,17 +4,16 @@ import cn.com.idmy.orm.core.OrmConsts;
 import cn.com.idmy.orm.core.constant.SqlConsts;
 import cn.com.idmy.orm.core.dialect.Dialect;
 import cn.com.idmy.orm.core.exception.OrmExceptions;
+import cn.com.idmy.orm.core.util.ArrayUtil;
 import cn.com.idmy.orm.core.util.CollectionUtil;
 import cn.com.idmy.orm.core.util.ObjectUtil;
-import cn.hutool.core.util.ArrayUtil;
-import cn.hutool.core.util.StrUtil;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
+import cn.com.idmy.orm.core.util.StringUtil;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class CaseQueryColumn extends QueryColumn implements HasParamsColumn {
+
     private List<When> whens;
     private Object elseValue;
 
@@ -29,11 +28,10 @@ public class CaseQueryColumn extends QueryColumn implements HasParamsColumn {
     @Override
     String toSelectSql(List<QueryTable> queryTables, Dialect dialect) {
         String sql = buildSql(queryTables, dialect);
-        if (StrUtil.isNotBlank(alias)) {
+        if (StringUtil.isNotBlank(alias)) {
             return WrapperUtil.withAlias(sql, alias, dialect);
-        } else {
-            return sql;
         }
+        return sql;
     }
 
     @Override
@@ -68,28 +66,33 @@ public class CaseQueryColumn extends QueryColumn implements HasParamsColumn {
     public Object[] getParamValues() {
         Object[] values = OrmConsts.EMPTY_ARRAY;
         for (When when : whens) {
-            values = ArrayUtil.addAll(values, WrapperUtil.getValues(when.whenCondition));
+            values = ArrayUtil.concat(values, WrapperUtil.getValues(when.whenCondition));
         }
         if (elseValue instanceof HasParamsColumn) {
-            values = ArrayUtil.addAll(values, ((HasParamsColumn) elseValue).getParamValues());
+            values = ArrayUtil.concat(values, ((HasParamsColumn) elseValue).getParamValues());
         }
         return values;
     }
 
 
     public static class When implements CloneSupport<When> {
+
         private QueryCondition whenCondition;
-        @Setter
         private Object thenValue;
 
         public When(QueryCondition whenCondition) {
             this.whenCondition = whenCondition;
         }
 
+        public void setThenValue(Object thenValue) {
+            this.thenValue = thenValue;
+        }
+
         @Override
         public When clone() {
             try {
                 When clone = (When) super.clone();
+                // deep clone ...
                 clone.whenCondition = ObjectUtil.clone(this.whenCondition);
                 clone.thenValue = ObjectUtil.cloneObject(this.thenValue);
                 return clone;
@@ -101,7 +104,8 @@ public class CaseQueryColumn extends QueryColumn implements HasParamsColumn {
     }
 
     public static class Builder {
-        private final CaseQueryColumn caseQueryColumn = new CaseQueryColumn();
+
+        private CaseQueryColumn caseQueryColumn = new CaseQueryColumn();
         private When lastWhen;
 
         public Then when(QueryCondition condition) {
@@ -118,15 +122,22 @@ public class CaseQueryColumn extends QueryColumn implements HasParamsColumn {
             return caseQueryColumn;
         }
 
-        @RequiredArgsConstructor
         public static class Then {
-            private final Builder builder;
+
+            private Builder builder;
+
+            public Then(Builder builder) {
+                this.builder = builder;
+            }
 
             public Builder then(Object thenValue) {
                 this.builder.lastWhen.setThenValue(thenValue);
                 this.builder.caseQueryColumn.addWhen(builder.lastWhen);
                 return builder;
             }
+
         }
+
     }
+
 }

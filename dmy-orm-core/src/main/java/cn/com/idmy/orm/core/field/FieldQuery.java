@@ -8,6 +8,7 @@ import java.io.Serializable;
 /**
  * 查询属性的信息。
  */
+@SuppressWarnings("rawtypes")
 @Data
 public class FieldQuery implements Serializable {
     private Class<?> entityClass;
@@ -61,6 +62,5 @@ public class FieldQuery implements Serializable {
         protected FieldQuery build() {
             return this.fieldQuery;
         }
-
     }
 }

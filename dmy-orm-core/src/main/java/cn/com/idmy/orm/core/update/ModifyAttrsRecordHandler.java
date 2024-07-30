@@ -11,6 +11,7 @@ import java.util.Map;
 
 @Getter
 class ModifyAttrsRecordHandler implements MethodHandler {
+
     /**
      * 更新的字段和内容
      */
@@ -18,6 +19,7 @@ class ModifyAttrsRecordHandler implements MethodHandler {
 
     @Override
     public Object invoke(Object self, Method originalMethod, Method proxyMethod, Object[] args) throws Throwable {
+
         String methodName = originalMethod.getName();
         if (methodName.startsWith("set")
                 && methodName.length() > 3
@@ -32,9 +34,12 @@ class ModifyAttrsRecordHandler implements MethodHandler {
                 return proxyMethod.invoke(self, args);
             }
 
-            updates.put(property, args[0]);
+            //用 fw.getField().getName() 的原因是 property 可能获取的内容不正确，比如 ID 会得到的内容为 iD
+            updates.put(fw == null ? property : fw.getField().getName(), args[0]);
         }
 
         return proxyMethod.invoke(self, args);
     }
+
+
 }

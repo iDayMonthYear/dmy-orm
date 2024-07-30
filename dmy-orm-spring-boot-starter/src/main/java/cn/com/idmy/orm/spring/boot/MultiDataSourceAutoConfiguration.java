@@ -52,7 +52,7 @@ public class MultiDataSourceAutoConfiguration {
         OrmDataSource ormDataSource = null;
         if (dataSourceProperties != null && !dataSourceProperties.isEmpty()) {
             if (dataSourceDecipher != null) {
-                DataSourceManager.setDataSourceDecipher(dataSourceDecipher);
+                DataSourceManager.setDecipher(dataSourceDecipher);
             }
             for (Map.Entry<String, Map<String, String>> entry : dataSourceProperties.entrySet()) {
                 DataSource dataSource = new DataSourceBuilder(entry.getValue()).build();

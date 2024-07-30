@@ -5,6 +5,7 @@ import cn.com.idmy.orm.core.query.QueryCondition;
 import cn.com.idmy.orm.core.query.QueryWrapper;
 import cn.com.idmy.orm.core.util.LambdaGetter;
 import cn.com.idmy.orm.core.util.LambdaUtil;
+import cn.com.idmy.orm.core.util.UpdateEntity;
 import org.apache.ibatis.javassist.util.proxy.ProxyObject;
 
 import java.io.Serializable;

@@ -15,7 +15,7 @@ import java.util.List;
  */
 public class QueryOrderBy implements CloneSupport<QueryOrderBy> {
 
-    private QueryColumn queryColumn;
+    QueryColumn queryColumn;
 
     /**
      * asc, desc
@@ -33,11 +33,9 @@ public class QueryOrderBy implements CloneSupport<QueryOrderBy> {
         this.orderType = orderType;
     }
 
-
     public QueryOrderBy(QueryColumn queryColumn) {
         this.queryColumn = queryColumn;
     }
-
 
     public QueryOrderBy nullsFirst() {
         this.nullsFirst = true;
@@ -45,13 +43,11 @@ public class QueryOrderBy implements CloneSupport<QueryOrderBy> {
         return this;
     }
 
-
     public QueryOrderBy nullsLast() {
         this.nullsFirst = false;
         this.nullsLast = true;
         return this;
     }
-
 
     public String toSql(List<QueryTable> queryTables, Dialect dialect) {
         String sql = queryColumn.toConditionSql(queryTables, dialect) + orderType;

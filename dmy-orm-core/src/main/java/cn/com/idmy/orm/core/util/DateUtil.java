@@ -1,7 +1,7 @@
 package cn.com.idmy.orm.core.util;
 
 
-import cn.hutool.core.util.StrUtil;
+import jakarta.annotation.Nullable;
 
 import java.sql.Timestamp;
 import java.text.ParseException;
@@ -79,8 +79,9 @@ public class DateUtil {
     }
 
 
+    @Nullable
     public static Date parseDate(String dateString) {
-        if (StrUtil.isBlank(dateString)) {
+        if (StringUtil.isBlank(dateString)) {
             return null;
         }
         dateString = dateString.trim();
@@ -120,8 +121,9 @@ public class DateUtil {
     }
 
 
+    @Nullable
     public static LocalDateTime parseLocalDateTime(String dateString) {
-        if (StrUtil.isBlank(dateString)) {
+        if (StringUtil.isBlank(dateString)) {
             return null;
         }
         dateString = dateString.trim();
@@ -181,6 +183,7 @@ public class DateUtil {
     }
 
 
+    @Nullable
     public static LocalDateTime toLocalDateTime(Date date) {
         if (date == null) {
             return null;
@@ -196,6 +199,7 @@ public class DateUtil {
     }
 
 
+    @Nullable
     public static LocalDate toLocalDate(Date date) {
         if (date == null) {
             return null;
@@ -212,6 +216,7 @@ public class DateUtil {
     }
 
 
+    @Nullable
     public static LocalTime toLocalTime(Date date) {
         if (date == null) {
             return null;
@@ -228,6 +233,7 @@ public class DateUtil {
     }
 
 
+    @Nullable
     public static Date toDate(LocalDateTime localDateTime) {
         if (localDateTime == null) {
             return null;
@@ -238,6 +244,7 @@ public class DateUtil {
     }
 
 
+    @Nullable
     public static Date toDate(LocalDate localDate) {
         if (localDate == null) {
             return null;
@@ -248,6 +255,7 @@ public class DateUtil {
     }
 
 
+    @Nullable
     public static Date toDate(LocalTime localTime) {
         if (localTime == null) {
             return null;

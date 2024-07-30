@@ -4,8 +4,7 @@ import cn.com.idmy.orm.core.exception.OrmExceptions;
 import cn.com.idmy.orm.core.util.ClassUtil;
 import jakarta.annotation.Nullable;
 import lombok.Getter;
-import lombok.Setter;
-import lombok.extern.slf4j.Slf4j;
+import org.apache.ibatis.logging.LogFactory;
 
 import javax.sql.DataSource;
 import java.lang.reflect.Method;
@@ -13,24 +12,31 @@ import java.lang.reflect.Method;
 /**
  * @author michael
  */
-@Slf4j
 public class DataSourceManager {
-    @Getter
-    @Setter
-    private static DataSourceDecipher dataSourceDecipher;
 
     @Getter
-    @Setter
+    private static DataSourceDecipher decipher;
+
+    public static void setDecipher(DataSourceDecipher decipher) {
+        DataSourceManager.decipher = decipher;
+    }
+
+    @Getter
     private static DataSourceShardingStrategy dataSourceShardingStrategy;
 
+    public static void setDataSourceShardingStrategy(DataSourceShardingStrategy dataSourceShardingStrategy) {
+        DataSourceManager.dataSourceShardingStrategy = dataSourceShardingStrategy;
+    }
+
     public static void decryptDataSource(DataSource dataSource) {
-        if (dataSourceDecipher == null) {
+        if (decipher == null) {
             return;
         }
 
         try {
             restartDataSource(dataSource);
         } catch (Exception ignored) {
+            // do nothing here.
         }
 
         for (DataSourceProperty property : DataSourceProperty.values()) {
@@ -38,7 +44,7 @@ public class DataSourceManager {
             if (getterMethod != null) {
                 String value = invokeMethod(getterMethod, dataSource);
                 if (value != null) {
-                    value = dataSourceDecipher.decrypt(property, value);
+                    value = decipher.decrypt(property, value);
                     Method setter = ClassUtil.getAnyMethod(dataSource.getClass(), property.getSetterMethods());
                     if (setter != null && value != null) {
                         invokeMethod(setter, dataSource, value);
@@ -65,12 +71,13 @@ public class DataSourceManager {
         try {
             return (String) method.invoke(object, params);
         } catch (Exception e) {
-            log.error("Can not invoke method: " + method.getName(), e);
-            return null;
+            LogFactory.getLog(DataSourceManager.class).error("Can not invoke method: " + method.getName(), e);
         }
+        return null;
     }
 
-    static String getByShardingStrategy(String dataSource, Object mapper, Method method, Object[] args) {
+
+    static String getShardingDsKey(String dataSource, Object mapper, Method method, Object[] args) {
         return dataSourceShardingStrategy != null ? dataSourceShardingStrategy.doSharding(dataSource, mapper, method, args) : null;
     }
 }

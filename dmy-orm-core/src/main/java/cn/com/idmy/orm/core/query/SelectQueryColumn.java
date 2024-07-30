@@ -2,11 +2,12 @@ package cn.com.idmy.orm.core.query;
 
 import cn.com.idmy.orm.core.dialect.Dialect;
 import cn.com.idmy.orm.core.util.ObjectUtil;
-import cn.hutool.core.util.StrUtil;
+import cn.com.idmy.orm.core.util.StringUtil;
 
 import java.util.List;
 
 public class SelectQueryColumn extends QueryColumn implements HasParamsColumn {
+
     private QueryWrapper queryWrapper;
 
     public SelectQueryColumn(QueryWrapper queryWrapper) {
@@ -21,7 +22,7 @@ public class SelectQueryColumn extends QueryColumn implements HasParamsColumn {
     @Override
     String toSelectSql(List<QueryTable> queryTables, Dialect dialect) {
         String selectSql = dialect.forSelectByQuery(queryWrapper);
-        if (StrUtil.isNotBlank(selectSql) && StrUtil.isNotBlank(alias)) {
+        if (StringUtil.isNotBlank(selectSql) && StringUtil.isNotBlank(alias)) {
             selectSql = WrapperUtil.withAlias(selectSql, alias, dialect);
         }
         return selectSql;

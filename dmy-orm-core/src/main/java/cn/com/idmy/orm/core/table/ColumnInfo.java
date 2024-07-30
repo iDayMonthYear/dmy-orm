@@ -1,10 +1,10 @@
 package cn.com.idmy.orm.core.table;
 
-import cn.com.idmy.orm.core.OrmConfig;
+import cn.com.idmy.orm.core.OrmGlobalConfig;
 import cn.com.idmy.orm.core.mask.CompositeMaskTypeHandler;
 import cn.com.idmy.orm.core.mask.MaskTypeHandler;
-import cn.hutool.core.util.ArrayUtil;
-import cn.hutool.core.util.StrUtil;
+import cn.com.idmy.orm.core.util.ArrayUtil;
+import cn.com.idmy.orm.core.util.StringUtil;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.ibatis.session.Configuration;
@@ -20,7 +20,6 @@ import java.util.Date;
 @Getter
 @Setter
 public class ColumnInfo {
-
     private static final Class<?>[] needGetTypeHandlerTypes = {
             Date.class, java.sql.Date.class, Time.class, Timestamp.class,
             Instant.class, LocalDate.class, LocalDateTime.class, LocalTime.class, OffsetDateTime.class, OffsetTime.class, ZonedDateTime.class,
@@ -42,6 +41,11 @@ public class ColumnInfo {
      * java entity 定义的属性名称（field name）。
      */
     protected String property;
+
+    /**
+     * 数据库字段注释，在 AI 时代，注释的内容往往可用于 AI 辅助对话
+     */
+    protected String comment;
 
     /**
      * 属性类型。
@@ -73,7 +77,6 @@ public class ColumnInfo {
      */
     protected boolean ignore;
 
-
     public TypeHandler<?> buildTypeHandler(Configuration configuration) {
 
         if (buildTypeHandler != null) {
@@ -81,7 +84,7 @@ public class ColumnInfo {
         }
 
         //脱敏规则配置
-        else if (StrUtil.isNotBlank(maskType)) {
+        else if (StringUtil.isNotBlank(maskType)) {
             if (typeHandler != null) {
                 //noinspection unchecked
                 buildTypeHandler = new CompositeMaskTypeHandler(maskType, (TypeHandler<Object>) typeHandler);
@@ -98,7 +101,7 @@ public class ColumnInfo {
         //枚举
         else if (propertyType.isEnum() || ArrayUtil.contains(needGetTypeHandlerTypes, propertyType)) {
             if (configuration == null) {
-                configuration = OrmConfig.getDefaultConfig().getConfiguration();
+                configuration = OrmGlobalConfig.getDefaultConfig().getConfiguration();
             }
             if (configuration != null) {
                 buildTypeHandler = configuration.getTypeHandlerRegistry().getTypeHandler(propertyType);

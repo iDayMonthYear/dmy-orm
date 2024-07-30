@@ -14,6 +14,7 @@ import java.util.Collection;
  * @author michael
  */
 public class Fastjson2TypeHandler extends BaseJsonTypeHandler<Object> {
+
     private final Class<?> propertyType;
     private Class<?> genericType;
     private Type type;
@@ -24,6 +25,7 @@ public class Fastjson2TypeHandler extends BaseJsonTypeHandler<Object> {
         this.propertyType = propertyType;
         this.supportAutoType = propertyType.isInterface() || Modifier.isAbstract(propertyType.getModifiers());
     }
+
 
     public Fastjson2TypeHandler(Class<?> propertyType, Class<?> genericType) {
         this.propertyType = propertyType;

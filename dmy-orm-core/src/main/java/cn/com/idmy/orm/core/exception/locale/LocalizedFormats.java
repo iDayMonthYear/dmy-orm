@@ -65,4 +65,5 @@ public enum LocalizedFormats implements Localizable {
         // 如果没有该语言的本地化消息，则返回源消息字符串
         return sourceFormat;
     }
+
 }

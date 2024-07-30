@@ -2,13 +2,13 @@ package cn.com.idmy.orm.core.table;
 
 import cn.com.idmy.orm.annotation.Id;
 import cn.com.idmy.orm.annotation.KeyType;
-import cn.com.idmy.orm.core.OrmConfig;
-import cn.hutool.core.util.StrUtil;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import cn.com.idmy.orm.core.OrmGlobalConfig;
+import cn.com.idmy.orm.core.util.StringUtil;
+import lombok.Getter;
+import lombok.Setter;
 
-@EqualsAndHashCode(callSuper = true)
-@Data
+@Setter
+@Getter
 public class IdInfo extends ColumnInfo {
 
     /**
@@ -25,7 +25,6 @@ public class IdInfo extends ColumnInfo {
      */
     private String value;
 
-
     /**
      * sequence 序列内容执行顺序
      *
@@ -33,11 +32,11 @@ public class IdInfo extends ColumnInfo {
      */
     private Boolean before;
 
-
     public IdInfo(Id id) {
         this.keyType = id.keyType();
         this.value = id.value();
         this.before = id.before();
+        this.comment = id.comment();
         initDefaultKeyType();
     }
 
@@ -46,17 +45,18 @@ public class IdInfo extends ColumnInfo {
      */
     private void initDefaultKeyType() {
         if (this.keyType == null || this.keyType == KeyType.NONE) {
-            OrmConfig.KeyConfig defaultKeyConfig = OrmConfig.getDefaultConfig().getKeyConfig();
+            OrmGlobalConfig.KeyConfig defaultKeyConfig = OrmGlobalConfig.getDefaultConfig().getKeyConfig();
             if (defaultKeyConfig != null) {
                 if (defaultKeyConfig.getKeyType() != null) {
                     this.keyType = defaultKeyConfig.getKeyType();
                     this.before = defaultKeyConfig.isBefore();
                 }
-                if (StrUtil.isBlank(this.value) && StrUtil.isNotBlank(defaultKeyConfig.getValue())) {
+                if (StringUtil.isBlank(this.value) && StringUtil.isNotBlank(defaultKeyConfig.getValue())) {
                     this.value = defaultKeyConfig.getValue();
                 }
             }
         }
     }
+
 
 }
