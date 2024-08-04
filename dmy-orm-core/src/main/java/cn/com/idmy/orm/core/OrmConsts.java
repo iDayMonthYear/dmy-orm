@@ -37,7 +37,6 @@ public class OrmConsts {
 
     public static final Object[] EMPTY_ARRAY = new Object[0];
 
-
     /**
      * 当 entity 使用逻辑删除时，0 为 entity 的正常状态
      */
@@ -46,5 +45,4 @@ public class OrmConsts {
      * 当 entity 使用逻辑删除时，1 为 entity 的删除状态
      */
     public static final int LOGIC_DELETE_DELETED = 1;
-
 }

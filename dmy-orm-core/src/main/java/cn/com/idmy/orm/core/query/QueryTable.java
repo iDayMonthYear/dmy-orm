@@ -5,7 +5,9 @@ import cn.com.idmy.orm.core.dialect.Dialect;
 import cn.com.idmy.orm.core.dialect.OperateType;
 import cn.com.idmy.orm.core.exception.OrmExceptions;
 import cn.com.idmy.orm.core.util.StringUtil;
+import cn.hutool.core.util.StrUtil;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.util.Objects;
 
@@ -15,6 +17,7 @@ import java.util.Objects;
  * @author michael
  * @author 王帅
  */
+@Setter
 @Getter
 public class QueryTable implements CloneSupport<QueryTable> {
     protected String schema;
@@ -31,30 +34,18 @@ public class QueryTable implements CloneSupport<QueryTable> {
     }
 
     public QueryTable(String schema, String name) {
-        this.schema = StringUtil.tryTrim(schema);
-        this.name = StringUtil.tryTrim(name);
+        this.schema = StrUtil.trim(schema);
+        this.name = StrUtil.trim(name);
     }
 
     public QueryTable(String schema, String table, String alias) {
-        this.schema = StringUtil.tryTrim(schema);
-        this.name = StringUtil.tryTrim(table);
-        this.alias = StringUtil.tryTrim(alias);
-    }
-
-    public void setSchema(String schema) {
-        this.schema = schema;
-    }
-
-    public void setName(String name) {
-        this.name = name;
+        this.schema = StrUtil.trim(schema);
+        this.name = StrUtil.trim(table);
+        this.alias = StrUtil.trim(alias);
     }
 
     public String getNameWithSchema() {
-        return StringUtil.isNotBlank(schema) ? schema + "." + name : name;
-    }
-
-    public void setAlias(String alias) {
-        this.alias = alias;
+        return StrUtil.isNotBlank(schema) ? schema + "." + name : name;
     }
 
     public QueryTable as(String alias) {
@@ -69,11 +60,11 @@ public class QueryTable implements CloneSupport<QueryTable> {
         if (this == table) {
             return true;
         }
-        if (StringUtil.isNotBlank(alias)
-                && StringUtil.isNotBlank(table.alias)) {
+        if (StrUtil.isNotBlank(alias) && StrUtil.isNotBlank(table.alias)) {
             return Objects.equals(alias, table.alias);
+        } else {
+            return Objects.equals(name, table.name);
         }
-        return Objects.equals(name, table.name);
     }
 
     Object[] getValueArray() {
@@ -81,14 +72,12 @@ public class QueryTable implements CloneSupport<QueryTable> {
     }
 
     public String toSql(Dialect dialect, OperateType operateType) {
-        String sql;
-        if (StringUtil.isNotBlank(schema)) {
-            String table = dialect.getRealTable(name, operateType);
-            sql = dialect.wrap(dialect.getRealSchema(schema, table, operateType)) + "." + dialect.wrap(table) + WrapperUtil.buildAlias(alias, dialect);
+        if (StrUtil.isBlank(schema)) {
+            return dialect.wrap(dialect.getRealTable(name, operateType)) + WrapperUtil.buildAlias(alias, dialect);
         } else {
-            sql = dialect.wrap(dialect.getRealTable(name, operateType)) + WrapperUtil.buildAlias(alias, dialect);
+            String table = dialect.getRealTable(name, operateType);
+            return dialect.wrap(dialect.getRealSchema(schema, table, operateType)) + "." + dialect.wrap(table) + WrapperUtil.buildAlias(alias, dialect);
         }
-        return sql;
     }
 
     @Override

@@ -42,7 +42,7 @@ public class MybatisFlexConfig {
     /**
      * 配置文件名。
      */
-    private static final String APT_FILE_NAME = "mybatis-flex.config";
+    private static final String APT_FILE_NAME = "orm.properties";
 
     /**
      * mybatis-flex.properties

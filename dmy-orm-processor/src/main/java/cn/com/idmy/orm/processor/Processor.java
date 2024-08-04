@@ -58,19 +58,19 @@ import java.util.*;
 public class Processor extends AbstractProcessor {
 
     private static final List<String> DEFAULT_SUPPORT_COLUMN_TYPES = Arrays.asList(
-        int.class.getName(), Integer.class.getName(),
-        short.class.getName(), Short.class.getName(),
-        long.class.getName(), Long.class.getName(),
-        float.class.getName(), Float.class.getName(),
-        double.class.getName(), Double.class.getName(),
-        boolean.class.getName(), Boolean.class.getName(),
-        Date.class.getName(), java.sql.Date.class.getName(), Time.class.getName(), Timestamp.class.getName(),
-        Instant.class.getName(), LocalDate.class.getName(), LocalDateTime.class.getName(), LocalTime.class.getName(),
-        OffsetDateTime.class.getName(), OffsetTime.class.getName(), ZonedDateTime.class.getName(),
-        Year.class.getName(), Month.class.getName(), YearMonth.class.getName(), JapaneseDate.class.getName(),
-        byte[].class.getName(), Byte[].class.getName(), Byte.class.getName(),
-        BigInteger.class.getName(), BigDecimal.class.getName(),
-        char.class.getName(), String.class.getName(), Character.class.getName()
+            int.class.getName(), Integer.class.getName(),
+            short.class.getName(), Short.class.getName(),
+            long.class.getName(), Long.class.getName(),
+            float.class.getName(), Float.class.getName(),
+            double.class.getName(), Double.class.getName(),
+            boolean.class.getName(), Boolean.class.getName(),
+            Date.class.getName(), java.sql.Date.class.getName(), Time.class.getName(), Timestamp.class.getName(),
+            Instant.class.getName(), LocalDate.class.getName(), LocalDateTime.class.getName(), LocalTime.class.getName(),
+            OffsetDateTime.class.getName(), OffsetTime.class.getName(), ZonedDateTime.class.getName(),
+            Year.class.getName(), Month.class.getName(), YearMonth.class.getName(), JapaneseDate.class.getName(),
+            byte[].class.getName(), Byte[].class.getName(), Byte.class.getName(),
+            BigInteger.class.getName(), BigDecimal.class.getName(),
+            char.class.getName(), String.class.getName(), Character.class.getName()
     );
 
     private Filer filer;
@@ -113,7 +113,7 @@ public class Processor extends AbstractProcessor {
             }
 
             // 其他配置选项
-            String genPath = configuration.get(ConfigurationKey.GEN_PATH);
+            String genPath = configuration.get(ConfigurationKey.GEN_PATH) ;
 
             // all in Tables 配置
             String allInTablesPackage = configuration.get(ConfigurationKey.ALL_IN_TABLES_PACKAGE);
@@ -139,6 +139,7 @@ public class Processor extends AbstractProcessor {
             Set<? extends Element> elementsAnnotatedWith = roundEnv.getElementsAnnotatedWith(Table.class);
 
             for (Element entityClassElement : elementsAnnotatedWith) {
+                System.err.println(entityClassElement);
 
                 // 获取 Table 注解
                 Table table = entityClassElement.getAnnotation(Table.class);
@@ -178,14 +179,18 @@ public class Processor extends AbstractProcessor {
                 tableInfo.setEntityName(entityClass);
                 tableInfo.setEntitySimpleName(entityClassName);
                 tableInfo.setSchema(table.schema());
-                tableInfo.setTableName(table.value());
+                String tableName = table.value();
+                if (cn.hutool.core.util.StrUtil.isBlank(tableName)) {
+                    tableName = entityClassName;
+                }
+                tableInfo.setTableName(tableName);
                 tableInfo.setEntityComment(elementUtils.getDocComment(entityClassElement));
 
                 // 生成 TableDef 文件
                 String realTableDefPackage = StrUtil.isBlank(tableDefPackage) ? StrUtil.buildTableDefPackage(entityClass) : StrUtil.processPackageExpression(entityClass, tableDefPackage);
                 String tableDefClassName = entityClassName.concat(tableDefClassSuffix);
                 String tableDefContent = ContentBuilder.buildTableDef(tableInfo, allInTablesEnable, realTableDefPackage, tableDefClassName
-                    , tableDefPropertiesNameStyle, tableDefInstanceSuffix, columnInfos, defaultColumns);
+                        , tableDefPropertiesNameStyle, tableDefInstanceSuffix, columnInfos, defaultColumns);
                 // 将文件所依赖的 Element 传入 Filer 中，表示此 TableDef 依赖这个类，以保证增量编译时不丢失内容。
                 processGenClass(genPath, realTableDefPackage, tableDefClassName, tableDefContent, entityClassElement);
 
@@ -197,9 +202,9 @@ public class Processor extends AbstractProcessor {
                 }
 
                 // 是否生成 Mapper 文件
-                if ("true".equalsIgnoreCase(mapperGenerateEnable) && table.mapper()) {
+                if ("true".equalsIgnoreCase(mapperGenerateEnable) && table.dao()) {
                     String realMapperPackage = StrUtil.isBlank(mapperPackage) ? StrUtil.buildMapperPackage(entityClass) : StrUtil.processPackageExpression(entityClass, mapperPackage);
-                    String mapperClassName = entityClassName.concat("Mapper");
+                    String mapperClassName = entityClassName.concat("Dao");
                     boolean mapperAnnotationEnable = "true".equalsIgnoreCase(mapperAnnotation);
                     String mapperClassContent = ContentBuilder.buildMapper(tableInfo, realMapperPackage, mapperClassName, mapperBaseClass, mapperAnnotationEnable);
                     // 生成的 Mapper 依赖于此 Element。
@@ -213,6 +218,7 @@ public class Processor extends AbstractProcessor {
                 String realTablesClassName = StrUtil.isBlank(allInTablesClassName) ? "Tables" : allInTablesClassName;
                 String tablesContent = ContentBuilder.buildTables(importBuilder, fieldBuilder, realTablesPackage, allInTablesClassName);
                 processGenClass(genPath, realTablesPackage, realTablesClassName, tablesContent, elementsAnnotatedWith.toArray(new Element[0]));
+                System.out.println(genPath);
             }
         }
         return false;
@@ -279,8 +285,8 @@ public class Processor extends AbstractProcessor {
 
                 // 未配置 typeHandler 的情况下，只支持基本数据类型，不支持比如 list set 或者自定义的类等
                 if ((column == null || "org.apache.ibatis.type.UnknownTypeHandler".equals(typeHandlerClass[0]))
-                    && !DEFAULT_SUPPORT_COLUMN_TYPES.contains(typeString)
-                    && (typeElement != null && ElementKind.ENUM != typeElement.getKind())
+                        && !DEFAULT_SUPPORT_COLUMN_TYPES.contains(typeString)
+                        && (typeElement != null && ElementKind.ENUM != typeElement.getKind())
                 ) {
                     continue;
                 }

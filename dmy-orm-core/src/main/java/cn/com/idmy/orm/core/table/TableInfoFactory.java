@@ -104,9 +104,8 @@ public class TableInfoFactory {
         // 检查基接口
         Type[] genericInterfaces = mapperClass.getGenericInterfaces();
         for (Type type : genericInterfaces) {
-            if (type instanceof ParameterizedType) {
+            if (type instanceof ParameterizedType parameterizedType) {
                 // 泛型基接口
-                ParameterizedType parameterizedType = (ParameterizedType) type;
                 Type rawType = parameterizedType.getRawType();
                 Type[] typeArguments = parameterizedType.getActualTypeArguments();
                 adjustTypeArguments(mapperClass, actualTypeArguments, typeArguments);
@@ -142,8 +141,7 @@ public class TableInfoFactory {
 
     private static void adjustTypeArguments(Class<?> subclass, Type[] subclassTypeArguments, Type[] typeArguments) {
         for (int i = 0; i < typeArguments.length; i++) {
-            if (typeArguments[i] instanceof TypeVariable) {
-                TypeVariable<?> typeVariable = (TypeVariable<?>) typeArguments[i];
+            if (typeArguments[i] instanceof TypeVariable<?> typeVariable) {
                 TypeVariable<?>[] typeParameters = subclass.getTypeParameters();
                 for (int j = 0; j < typeParameters.length; j++) {
                     if (Objects.equals(typeVariable.getName(), typeParameters[j].getName())) {
@@ -167,7 +165,11 @@ public class TableInfoFactory {
             tableInfo.setTableName(StringUtil.camelToUnderline(entityClass.getSimpleName()));
         } else {
             tableInfo.setSchema(table.schema());
-            tableInfo.setTableName(table.value());
+            String tableName = table.value();
+            if (StrUtil.isBlank(tableName)) {
+                tableName = entityClass.getSimpleName();
+            }
+            tableInfo.setTableName(tableName);
             tableInfo.setCamelToUnderline(table.underline());
             tableInfo.setComment(table.comment());
             if (StringUtil.isNotBlank(table.dataSource())) {
@@ -365,11 +367,6 @@ public class TableInfoFactory {
     /**
      * 创建 typeHandler
      * 参考 {@link TypeHandlerRegistry#getInstance(Class, Class)}
-     *
-     * @param entityClass
-     * @param field
-     * @param typeHandlerClass
-     * @param fieldType
      */
     private static TypeHandler<?> createCollectionTypeHandler(Class<?> entityClass, Field field, Class<?> typeHandlerClass, Class<?> fieldType) {
         Class<?> genericClass = null;

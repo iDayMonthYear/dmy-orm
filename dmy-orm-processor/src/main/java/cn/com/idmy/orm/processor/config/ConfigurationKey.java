@@ -36,13 +36,13 @@ public enum ConfigurationKey {
     /**
      * 自定义 Tables 生成的包名。
      */
-    ALL_IN_TABLES_PACKAGE("processor.allInTables.package", null),
+    ALL_IN_TABLES_PACKAGE("processor.allInTables.package", "${entityPackage.parent.parent}.table"),
 
 
     /**
      * 开启 Mapper 自动生成。
      */
-    MAPPER_GENERATE_ENABLE("processor.mapper.generateEnable", "false"),
+    MAPPER_GENERATE_ENABLE("processor.mapper.generateEnable", "true"),
 
     /**
      * 开启 @Mapper 注解。
@@ -57,13 +57,13 @@ public enum ConfigurationKey {
     /**
      * 自定义 Mapper 生成的包名。
      */
-    MAPPER_PACKAGE("processor.mapper.package", null),
+    MAPPER_PACKAGE("processor.mapper.package", "${entityPackage.parent.parent}.dao"),
 
 
     /**
      * 自定义 Class 生成的包名。
      */
-    TABLE_DEF_PACKAGE("processor.tableDef.package", null),
+    TABLE_DEF_PACKAGE("processor.tableDef.package", "${entityPackage.parent.parent}.table"),
 
     /**
      * 生成的 Class 的后缀。

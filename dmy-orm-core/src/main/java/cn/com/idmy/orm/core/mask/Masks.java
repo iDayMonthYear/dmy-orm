@@ -1,12 +1,9 @@
 package cn.com.idmy.orm.core.mask;
 
-/**
- * 内置的数据脱敏方式
- */
-public class Masks {
+import lombok.NoArgsConstructor;
 
-    private Masks() {
-    }
+@NoArgsConstructor(access = lombok.AccessLevel.PRIVATE)
+public class Masks {
 
     /**
      * 手机号脱敏
@@ -21,7 +18,7 @@ public class Masks {
     /**
      * 身份证号脱敏
      */
-    public static final String ID_CARD_NUMBER = "id_card_number";
+    public static final String ID_CARD_NO = "id_card_no";
 
     /**
      * 中文名脱敏
@@ -51,24 +48,17 @@ public class Masks {
     /**
      * 银行卡号脱敏
      */
-    public static final String BANK_CARD_NUMBER = "bank_card_number";
+    public static final String BANK_CARD_NO = "bank_card_no";
 
-
-    private static String createMask(int count) {
-        StringBuilder mask = new StringBuilder();
-        for (int i = 0; i < count; i++) {
-            mask.append("*");
-        }
-        return mask.toString();
+    private static String create(int count) {
+        return "*".repeat(Math.max(0, count));
     }
-
 
     private static String mask(String needToMaskString, int keepFirstCount, int keepLastCount, int maskCount) {
         return needToMaskString.substring(0, keepFirstCount)
-                + createMask(maskCount)
+                + create(maskCount)
                 + needToMaskString.substring(needToMaskString.length() - keepLastCount);
     }
-
 
     /**
      * 手机号脱敏处理器
@@ -77,10 +67,10 @@ public class Masks {
     static MaskProcessor MOBILE_PROCESSOR = data -> {
         if (data instanceof String && ((String) data).startsWith("1") && ((String) data).length() == 11) {
             return mask((String) data, 3, 4, 4);
+        } else {
+            return data;
         }
-        return data;
     };
-
 
     /**
      * 固定电话脱敏
@@ -89,20 +79,21 @@ public class Masks {
     static MaskProcessor FIXED_PHONE_PROCESSOR = data -> {
         if (data instanceof String && ((String) data).length() > 5) {
             return mask((String) data, 3, 2, ((String) data).length() - 5);
+        } else {
+            return data;
         }
-        return data;
     };
-
 
     /**
      * 身份证号脱敏处理器
      * 身份证号的保留前三后四，中间的数为星号  "*"
      */
-    static MaskProcessor ID_CARD_NUMBER_PROCESSOR = data -> {
+    static MaskProcessor ID_CARD_NO_PROCESSOR = data -> {
         if (data instanceof String && ((String) data).length() >= 15) {
-            return mask((String) data, 3, 4, ((String) data).length() - 7);
+            return mask((String) data, 6, 2, ((String) data).length() - 7);
+        } else {
+            return data;
         }
-        return data;
     };
 
 
@@ -110,8 +101,7 @@ public class Masks {
      * 姓名脱敏
      */
     static MaskProcessor CHINESE_NAME_PROCESSOR = data -> {
-        if (data instanceof String) {
-            String name = (String) data;
+        if (data instanceof String name) {
             if (name.length() == 2) {
                 return name.charAt(0) + "*";
             } else if (name.length() == 3) {
@@ -130,8 +120,7 @@ public class Masks {
      * 地址脱敏
      */
     static MaskProcessor ADDRESS_PROCESSOR = data -> {
-        if (data instanceof String) {
-            String address = (String) data;
+        if (data instanceof String address) {
             if (address.length() > 6) {
                 return mask(address, 6, 0, 3);
             } else if (address.length() > 3) {
@@ -146,8 +135,7 @@ public class Masks {
      * email 脱敏
      */
     static MaskProcessor EMAIL_PROCESSOR = data -> {
-        if (data instanceof String && ((String) data).contains("@")) {
-            String fullEmail = (String) data;
+        if (data instanceof String fullEmail && ((String) data).contains("@")) {
             int indexOf = fullEmail.lastIndexOf("@");
             String email = fullEmail.substring(0, indexOf);
 
@@ -171,10 +159,10 @@ public class Masks {
     static MaskProcessor PASSWORD_PROCESSOR = data -> {
         if (data instanceof String) {
             return mask((String) data, 0, 0, ((String) data).length());
+        } else {
+            return data;
         }
-        return data;
     };
-
 
     /**
      * 车牌号 脱敏
@@ -182,20 +170,19 @@ public class Masks {
     static MaskProcessor CAR_LICENSE_PROCESSOR = data -> {
         if (data instanceof String) {
             return mask((String) data, 3, 1, ((String) data).length() - 4);
+        } else {
+            return data;
         }
-        return data;
     };
-
 
     /**
      * 银行卡号 脱敏
      */
-    static MaskProcessor BANK_CARD_PROCESSOR = data -> {
+    static MaskProcessor BANK_CARD_NO_PROCESSOR = data -> {
         if (data instanceof String && ((String) data).length() >= 8) {
             return mask((String) data, 4, 4, 4);
+        } else {
+            return data;
         }
-        return data;
     };
-
-
 }

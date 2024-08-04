@@ -14,12 +14,7 @@ import java.util.List;
  * @author michael
  */
 public class QueryOrderBy implements CloneSupport<QueryOrderBy> {
-
     QueryColumn queryColumn;
-
-    /**
-     * asc, desc
-     */
     private String orderType = SqlConsts.ASC;
 
     private boolean nullsFirst = false;
@@ -29,11 +24,17 @@ public class QueryOrderBy implements CloneSupport<QueryOrderBy> {
     }
 
     public QueryOrderBy(QueryColumn queryColumn, String orderType) {
+        if (queryColumn == null) {
+            throw new IllegalArgumentException("排序字段为空，请检查字段是否正确");
+        }
         this.queryColumn = queryColumn;
         this.orderType = orderType;
     }
 
     public QueryOrderBy(QueryColumn queryColumn) {
+        if (queryColumn == null) {
+            throw new IllegalArgumentException("排序字段为空，请检查字段是否正确");
+        }
         this.queryColumn = queryColumn;
     }
 

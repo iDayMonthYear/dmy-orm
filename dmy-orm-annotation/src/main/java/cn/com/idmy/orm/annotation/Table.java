@@ -37,7 +37,7 @@ public @interface Table {
     /**
      * 在某些场景下，我们需要手动编写 Mapper，可以通过这个注解来关闭 APT 的 Mapper 生成。
      */
-    boolean mapper() default true;
+    boolean dao() default true;
 
     String comment() default "";
 }

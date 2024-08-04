@@ -95,10 +95,8 @@ public class TableManager {
         return StringUtil.isNotBlank(dynamicSchema) ? dynamicSchema : schema;
     }
 
-
     public static void clear() {
         tableNameMappingTL.remove();
         schemaMappingTL.remove();
     }
-
 }

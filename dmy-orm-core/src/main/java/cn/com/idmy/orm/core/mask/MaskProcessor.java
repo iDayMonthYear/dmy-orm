@@ -1,10 +1,6 @@
 package cn.com.idmy.orm.core.mask;
 
-/**
- * 数据脱敏处理器
- */
+@FunctionalInterface
 public interface MaskProcessor {
-
     Object mask(Object data);
-
 }

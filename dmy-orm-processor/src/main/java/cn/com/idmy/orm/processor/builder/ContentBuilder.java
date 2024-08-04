@@ -68,7 +68,7 @@ public class ContentBuilder {
         content.append(tableDefPackage).append(";\n\n");
         content.append("import cn.com.idmy.orm.core.query.QueryColumn;\n");
         content.append("import cn.com.idmy.orm.core.table.TableDef;\n\n");
-        content.append("public class ").append(tableDefClassName).append(" extends TableDef {\n\n");
+        content.append("public class ").append(tableDefClassName).append(" extends TableDef {\n");
 
         //TableDef 类的属性名称
         String tableDefPropertyName = null;
@@ -109,9 +109,6 @@ public class ContentBuilder {
             }
             content.append(");\n");
         });
-        content.append("    /**\n")
-                .append("     * 所有字段。\n")
-                .append("     */\n");
         content.append("    public final QueryColumn ALL = new QueryColumn(this, \"*\");\n");
         StringJoiner defaultColumnJoiner = new StringJoiner(", ");
         columnInfos.forEach(columnInfo -> {
@@ -123,9 +120,6 @@ public class ContentBuilder {
                 defaultColumnJoiner.add(columnPropertyName);
             }
         });
-        content.append("\n    /**\n")
-                .append("     * 默认字段，不包含逻辑删除或者 large 等字段。\n")
-                .append("     */\n");
         content.append("    public final QueryColumn[] FULL = new QueryColumn[]{").append(defaultColumnJoiner).append("};\n\n");
         String schema = !StrUtil.isBlank(tableInfo.getSchema())
                 ? tableInfo.getSchema()
@@ -142,9 +136,8 @@ public class ContentBuilder {
                 .append("    }\n\n");
 
         content.append("    public ").append(tableDefClassName).append(" as(String alias) {\n")
-                .append("        String key = getNameWithSchema() + \".\" + alias;\n")
-                .append("        return getCache(key, k -> new ").append(tableDefClassName).append("(\"").append(schema).append("\", \"").append(tableName).append("\", alias));\n")
-                .append("    }\n\n}\n");
+                .append("        return getCache(getNameWithSchema() + \".\" + alias, k -> new ").append(tableDefClassName).append("(\"").append(schema).append("\", \"").append(tableName).append("\", alias));\n")
+                .append("    }\n}");
         return content.toString();
     }
 

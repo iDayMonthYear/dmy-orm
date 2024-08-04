@@ -19,7 +19,6 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class OrmBootstrap {
-
     protected final AtomicBoolean started = new AtomicBoolean(false);
 
     @Getter

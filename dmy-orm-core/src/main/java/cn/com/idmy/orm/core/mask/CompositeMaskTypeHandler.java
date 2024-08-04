@@ -9,7 +9,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public class CompositeMaskTypeHandler implements TypeHandler<Object> {
-
     private final String maskType;
     private final TypeHandler<Object> typeHandler;
 
