@@ -74,7 +74,8 @@ public class DialectFactory {
 
     private static Dialect createDialect(DbType dbType) {
         return switch (dbType) {
-            case MYSQL, H2, LEALONE -> new CommonDialectImpl(KeywordWrap.BACK_QUOTE, LimitOffsetProcessor.MYSQL);
+            case MYSQL -> new CommonDialectImpl(KeywordWrap.BACK_QUOTE, LimitOffsetProcessor.MYSQL);
+            case H2, LEALONE -> new CommonDialectImpl(KeywordWrap.DOUBLE_QUOTATION, LimitOffsetProcessor.POSTGRESQL);
             default -> new CommonDialectImpl();
         };
     }
