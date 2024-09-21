@@ -180,7 +180,7 @@ public class Processor extends AbstractProcessor {
                 tableInfo.setEntitySimpleName(entityClassName);
                 tableInfo.setSchema(table.schema());
                 String tableName = table.value();
-                if (cn.hutool.core.util.StrUtil.isBlank(tableName)) {
+                if (StrUtil.isBlank(tableName)) {
                     tableName = entityClassName;
                 }
                 tableInfo.setTableName(tableName);

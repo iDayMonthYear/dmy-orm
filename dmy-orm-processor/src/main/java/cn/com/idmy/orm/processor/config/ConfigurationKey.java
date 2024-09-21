@@ -1,11 +1,14 @@
 package cn.com.idmy.orm.processor.config;
 
+import lombok.Getter;
+
 /**
  * 配置键值。
  *
  * @author 王帅
  * @since 2023-06-22
  */
+@Getter
 public enum ConfigurationKey {
 
     /**
@@ -47,7 +50,7 @@ public enum ConfigurationKey {
     /**
      * 开启 @Mapper 注解。
      */
-    MAPPER_ANNOTATION("processor.mapper.annotation", "false"),
+    MAPPER_ANNOTATION("processor.mapper.annotation", "true"),
 
     /**
      * 自定义 Mapper 的父类。
@@ -86,30 +89,23 @@ public enum ConfigurationKey {
     TABLE_DEF_IGNORE_ENTITY_SUFFIXES("processor.tableDef.ignoreEntitySuffixes", "");
 
 
+    /**
+     * -- GETTER --
+     *  获取配置键。
+     *
+     * @return 键
+     */
     private final String configKey;
+    /**
+     * -- GETTER --
+     *  获取配置默认值。
+     *
+     * @return 默认值
+     */
     private final String defaultValue;
 
     ConfigurationKey(String configKey, String defaultValue) {
         this.configKey = configKey;
         this.defaultValue = defaultValue;
     }
-
-    /**
-     * 获取配置键。
-     *
-     * @return 键
-     */
-    public String getConfigKey() {
-        return configKey;
-    }
-
-    /**
-     * 获取配置默认值。
-     *
-     * @return 默认值
-     */
-    public String getDefaultValue() {
-        return defaultValue;
-    }
-
 }
