@@ -126,9 +126,8 @@ public class KeywordWrap {
         StringBuilder resultBuilder = new StringBuilder();
         String[] split = keyword.split("\\.");
         if (split.length > 0) {
-            Arrays.asList(split)
-                    .forEach(f -> resultBuilder.append(prefix).append(f).append(suffix).append("."));
-            return resultBuilder.toString().substring(0, resultBuilder.length() - 1);
+            Arrays.asList(split).forEach(f -> resultBuilder.append(prefix).append(f).append(suffix).append("."));
+            return resultBuilder.substring(0, resultBuilder.length() - 1);
         } else {
             return prefix + keyword + suffix;
         }

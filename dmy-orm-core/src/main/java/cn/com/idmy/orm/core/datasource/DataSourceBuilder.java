@@ -20,6 +20,7 @@ public class DataSourceBuilder {
         dataSourceAlias.put("druid", "com.alibaba.druid.pool.DruidDataSource");
         dataSourceAlias.put("hikari", "com.zaxxer.hikari.HikariDataSource");
         dataSourceAlias.put("hikaricp", "com.zaxxer.hikari.HikariDataSource");
+        dataSourceAlias.put("lealone", "com.lealone.client.jdbc.JdbcDataSource");
     }
 
     private final Map<String, String> dataSourceProperties;
@@ -98,6 +99,7 @@ public class DataSourceBuilder {
         String[] detectClassNames = new String[]{
                 "com.alibaba.druid.pool.DruidDataSource",
                 "com.zaxxer.hikari.HikariDataSource",
+                "com.lealone.client.jdbc.JdbcDataSource",
         };
 
         for (String detectClassName : detectClassNames) {

@@ -34,6 +34,7 @@ public interface LimitOffsetProcessor {
         }
         return sql;
     };
+
     LimitOffsetProcessor POSTGRESQL = (dialect, sql, queryWrapper, limitRows, limitOffset) -> {
         if (limitRows != null && limitOffset != null) {
             sql.append(LIMIT).append(limitRows).append(OFFSET).append(limitOffset);
