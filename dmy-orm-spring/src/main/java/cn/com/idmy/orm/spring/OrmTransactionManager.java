@@ -3,7 +3,7 @@ package cn.com.idmy.orm.spring;
 
 import cn.com.idmy.orm.core.transaction.TransactionContext;
 import cn.com.idmy.orm.core.transaction.TransactionalManager;
-import cn.hutool.core.util.StrUtil;
+import org.dromara.hutool.core.text.StrUtil;
 import org.springframework.jdbc.datasource.JdbcTransactionObjectSupport;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionException;

@@ -5,13 +5,14 @@ package cn.com.idmy.orm.spring.datasource;
 
 import cn.com.idmy.orm.annotation.UseDataSource;
 import cn.com.idmy.orm.core.datasource.DataSourceKey;
-import cn.hutool.core.util.StrUtil;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
+import org.dromara.hutool.core.text.StrUtil;
 import org.springframework.core.MethodClassKey;
 
 import java.lang.reflect.Method;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -35,7 +36,7 @@ public class DataSourceInterceptor implements MethodInterceptor {
             return invocation.proceed();
         }
 
-        dsKey = findDataSourceKey(invocation.getMethod(), invocation.getThis().getClass());
+        dsKey = findDataSourceKey(invocation.getMethod(), Objects.requireNonNull(invocation.getThis()).getClass());
         if (StrUtil.isBlank(dsKey)) {
             return invocation.proceed();
         }

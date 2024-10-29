@@ -11,13 +11,12 @@ import cn.com.idmy.orm.core.query.QueryColumn;
 import cn.com.idmy.orm.core.query.QueryCondition;
 import cn.com.idmy.orm.core.query.QueryWrapper;
 import cn.com.idmy.orm.core.util.*;
-import cn.hutool.core.util.ArrayUtil;
-import cn.hutool.core.util.StrUtil;
 import jakarta.annotation.Nullable;
 import org.apache.ibatis.io.ResolverUtil;
 import org.apache.ibatis.reflection.Reflector;
 import org.apache.ibatis.reflection.TypeParameterResolver;
 import org.apache.ibatis.type.*;
+import org.dromara.hutool.core.text.StrUtil;
 
 import java.lang.reflect.*;
 import java.math.BigDecimal;

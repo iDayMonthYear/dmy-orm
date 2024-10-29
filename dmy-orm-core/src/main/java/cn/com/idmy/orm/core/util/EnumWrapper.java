@@ -34,6 +34,7 @@ public class EnumWrapper<E extends Enum<E>> {
             hasEnumValueAnnotation = true;
         }
 
+
         if (hasEnumValueAnnotation) {
             String getterMethodName = "get" + StringUtil.firstCharToUpperCase(enumValueField.getName());
 

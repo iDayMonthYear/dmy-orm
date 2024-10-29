@@ -5,9 +5,9 @@ import cn.com.idmy.orm.core.dialect.Dialect;
 import cn.com.idmy.orm.core.dialect.OperateType;
 import cn.com.idmy.orm.core.exception.OrmExceptions;
 import cn.com.idmy.orm.core.util.StringUtil;
-import cn.hutool.core.util.StrUtil;
 import lombok.Getter;
 import lombok.Setter;
+import org.dromara.hutool.core.text.StrUtil;
 
 import java.util.Objects;
 
