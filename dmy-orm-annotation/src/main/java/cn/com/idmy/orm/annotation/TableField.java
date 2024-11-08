@@ -1,9 +1,6 @@
 
 package cn.com.idmy.orm.annotation;
 
-import org.apache.ibatis.type.TypeHandler;
-import org.apache.ibatis.type.UnknownTypeHandler;
-
 import java.lang.annotation.*;
 
 @Inherited
@@ -19,8 +16,6 @@ public @interface TableField {
     boolean version() default false;
 
     boolean tenantId() default false;
-
-    Class<? extends TypeHandler> typeHandler() default UnknownTypeHandler.class;
 
     String comment() default "";
 }
