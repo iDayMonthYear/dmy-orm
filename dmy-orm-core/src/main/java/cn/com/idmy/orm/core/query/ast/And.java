@@ -1,24 +1,22 @@
 package cn.com.idmy.orm.core.query.ast;
 
-public class From {
+public class And {
     Select root;
-    String table;
-    String alias;
 
-    public From(Select root, String table) {
+    public And(Select root) {
         this.root = root;
-        this.table = table;
     }
 
-    public From as(String alias) {
-        this.alias = alias;
+    public And eq(String col, Object val) {
+        Eq eq = new Eq(root, col, val);
+        root.add(eq);
         return this;
     }
 
-    public Where where() {
-        Where where = new Where(root);
-        root.add(where);
-        return where;
+    public Or or() {
+        Or or = new Or(root);
+        root.add(or);
+        return or;
     }
 
     public GroupBy groupBy(String col, String... cols) {
@@ -35,12 +33,7 @@ public class From {
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder("from ");
-        sb.append(table);
-        if (alias != null) {
-            sb.append(" ").append(alias);
-        }
-        return sb.toString();
+        return " and";
     }
 
     public String sql() {
