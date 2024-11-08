@@ -19,7 +19,6 @@
         <module>dmy-orm-core</module>
         <module>dmy-orm-spring</module>
         <module>dmy-orm-spring-boot-starter</module>
-        <module>dmy-orm-processor</module>
     </modules>
 
     <properties>
