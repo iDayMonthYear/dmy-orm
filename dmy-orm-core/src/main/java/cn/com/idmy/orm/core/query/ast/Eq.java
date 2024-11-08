@@ -19,7 +19,6 @@ public class Eq  {
     }
 
 
-
     @Override
     public String toString() {
         return StrUtil.format(" {} = {} {}", left, right, or ? "or" : "and");
