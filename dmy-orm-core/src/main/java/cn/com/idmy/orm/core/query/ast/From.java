@@ -1,49 +1,16 @@
 package cn.com.idmy.orm.core.query.ast;
 
-public class From {
-    Select root;
-    String table;
-    String alias;
-
-    public From(Select root, String table) {
-        this.root = root;
-        this.table = table;
+public record From<T, CRUD extends Crud>(CRUD crud) {
+    public From(CRUD crud) {
+        this.crud = crud;
+        crud.addNode(this);
     }
 
-    public From as(String alias) {
-        this.alias = alias;
-        return this;
+    public Where<T, CRUD> where() {
+        return new Where<>(crud);
     }
 
-    public Where where() {
-        Where where = new Where(root);
-        root.add(where);
-        return where;
-    }
-
-    public GroupBy groupBy(String col, String... cols) {
-        GroupBy tmp = new GroupBy(root, col, cols);
-        root.add(tmp);
-        return tmp;
-    }
-
-    public OrderBy orderBy(String col, boolean desc) {
-        OrderBy orderBy = new OrderBy(root, col, desc);
-        root.add(orderBy);
-        return orderBy;
-    }
-
-    @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder("from ");
-        sb.append(table);
-        if (alias != null) {
-            sb.append(" ").append(alias);
-        }
-        return sb.toString();
-    }
-
-    public String sql() {
-        return root.toString();
+    public CRUD semi() {
+        return crud;
     }
 }

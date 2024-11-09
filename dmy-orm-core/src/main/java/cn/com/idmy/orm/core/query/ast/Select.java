@@ -1,37 +1,46 @@
 package cn.com.idmy.orm.core.query.ast;
 
-import java.util.ArrayList;
-import java.util.List;
+import cn.com.idmy.orm.core.query.OrmDao;
+import cn.com.idmy.orm.core.query.test.User;
+import cn.com.idmy.orm.core.query.test.UserDao;
+import lombok.Getter;
+import lombok.experimental.Accessors;
 
-public class Select {
-    List<Object> asts = new ArrayList<>();
-    List<SelectItem> items = new ArrayList<>();
+@Getter
+@Accessors(fluent = true, chain = false)
+public class Select<T> extends RootNode implements Crud {
+    protected RootNode root;
+    protected Class<T> table;
 
-    public Select(SelectItem... items) {
-        this.items = List.of(items);
+    Select(Class<T> table) {
+        root = this;
+        this.table = table;
     }
 
-    void add(Object ast) {
-        asts.add(ast);
+    public static <T> Select<T> of(OrmDao<T> dao) {
+        return new Select<>(dao.entityType());
     }
 
-    Object last() {
-        return asts.getLast();
+    public SelectField<T, Select<T>> select() {
+        return new SelectField<>(this, "*");
     }
 
-    public From from(String table) {
-        From from = new From(this, table);
-        add(from);
-        return from;
+    public SelectField<T, Select<T>> select(String... field) {
+        return new SelectField<>(this, field);
     }
 
-    @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder("select");
-        sb.append(items.isEmpty() ? "*" : items);
-        for (Object ast : asts) {
-            sb.append(ast);
-        }
-        return sb.toString().replace("[", "").replace("]", "");
+    @SafeVarargs
+    public final SelectField<T, Select<T>> select(FieldGetter<T, ?>... fields) {
+        return new SelectField<>(this, fields);
+    }
+
+    public static void main(String[] args) {
+        UserDao dao = () -> User.class;
+        Where<User, Select<User>> where = Select.of(dao).select(User::id, User::name).from().where();
+        Condition<User, Select<User>> eq = where.eq(User::id, 1);
+        Condition<User, Select<User>> eq = where.eq(User::id, 1);
+        Select<User> semi = eq.semi();
+
+
     }
 }
