@@ -1,4 +1,4 @@
-package cn.com.idmy.orm.core.query.ast;
+package cn.com.idmy.orm.core.ast;
 
 import java.io.Serializable;
 

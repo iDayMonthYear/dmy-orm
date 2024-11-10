@@ -1,6 +1,6 @@
-package cn.com.idmy.orm.core.query.util;
+package cn.com.idmy.orm.core.util;
 
-import cn.com.idmy.orm.core.query.OrmDao;
+import cn.com.idmy.orm.core.OrmDao;
 
 public class OrmUtil {
     public static String tableName(OrmDao<?> dao) {

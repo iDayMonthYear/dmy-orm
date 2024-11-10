@@ -1,47 +1,64 @@
-package cn.com.idmy.orm.core.query.test;
+package cn.com.idmy.orm.core.ast;
 
-import cn.com.idmy.orm.annotation.Table;
-import cn.com.idmy.orm.annotation.TableField;
-import cn.com.idmy.orm.core.query.ast.*;
-import cn.com.idmy.orm.core.query.fn.SqlExpressionFn;
-import cn.com.idmy.orm.core.util.LambdaUtil;
+import cn.com.idmy.orm.core.ast.Node.Cond;
+import cn.com.idmy.orm.core.ast.Node.Or;
+import cn.com.idmy.orm.core.ast.Node.Type;
+import cn.com.idmy.orm.test.User;
+import cn.com.idmy.orm.test.UserDao;
+import org.dromara.hutool.core.collection.CollUtil;
 import org.dromara.hutool.core.lang.Console;
-import org.dromara.hutool.core.text.StrUtil;
 
-import java.lang.reflect.Field;
-import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
-public class DeleteSqlGenerator {
-
-    private <T> String generate(Delete<T> delete) {
-        StringBuilder sql = new StringBuilder();
-        List<Object> asts = delete.root().asts();
-        for (Object node : asts) {
-            if (node instanceof From<?, ?> from) {
-                String tableName = tableName(from.table());
-                sql.append("delete from ").append(tableName);
-            } else if (node instanceof Where) {
-                sql.append(" where ");
-            } else if (node instanceof And) {
-                sql.append(" and ");
+public class DeleteSqlGenerator extends AbstractSqlGenerator {
+    public static String gen(DeleteChain<?> deleteChain) {
+        List<Node> nodes = deleteChain.nodes();
+        List<Node> wheres = new ArrayList<>(nodes.size());
+        for (Node node : nodes) {
+            if (node instanceof Cond) {
+                wheres.add(node);
             } else if (node instanceof Or) {
-                sql.append(" or ");
-            } else if (node instanceof Condition<?, ?> condition) {
-                String field = fieldName(condition.field());
-                sql.append(field).append(" ").append(condition.op().getSymbol()).append(" ");
-                Object value = condition.expr();
-                if (value instanceof SqlExpression expr) {
-                    SqlExpressionFn fn = expr.apply(new SqlExpressionFn(field));
-                    sql.append(fn.expr());
-                } else {
-                    sql.append(formatValue(value));
+                if (!wheres.isEmpty()) {
+                    if (wheres.getLast().type() != Type.OR) {
+                        wheres.add(node);
+                    }
                 }
             }
         }
-        Console.log(sql);
+
+        if (CollUtil.isNotEmpty(wheres) && wheres.getLast() instanceof Or) {
+            wheres.removeLast();
+        }
+
+        StringBuilder sql = new StringBuilder("delete from ").append(tableName(deleteChain.table()));
+        if (!wheres.isEmpty()) {
+            sql.append(" where ");
+
+            for (int i = 0, whereNodesSize = wheres.size(); i < whereNodesSize; i++) {
+                Node node = wheres.get(i);
+                sql.append(parseExpr(node));
+                if (i < whereNodesSize - 1) {
+                    Node next = wheres.get(i + 1);
+                    if (next instanceof Cond && node.type() != Type.OR) {
+                        sql.append(" and ");
+                    }
+                }
+            }
+        }
+
         return sql.toString();
     }
+
+
+    public static void main(String[] args) {
+        UserDao dao = () -> User.class;
+
+//        Console.log(Delete.of(dao).or().or().in(User::id, 1, 2, 3).like(User::name, "%dmy%").or());
+        Console.log(DeleteChain.of(dao).or().or().eq(User::name, "1", "1".equals("2")).or().or().eq(User::createdAt, 1, false).or().or().eq(User::id, 1, false).or());
+//        Console.log(Delete.of(dao).eq(User::id, 1).or().in(User::id, "1", "2", "3").like(User::name, "%dmy%"));
+    }
+/*
 
     private <T> String generate(Update<T> update) {
         StringBuilder sql = new StringBuilder("update ").append(tableName(update.table())).append(" ");
@@ -84,44 +101,6 @@ public class DeleteSqlGenerator {
         return sql.toString();
     }
 
-    private String tableName(Class<?> entityClass) {
-        if (entityClass.isAnnotationPresent(Table.class)) {
-            Table table = entityClass.getAnnotation(Table.class);
-            String value = table.value();
-            return StrUtil.isBlank(value) ? entityClass.getSimpleName() : value;
-        } else {
-            return entityClass.getSimpleName();
-        }
-    }
-
-    private String fieldName(Field field) {
-        if (field.isAnnotationPresent(TableField.class)) {
-            TableField tableField = field.getAnnotation(TableField.class);
-            String value = tableField.value();
-            return StrUtil.isBlank(value) ? field.getName() : value;
-        } else {
-            return field.getName(); // 默认使用字段名
-        }
-    }
-
-    private String fieldName(Object field) {
-        if (field instanceof FieldGetter<?, ?> getter) {
-            return LambdaUtil.fieldName(getter);
-        } else {
-            return (String) field;
-        }
-    }
-
-    private String formatValue(Object value) {
-        if (value == null) {
-            return "null";
-        }
-        if (value instanceof String str) {
-            return "'" + str.replace("'", "''") + "'";
-        }
-        return value.toString();
-    }
-
     public static void main(String[] args) {
         UserDao dao = () -> User.class;
 
@@ -146,5 +125,5 @@ public class DeleteSqlGenerator {
                 .eq(User::username, "test")  // 普通字符串值
                 .semi());
 
-    }
+    }*/
 }

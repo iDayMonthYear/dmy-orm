@@ -1,4 +1,4 @@
-package cn.com.idmy.orm.core.query.test;
+package cn.com.idmy.orm.test;
 
 import cn.com.idmy.orm.annotation.Table;
 import cn.com.idmy.orm.annotation.TableField;

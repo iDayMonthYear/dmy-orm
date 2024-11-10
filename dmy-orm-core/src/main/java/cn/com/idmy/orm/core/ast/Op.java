@@ -1,4 +1,4 @@
-package cn.com.idmy.orm.core.query.ast;
+package cn.com.idmy.orm.core.ast;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -12,12 +12,12 @@ public enum Op {
     LE("<="),          // Less Than or Equal
     GT(">"),           // Greater Than
     GE(">="),          // Greater Than or Equal
-    IN("IN"),          // In
-    NOT_IN("NOT IN"),  // Not In
-    BETWEEN("BETWEEN"), // Between
-    LIKE("LIKE"),      // Like
-    IS_NULL("IS NULL"), // Is Null
-    IS_NOT_NULL("IS NOT NULL"); // Is Not Null
+    IN("in"),          // In
+    NOT_IN("not in"),  // Not In
+    BETWEEN("between"), // Between
+    LIKE("like"),      // Like
+    IS_NULL("is null"), // Is Null
+    IS_NOT_NULL("is not null"); // Is Not Null
     ;
     private final String symbol;
 }

@@ -1,4 +1,4 @@
-package cn.com.idmy.orm.core.query.fn;
+package cn.com.idmy.orm.core.ast;
 
 
 import lombok.Getter;
@@ -8,22 +8,32 @@ import lombok.experimental.Accessors;
 @Getter
 @Accessors(fluent = true, chain = false)
 @RequiredArgsConstructor
-public class SqlExpressionFn {
+public class SqlExprFn {
     private final String field;
     private String expr;
 
-    public SqlExpressionFn plus(int value) {
+    public SqlExprFn plus(int value) {
         this.expr = field + " + " + value;
         return this;
     }
 
-    public SqlExpressionFn minus(int value) {
+    public SqlExprFn minus(int value) {
         this.expr = field + " - " + value;
         return this;
     }
 
-    public SqlExpressionFn multiply(int value) {
+    public SqlExprFn multiply(int value) {
         this.expr = field + " * " + value;
+        return this;
+    }
+
+    public SqlExprFn divide(int value) {
+        this.expr = field + " / " + value;
+        return this;
+    }
+
+    public SqlExprFn mod(int value) {
+        this.expr = field + " % " + value;
         return this;
     }
 }
