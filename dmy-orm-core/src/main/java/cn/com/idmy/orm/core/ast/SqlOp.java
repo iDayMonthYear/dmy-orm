@@ -8,31 +8,31 @@ import lombok.experimental.Accessors;
 @Getter
 @Accessors(fluent = true, chain = false)
 @RequiredArgsConstructor
-public class SqlExprFn {
+public class SqlOp {
     private final String field;
     private String expr;
 
-    public SqlExprFn plus(int value) {
+    public SqlOp plus(int value) {
         this.expr = field + " + " + value;
         return this;
     }
 
-    public SqlExprFn minus(int value) {
+    public SqlOp minus(int value) {
         this.expr = field + " - " + value;
         return this;
     }
 
-    public SqlExprFn multiply(int value) {
+    public SqlOp multiply(int value) {
         this.expr = field + " * " + value;
         return this;
     }
 
-    public SqlExprFn divide(int value) {
+    public SqlOp divide(int value) {
         this.expr = field + " / " + value;
         return this;
     }
 
-    public SqlExprFn mod(int value) {
+    public SqlOp mod(int value) {
         this.expr = field + " % " + value;
         return this;
     }

@@ -1,9 +1,7 @@
 package cn.com.idmy.orm.core.ast;
 
 import cn.com.idmy.orm.core.OrmDao;
-import cn.com.idmy.orm.core.ast.Node.Field;
-import cn.com.idmy.orm.core.ast.Node.GroupBy;
-import cn.com.idmy.orm.core.ast.Node.OrderBy;
+import cn.com.idmy.orm.core.ast.Node.*;
 import lombok.Getter;
 import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
@@ -19,6 +17,47 @@ public class SelectChain<T> extends StringWhere<T, SelectChain<T>> {
 
     public static <T> SelectChain<T> of(OrmDao<T> dao) {
         return new SelectChain<>(dao.entityType());
+    }
+
+    public SelectChain<T> distinct() {
+        return addNode(new Distinct());
+    }
+
+    public SelectChain<T> distinct(String field) {
+        return addNode(new Distinct(new Field(field)));
+    }
+
+    public SelectChain<T> distinct(FieldGetter<T, ?> getter) {
+        return addNode(new Distinct(new Field(getter)));
+    }
+
+    public SelectChain<T> select() {
+        return this;
+    }
+
+    public SelectChain<T> select(SqlFnExpr<T> expr) {
+        return addNode(new SelectField(expr));
+    }
+
+    public SelectChain<T> select(SqlFnExpr<T> expr, String alias) {
+        return addNode(new SelectField(expr, alias));
+    }
+
+    public SelectChain<T> select(String field, String... fields) {
+        addNode(new SelectField(field));
+        for (String f : fields) {
+            addNode(new SelectField(f));
+        }
+        return this;
+    }
+
+    @SafeVarargs
+    public final SelectChain<T> select(FieldGetter<T, ?> field, FieldGetter<T, ?>... fields) {
+        addNode(new SelectField(new Field(field)));
+        for (FieldGetter<T, ?> f : fields) {
+            addNode(new SelectField(new Field(f)));
+        }
+        return this;
     }
 
     public SelectChain<T> groupBy(String field) {
@@ -44,6 +83,10 @@ public class SelectChain<T> extends StringWhere<T, SelectChain<T>> {
             addNode(new GroupBy(new Field(f)));
         }
         return this;
+    }
+
+    public SelectChain<T> having(String expr) {
+        return addNode(new Having(expr));
     }
 
     public SelectChain<T> orderBy(String field) {

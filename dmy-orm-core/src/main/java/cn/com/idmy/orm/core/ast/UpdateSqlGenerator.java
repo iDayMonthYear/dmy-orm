@@ -28,12 +28,12 @@ public class UpdateSqlGenerator extends AbstractSqlGenerator {
             }
         }
 
-        StringBuilder sql = new StringBuilder("UPDATE ").append(tableName(update.table())).append(" SET ");
+        StringBuilder sql = new StringBuilder("UPDATE ").append(getTableName(update.table())).append(" SET ");
 
         if (!sets.isEmpty()) {
             for (int i = 0, setsSize = sets.size(); i < setsSize; i++) {
                 Set set = sets.get(i);
-                sql.append(parseExpr(set));
+                sql.append(builder(set));
                 if (i < setsSize - 1) {
                     Type type = sets.get(i + 1).type();
                     if (type == Type.SET) {

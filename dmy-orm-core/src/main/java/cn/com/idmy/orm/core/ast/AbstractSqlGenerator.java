@@ -4,6 +4,7 @@ import cn.com.idmy.orm.annotation.Table;
 import cn.com.idmy.orm.annotation.TableField;
 import cn.com.idmy.orm.core.ast.Node.*;
 import cn.com.idmy.orm.core.util.LambdaUtil;
+import cn.com.idmy.orm.core.util.SqlUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.hutool.core.collection.CollUtil;
 import org.dromara.hutool.core.text.StrUtil;
@@ -13,7 +14,7 @@ import java.util.List;
 
 @Slf4j
 public abstract class AbstractSqlGenerator {
-    protected static String tableName(Class<?> entityClass) {
+    protected static String getTableName(Class<?> entityClass) {
         if (entityClass.isAnnotationPresent(Table.class)) {
             Table table = entityClass.getAnnotation(Table.class);
             String value = table.value();
@@ -23,7 +24,7 @@ public abstract class AbstractSqlGenerator {
         }
     }
 
-    protected static String fieldName(Field field) {
+    protected static String getFieldName(Field field) {
         if (field.isAnnotationPresent(TableField.class)) {
             TableField tableField = field.getAnnotation(TableField.class);
             String value = tableField.value();
@@ -33,63 +34,90 @@ public abstract class AbstractSqlGenerator {
         }
     }
 
-    protected static String field(Node.Field field) {
+    protected static String getField(Node.Field field) {
         if (field.name() instanceof FieldGetter<?, ?> getter) {
             field.value(LambdaUtil.fieldName(getter));
         } else {
             field.value(field.name());
         }
-        return (String) field.value();
+        String f = (String) field.value();
+        SqlUtil.checkField(f);
+        return f;
     }
 
     private static Object parseSqlExpr(String field, Object expr) {
-        if (expr instanceof SqlExpr sqlExpr) {
-            SqlExprFn fn = new SqlExprFn(field);
-            SqlExprFn apply = sqlExpr.apply(fn);
+        if (expr instanceof SqlOpExpr sqlOpExpr) {
+            SqlOp fn = new SqlOp(field);
+            SqlOp apply = sqlOpExpr.apply(fn);
             return apply.expr();
         } else {
             return formatValue(expr);
         }
     }
 
-    private static String parseCond(Cond cond) {
-        field(cond.field());
+    private static String buildCond(Cond cond) {
+        getField(cond.field());
         Object val = parseSqlExpr((String) cond.field().value(), cond.expr());
         cond.value(val);
         return cond.field().value() + " " + cond.op().getSymbol() + " " + val;
     }
 
-    private static String parseSet(Set set) {
-        field(set.field());
+    private static String buildSet(Set set) {
+        getField(set.field());
         Object val = parseSqlExpr((String) set.field().value(), set.expr());
         set.value(val);
         return set.field().value() + " = " + val;
     }
 
-    private static String parseSelectField(SelectField selectField) {
-        field(selectField.field());
-        return (String) selectField.field().value();
+    private static String buildSelectField(SelectField selectField) {
+        Object value = selectField.field();
+        if (value instanceof Node.Field f) {
+            return getField(f);
+        } else if (value instanceof SqlFnExpr<?> exp) {
+            SqlFn<?> fn = exp.apply();
+            SqlFnName name = fn.name();
+            String field = getField(fn.field());
+            String alias = selectField.alias();
+            if (name == SqlFnName.IF_NULL) {
+                return StrUtil.format("{}({}, {}) {}", name.getName(), field, fn.expr(), alias == null ? field : alias);
+            } else {
+                return StrUtil.format("{}({}) {}", name.getName(), field, alias == null ? field : alias);
+            }
+        } else {
+            return (String) value;
+        }
     }
 
-    private static String parseGroupBy(GroupBy group) {
-        field(group.field());
+    private static String buildGroupBy(GroupBy group) {
+        getField(group.field());
         return (String) group.field().value();
     }
 
-    private static String parseOrderBy(OrderBy order) {
-        field(order.field());
+    private static String buildOrderBy(OrderBy order) {
+        getField(order.field());
         return StrUtil.format("{} {}", order.field().value(), order.desc() ? "desc" : "");
     }
 
-    protected static Object parseExpr(Node node) {
+    private static String buildDistinct(Distinct distinct) {
+        Node.Field field = distinct.field();
+        if (field == null) {
+            return "distinct ";
+        } else {
+            String str = getField(field);
+            return StrUtil.format("distinct({}) ", str);
+        }
+    }
+
+    protected static Object builder(Node node) {
         return switch (node) {
-            case Node.Field field -> field(field);
+            case Node.Field field -> getField(field);
             case Node.Or ignored -> " or ";
-            case Node.Cond cond -> parseCond(cond);
-            case Node.Set set -> parseSet(set);
-            case Node.GroupBy group -> parseGroupBy(group);
-            case Node.OrderBy order -> parseOrderBy(order);
-            case Node.SelectField sf -> parseSelectField(sf);
+            case Node.Cond cond -> buildCond(cond);
+            case Node.Set set -> buildSet(set);
+            case Node.GroupBy group -> buildGroupBy(group);
+            case Node.OrderBy order -> buildOrderBy(order);
+            case Node.SelectField sf -> buildSelectField(sf);
+            case Node.Distinct distinct -> buildDistinct(distinct);
             case null, default -> {
                 yield null;
             }
@@ -142,7 +170,7 @@ public abstract class AbstractSqlGenerator {
             sql.append(" where ");
             for (int i = 0, whereNodesSize = wheres.size(); i < whereNodesSize; i++) {
                 Node node = wheres.get(i);
-                sql.append(parseExpr(node));
+                sql.append(builder(node));
                 if (i < whereNodesSize - 1) {
                     Type type = wheres.get(i + 1).type();
                     if (type == Type.COND && node.type() != Type.OR) {

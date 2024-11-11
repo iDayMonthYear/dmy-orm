@@ -23,7 +23,7 @@ public class DeleteSqlGenerator extends AbstractSqlGenerator {
             }
         }
 
-        StringBuilder sql = new StringBuilder("delete from ").append(tableName(deleteChain.table()));
+        StringBuilder sql = new StringBuilder("delete from ").append(getTableName(deleteChain.table()));
         buildWhere(wheres, sql);
         return sql.toString();
     }

@@ -9,45 +9,65 @@ import org.dromara.hutool.core.lang.Console;
 import java.util.ArrayList;
 import java.util.List;
 
+import static cn.com.idmy.orm.core.ast.SqlFn.ifNull;
+import static cn.com.idmy.orm.core.ast.SqlFn.sum;
+
 @Slf4j
 public class SelectSqlGenerator extends AbstractSqlGenerator {
     public static String gen(SelectChain<?> select) {
         List<Node> nodes = select.nodes();
         List<SelectField> selectFields = new ArrayList<>(nodes.size());
         List<Node> wheres = new ArrayList<>(nodes.size());
-        List<GroupBy> groups = new ArrayList<>(nodes.size());
+        List<GroupBy> groups = new ArrayList<>(1);
         List<OrderBy> orders = new ArrayList<>(4);
+        Distinct distinct = null;
+        Having having = null;
         for (Node node : nodes) {
-            if (node instanceof Cond) {
-                wheres.add(node);
-            } else if (node instanceof SelectField sf) {
-                selectFields.add(sf);
-            } else if (node instanceof GroupBy group) {
-                groups.add(group);
-            } else if (node instanceof OrderBy order) {
-                orders.add(order);
-            } else if (node instanceof Or) {
-                skipAdjoinOr(node, wheres);
+            switch (node) {
+                case Cond cond -> wheres.add(cond);
+                case SelectField selectField -> selectFields.add(selectField);
+                case GroupBy groupBy -> groups.add(groupBy);
+                case OrderBy orderBy -> orders.add(orderBy);
+                case Or or -> skipAdjoinOr(or, wheres);
+                case Distinct d -> {
+                    distinct = d;
+                }
+                case Having h -> {
+                    having = h;
+                }
+                case null, default -> {
+                }
             }
         }
 
         StringBuilder sql = new StringBuilder("select ");
-        buildSelectFields(selectFields, sql);
+        if (distinct != null) {
+            sql.append(builder(distinct));
+            if (!selectFields.isEmpty()) {
+                sql.append(", ");
+            }
+        }
+        buildSelectField(selectFields, sql);
+        sql.append(" from ").append(getTableName(select.table()));
         buildWhere(wheres, sql);
         buildGroupBy(groups, sql);
+        if (having != null) {
+            sql.append(" having ").append(having.expr());
+        }
         buildOrderBy(orders, sql);
         return sql.toString();
     }
 
-    private static void buildSelectFields(List<SelectField> sfs, StringBuilder sql) {
-        if (!sfs.isEmpty()) {
-            sql.append("  ");
-            for (int i = 0, size = sfs.size(); i < size; i++) {
-                SelectField selectField = sfs.get(i);
-                sql.append(parseExpr(selectField));
+    private static void buildSelectField(List<SelectField> selectFields, StringBuilder sql) {
+        if (selectFields.isEmpty()) {
+            sql.append("*");
+        } else {
+            for (int i = 0, size = selectFields.size(); i < size; i++) {
+                SelectField selectField = selectFields.get(i);
+                sql.append(builder(selectField));
                 if (i < size - 1) {
-                    Type type = sfs.get(i + 1).type();
-                    if (type == Type.GROUP_BY) {
+                    Type type = selectFields.get(i + 1).type();
+                    if (type == Type.SELECT_FIELD) {
                         sql.append(", ");
                     }
                 }
@@ -60,7 +80,7 @@ public class SelectSqlGenerator extends AbstractSqlGenerator {
             sql.append(" group by ");
             for (int i = 0, size = groups.size(); i < size; i++) {
                 GroupBy group = groups.get(i);
-                sql.append(parseExpr(group));
+                sql.append(builder(group));
                 if (i < size - 1) {
                     Type type = groups.get(i + 1).type();
                     if (type == Type.GROUP_BY) {
@@ -76,7 +96,7 @@ public class SelectSqlGenerator extends AbstractSqlGenerator {
             sql.append(" order by ");
             for (int i = 0, size = orders.size(); i < size; i++) {
                 OrderBy order = orders.get(i);
-                sql.append(parseExpr(order));
+                sql.append(builder(order));
                 if (i < size - 1) {
                     Type type = orders.get(i + 1).type();
                     if (type == Type.ORDER_BY) {
@@ -89,23 +109,15 @@ public class SelectSqlGenerator extends AbstractSqlGenerator {
 
     public static void main(String[] args) {
         UserDao dao = () -> User.class;
-       /* Console.log(Update.of(dao)
-                .or()
-                .or()
-                .like(User::name, "%dmy%")
-                .eq(User::name, "1", "1".equals("0"))
-                .eq(User::createdAt, 1)
-                .or()
-                .or()
-                .set(User::username, "dmy")
-                .set(User::username, "dmy")
-                .set(User::username, "dmy")
-                .in(User::id, 1, 2, 3)
-                .like(User::name, "%dmy%")
-                .or());*/
         Console.log(SelectChain.of(dao)
                 .or()
                 .or()
+                .distinct(User::id)
+                .select(SqlFn::count, "test")
+                .select(() -> sum(User::id))
+                .select(() -> ifNull(User::id, 1))
+                .select(SqlFn::count)
+                .select(User::createdAt, User::createdAt, User::createdAt, User::createdAt)
                 .eq(User::createdAt, 1)
                 .eq(User::createdAt, 1)
                 .eq(User::createdAt, 1)
@@ -115,6 +127,7 @@ public class SelectSqlGenerator extends AbstractSqlGenerator {
                 .groupBy(User::createdAt, User::id)
                 .orderBy(User::createdAt, true, User::id, true)
                 .orderBy(User::name, true)
+                .having("sum(id) > 1")
         );
     }
 /*

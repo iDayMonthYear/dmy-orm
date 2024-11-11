@@ -21,6 +21,7 @@ public class Node {
         OR,
         AND,
         SELECT_FIELD,
+        DISTINCT,
         LIMIT,
         OFFSET;
     }
@@ -59,6 +60,7 @@ public class Node {
         }
     }
 
+
     @Getter
     static class Or extends Node {
         Or() {
@@ -90,7 +92,16 @@ public class Node {
         }
     }
 
-    record Having(String expr) {
+
+    @Getter
+    @Accessors(fluent = true)
+    static final class Having extends Node {
+        private final String expr;
+
+        Having(String expr) {
+            super(Type.HAVING);
+            this.expr = expr;
+        }
     }
 
     @Getter
@@ -109,10 +120,32 @@ public class Node {
     @Getter
     @Accessors(fluent = true)
     static final class SelectField extends Node {
-        private final Field field;
+        private final Object field; //String | Field | SqlFnExpr
+        private String alias;
 
-        SelectField(Field field) {
-            super(Type.GROUP_BY);
+        SelectField(Object field) {
+            super(Type.SELECT_FIELD);
+            this.field = field;
+        }
+
+        SelectField(Object field, String alias) {
+            super(Type.SELECT_FIELD);
+            this.field = field;
+            this.alias = alias;
+        }
+    }
+
+    @Getter
+    @Accessors(fluent = true)
+    static final class Distinct extends Node {
+        private Field field;
+
+        Distinct() {
+            super(Type.DISTINCT);
+        }
+
+        Distinct(Field field) {
+            this();
             this.field = field;
         }
     }

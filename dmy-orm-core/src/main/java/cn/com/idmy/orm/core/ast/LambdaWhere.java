@@ -19,7 +19,7 @@ public abstract class LambdaWhere<T, WHERE extends LambdaWhere<T, WHERE>> extend
         return addNode(new Cond(new Field(field), Op.EQ, value));
     }
 
-    public WHERE eq(FieldGetter<T, ?> field, SqlExpr expr) {
+    public WHERE eq(FieldGetter<T, ?> field, SqlOpExpr expr) {
         return addNode(new Cond(new Field(field), Op.EQ, expr));
     }
 
@@ -31,7 +31,7 @@ public abstract class LambdaWhere<T, WHERE extends LambdaWhere<T, WHERE>> extend
         }
     }
 
-    public WHERE eq(FieldGetter<T, ?> field, SqlExpr expr, boolean if0) {
+    public WHERE eq(FieldGetter<T, ?> field, SqlOpExpr expr, boolean if0) {
         if (if0) {
             return addNode(new Cond(new Field(field), Op.EQ, expr));
         } else {

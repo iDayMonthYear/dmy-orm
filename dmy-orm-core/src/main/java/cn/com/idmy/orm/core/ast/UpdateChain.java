@@ -29,7 +29,7 @@ public class UpdateChain<T> extends StringWhere<T, UpdateChain<T>> {
         return addNode(new Set(new Field(field),  expr));
     }
 
-    public UpdateChain<T> set(FieldGetter<T, ?> field, SqlExpr expr) {
+    public UpdateChain<T> set(FieldGetter<T, ?> field, SqlOpExpr expr) {
         return addNode(new Set(new Field(field), expr));
     }
 
