@@ -8,7 +8,6 @@ import lombok.experimental.Accessors;
 
 @Accessors(fluent = true)
 @Setter
-@Getter
 @RequiredArgsConstructor
 public class Node {
     enum Type {
@@ -119,7 +118,7 @@ public class Node {
             super(Type.DISTINCT);
         }
 
-        Distinct( @Nullable FieldGetter<?, ?> field) {
+        Distinct(@Nullable FieldGetter<?, ?> field) {
             this();
             this.field = field;
         }
