@@ -1,7 +1,6 @@
 package cn.com.idmy.orm.core.ast;
 
 import cn.com.idmy.orm.core.OrmDao;
-import cn.com.idmy.orm.core.ast.Node.Field;
 import cn.com.idmy.orm.core.ast.Node.Set;
 import lombok.Getter;
 import lombok.experimental.Accessors;
@@ -11,7 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Getter
 @Accessors(fluent = true, chain = false)
-public class UpdateChain<T> extends StringWhere<T, UpdateChain<T>> {
+public class UpdateChain<T> extends LambdaWhere<T, UpdateChain<T>> {
 
     private UpdateChain(Class<T> table) {
         super(table);
@@ -21,16 +20,12 @@ public class UpdateChain<T> extends StringWhere<T, UpdateChain<T>> {
         return new UpdateChain<>(dao.entityType());
     }
 
-    public UpdateChain<T> set(String field, Object expr) {
-        return addNode(new Set(new Field(field), expr));
-    }
-
     public UpdateChain<T> set(FieldGetter<T, ?> field, Object expr) {
-        return addNode(new Set(new Field(field),  expr));
+        return addNode(new Set(field,  expr));
     }
 
     public UpdateChain<T> set(FieldGetter<T, ?> field, SqlOpExpr expr) {
-        return addNode(new Set(new Field(field), expr));
+        return addNode(new Set(field, expr));
     }
 
     @Override

@@ -34,15 +34,10 @@ public abstract class AbstractSqlGenerator {
         }
     }
 
-    protected static String getField(Node.Field field) {
-        if (field.name() instanceof FieldGetter<?, ?> getter) {
-            field.value(LambdaUtil.fieldName(getter));
-        } else {
-            field.value(field.name());
-        }
-        String f = (String) field.value();
-        SqlUtil.checkField(f);
-        return f;
+    protected static String getField(FieldGetter<?, ?> field) {
+        String name = LambdaUtil.fieldName(field);
+        SqlUtil.checkField(name);
+        return name;
     }
 
     private static Object parseSqlExpr(String field, Object expr) {
@@ -56,30 +51,28 @@ public abstract class AbstractSqlGenerator {
     }
 
     private static String buildCond(Cond cond) {
-        getField(cond.field());
-        Object val = parseSqlExpr((String) cond.field().value(), cond.expr());
-        cond.value(val);
-        return cond.field().value() + " " + cond.op().getSymbol() + " " + val;
+        String field = getField(cond.field());
+        Object value = parseSqlExpr(field, cond.expr());
+        return field + " " + cond.op().getSymbol() + " " + value;
     }
 
     private static String buildSet(Set set) {
-        getField(set.field());
-        Object val = parseSqlExpr((String) set.field().value(), set.expr());
-        set.value(val);
-        return set.field().value() + " = " + val;
+        String field = getField(set.field());
+        Object value = parseSqlExpr(field, set.expr());
+        return field + " = " + value;
     }
 
     private static String buildSelectField(SelectField selectField) {
         Object value = selectField.field();
-        if (value instanceof Node.Field f) {
-            return getField(f);
+        if (value instanceof FieldGetter<?, ?> field) {
+            return getField(field);
         } else if (value instanceof SqlFnExpr<?> exp) {
             SqlFn<?> fn = exp.apply();
             SqlFnName name = fn.name();
-            String field = getField(fn.field());
-            String alias = selectField.alias();
+            String field = (fn.field() == null && name == SqlFnName.COUNT) ? "*" : getField(fn.field());
+            String alias = selectField.alias() == null ? null : LambdaUtil.fieldName(selectField.alias());
             if (name == SqlFnName.IF_NULL) {
-                return StrUtil.format("{}({}, {}) {}", name.getName(), field, fn.expr(), alias == null ? field : alias);
+                return StrUtil.format("{}({}, {}) {}", name.getName(), field, fn.value(), alias == null ? field : alias);
             } else {
                 return StrUtil.format("{}({}) {}", name.getName(), field, alias == null ? field : alias);
             }
@@ -89,28 +82,26 @@ public abstract class AbstractSqlGenerator {
     }
 
     private static String buildGroupBy(GroupBy group) {
-        getField(group.field());
-        return (String) group.field().value();
+        return getField(group.field());
     }
 
     private static String buildOrderBy(OrderBy order) {
-        getField(order.field());
-        return StrUtil.format("{} {}", order.field().value(), order.desc() ? "desc" : "");
+        String field = getField(order.field());
+        return StrUtil.format("{} {}", field, order.desc() ? "desc" : "");
     }
 
     private static String buildDistinct(Distinct distinct) {
-        Node.Field field = distinct.field();
-        if (field == null) {
+        FieldGetter<?, ?> fieldGetter = distinct.field();
+        if (fieldGetter == null) {
             return "distinct ";
         } else {
-            String str = getField(field);
-            return StrUtil.format("distinct({}) ", str);
+            String field = getField(fieldGetter);
+            return StrUtil.format("distinct({}) ", field);
         }
     }
 
     protected static Object builder(Node node) {
         return switch (node) {
-            case Node.Field field -> getField(field);
             case Node.Or ignored -> " or ";
             case Node.Cond cond -> buildCond(cond);
             case Node.Set set -> buildSet(set);

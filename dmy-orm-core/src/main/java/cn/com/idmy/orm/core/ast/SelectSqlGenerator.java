@@ -21,7 +21,6 @@ public class SelectSqlGenerator extends AbstractSqlGenerator {
         List<GroupBy> groups = new ArrayList<>(1);
         List<OrderBy> orders = new ArrayList<>(4);
         Distinct distinct = null;
-        Having having = null;
         for (Node node : nodes) {
             switch (node) {
                 case Cond cond -> wheres.add(cond);
@@ -31,9 +30,6 @@ public class SelectSqlGenerator extends AbstractSqlGenerator {
                 case Or or -> skipAdjoinOr(or, wheres);
                 case Distinct d -> {
                     distinct = d;
-                }
-                case Having h -> {
-                    having = h;
                 }
                 case null, default -> {
                 }
@@ -51,9 +47,6 @@ public class SelectSqlGenerator extends AbstractSqlGenerator {
         sql.append(" from ").append(getTableName(select.table()));
         buildWhere(wheres, sql);
         buildGroupBy(groups, sql);
-        if (having != null) {
-            sql.append(" having ").append(having.expr());
-        }
         buildOrderBy(orders, sql);
         return sql.toString();
     }
@@ -113,7 +106,7 @@ public class SelectSqlGenerator extends AbstractSqlGenerator {
                 .or()
                 .or()
                 .distinct(User::id)
-                .select(SqlFn::count, "test")
+                .select(SqlFn::count, User::id)
                 .select(() -> sum(User::id))
                 .select(() -> ifNull(User::id, 1))
                 .select(SqlFn::count)
@@ -127,7 +120,6 @@ public class SelectSqlGenerator extends AbstractSqlGenerator {
                 .groupBy(User::createdAt, User::id)
                 .orderBy(User::createdAt, true, User::id, true)
                 .orderBy(User::name, true)
-                .having("sum(id) > 1")
         );
     }
 /*

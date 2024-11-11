@@ -9,7 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 @Getter
 @Accessors(fluent = true, chain = false)
 @Slf4j
-public class DeleteChain<T> extends StringWhere<T, DeleteChain<T>> {
+public class DeleteChain<T> extends LambdaWhere<T, DeleteChain<T>> {
     private DeleteChain(Class<T> table) {
         super(table);
     }

@@ -1,7 +1,6 @@
 package cn.com.idmy.orm.core.ast;
 
 import cn.com.idmy.orm.core.ast.Node.Cond;
-import cn.com.idmy.orm.core.ast.Node.Field;
 import lombok.Getter;
 import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
@@ -16,16 +15,16 @@ public abstract class LambdaWhere<T, WHERE extends LambdaWhere<T, WHERE>> extend
     }
 
     public WHERE eq(FieldGetter<T, ?> field, Object value) {
-        return addNode(new Cond(new Field(field), Op.EQ, value));
+        return addNode(new Cond(field, Op.EQ, value));
     }
 
     public WHERE eq(FieldGetter<T, ?> field, SqlOpExpr expr) {
-        return addNode(new Cond(new Field(field), Op.EQ, expr));
+        return addNode(new Cond(field, Op.EQ, expr));
     }
 
     public WHERE eq(FieldGetter<T, ?> field, Object value, boolean if0) {
         if (if0) {
-            return addNode(new Cond(new Field(field), Op.EQ, value));
+            return addNode(new Cond(field, Op.EQ, value));
         } else {
             return typedThis;
         }
@@ -33,7 +32,7 @@ public abstract class LambdaWhere<T, WHERE extends LambdaWhere<T, WHERE>> extend
 
     public WHERE eq(FieldGetter<T, ?> field, SqlOpExpr expr, boolean if0) {
         if (if0) {
-            return addNode(new Cond(new Field(field), Op.EQ, expr));
+            return addNode(new Cond(field, Op.EQ, expr));
         } else {
             return typedThis;
         }
