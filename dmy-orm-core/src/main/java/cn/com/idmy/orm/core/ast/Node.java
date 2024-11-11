@@ -5,8 +5,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 
-import java.util.List;
-
 @Accessors(fluent = true)
 @Setter
 @Getter
@@ -32,7 +30,7 @@ public class Node {
 
     @Getter
     @Accessors(fluent = true)
-    static class Cond extends Node {
+    static final class Cond extends Node {
         private final Field field;
         private final Op op;
         private final Object expr;
@@ -47,7 +45,7 @@ public class Node {
 
     @Getter
     @Accessors(fluent = true)
-    public static class Field extends Node {
+    public static final class Field extends Node {
         private final Object name;
 
         public Field(String name) {
@@ -81,16 +79,41 @@ public class Node {
         }
     }
 
-    record GroupBy(List<Object> fields) {
+    @Getter
+    @Accessors(fluent = true)
+    static final class GroupBy extends Node {
+        private final Field field;
+
+        GroupBy(Field field) {
+            super(Type.GROUP_BY);
+            this.field = field;
+        }
     }
 
     record Having(String expr) {
     }
 
-    record OrderBy(Object field, boolean desc) {
+    @Getter
+    @Accessors(fluent = true)
+    static final class OrderBy extends Node {
+        private final Field field;
+        private final boolean desc;
+
+        OrderBy(Field field, boolean desc) {
+            super(Type.ORDER_BY);
+            this.field = field;
+            this.desc = desc;
+        }
     }
 
-    record SelectField(List<Object> fields) {
+    @Getter
+    @Accessors(fluent = true)
+    static final class SelectField extends Node {
+        private final Field field;
 
+        SelectField(Field field) {
+            super(Type.GROUP_BY);
+            this.field = field;
+        }
     }
 }

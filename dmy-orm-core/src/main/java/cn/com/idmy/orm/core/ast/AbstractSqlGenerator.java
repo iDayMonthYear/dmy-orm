@@ -2,14 +2,16 @@ package cn.com.idmy.orm.core.ast;
 
 import cn.com.idmy.orm.annotation.Table;
 import cn.com.idmy.orm.annotation.TableField;
-import cn.com.idmy.orm.core.ast.Node.Cond;
-import cn.com.idmy.orm.core.ast.Node.Set;
+import cn.com.idmy.orm.core.ast.Node.*;
 import cn.com.idmy.orm.core.util.LambdaUtil;
+import lombok.extern.slf4j.Slf4j;
+import org.dromara.hutool.core.collection.CollUtil;
 import org.dromara.hutool.core.text.StrUtil;
 
 import java.lang.reflect.Field;
 import java.util.List;
 
+@Slf4j
 public abstract class AbstractSqlGenerator {
     protected static String tableName(Class<?> entityClass) {
         if (entityClass.isAnnotationPresent(Table.class)) {
@@ -64,12 +66,30 @@ public abstract class AbstractSqlGenerator {
         return set.field().value() + " = " + val;
     }
 
+    private static String parseSelectField(SelectField selectField) {
+        field(selectField.field());
+        return (String) selectField.field().value();
+    }
+
+    private static String parseGroupBy(GroupBy group) {
+        field(group.field());
+        return (String) group.field().value();
+    }
+
+    private static String parseOrderBy(OrderBy order) {
+        field(order.field());
+        return StrUtil.format("{} {}", order.field().value(), order.desc() ? "desc" : "");
+    }
+
     protected static Object parseExpr(Node node) {
         return switch (node) {
             case Node.Field field -> field(field);
             case Node.Or ignored -> " or ";
             case Node.Cond cond -> parseCond(cond);
             case Node.Set set -> parseSet(set);
+            case Node.GroupBy group -> parseGroupBy(group);
+            case Node.OrderBy order -> parseOrderBy(order);
+            case Node.SelectField sf -> parseSelectField(sf);
             case null, default -> {
                 yield null;
             }
@@ -93,5 +113,43 @@ public abstract class AbstractSqlGenerator {
             return "(" + StrUtil.join(",", value) + ")";
         }
         return value.toString();
+    }
+
+    protected static void skipAdjoinOr(Node node, List<Node> wheres) {
+        if (CollUtil.isNotEmpty(wheres)) {
+            if (wheres.getLast().type() == Type.OR) {
+                if (log.isDebugEnabled()) {
+                    log.warn("存在相邻的or，已自动移除");
+                }
+            } else {
+                wheres.add(node);
+            }
+        }
+    }
+
+    private static void removeLastOr(List<Node> wheres) {
+        if (CollUtil.isNotEmpty(wheres) && wheres.getLast() instanceof Or) {
+            wheres.removeLast();
+            if (log.isDebugEnabled()) {
+                log.warn("where条件最后存在or，已自动移除");
+            }
+        }
+    }
+
+    protected static void buildWhere(List<Node> wheres, StringBuilder sql) {
+        if (!wheres.isEmpty()) {
+            removeLastOr(wheres);
+            sql.append(" where ");
+            for (int i = 0, whereNodesSize = wheres.size(); i < whereNodesSize; i++) {
+                Node node = wheres.get(i);
+                sql.append(parseExpr(node));
+                if (i < whereNodesSize - 1) {
+                    Type type = wheres.get(i + 1).type();
+                    if (type == Type.COND && node.type() != Type.OR) {
+                        sql.append(" and ");
+                    }
+                }
+            }
+        }
     }
 }

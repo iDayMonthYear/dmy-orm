@@ -2,15 +2,15 @@ package cn.com.idmy.orm.core.ast;
 
 import cn.com.idmy.orm.core.ast.Node.Cond;
 import cn.com.idmy.orm.core.ast.Node.Or;
-import cn.com.idmy.orm.core.ast.Node.Type;
 import cn.com.idmy.orm.test.User;
 import cn.com.idmy.orm.test.UserDao;
-import org.dromara.hutool.core.collection.CollUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.dromara.hutool.core.lang.Console;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@Slf4j
 public class DeleteSqlGenerator extends AbstractSqlGenerator {
     public static String gen(DeleteChain<?> deleteChain) {
         List<Node> nodes = deleteChain.nodes();
@@ -19,43 +19,21 @@ public class DeleteSqlGenerator extends AbstractSqlGenerator {
             if (node instanceof Cond) {
                 wheres.add(node);
             } else if (node instanceof Or) {
-                if (!wheres.isEmpty()) {
-                    if (wheres.getLast().type() != Type.OR) {
-                        wheres.add(node);
-                    }
-                }
+                skipAdjoinOr(node, wheres);
             }
-        }
-
-        if (CollUtil.isNotEmpty(wheres) && wheres.getLast() instanceof Or) {
-            wheres.removeLast();
         }
 
         StringBuilder sql = new StringBuilder("delete from ").append(tableName(deleteChain.table()));
-        if (!wheres.isEmpty()) {
-            sql.append(" where ");
-
-            for (int i = 0, whereNodesSize = wheres.size(); i < whereNodesSize; i++) {
-                Node node = wheres.get(i);
-                sql.append(parseExpr(node));
-                if (i < whereNodesSize - 1) {
-                    Node next = wheres.get(i + 1);
-                    if (next instanceof Cond && node.type() != Type.OR) {
-                        sql.append(" and ");
-                    }
-                }
-            }
-        }
-
+        buildWhere(wheres, sql);
         return sql.toString();
     }
 
 
+
     public static void main(String[] args) {
         UserDao dao = () -> User.class;
-
 //        Console.log(Delete.of(dao).or().or().in(User::id, 1, 2, 3).like(User::name, "%dmy%").or());
-        Console.log(DeleteChain.of(dao).or().or().eq(User::name, "1", "1".equals("2")).or().or().eq(User::createdAt, 1, false).or().or().eq(User::id, 1, false).or());
+        Console.log(DeleteChain.of(dao).or().or().eq(User::name, "1", "1".equals("2")).or().or().eq(User::createdAt, 1, true).or().or().eq(User::id, 1).or());
 //        Console.log(Delete.of(dao).eq(User::id, 1).or().in(User::id, "1", "2", "3").like(User::name, "%dmy%"));
     }
 /*

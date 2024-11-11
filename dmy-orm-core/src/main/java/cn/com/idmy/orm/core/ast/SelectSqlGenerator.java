@@ -1,9 +1,6 @@
 package cn.com.idmy.orm.core.ast;
 
-import cn.com.idmy.orm.core.ast.Node.Cond;
-import cn.com.idmy.orm.core.ast.Node.Or;
-import cn.com.idmy.orm.core.ast.Node.Set;
-import cn.com.idmy.orm.core.ast.Node.Type;
+import cn.com.idmy.orm.core.ast.Node.*;
 import cn.com.idmy.orm.test.User;
 import cn.com.idmy.orm.test.UserDao;
 import lombok.extern.slf4j.Slf4j;
@@ -13,40 +10,82 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
-public class UpdateSqlGenerator extends AbstractSqlGenerator {
-    public static String gen(UpdateChain<?> update) {
-        List<Node> nodes = update.nodes();
-        List<Set> sets = new ArrayList<>(nodes.size());
+public class SelectSqlGenerator extends AbstractSqlGenerator {
+    public static String gen(SelectChain<?> select) {
+        List<Node> nodes = select.nodes();
+        List<SelectField> selectFields = new ArrayList<>(nodes.size());
         List<Node> wheres = new ArrayList<>(nodes.size());
+        List<GroupBy> groups = new ArrayList<>(nodes.size());
+        List<OrderBy> orders = new ArrayList<>(4);
         for (Node node : nodes) {
-            if (node instanceof Set set) {
-                sets.add(set);
-            } else if (node instanceof Cond) {
+            if (node instanceof Cond) {
                 wheres.add(node);
+            } else if (node instanceof SelectField sf) {
+                selectFields.add(sf);
+            } else if (node instanceof GroupBy group) {
+                groups.add(group);
+            } else if (node instanceof OrderBy order) {
+                orders.add(order);
             } else if (node instanceof Or) {
                 skipAdjoinOr(node, wheres);
             }
         }
 
-        StringBuilder sql = new StringBuilder("UPDATE ").append(tableName(update.table())).append(" SET ");
+        StringBuilder sql = new StringBuilder("select ");
+        buildSelectFields(selectFields, sql);
+        buildWhere(wheres, sql);
+        buildGroupBy(groups, sql);
+        buildOrderBy(orders, sql);
+        return sql.toString();
+    }
 
-        if (!sets.isEmpty()) {
-            for (int i = 0, setsSize = sets.size(); i < setsSize; i++) {
-                Set set = sets.get(i);
-                sql.append(parseExpr(set));
-                if (i < setsSize - 1) {
-                    Type type = sets.get(i + 1).type();
-                    if (type == Type.SET) {
+    private static void buildSelectFields(List<SelectField> sfs, StringBuilder sql) {
+        if (!sfs.isEmpty()) {
+            sql.append("  ");
+            for (int i = 0, size = sfs.size(); i < size; i++) {
+                SelectField selectField = sfs.get(i);
+                sql.append(parseExpr(selectField));
+                if (i < size - 1) {
+                    Type type = sfs.get(i + 1).type();
+                    if (type == Type.GROUP_BY) {
                         sql.append(", ");
                     }
                 }
             }
         }
-
-        buildWhere(wheres, sql);
-        return sql.toString();
     }
 
+    private static void buildGroupBy(List<GroupBy> groups, StringBuilder sql) {
+        if (!groups.isEmpty()) {
+            sql.append(" group by ");
+            for (int i = 0, size = groups.size(); i < size; i++) {
+                GroupBy group = groups.get(i);
+                sql.append(parseExpr(group));
+                if (i < size - 1) {
+                    Type type = groups.get(i + 1).type();
+                    if (type == Type.GROUP_BY) {
+                        sql.append(", ");
+                    }
+                }
+            }
+        }
+    }
+
+    private static void buildOrderBy(List<OrderBy> orders, StringBuilder sql) {
+        if (!orders.isEmpty()) {
+            sql.append(" order by ");
+            for (int i = 0, size = orders.size(); i < size; i++) {
+                OrderBy order = orders.get(i);
+                sql.append(parseExpr(order));
+                if (i < size - 1) {
+                    Type type = orders.get(i + 1).type();
+                    if (type == Type.ORDER_BY) {
+                        sql.append(", ");
+                    }
+                }
+            }
+        }
+    }
 
     public static void main(String[] args) {
         UserDao dao = () -> User.class;
@@ -64,19 +103,19 @@ public class UpdateSqlGenerator extends AbstractSqlGenerator {
                 .in(User::id, 1, 2, 3)
                 .like(User::name, "%dmy%")
                 .or());*/
-        Console.log(UpdateChain.of(dao)
+        Console.log(SelectChain.of(dao)
                 .or()
                 .or()
                 .eq(User::createdAt, 1)
                 .eq(User::createdAt, 1)
                 .eq(User::createdAt, 1)
-                .set(User::username, "dmy")
                 .or()
                 .eq(User::createdAt, 1)
                 .or()
-                .set(User::username, "dmy")
-                .set(User::username, "dmy").or());
-
+                .groupBy(User::createdAt, User::id)
+                .orderBy(User::createdAt, true, User::id, true)
+                .orderBy(User::name, true)
+        );
     }
 /*
 
