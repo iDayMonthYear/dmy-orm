@@ -34,21 +34,6 @@
             <artifactId>slf4j-api</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.mybatis.scripting</groupId>
-            <artifactId>mybatis-freemarker</artifactId>
-            <optional>true</optional>
-        </dependency>
-        <dependency>
-            <groupId>org.mybatis.scripting</groupId>
-            <artifactId>mybatis-velocity</artifactId>
-            <optional>true</optional>
-        </dependency>
-        <dependency>
-            <groupId>org.mybatis.scripting</groupId>
-            <artifactId>mybatis-thymeleaf</artifactId>
-            <optional>true</optional>
-        </dependency>
-        <dependency>
             <groupId>com.zaxxer</groupId>
             <artifactId>HikariCP</artifactId>
             <version>4.0.3</version>
@@ -73,13 +58,6 @@
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-dbcp2</artifactId>
             <version>2.9.0</version>
-            <scope>compile</scope>
-            <optional>true</optional>
-        </dependency>
-        <dependency>
-            <groupId>io.seata</groupId>
-            <artifactId>seata-rm-datasource</artifactId>
-            <version>1.7.0</version>
             <scope>compile</scope>
             <optional>true</optional>
         </dependency>

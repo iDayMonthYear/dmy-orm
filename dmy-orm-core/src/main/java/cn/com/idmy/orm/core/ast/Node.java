@@ -3,11 +3,10 @@ package cn.com.idmy.orm.core.ast;
 import jakarta.annotation.Nullable;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import lombok.Setter;
 import lombok.experimental.Accessors;
 
 @Accessors(fluent = true)
-@Setter
+@Getter
 @RequiredArgsConstructor
 public class Node {
     enum Type {
@@ -75,10 +74,16 @@ public class Node {
     @Getter
     @Accessors(fluent = true)
     static final class OrderBy extends Node {
-        private final FieldGetter<?, ?> field;
+        private final Object field;
         private final boolean desc;
 
         OrderBy(FieldGetter<?, ?> field, boolean desc) {
+            super(Type.ORDER_BY);
+            this.field = field;
+            this.desc = desc;
+        }
+
+        OrderBy(String field, boolean desc) {
             super(Type.ORDER_BY);
             this.field = field;
             this.desc = desc;

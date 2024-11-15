@@ -20,7 +20,7 @@ public abstract class AbstractWhere<T, WHERE extends AbstractWhere<T, WHERE>> {
         this.table = table;
     }
 
-    protected abstract String sql();
+    public abstract String sql();
 
     @Override
     public String toString() {

@@ -86,8 +86,14 @@ public abstract class AbstractSqlGenerator {
     }
 
     private static String buildOrderBy(OrderBy order) {
-        String field = getField(order.field());
-        return StrUtil.format("{} {}", field, order.desc() ? "desc" : "");
+        Object field = order.field();
+        String name;
+        if (field instanceof FieldGetter<?, ?> getter) {
+            name = getField(getter);
+        } else {
+            name = (String) field;
+        }
+        return StrUtil.format("{} {}", name, order.desc() ? "desc" : "");
     }
 
     private static String buildDistinct(Distinct distinct) {

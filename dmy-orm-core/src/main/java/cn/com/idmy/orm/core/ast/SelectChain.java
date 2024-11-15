@@ -8,6 +8,8 @@ import cn.com.idmy.orm.core.ast.Node.SelectField;
 import lombok.Getter;
 import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
+import org.dromara.hutool.core.lang.Assert;
+import org.dromara.hutool.core.text.StrUtil;
 
 @Slf4j
 @Getter
@@ -46,7 +48,7 @@ public class SelectChain<T> extends LambdaWhere<T, SelectChain<T>> {
     public final SelectChain<T> select(FieldGetter<T, ?> field, FieldGetter<T, ?>... fields) {
         addNode(new SelectField(field));
         for (FieldGetter<T, ?> f : fields) {
-            addNode(new SelectField(field));
+            addNode(new SelectField(f));
         }
         return this;
     }
@@ -80,8 +82,18 @@ public class SelectChain<T> extends LambdaWhere<T, SelectChain<T>> {
         return addNode(new OrderBy(field1, desc1)).addNode(new OrderBy(field2, desc2)).addNode(new OrderBy(field3, desc3));
     }
 
+    public SelectChain<T> orderBy(String[] orders) {
+        Assert.isTrue(orders.length % 2 == 0, "排序字段不成对，必须为：['name', 'asc', 'gender', 'desc']");
+        for (int i = 0; i < orders.length; i = i + 2) {
+            String field = orders[i];
+            boolean desc = StrUtil.equalsIgnoreCase(orders[i + 1], "desc");
+            addNode(new OrderBy(field, desc));
+        }
+        return this;
+    }
+
     @Override
-    protected String sql() {
+    public String sql() {
         return SelectSqlGenerator.gen(this);
     }
 }

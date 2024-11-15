@@ -1,16 +1,10 @@
 package cn.com.idmy.orm.core.ast;
 
 import cn.com.idmy.orm.core.ast.Node.*;
-import cn.com.idmy.orm.test.User;
-import cn.com.idmy.orm.test.UserDao;
 import lombok.extern.slf4j.Slf4j;
-import org.dromara.hutool.core.lang.Console;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import static cn.com.idmy.orm.core.ast.SqlFn.ifNull;
-import static cn.com.idmy.orm.core.ast.SqlFn.sum;
 
 @Slf4j
 public class SelectSqlGenerator extends AbstractSqlGenerator {
@@ -99,95 +93,4 @@ public class SelectSqlGenerator extends AbstractSqlGenerator {
             }
         }
     }
-
-    public static void main(String[] args) {
-        UserDao dao = () -> User.class;
-        Console.log(SelectChain.of(dao)
-                .or()
-                .or()
-                .distinct(User::id)
-                .select(SqlFn::count, User::id)
-                .select(() -> sum(User::id))
-                .select(() -> ifNull(User::id, 1))
-                .select(SqlFn::count)
-                .select(User::createdAt, User::createdAt, User::createdAt, User::createdAt)
-                .eq(User::createdAt, 1)
-                .eq(User::createdAt, 1)
-                .eq(User::createdAt, 1)
-                .or()
-                .eq(User::createdAt, 1)
-                .or()
-                .groupBy(User::createdAt, User::id)
-                .orderBy(User::createdAt, true, User::id, true)
-                .orderBy(User::name, true)
-        );
-    }
-/*
-
-    private <T> String generate(Update<T> update) {
-        StringBuilder sql = new StringBuilder("update ").append(tableName(update.table())).append(" ");
-        List<Object> asts = update.root().asts();
-        for (int i = 0, astsSize = asts.size(); i < astsSize; i++) {
-            Object node = asts.get(i);
-            if (node instanceof Where) {
-                sql.append(" where ");
-            } else if (node instanceof And) {
-                sql.append(" and ");
-            } else if (node instanceof Or) {
-                sql.append(" or ");
-            } else if (node instanceof Condition<?, ?> condition) {
-                String field = fieldName(condition.field());
-                sql.append(field).append(" ").append(condition.op().getSymbol()).append(" ");
-                Object value = condition.expr();
-                if (value instanceof SqlExpression expr) {
-                    SqlExpressionFn fn = expr.apply(new SqlExpressionFn(field));
-                    sql.append(fn.expr());
-                } else {
-                    sql.append(formatValue(value));
-                }
-            } else if (node instanceof Set<?, ?> set) {
-                String field = fieldName(set.field());
-                sql.append(field).append(" = ");
-                Object value = set.expr();
-                if (value instanceof SqlExpression expr) {
-                    SqlExpressionFn fn = expr.apply(new SqlExpressionFn(field));
-                    sql.append(fn.expr());
-                } else {
-                    sql.append(formatValue(value));
-                }
-                Object next = asts.get(i + 1);
-                if (next instanceof Set) {
-                    sql.append(", ");
-                }
-            }
-        }
-        Console.log(sql);
-        return sql.toString();
-    }
-
-    public static void main(String[] args) {
-        UserDao dao = () -> User.class;
-
-        new DeleteSqlGenerator().generate(Delete.of(dao).from()
-                .where()
-                .eq(User::id, c -> c.plus(1))  // 使用函数构建表达式
-                .and()
-                .eq("name", "test")  // 普通字符串值
-                .or()
-                .eq(User::username, "test")  // 普通字符串值
-                .semi());
-
-        new DeleteSqlGenerator().generate(Update.of(dao)
-                .set(User::id, 1)
-                .set(User::username, "dmy")
-                .set(User::name, f -> f.plus(1))
-                .where()
-                .eq(User::createdAt, LocalDateTime.now())  // 使用函数构建表达式
-                .and()
-                .eq("name", "test")  // 普通字符串值
-                .or()
-                .eq(User::username, "test")  // 普通字符串值
-                .semi());
-
-    }*/
 }

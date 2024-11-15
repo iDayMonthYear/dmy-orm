@@ -29,7 +29,7 @@ public class UpdateWhere<T> extends LambdaWhere<T, UpdateWhere<T>> {
     }
 
     @Override
-    protected String sql() {
+    public String sql() {
         return null;
     }
 }

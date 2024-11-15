@@ -1,27 +1,31 @@
 package cn.com.idmy.orm.core;
 
 import cn.com.idmy.orm.core.ast.DeleteChain;
+import cn.com.idmy.orm.core.ast.SelectChain;
 import cn.com.idmy.orm.core.ast.UpdateChain;
-import cn.com.idmy.orm.core.ast.UpdateWhere;
+import cn.com.idmy.orm.core.provider.MybatisSqlProvider;
+import org.apache.ibatis.annotations.DeleteProvider;
+import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.SelectProvider;
+import org.apache.ibatis.annotations.UpdateProvider;
+import org.dromara.hutool.core.reflect.TypeUtil;
+
+import java.util.List;
 
 public interface OrmDao<T> {
-    Class<T> entityType();
-
-    default boolean delete(DeleteChain<T> delete) {
-        return true;
+    default Class<T> entityType() {
+        return (Class<T>) TypeUtil.getTypeArgument(getClass());
     }
 
-    default boolean update(UpdateChain<T> update) {
-        return true;
-    }
+    @SelectProvider(type = MybatisSqlProvider.class, method = "find")
+    List<T> find(@Param("chain") SelectChain<T> chain);
 
-    default boolean update(T entity, UpdateWhere<T> where) {
-        where.entity(entity);
-        return true;
-    }
+    @SelectProvider(type = MybatisSqlProvider.class, method = "get")
+    T get(@Param("chain") SelectChain<T> chain);
 
-    default boolean update(T entity, UpdateWhere<T> where, boolean nulls) {
-        where.entity(entity);
-        return true;
-    }
+    @UpdateProvider(type = MybatisSqlProvider.class, method = "update")
+    int update(@Param("chain") UpdateChain<T> chain);
+
+    @DeleteProvider(type = MybatisSqlProvider.class, method = "delete")
+    int delete(@Param("chain") DeleteChain<T> chain);
 }

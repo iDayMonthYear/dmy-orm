@@ -19,7 +19,7 @@ public class DeleteChain<T> extends LambdaWhere<T, DeleteChain<T>> {
     }
 
     @Override
-    protected String sql() {
+    public String sql() {
         return DeleteSqlGenerator.gen(this);
     }
 }

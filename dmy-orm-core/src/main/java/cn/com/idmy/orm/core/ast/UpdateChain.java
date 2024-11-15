@@ -29,7 +29,7 @@ public class UpdateChain<T> extends LambdaWhere<T, UpdateChain<T>> {
     }
 
     @Override
-    protected String sql() {
+    public String sql() {
         return UpdateSqlGenerator.gen(this);
     }
 }
