@@ -23,21 +23,11 @@
 
     <properties>
         <dmy-orm.version>1.9.4</dmy-orm.version>
-
         <mybatis.version>3.5.15</mybatis.version>
         <mybatis-spring.version>3.0.3</mybatis-spring.version>
-        <mybatis-freemarker.version>1.2.4</mybatis-freemarker.version>
-        <mybatis-velocity.version>2.1.2</mybatis-velocity.version>
-        <mybatis-thymeleaf.version>1.0.4</mybatis-thymeleaf.version>
 
         <mysql.version>8.0.33</mysql.version>
         <HikariCP.version>4.0.3</HikariCP.version>
-
-        <solon.version>2.5.3</solon.version>
-
-        <junit.version>4.13.2</junit.version>
-        <testcontainers.version>1.19.3</testcontainers.version>
-        <maven-flatten.version>1.5.0</maven-flatten.version>
     </properties>
 
     <dependencies>
@@ -72,7 +62,6 @@
                 <version>${HikariCP.version}</version>
                 <optional>true</optional>
             </dependency>
-
         </dependencies>
     </dependencyManagement>
 

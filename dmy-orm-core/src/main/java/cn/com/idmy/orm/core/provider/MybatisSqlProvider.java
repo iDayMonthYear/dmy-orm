@@ -1,31 +1,30 @@
 package cn.com.idmy.orm.core.provider;
 
-
 import cn.com.idmy.orm.core.ast.DeleteChain;
 import cn.com.idmy.orm.core.ast.SelectChain;
 import cn.com.idmy.orm.core.ast.UpdateChain;
-import org.apache.ibatis.annotations.Param;
-import org.apache.ibatis.builder.annotation.ProviderContext;
 
+import java.util.Map;
 
 @SuppressWarnings({"rawtypes", "DuplicatedCode"})
 public class MybatisSqlProvider {
-    private MybatisSqlProvider() {
-    }
-
-    public String get(ProviderContext context, @Param("chain") SelectChain<?> chain) {
+    public String get(Map<String, Object> params) {
+        SelectChain<?> chain = (SelectChain<?>) params.get("chain");
         return chain.sql();
     }
 
-    public String find(ProviderContext context, @Param("chain") SelectChain<?> chain) {
+    public String find(Map<String, Object> params) {
+        SelectChain<?> chain = (SelectChain<?>) params.get("chain");
         return chain.sql();
     }
 
-    public String update(ProviderContext context, @Param("chain") UpdateChain<?> chain) {
+    public String update(Map<String, Object> params) {
+        UpdateChain<?> chain = (UpdateChain<?>) params.get("chain");
         return chain.sql();
     }
 
-    public String delete(ProviderContext context, @Param("chain") DeleteChain<?> chain) {
+    public String delete(Map<String, Object> params) {
+        DeleteChain<?> chain = (DeleteChain<?>) params.get("chain");
         return chain.sql();
     }
 }
