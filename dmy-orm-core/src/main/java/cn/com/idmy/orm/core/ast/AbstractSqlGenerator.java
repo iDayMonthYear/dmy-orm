@@ -37,7 +37,7 @@ public abstract class AbstractSqlGenerator {
     protected static String getField(FieldGetter<?, ?> field) {
         String name = LambdaUtil.fieldName(field);
         SqlUtil.checkField(name);
-        return name;
+        return '`' + name + '`';
     }
 
     private static Object parseSqlExpr(String field, Object expr) {
@@ -122,22 +122,23 @@ public abstract class AbstractSqlGenerator {
     }
 
     protected static String formatValue(Object value) {
-        if (value == null) {
-            return "null";
-        }
-        if (value instanceof String str) {
-            return "'" + str.replace("'", "''") + "'";
-        }
-        if (value instanceof Number) {
-            return value.toString();
-        }
-        if (value instanceof List) {
-            return StrUtil.join(",", value);
-        }
-        if (value instanceof Object[]) {
-            return "(" + StrUtil.join(",", value) + ")";
-        }
-        return value.toString();
+//        if (value == null) {
+//            return "null";
+//        }
+//        if (value instanceof String str) {
+//            return "'" + str.replace("'", "''") + "'";
+//        }
+//        if (value instanceof Number) {
+//            return value.toString();
+//        }
+//        if (value instanceof List) {
+//            return StrUtil.join(",", value);
+//        }
+//        if (value instanceof Object[]) {
+//            return "(" + StrUtil.join(",", value) + ")";
+//        }
+//        return value.toString();
+        return "?";
     }
 
     protected static void skipAdjoinOr(Node node, List<Node> wheres) {

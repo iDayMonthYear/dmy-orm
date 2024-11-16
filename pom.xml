@@ -4,8 +4,8 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>cn.com.idmy</groupId>
-        <artifactId>dmy-root</artifactId>
+        <groupId>cn.com.idmy.cloud</groupId>
+        <artifactId>dmy-cloud</artifactId>
         <version>1.0.0</version>
     </parent>
 
@@ -19,13 +19,13 @@
         <module>dmy-orm-core</module>
         <module>dmy-orm-spring</module>
         <module>dmy-orm-spring-boot-starter</module>
+        <module>dmy-orm-test</module>
     </modules>
 
     <properties>
         <dmy-orm.version>1.9.4</dmy-orm.version>
         <mybatis.version>3.5.15</mybatis.version>
         <mybatis-spring.version>3.0.3</mybatis-spring.version>
-
         <mysql.version>8.0.33</mysql.version>
         <HikariCP.version>4.0.3</HikariCP.version>
     </properties>

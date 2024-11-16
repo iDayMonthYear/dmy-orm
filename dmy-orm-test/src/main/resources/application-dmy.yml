@@ -1,0 +1,10 @@
+logging:
+  level:
+    root: debug
+
+spring:
+  datasource:
+    username: dmy
+    password: fadsfawef#32423
+    url: jdbc:mysql://rm-bp15q767621w68657no.mysql.rds.aliyuncs.com:3306/xxl_job
+    type: com.zaxxer.hikari.HikariDataSource
