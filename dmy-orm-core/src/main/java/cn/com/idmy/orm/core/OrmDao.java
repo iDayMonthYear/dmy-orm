@@ -3,7 +3,8 @@ package cn.com.idmy.orm.core;
 import cn.com.idmy.orm.core.ast.DeleteChain;
 import cn.com.idmy.orm.core.ast.SelectChain;
 import cn.com.idmy.orm.core.ast.UpdateChain;
-import cn.com.idmy.orm.core.provider.MybatisSqlProvider;
+import cn.com.idmy.orm.core.mybatis.MybatisConsts;
+import cn.com.idmy.orm.core.mybatis.MybatisSqlProvider;
 import org.apache.ibatis.annotations.DeleteProvider;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.SelectProvider;
@@ -18,10 +19,10 @@ public interface OrmDao<T> {
     }
 
     @SelectProvider(type = MybatisSqlProvider.class, method = "find")
-    List<T> find(@Param("chain") SelectChain<T> chain);
+    List<T> find(@Param(MybatisConsts.SELECT) SelectChain<T> chain);
 
     @SelectProvider(type = MybatisSqlProvider.class, method = "get")
-    T get(@Param("chain") SelectChain<T> chain);
+    T get(@Param(MybatisConsts.SELECT) SelectChain<T> chain);
 
     @UpdateProvider(type = MybatisSqlProvider.class, method = "update")
     int update(@Param("chain") UpdateChain<T> chain);

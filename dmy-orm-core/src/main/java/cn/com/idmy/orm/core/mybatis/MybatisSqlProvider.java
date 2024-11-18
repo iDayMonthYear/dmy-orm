@@ -1,4 +1,4 @@
-package cn.com.idmy.orm.core.provider;
+package cn.com.idmy.orm.core.mybatis;
 
 import cn.com.idmy.base.model.Pair;
 import cn.com.idmy.orm.core.ast.DeleteChain;
@@ -11,14 +11,16 @@ import java.util.Map;
 @SuppressWarnings({"rawtypes", "DuplicatedCode"})
 public class MybatisSqlProvider {
     public String get(Map<String, Object> params) {
-        SelectChain<?> chain = (SelectChain<?>) params.get("chain");
+        SelectChain<?> chain = (SelectChain<?>) params.get(MybatisConsts.SELECT);
         Pair<String, List<Object>> pair = chain.sql();
+        ProviderUtil.setSqlArgs(params, pair.right);
         return pair.left;
     }
 
     public String find(Map<String, Object> params) {
-        SelectChain<?> chain = (SelectChain<?>) params.get("chain");
+        SelectChain<?> chain = (SelectChain<?>) params.get(MybatisConsts.SELECT);
         Pair<String, List<Object>> pair = chain.sql();
+        ProviderUtil.setSqlArgs(params, pair.right);
         return pair.left;
     }
 

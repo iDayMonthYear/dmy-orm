@@ -1,4 +1,4 @@
-package cn.com.idmy.orm.core.handler;
+package cn.com.idmy.orm.core.mybatis;
 
 import org.apache.ibatis.type.BaseTypeHandler;
 import org.apache.ibatis.type.JdbcType;

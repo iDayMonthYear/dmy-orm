@@ -1,6 +1,6 @@
 package cn.com.idmy.orm.spring.boot;
 
-import cn.com.idmy.orm.core.provider.MybatisSqlProvider;
+import cn.com.idmy.orm.core.mybatis.MybatisSqlProvider;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.ibatis.type.EnumTypeHandler;
 import org.mybatis.spring.SqlSessionFactoryBean;
