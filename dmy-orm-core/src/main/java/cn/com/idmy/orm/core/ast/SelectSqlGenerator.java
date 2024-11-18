@@ -1,14 +1,24 @@
 package cn.com.idmy.orm.core.ast;
 
+import cn.com.idmy.base.model.Pair;
 import cn.com.idmy.orm.core.ast.Node.*;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+
+import static cn.com.idmy.orm.core.ast.SqlConsts.ASTERISK;
+import static cn.com.idmy.orm.core.ast.SqlConsts.DELIMITER;
+import static cn.com.idmy.orm.core.ast.SqlConsts.FROM;
+import static cn.com.idmy.orm.core.ast.SqlConsts.GROUP_BY;
+import static cn.com.idmy.orm.core.ast.SqlConsts.ORDER_BY;
+import static cn.com.idmy.orm.core.ast.SqlConsts.SELECT;
 
 @Slf4j
 public class SelectSqlGenerator extends AbstractSqlGenerator {
-    public static String gen(SelectChain<?> select) {
+    public static Pair<String, List<Object>> gen(SelectChain<?> select) {
         List<Node> nodes = select.nodes();
         List<SelectField> selectFields = new ArrayList<>(nodes.size());
         List<Node> wheres = new ArrayList<>(nodes.size());
@@ -22,72 +32,78 @@ public class SelectSqlGenerator extends AbstractSqlGenerator {
                 case GroupBy groupBy -> groups.add(groupBy);
                 case OrderBy orderBy -> orders.add(orderBy);
                 case Or or -> skipAdjoinOr(or, wheres);
-                case Distinct d -> {
-                    distinct = d;
-                }
+                case Distinct d -> distinct = d;
                 case null, default -> {
                 }
             }
         }
 
-        StringBuilder sql = new StringBuilder("select ");
+        List<Object> params = new ArrayList<>();
+        StringBuilder sql = new StringBuilder(SELECT);
         if (distinct != null) {
-            sql.append(builder(distinct));
+            builder(distinct, sql, params);
             if (!selectFields.isEmpty()) {
-                sql.append(", ");
+                sql.append(DELIMITER);
             }
         }
-        buildSelectField(selectFields, sql);
-        sql.append(" from ").append(getTableName(select.table()));
-        buildWhere(wheres, sql);
-        buildGroupBy(groups, sql);
-        buildOrderBy(orders, sql);
-        return sql.toString();
+        buildSelectField(selectFields, sql, params);
+        sql.append(FROM).append(getTableName(select.table()));
+        buildWhere(wheres, sql, params);
+        buildGroupBy(groups, sql, params);
+        buildOrderBy(orders, sql, params);
+        return Pair.of(sql.toString(), params);
     }
 
-    private static void buildSelectField(List<SelectField> selectFields, StringBuilder sql) {
+    private static void buildSelectField(List<SelectField> selectFields, StringBuilder sql, List<Object> params) {
         if (selectFields.isEmpty()) {
-            sql.append("*");
+            sql.append(ASTERISK);
         } else {
+            Set<String> set = new HashSet<>(selectFields.size());
             for (int i = 0, size = selectFields.size(); i < size; i++) {
                 SelectField selectField = selectFields.get(i);
-                sql.append(builder(selectField));
+                String field = (String) builder(selectField, sql, params);
+                if (log.isDebugEnabled()) {
+                    if (set.contains(field)) {
+                        log.error("select {} 字段名重复会导致映射到实体类异常", field);
+                    }
+                    set.add(field);
+                }
                 if (i < size - 1) {
                     Type type = selectFields.get(i + 1).type();
                     if (type == Type.SELECT_FIELD) {
-                        sql.append(", ");
+                        sql.append(DELIMITER);
                     }
                 }
             }
         }
     }
 
-    private static void buildGroupBy(List<GroupBy> groups, StringBuilder sql) {
+    private static void buildGroupBy(List<GroupBy> groups, StringBuilder sql, List<Object> params) {
         if (!groups.isEmpty()) {
-            sql.append(" group by ");
+            sql.append(GROUP_BY);
             for (int i = 0, size = groups.size(); i < size; i++) {
                 GroupBy group = groups.get(i);
-                sql.append(builder(group));
+                builder(group, sql, params);
                 if (i < size - 1) {
                     Type type = groups.get(i + 1).type();
                     if (type == Type.GROUP_BY) {
-                        sql.append(", ");
+                        sql.append(DELIMITER);
                     }
                 }
             }
         }
     }
 
-    private static void buildOrderBy(List<OrderBy> orders, StringBuilder sql) {
+    private static void buildOrderBy(List<OrderBy> orders, StringBuilder sql, List<Object> params) {
         if (!orders.isEmpty()) {
-            sql.append(" order by ");
+            sql.append(ORDER_BY);
             for (int i = 0, size = orders.size(); i < size; i++) {
                 OrderBy order = orders.get(i);
-                sql.append(builder(order));
+                builder(order, sql, params);
                 if (i < size - 1) {
                     Type type = orders.get(i + 1).type();
                     if (type == Type.ORDER_BY) {
-                        sql.append(", ");
+                        sql.append(DELIMITER);
                     }
                 }
             }

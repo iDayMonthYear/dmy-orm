@@ -1,9 +1,12 @@
 package cn.com.idmy.orm.core.ast;
 
+import cn.com.idmy.base.model.Pair;
 import cn.com.idmy.orm.core.OrmDao;
 import lombok.Getter;
 import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
+
+import java.util.List;
 
 
 @Getter
@@ -19,7 +22,7 @@ public class DeleteChain<T> extends LambdaWhere<T, DeleteChain<T>> {
     }
 
     @Override
-    public String sql() {
+    public Pair<String, List<Object>> sql() {
         return DeleteSqlGenerator.gen(this);
     }
 }

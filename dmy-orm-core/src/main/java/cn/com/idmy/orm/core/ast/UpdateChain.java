@@ -1,10 +1,13 @@
 package cn.com.idmy.orm.core.ast;
 
+import cn.com.idmy.base.model.Pair;
 import cn.com.idmy.orm.core.OrmDao;
 import cn.com.idmy.orm.core.ast.Node.Set;
 import lombok.Getter;
 import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
+
+import java.util.List;
 
 
 @Slf4j
@@ -29,7 +32,7 @@ public class UpdateChain<T> extends LambdaWhere<T, UpdateChain<T>> {
     }
 
     @Override
-    public String sql() {
+    public Pair<String, List<Object>> sql() {
         return UpdateSqlGenerator.gen(this);
     }
 }

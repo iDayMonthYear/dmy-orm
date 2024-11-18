@@ -1,5 +1,6 @@
 package cn.com.idmy.orm.core.ast;
 
+import cn.com.idmy.base.model.Pair;
 import cn.com.idmy.orm.core.OrmDao;
 import cn.com.idmy.orm.core.ast.Node.Distinct;
 import cn.com.idmy.orm.core.ast.Node.GroupBy;
@@ -10,6 +11,8 @@ import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.hutool.core.lang.Assert;
 import org.dromara.hutool.core.text.StrUtil;
+
+import java.util.List;
 
 @Slf4j
 @Getter
@@ -85,15 +88,13 @@ public class SelectChain<T> extends LambdaWhere<T, SelectChain<T>> {
     public SelectChain<T> orderBy(String[] orders) {
         Assert.isTrue(orders.length % 2 == 0, "排序字段不成对，必须为：['name', 'asc', 'gender', 'desc']");
         for (int i = 0; i < orders.length; i = i + 2) {
-            String field = orders[i];
-            boolean desc = StrUtil.equalsIgnoreCase(orders[i + 1], "desc");
-            addNode(new OrderBy(field, desc));
+            addNode(new OrderBy(orders[i], StrUtil.equalsIgnoreCase(orders[i + 1], "desc")));
         }
         return this;
     }
 
     @Override
-    public String sql() {
+    public Pair<String, List<Object>> sql() {
         return SelectSqlGenerator.gen(this);
     }
 }

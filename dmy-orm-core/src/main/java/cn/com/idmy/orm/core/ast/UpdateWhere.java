@@ -1,10 +1,13 @@
 package cn.com.idmy.orm.core.ast;
 
+import cn.com.idmy.base.model.Pair;
 import cn.com.idmy.orm.core.OrmDao;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
+
+import java.util.List;
 
 
 @Slf4j
@@ -29,7 +32,7 @@ public class UpdateWhere<T> extends LambdaWhere<T, UpdateWhere<T>> {
     }
 
     @Override
-    public String sql() {
+    public Pair<String, List<Object>> sql() {
         return null;
     }
 }

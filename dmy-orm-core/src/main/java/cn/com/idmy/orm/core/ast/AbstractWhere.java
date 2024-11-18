@@ -1,5 +1,6 @@
 package cn.com.idmy.orm.core.ast;
 
+import cn.com.idmy.base.model.Pair;
 import cn.com.idmy.orm.core.ast.Node.Or;
 import lombok.Getter;
 import lombok.experimental.Accessors;
@@ -20,12 +21,12 @@ public abstract class AbstractWhere<T, WHERE extends AbstractWhere<T, WHERE>> {
         this.table = table;
     }
 
-    public abstract String sql();
+    public abstract Pair<String, List<Object>> sql();
 
     @Override
     public String toString() {
         try {
-            return sql();
+            return sql().left;
         } catch (Exception e) {
             log.warn("SQL生成失败：{}", e.getMessage());
             return null;

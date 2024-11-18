@@ -12,6 +12,10 @@ import org.dromara.hutool.core.text.StrUtil;
 import java.lang.reflect.Field;
 import java.util.List;
 
+import static cn.com.idmy.orm.core.ast.SqlConsts.*;
+import static cn.com.idmy.orm.core.ast.SqlFnName.COUNT;
+
+
 @Slf4j
 public abstract class AbstractSqlGenerator {
     protected static String getTableName(Class<?> entityClass) {
@@ -35,110 +39,135 @@ public abstract class AbstractSqlGenerator {
     }
 
     protected static String getField(FieldGetter<?, ?> field) {
-        String name = LambdaUtil.fieldName(field);
-        SqlUtil.checkField(name);
-        return '`' + name + '`';
+        return "`" + LambdaUtil.fieldName(field) + "`";
     }
 
-    private static Object parseSqlExpr(String field, Object expr) {
+    private static String parseSqlExpr(String field, Object expr, List<Object> params) {
+        StringBuilder sql = new StringBuilder();
         if (expr instanceof SqlOpExpr sqlOpExpr) {
-            SqlOp fn = new SqlOp(field);
-            SqlOp apply = sqlOpExpr.apply(fn);
-            return apply.expr();
+            SqlOp sqlOp = sqlOpExpr.apply(new SqlOp(field));
+            params.add(sqlOp.value());
+            return sql.append(sqlOp.field()).append(BLANK).append(sqlOp.op()).append(BLANK).append(PLACEHOLDER).toString();
         } else {
-            return formatValue(expr);
+            params.add(expr);
+            placeholder(expr, sql);
+        }
+        return sql.toString();
+    }
+
+    private static void placeholder(Object value, StringBuilder sql) {
+        if (value instanceof List<?> ls) {
+            int size = ls.size();
+            sql.append(BRACKET_LEFT);
+            for (int i = 0; i < size; i++) {
+                sql.append(PLACEHOLDER);
+                if (i != size - 1) {
+                    sql.append(DELIMITER);
+                }
+            }
+            sql.append(BRACKET_RIGHT);
+        } else if (value instanceof Object[] ls) {
+            int size = ls.length;
+            sql.append(BRACKET_LEFT);
+            for (int i = 0; i < size; i++) {
+                sql.append(PLACEHOLDER);
+                if (i != size - 1) {
+                    sql.append(DELIMITER);
+                }
+            }
+            sql.append(BRACKET_RIGHT);
+        } else {
+            sql.append(PLACEHOLDER);
         }
     }
 
-    private static String buildCond(Cond cond) {
+    private static StringBuilder buildCond(Cond cond, StringBuilder sql, List<Object> params) {
         String field = getField(cond.field());
-        Object value = parseSqlExpr(field, cond.expr());
-        return field + " " + cond.op().getSymbol() + " " + value;
+        String expr = parseSqlExpr(field, cond.expr(), params);
+        sql.append(field).append(BLANK).append(cond.op().getSymbol()).append(BLANK).append(expr);
+        return sql;
     }
 
-    private static String buildSet(Set set) {
+    private static StringBuilder buildSet(Set set, StringBuilder sql, List<Object> params) {
         String field = getField(set.field());
-        Object value = parseSqlExpr(field, set.expr());
-        return field + " = " + value;
+        String expr = parseSqlExpr(field, set.expr(), params);
+        sql.append(field).append(BLANK).append(expr);
+        return sql;
     }
 
-    private static String buildSelectField(SelectField selectField) {
+    private static String buildSelectField(SelectField selectField, StringBuilder sql, List<Object> params) {
         Object value = selectField.field();
         if (value instanceof FieldGetter<?, ?> field) {
-            return getField(field);
+            String out = getField(field);
+            sql.append(out);
+            return out;
         } else if (value instanceof SqlFnExpr<?> exp) {
             SqlFn<?> fn = exp.apply();
             SqlFnName name = fn.name();
-            String field = (fn.field() == null && name == SqlFnName.COUNT) ? "*" : getField(fn.field());
+            String field = (fn.field() == null && name == COUNT) ? ASTERISK : getField(fn.field());
             String alias = selectField.alias() == null ? null : LambdaUtil.fieldName(selectField.alias());
-            if (name == SqlFnName.IF_NULL) {
-                return StrUtil.format("{}({}, {}) {}", name.getName(), field, fn.value(), alias == null ? field : alias);
+            final String fieldOrAlias;
+            if (alias == null) {
+                fieldOrAlias = field;
             } else {
-                return StrUtil.format("{}({}) {}", name.getName(), field, alias == null ? field : alias);
+                fieldOrAlias = alias;
             }
+            if (name == SqlFnName.IF_NULL) {
+                params.add(fn.value());
+                sql.append(name.getName()).append(BRACKET_LEFT).append(field).append(DELIMITER).append(PLACEHOLDER).append(BRACKET_RIGHT).append(BLANK).append(fieldOrAlias);
+            } else {
+                sql.append(name.getName()).append(BRACKET_LEFT).append(field).append(BRACKET_RIGHT).append(BLANK).append(fieldOrAlias);
+            }
+            return fieldOrAlias;
         } else {
+            sql.append(value);
             return (String) value;
         }
     }
 
-    private static String buildGroupBy(GroupBy group) {
-        return getField(group.field());
+    private static StringBuilder buildGroupBy(GroupBy group, StringBuilder sql) {
+        sql.append(getField(group.field()));
+        return sql;
     }
 
-    private static String buildOrderBy(OrderBy order) {
+    private static StringBuilder buildOrderBy(OrderBy order, StringBuilder sql) {
         Object field = order.field();
         String name;
         if (field instanceof FieldGetter<?, ?> getter) {
             name = getField(getter);
         } else {
             name = (String) field;
+            //字符串类型可以是前端过来的。必须检查
+            SqlUtil.checkField(name);
         }
-        return StrUtil.format("{} {}", name, order.desc() ? "desc" : "");
+        sql.append(name).append(order.desc() ? DESC : EMPTY);
+        return sql;
     }
 
-    private static String buildDistinct(Distinct distinct) {
+    private static StringBuilder buildDistinct(Distinct distinct, StringBuilder sql) {
         FieldGetter<?, ?> fieldGetter = distinct.field();
         if (fieldGetter == null) {
-            return "distinct ";
+            sql.append(DISTINCT);
         } else {
             String field = getField(fieldGetter);
-            return StrUtil.format("distinct({}) ", field);
+            sql.append(DISTINCT).append(BRACKET_LEFT).append(field).append(BRACKET_RIGHT);
         }
+        return sql;
     }
 
-    protected static Object builder(Node node) {
+    protected static Object builder(Node node, StringBuilder sql, List<Object> params) {
         return switch (node) {
-            case Node.Or ignored -> " or ";
-            case Node.Cond cond -> buildCond(cond);
-            case Node.Set set -> buildSet(set);
-            case Node.GroupBy group -> buildGroupBy(group);
-            case Node.OrderBy order -> buildOrderBy(order);
-            case Node.SelectField sf -> buildSelectField(sf);
-            case Node.Distinct distinct -> buildDistinct(distinct);
+            case Node.Or ignored -> sql.append(SqlConsts.OR);
+            case Node.Cond cond -> buildCond(cond, sql, params);
+            case Node.Set set -> buildSet(set, sql, params);
+            case Node.GroupBy group -> buildGroupBy(group, sql);
+            case Node.OrderBy order -> buildOrderBy(order, sql);
+            case Node.SelectField sf -> buildSelectField(sf, sql, params);
+            case Node.Distinct distinct -> buildDistinct(distinct, sql);
             case null, default -> {
                 yield null;
             }
         };
-    }
-
-    protected static String formatValue(Object value) {
-//        if (value == null) {
-//            return "null";
-//        }
-//        if (value instanceof String str) {
-//            return "'" + str.replace("'", "''") + "'";
-//        }
-//        if (value instanceof Number) {
-//            return value.toString();
-//        }
-//        if (value instanceof List) {
-//            return StrUtil.join(",", value);
-//        }
-//        if (value instanceof Object[]) {
-//            return "(" + StrUtil.join(",", value) + ")";
-//        }
-//        return value.toString();
-        return "?";
     }
 
     protected static void skipAdjoinOr(Node node, List<Node> wheres) {
@@ -162,17 +191,17 @@ public abstract class AbstractSqlGenerator {
         }
     }
 
-    protected static void buildWhere(List<Node> wheres, StringBuilder sql) {
+    protected static void buildWhere(List<Node> wheres, StringBuilder sql, List<Object> params) {
         if (!wheres.isEmpty()) {
             removeLastOr(wheres);
-            sql.append(" where ");
+            sql.append(WHERE);
             for (int i = 0, whereNodesSize = wheres.size(); i < whereNodesSize; i++) {
                 Node node = wheres.get(i);
-                sql.append(builder(node));
+                builder(node, sql, params);
                 if (i < whereNodesSize - 1) {
                     Type type = wheres.get(i + 1).type();
                     if (type == Type.COND && node.type() != Type.OR) {
-                        sql.append(" and ");
+                        sql.append(AND);
                     }
                 }
             }

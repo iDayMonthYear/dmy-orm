@@ -5,6 +5,8 @@ import lombok.Getter;
 import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.Collection;
+
 @Slf4j
 @Getter
 @Accessors(fluent = true, chain = false)
@@ -129,7 +131,7 @@ public abstract class LambdaWhere<T, WHERE extends LambdaWhere<T, WHERE>> extend
 
     public WHERE lt(FieldGetter<T, ?> field, Object value, boolean if0) {
         if (if0) {
-            return addNode(new Cond(field, Op.LT ,value));
+            return addNode(new Cond(field, Op.LT, value));
         } else {
             return typedThis;
         }
@@ -175,9 +177,21 @@ public abstract class LambdaWhere<T, WHERE extends LambdaWhere<T, WHERE>> extend
         return addNode(new Cond(field, Op.IN, value));
     }
 
+    public WHERE in(FieldGetter<T, ?> field, Object... values) {
+        return addNode(new Cond(field, Op.IN, values));
+    }
+
     public WHERE in(FieldGetter<T, ?> field, Object value, boolean if0) {
         if (if0) {
             return addNode(new Cond(field, Op.IN, value));
+        } else {
+            return typedThis;
+        }
+    }
+
+    public WHERE in(FieldGetter<T, ?> field, Collection<Object> values, boolean if0) {
+        if (if0) {
+            return addNode(new Cond(field, Op.IN, values));
         } else {
             return typedThis;
         }
