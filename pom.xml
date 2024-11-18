@@ -24,7 +24,7 @@
 
     <properties>
         <dmy-orm.version>1.9.4</dmy-orm.version>
-        <mybatis.version>3.5.15</mybatis.version>
+        <mybatis.version>3.5.16</mybatis.version>
         <mybatis-spring.version>3.0.3</mybatis-spring.version>
         <mysql.version>8.0.33</mysql.version>
         <HikariCP.version>4.0.3</HikariCP.version>

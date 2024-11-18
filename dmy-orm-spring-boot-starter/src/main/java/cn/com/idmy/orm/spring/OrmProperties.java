@@ -1,4 +1,4 @@
-package cn.com.idmy.orm.spring.boot;
+package cn.com.idmy.orm.spring;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;

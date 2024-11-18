@@ -14,6 +14,7 @@ import java.util.List;
 @Service
 public class AppServiceImpl  implements AppService {
     private final AppDao appDao;
+
     @Override
     public List<App> all() {
         SelectChain<App> chain = SelectChain.of(appDao);

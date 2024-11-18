@@ -15,15 +15,27 @@
  */
 package cn.com.idmy.orm.core.mybatis;
 
+import cn.com.idmy.orm.core.mybatis.handler.EnumTypeHandler;
+import cn.com.idmy.orm.core.mybatis.handler.JsonTypeHandler;
 import org.apache.ibatis.executor.keygen.SelectKeyGenerator;
 import org.apache.ibatis.executor.parameter.ParameterHandler;
 import org.apache.ibatis.mapping.BoundSql;
 import org.apache.ibatis.mapping.MappedStatement;
 import org.apache.ibatis.session.Configuration;
+import org.apache.ibatis.type.TypeHandlerRegistry;
 
 import java.util.Map;
 
 public class MybatisConfiguration extends Configuration {
+    public MybatisConfiguration() {
+        // 注册默认的类型处理器
+        TypeHandlerRegistry registry = getTypeHandlerRegistry();
+        // 枚举类型处理器
+        registry.setDefaultEnumTypeHandler(EnumTypeHandler.class);
+        // JSON类型处理器
+        registry.register(JsonTypeHandler.class);
+    }
+
     @Override
     public ParameterHandler newParameterHandler(MappedStatement ms, Object paramObj, BoundSql boundSql) {
         String id = ms.getId();
