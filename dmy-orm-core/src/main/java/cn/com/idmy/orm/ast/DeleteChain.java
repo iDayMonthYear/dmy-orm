@@ -13,8 +13,8 @@ import java.util.List;
 @Accessors(fluent = true, chain = false)
 @Slf4j
 public class DeleteChain<T> extends LambdaWhere<T, DeleteChain<T>> {
-    private DeleteChain(Class<T> table) {
-        super(table);
+    private DeleteChain(Class<T> entityClass) {
+        super(entityClass);
     }
 
     public static <T> DeleteChain<T> of(MybatisDao<T, ?> dao) {

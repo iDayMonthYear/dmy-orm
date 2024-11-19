@@ -12,7 +12,7 @@ import org.dromara.hutool.core.reflect.TypeUtil;
 import java.util.*;
 
 @SuppressWarnings({"rawtypes", "DuplicatedCode"})
-class MybatisSqlProvider {
+public class MybatisSqlProvider {
     private static void setParams(Map<String, Object> params, Pair<String, List<Object>> pair) {
         params.put(MybatisConsts.SQL_PARAMS, pair.right);
     }

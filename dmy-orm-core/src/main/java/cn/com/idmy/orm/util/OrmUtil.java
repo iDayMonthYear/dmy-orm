@@ -1,9 +1,9 @@
 package cn.com.idmy.orm.util;
 
 import cn.com.idmy.orm.OrmException;
-import cn.com.idmy.orm.annotation.Id;
 import cn.com.idmy.orm.annotation.Table;
 import cn.com.idmy.orm.annotation.TableField;
+import cn.com.idmy.orm.annotation.TableId;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.hutool.core.reflect.FieldUtil;
 import org.dromara.hutool.core.text.StrUtil;
@@ -33,13 +33,8 @@ public class OrmUtil {
     public static String getPrimaryKey(Class<?> entityClass) {
         Field[] fields = entityClass.getDeclaredFields();
         for (Field field : fields) {
-            if (field.isAnnotationPresent(Id.class)) {
-                if (field.isAnnotationPresent(TableField.class)) {
-                    TableField tableField = field.getAnnotation(TableField.class);
-                    String value = tableField.value();
-                    return StrUtil.isBlank(value) ? field.getName() : value;
-                }
-                return field.getName();
+            if (field.isAnnotationPresent(TableId.class)) {
+                return getFieldName(field);
             }
         }
         throw new OrmException("No primary key found in " + entityClass.getName());
@@ -51,7 +46,7 @@ public class OrmUtil {
     public static Object getPrimaryKeyValue(Object entity) {
         Field[] fields = entity.getClass().getDeclaredFields();
         for (Field field : fields) {
-            if (field.isAnnotationPresent(Id.class)) {
+            if (field.isAnnotationPresent(TableId.class)) {
                 return FieldUtil.getFieldValue(entity, field);
             }
         }
@@ -67,7 +62,7 @@ public class OrmUtil {
 
         for (Field field : fields) {
             // 跳过主键字段
-            if (field.isAnnotationPresent(Id.class)) {
+            if (field.isAnnotationPresent(TableId.class)) {
                 continue;
             }
 
@@ -98,7 +93,7 @@ public class OrmUtil {
 
         for (Field field : fields) {
             // 跳过主键字段
-            if (field.isAnnotationPresent(Id.class)) {
+            if (field.isAnnotationPresent(TableId.class)) {
                 continue;
             }
 

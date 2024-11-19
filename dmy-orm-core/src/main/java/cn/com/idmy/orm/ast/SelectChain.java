@@ -19,8 +19,8 @@ import java.util.List;
 @Accessors(fluent = true, chain = false)
 public class SelectChain<T> extends LambdaWhere<T, SelectChain<T>> {
 
-    private SelectChain(Class<T> table) {
-        super(table);
+    protected SelectChain(Class<T> entityClass) {
+        super(entityClass);
     }
 
     public static <T> SelectChain<T> of(MybatisDao<T, ?> dao) {
@@ -35,10 +35,6 @@ public class SelectChain<T> extends LambdaWhere<T, SelectChain<T>> {
         return addNode(new Distinct(field));
     }
 
-    public SelectChain<T> select() {
-        return this;
-    }
-
     public SelectChain<T> select(SqlFnExpr<T> expr) {
         return addNode(new SelectField(expr));
     }
@@ -47,9 +43,7 @@ public class SelectChain<T> extends LambdaWhere<T, SelectChain<T>> {
         return addNode(new SelectField(expr, alias));
     }
 
-    @SafeVarargs
-    public final SelectChain<T> select(FieldGetter<T, ?> field, FieldGetter<T, ?>... fields) {
-        addNode(new SelectField(field));
+    public SelectChain<T> select(FieldGetter<T, ?>... fields) {
         for (FieldGetter<T, ?> f : fields) {
             addNode(new SelectField(f));
         }

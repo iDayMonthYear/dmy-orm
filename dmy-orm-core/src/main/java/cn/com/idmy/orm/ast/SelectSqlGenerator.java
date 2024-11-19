@@ -48,7 +48,7 @@ public class SelectSqlGenerator extends AbstractSqlGenerator {
             }
         }
         buildSelectField(selectFields, sql, params);
-        sql.append(FROM).append(OrmUtil.getTableName(select.table()));
+        sql.append(FROM).append(OrmUtil.getTableName(select.entityClass()));
         buildWhere(wheres, sql, params);
         buildGroupBy(groups, sql, params);
         buildOrderBy(orders, sql, params);

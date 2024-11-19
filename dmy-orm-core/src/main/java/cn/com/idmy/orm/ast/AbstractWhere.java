@@ -14,11 +14,11 @@ import java.util.List;
 @Accessors(fluent = true, chain = false)
 public abstract class AbstractWhere<T, WHERE extends AbstractWhere<T, WHERE>> {
     protected final List<Node> nodes = new ArrayList<>();
-    protected final Class<T> table;
     protected final WHERE typedThis = (WHERE) this;
+    protected Class<T> entityClass;
 
-    protected AbstractWhere(Class<T> table) {
-        this.table = table;
+    protected AbstractWhere(Class<T> entityClass) {
+        this.entityClass = entityClass;
     }
 
     public abstract Pair<String, List<Object>> sql();

@@ -5,5 +5,5 @@ import cn.com.idmy.ts.server.model.entity.App;
 import org.apache.ibatis.annotations.Mapper;
 
 @Mapper
-public interface AppDao extends MybatisDao<App, Long> {
+public interface AppDao extends MybatisDao<App, String> {
 }

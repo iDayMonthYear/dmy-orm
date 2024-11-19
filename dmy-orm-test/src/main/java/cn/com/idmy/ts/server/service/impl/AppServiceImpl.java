@@ -8,18 +8,28 @@ import cn.com.idmy.ts.server.service.AppService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.Collection;
 import java.util.List;
 
 @RequiredArgsConstructor
 @Service
-public class AppServiceImpl  implements AppService {
+public class AppServiceImpl implements AppService {
     private final AppDao appDao;
 
     @Override
     public List<App> all() {
         SelectChain<App> chain = SelectChain.of(appDao);
         chain.in(App::getKey, "dmy-ts-admin", "saas-invoice-admin");
-        List<App> apps = appDao.find(chain);
-        return apps;
+        return appDao.find(chain);
+    }
+
+    @Override
+    public App get(String id) {
+        return appDao.get(id);
+    }
+
+    @Override
+    public List<App> find(Collection<String> ids) {
+        return appDao.find(ids);
     }
 }

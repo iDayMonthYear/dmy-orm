@@ -1,5 +1,6 @@
 package cn.com.idmy.ts.server.model.entity;
 import cn.com.idmy.orm.annotation.Table;
+import cn.com.idmy.orm.annotation.TableId;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -11,8 +12,9 @@ import java.time.LocalDateTime;
 @SuperBuilder
 @AllArgsConstructor
 @NoArgsConstructor
-@Table()
+@Table
 public class App  {
+    @TableId
     protected String key;
     protected String name;
     protected LocalDateTime createdAt;

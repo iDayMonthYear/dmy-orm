@@ -30,7 +30,7 @@ public class UpdateSqlGenerator extends AbstractSqlGenerator {
                 skipAdjoinOr(node, wheres);
             }
         }
-        StringBuilder sql = new StringBuilder(UPDATE).append(OrmUtil.getTableName(update.table())).append(SET);
+        StringBuilder sql = new StringBuilder(UPDATE).append(OrmUtil.getTableName(update.entityClass())).append(SET);
         List<Object> params = new ArrayList<>();
         if (!sets.isEmpty()) {
             for (int i = 0, setsSize = sets.size(); i < setsSize; i++) {

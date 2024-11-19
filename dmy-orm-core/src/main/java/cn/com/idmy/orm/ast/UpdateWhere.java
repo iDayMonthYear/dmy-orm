@@ -15,10 +15,8 @@ import java.util.List;
 @Setter
 @Accessors(fluent = true)
 public class UpdateWhere<T> extends LambdaWhere<T, UpdateWhere<T>> {
-    private T entity;
-
-    private UpdateWhere(Class<T> table) {
-        super(table);
+    private UpdateWhere(Class<T> entityClass) {
+        super(entityClass);
     }
 
     public static <T> UpdateWhere<T> of(MybatisDao<T, ?> dao) {
@@ -27,7 +25,7 @@ public class UpdateWhere<T> extends LambdaWhere<T, UpdateWhere<T>> {
 
     public static <T> UpdateWhere<T> of(MybatisDao<T, ?> dao, T entity) {
         UpdateWhere<T> where = of(dao);
-        where.entity = entity;
+        where.entityClass = (Class<T>) entity.getClass();
         return where;
     }
 

@@ -28,11 +28,18 @@ public class Node {
     @Getter
     @Accessors(fluent = true)
     static final class Cond extends Node {
-        private final FieldGetter<?, ?> field;
+        private final Object field;
         private final Op op;
         private final Object expr;
 
         Cond(FieldGetter<?, ?> field, Op op, Object expr) {
+            super(Type.COND);
+            this.field = field;
+            this.op = op;
+            this.expr = expr;
+        }
+
+        Cond(String field, Op op, Object expr) {
             super(Type.COND);
             this.field = field;
             this.op = op;
@@ -97,6 +104,11 @@ public class Node {
         private FieldGetter<?, ?> alias;
 
         SelectField(FieldGetter<?, ?> field) {
+            super(Type.SELECT_FIELD);
+            this.field = field;
+        }
+
+        SelectField(String field) {
             super(Type.SELECT_FIELD);
             this.field = field;
         }

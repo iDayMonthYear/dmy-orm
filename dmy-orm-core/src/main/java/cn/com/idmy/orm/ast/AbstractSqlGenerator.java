@@ -15,8 +15,13 @@ import static cn.com.idmy.orm.ast.SqlFnName.COUNT;
 
 @Slf4j
 public abstract class AbstractSqlGenerator {
-    protected static String getField(FieldGetter<?, ?> field) {
-        return "`" + LambdaUtil.fieldName(field) + "`";
+    protected static String getField(Object field) {
+        if (field instanceof FieldGetter<?, ?> f) {
+            return "`" + LambdaUtil.fieldName(f) + "`";
+        } else {
+            SqlUtil.checkField((String) field);
+            return "`" + field + "`";
+        }
     }
 
     private static String parseSqlExpr(String field, Object expr, List<Object> params) {
@@ -74,8 +79,8 @@ public abstract class AbstractSqlGenerator {
 
     private static String buildSelectField(SelectField selectField, StringBuilder sql, List<Object> params) {
         Object value = selectField.field();
-        if (value instanceof FieldGetter<?, ?> field) {
-            String out = getField(field);
+        if (value instanceof FieldGetter<?, ?>  || value instanceof String) {
+            String out = getField(value);
             sql.append(out);
             return out;
         } else if (value instanceof SqlFnExpr<?> exp) {

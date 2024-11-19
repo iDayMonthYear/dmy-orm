@@ -25,7 +25,7 @@ public class DeleteSqlGenerator extends AbstractSqlGenerator {
             }
         }
         List<Object> params = new ArrayList<>();
-        StringBuilder sql = new StringBuilder(DELETE).append(FROM).append(OrmUtil.getTableName(deleteChain.table()));
+        StringBuilder sql = new StringBuilder(DELETE).append(FROM).append(OrmUtil.getTableName(deleteChain.entityClass()));
         buildWhere(wheres, sql, params);
         return Pair.of(sql.toString(), params);
     }
