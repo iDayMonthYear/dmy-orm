@@ -3,6 +3,7 @@ package cn.com.idmy.orm.core;
 import cn.com.idmy.base.model.Pair;
 import cn.com.idmy.orm.core.Node.Or;
 import lombok.Getter;
+import lombok.Setter;
 import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
 
@@ -11,11 +12,13 @@ import java.util.List;
 
 @Slf4j
 @Getter
-@Accessors(fluent = true, chain = false)
+@Accessors(fluent = true, chain = true)
 public abstract class AbstractWhere<T, WHERE extends AbstractWhere<T, WHERE>> {
     protected final List<Node> nodes = new ArrayList<>();
     protected final WHERE typedThis = (WHERE) this;
     protected Class<T> entityClass;
+    @Setter
+    protected int sqlParamsSize;
 
     protected AbstractWhere(Class<T> entityClass) {
         this.entityClass = entityClass;

@@ -19,8 +19,8 @@ import static cn.com.idmy.orm.core.SqlConsts.SELECT;
 
 @Slf4j
 public class SelectSqlGenerator extends AbstractSqlGenerator {
-    public static Pair<String, List<Object>> gen(SelectChain<?> select) {
-        List<Node> nodes = select.nodes();
+    public static Pair<String, List<Object>> gen(SelectChain<?> chain) {
+        List<Node> nodes = chain.nodes();
         List<SelectField> selectFields = new ArrayList<>(nodes.size());
         List<Node> wheres = new ArrayList<>(nodes.size());
         List<GroupBy> groups = new ArrayList<>(1);
@@ -39,7 +39,7 @@ public class SelectSqlGenerator extends AbstractSqlGenerator {
             }
         }
 
-        List<Object> params = new ArrayList<>();
+        List<Object> params = new ArrayList<>(chain.sqlParamsSize());
         StringBuilder sql = new StringBuilder(SELECT);
         if (distinct != null) {
             builder(distinct, sql, params);
@@ -48,7 +48,7 @@ public class SelectSqlGenerator extends AbstractSqlGenerator {
             }
         }
         buildSelectField(selectFields, sql, params);
-        sql.append(FROM).append(OrmUtil.getTableName(select.entityClass()));
+        sql.append(FROM).append(OrmUtil.getTableName(chain.entityClass()));
         buildWhere(wheres, sql, params);
         buildGroupBy(groups, sql, params);
         buildOrderBy(orders, sql, params);

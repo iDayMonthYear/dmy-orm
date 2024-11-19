@@ -43,18 +43,34 @@ public interface MybatisDao<T, ID> {
     }
 
     default List<T> find(Collection<ID> ids) {
-        return CollUtil.isEmpty(ids) ? Collections.emptyList() : find(StringSelectChain.of(this).in(OrmUtil.getId(entityClass()), ids));
+        if (CollUtil.isEmpty(ids)) {
+            return Collections.emptyList();
+        } else {
+            var chain = StringSelectChain.of(this);
+            chain.sqlParamsSize(1);
+            chain.in(OrmUtil.getId(entityClass()), ids);
+            return find(chain);
+        }
     }
 
     default <R> List<R> find(Collection<ID> ids, FieldGetter<T, R> getter) {
-        var select = (StringSelectChain<T>) StringSelectChain.of(this).select(getter);
-        var chain = select.in(OrmUtil.getId(entityClass()), ids);
-        return find(chain).stream().map(getter::get).toList();
+        if (CollUtil.isEmpty(ids)) {
+            return Collections.emptyList();
+        } else {
+            var chain = (StringSelectChain<T>) StringSelectChain.of(this).select(getter);
+            chain.sqlParamsSize(1);
+            chain.in(OrmUtil.getId(entityClass()), ids);
+            return find(chain).stream().map(getter::get).toList();
+        }
     }
 
     default <R> List<R> find(SelectChain<T> chain, FieldGetter<T, R> getter) {
-        List<T> ts = find(chain.select(getter));
-        return ts.stream().map(getter::get).toList();
+        if (chain.hasSelectField()) {
+            throw new IllegalArgumentException("select ... from 中间不能有字段或者函数");
+        } else {
+            List<T> ts = find(chain.select(getter));
+            return ts.stream().map(getter::get).toList();
+        }
     }
 
     @Nullable
@@ -64,18 +80,40 @@ public interface MybatisDao<T, ID> {
 
     @Nullable
     default <R> R get(ID id, FieldGetter<T, R> getter) {
-        var select = (StringSelectChain<T>) StringSelectChain.of(this).select(getter);
-        T t = get(select.eq(OrmUtil.getId(entityClass()), id));
+        var chain = (StringSelectChain<T>) StringSelectChain.of(this).select(getter);
+        chain.sqlParamsSize(1);
+        chain.eq(OrmUtil.getId(entityClass()), id);
+        T t = get(chain);
         return Optional.ofNullable(t).map(getter::get).orElse(null);
     }
 
+    @Nullable
+    default <R> R get(SelectChain<T> chain, FieldGetter<T, R> getter) {
+        if (chain.hasSelectField()) {
+            throw new IllegalArgumentException("select ... from 中间不能有字段或者函数");
+        }
+        T t = get(chain.select(getter));
+        if (t == null) {
+            return null;
+        } else {
+            return getter.get(t);
+        }
+    }
+
     default long count(SelectChain<T> chain) {
-        T t = get(chain.select(SqlFn::count));
-        return (long) t;
+        if (chain.hasSelectField()) {
+            throw new IllegalArgumentException("select ... from 中间不能有字段或者函数");
+        } else {
+            T t = get(chain.select(SqlFn::count));
+            return (long) t;
+        }
     }
 
     default boolean exists(ID id) {
-        return count(StringSelectChain.of(this).eq(OrmUtil.getId(entityClass()), id)) > 0;
+        var chain = StringSelectChain.of(this);
+        chain.sqlParamsSize(1);
+        chain.eq(OrmUtil.getId(entityClass()), id);
+        return count(chain) > 0;
     }
 
     default boolean notExist(ID id) {
@@ -91,18 +129,30 @@ public interface MybatisDao<T, ID> {
     }
 
     default long sumLong(SelectChain<T> chain, FieldGetter<T, Long> getter) {
-        T t = get(chain.select(() -> SqlFn.sum(getter)));
-        return getter.get(t);
+        if (chain.hasSelectField()) {
+            throw new IllegalArgumentException("select ... from 中间不能有字段或者函数");
+        } else {
+            T t = get(chain.select(() -> SqlFn.sum(getter)));
+            return getter.get(t);
+        }
     }
 
     default int sumInt(SelectChain<T> chain, FieldGetter<T, Integer> getter) {
-        T t = get(chain.select(() -> SqlFn.sum(getter)));
-        return getter.get(t);
+        if (chain.hasSelectField()) {
+            throw new IllegalArgumentException("select ... from 中间不能有字段或者函数");
+        } else {
+            T t = get(chain.select(() -> SqlFn.sum(getter)));
+            return getter.get(t);
+        }
     }
 
     default BigDecimal sumBigDecimal(SelectChain<T> chain, FieldGetter<T, BigDecimal> getter) {
-        T t = get(chain.select(() -> SqlFn.sum(getter)));
-        return getter.get(t);
+        if (chain.hasSelectField()) {
+            throw new IllegalArgumentException("select ... from 中间不能有字段或者函数");
+        } else {
+            T t = get(chain.select(() -> SqlFn.sum(getter)));
+            return getter.get(t);
+        }
     }
 
     default Map<ID, T> map(ID... ids) {
@@ -110,10 +160,20 @@ public interface MybatisDao<T, ID> {
     }
 
     default int delete(ID id) {
-        return delete(StringDeleteChain.of(this).eq(OrmUtil.getId(entityClass()), id));
+        var chain = StringDeleteChain.of(this);
+        chain.sqlParamsSize(1);
+        chain.eq(OrmUtil.getId(entityClass()), id);
+        return delete(chain);
     }
 
     default int delete(Collection<ID> ids) {
-        return CollUtil.isEmpty(ids) ? -1 : delete(StringDeleteChain.of(this).in(OrmUtil.getId(entityClass()), ids));
+        if (CollUtil.isEmpty(ids)) {
+            return -1;
+        } else {
+            var chain = StringDeleteChain.of(this);
+            chain.sqlParamsSize(1);
+            chain.in(OrmUtil.getId(entityClass()), ids);
+            return delete(chain);
+        }
     }
 }

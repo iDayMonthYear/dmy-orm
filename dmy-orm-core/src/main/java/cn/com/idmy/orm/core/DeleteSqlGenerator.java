@@ -14,8 +14,8 @@ import static cn.com.idmy.orm.core.SqlConsts.FROM;
 
 @Slf4j
 public class DeleteSqlGenerator extends AbstractSqlGenerator {
-    public static Pair<String, List<Object>> gen(DeleteChain<?> deleteChain) {
-        List<Node> nodes = deleteChain.nodes();
+    public static Pair<String, List<Object>> gen(DeleteChain<?> chain) {
+        List<Node> nodes = chain.nodes();
         List<Node> wheres = new ArrayList<>(nodes.size());
         for (Node node : nodes) {
             if (node instanceof Cond) {
@@ -24,8 +24,8 @@ public class DeleteSqlGenerator extends AbstractSqlGenerator {
                 skipAdjoinOr(node, wheres);
             }
         }
-        List<Object> params = new ArrayList<>();
-        StringBuilder sql = new StringBuilder(DELETE).append(FROM).append(OrmUtil.getTableName(deleteChain.entityClass()));
+        List<Object> params = new ArrayList<>(chain.sqlParamsSize());
+        StringBuilder sql = new StringBuilder(DELETE).append(FROM).append(OrmUtil.getTableName(chain.entityClass()));
         buildWhere(wheres, sql, params);
         return Pair.of(sql.toString(), params);
     }

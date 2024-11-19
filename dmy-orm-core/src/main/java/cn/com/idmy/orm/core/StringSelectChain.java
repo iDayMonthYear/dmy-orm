@@ -8,7 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Getter
-@Accessors(fluent = true, chain = false)
+@Accessors(fluent = true, chain = true)
 public class StringSelectChain<T> extends SelectChain<T> implements StringWhere<T, StringSelectChain<T>> {
 
     @Override

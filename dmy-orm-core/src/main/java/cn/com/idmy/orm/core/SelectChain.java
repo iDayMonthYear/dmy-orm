@@ -18,6 +18,7 @@ import java.util.List;
 @Getter
 @Accessors(fluent = true, chain = false)
 public class SelectChain<T> extends LambdaWhere<T, SelectChain<T>> {
+    protected boolean hasSelectField = false;
 
     protected SelectChain(Class<T> entityClass) {
         super(entityClass);
@@ -28,24 +29,29 @@ public class SelectChain<T> extends LambdaWhere<T, SelectChain<T>> {
     }
 
     public SelectChain<T> distinct() {
+        hasSelectField = true;
         return addNode(new Distinct());
     }
 
     public SelectChain<T> distinct(FieldGetter<T, ?> field) {
+        hasSelectField = true;
         return addNode(new Distinct(field));
     }
 
     public SelectChain<T> select(SqlFnExpr<T> expr) {
+        hasSelectField = true;
         return addNode(new SelectField(expr));
     }
 
     public SelectChain<T> select(SqlFnExpr<T> expr, FieldGetter<T, ?> alias) {
+        hasSelectField = true;
         return addNode(new SelectField(expr, alias));
     }
 
     @SafeVarargs
     public final SelectChain<T> select(FieldGetter<T, ?>... fields) {
         if (fields != null) {
+            hasSelectField = true;
             for (FieldGetter<T, ?> f : fields) {
                 addNode(new SelectField(f));
             }

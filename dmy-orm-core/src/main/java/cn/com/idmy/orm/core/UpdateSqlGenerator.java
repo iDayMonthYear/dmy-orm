@@ -17,8 +17,8 @@ import static cn.com.idmy.orm.core.SqlConsts.UPDATE;
 
 @Slf4j
 public class UpdateSqlGenerator extends AbstractSqlGenerator {
-    public static Pair<String, List<Object>> gen(UpdateChain<?> update) {
-        List<Node> nodes = update.nodes();
+    public static Pair<String, List<Object>> gen(UpdateChain<?> chain) {
+        List<Node> nodes = chain.nodes();
         List<Set> sets = new ArrayList<>(nodes.size());
         List<Node> wheres = new ArrayList<>(nodes.size());
         for (Node node : nodes) {
@@ -30,8 +30,8 @@ public class UpdateSqlGenerator extends AbstractSqlGenerator {
                 skipAdjoinOr(node, wheres);
             }
         }
-        StringBuilder sql = new StringBuilder(UPDATE).append(OrmUtil.getTableName(update.entityClass())).append(SET);
-        List<Object> params = new ArrayList<>();
+        StringBuilder sql = new StringBuilder(UPDATE).append(OrmUtil.getTableName(chain.entityClass())).append(SET);
+        List<Object> params = new ArrayList<>(chain.sqlParamsSize());
         if (!sets.isEmpty()) {
             for (int i = 0, setsSize = sets.size(); i < setsSize; i++) {
                 Set set = sets.get(i);
