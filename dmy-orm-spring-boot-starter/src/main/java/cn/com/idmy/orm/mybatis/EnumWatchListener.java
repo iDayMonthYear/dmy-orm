@@ -1,5 +1,6 @@
 package cn.com.idmy.orm.mybatis;
 
+import cn.com.idmy.orm.OrmException;
 import cn.com.idmy.orm.annotation.WatchEnum;
 import cn.com.idmy.orm.annotation.WatchEnum.WatchAction;
 import cn.com.idmy.orm.annotation.WatchEnum.WatchTiming;
@@ -56,7 +57,7 @@ class EnumWatchListener {
                 try {
                     method.method().invoke(method.bean(), event.entity());
                 } catch (Exception e) {
-                    throw new RuntimeException("Failed to invoke watch method", e);
+                    throw new OrmException("Failed to invoke watch method", e);
                 }
             }
         }

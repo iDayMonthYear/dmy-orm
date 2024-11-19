@@ -1,4 +1,4 @@
-package cn.com.idmy.orm.ast;
+package cn.com.idmy.orm.core;
 
 import cn.com.idmy.base.model.Pair;
 import cn.com.idmy.orm.mybatis.MybatisDao;
@@ -13,12 +13,12 @@ import java.util.List;
 @Accessors(fluent = true, chain = false)
 @Slf4j
 public class DeleteChain<T> extends LambdaWhere<T, DeleteChain<T>> {
-    private DeleteChain(Class<T> entityClass) {
+    protected DeleteChain(Class<T> entityClass) {
         super(entityClass);
     }
 
     public static <T> DeleteChain<T> of(MybatisDao<T, ?> dao) {
-        return new DeleteChain<>(dao.entityType());
+        return new DeleteChain<>(dao.entityClass());
     }
 
     @Override

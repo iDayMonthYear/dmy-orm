@@ -17,7 +17,7 @@ package cn.com.idmy.orm.util;
 
 
 import cn.com.idmy.orm.OrmException;
-import cn.com.idmy.orm.ast.FieldGetter;
+import cn.com.idmy.orm.core.FieldGetter;
 import org.apache.ibatis.util.MapUtil;
 
 import java.io.Serializable;

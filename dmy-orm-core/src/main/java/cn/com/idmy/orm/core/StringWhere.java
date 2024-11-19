@@ -1,6 +1,6 @@
-package cn.com.idmy.orm.ast;
+package cn.com.idmy.orm.core;
 
-import cn.com.idmy.orm.ast.Node.Cond;
+import cn.com.idmy.orm.core.Node.Cond;
 
 
 public interface StringWhere<T, WHERE extends StringWhere<T, WHERE>> {

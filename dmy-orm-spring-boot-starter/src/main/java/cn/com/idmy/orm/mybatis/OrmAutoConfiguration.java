@@ -35,16 +35,11 @@ public class OrmAutoConfiguration {
     @Lazy
     @Bean
     @ConditionalOnMissingBean
-    public SqlSessionFactory sqlSessionFactory(DataSource dataSource, EnumWatchInterceptor enumWatchInterceptor) throws Exception {
+    SqlSessionFactory sqlSessionFactory(DataSource dataSource, EnumWatchInterceptor interceptor) throws Exception {
         SqlSessionFactoryBean factory = new SqlSessionFactoryBean();
         factory.setDataSource(dataSource);
-
-        // 使用自定义的 MybatisConfiguration
         factory.setConfiguration(new MybatisConfiguration());
-
-        // 配置插件
-        factory.setPlugins(enumWatchInterceptor);
-
+        factory.setPlugins(interceptor);
         return factory.getObject();
     }
 }

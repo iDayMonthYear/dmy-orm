@@ -23,14 +23,15 @@ public class OrmUtil {
             Table table = entityClass.getAnnotation(Table.class);
             String value = table.value();
             return StrUtil.isBlank(value) ? entityClass.getSimpleName() : value;
+        } else {
+            return entityClass.getSimpleName();
         }
-        return entityClass.getSimpleName();
     }
 
     /**
      * 获取主键列名
      */
-    public static String getPrimaryKey(Class<?> entityClass) {
+    public static String getId(Class<?> entityClass) {
         Field[] fields = entityClass.getDeclaredFields();
         for (Field field : fields) {
             if (field.isAnnotationPresent(TableId.class)) {
@@ -43,7 +44,7 @@ public class OrmUtil {
     /**
      * 获取主键值
      */
-    public static Object getPrimaryKeyValue(Object entity) {
+    public static Object getIdValue(Object entity) {
         Field[] fields = entity.getClass().getDeclaredFields();
         for (Field field : fields) {
             if (field.isAnnotationPresent(TableId.class)) {
@@ -116,7 +117,8 @@ public class OrmUtil {
             TableField tableField = field.getAnnotation(TableField.class);
             String value = tableField.value();
             return StrUtil.isBlank(value) ? field.getName() : value;
+        } else {
+            return field.getName();
         }
-        return field.getName();
     }
 }

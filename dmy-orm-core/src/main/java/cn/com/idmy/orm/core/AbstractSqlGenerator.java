@@ -1,6 +1,6 @@
-package cn.com.idmy.orm.ast;
+package cn.com.idmy.orm.core;
 
-import cn.com.idmy.orm.ast.Node.*;
+import cn.com.idmy.orm.core.Node.*;
 import cn.com.idmy.orm.util.LambdaUtil;
 import cn.com.idmy.orm.util.SqlUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -9,13 +9,13 @@ import org.dromara.hutool.core.collection.CollUtil;
 import java.util.List;
 import java.util.Objects;
 
-import static cn.com.idmy.orm.ast.SqlConsts.*;
-import static cn.com.idmy.orm.ast.SqlFnName.COUNT;
+import static cn.com.idmy.orm.core.SqlConsts.*;
+import static cn.com.idmy.orm.core.SqlFnName.COUNT;
 
 
 @Slf4j
 public abstract class AbstractSqlGenerator {
-    protected static String getField(Object field) {
+    protected static String buildField(Object field) {
         if (field instanceof FieldGetter<?, ?> f) {
             return "`" + LambdaUtil.fieldName(f) + "`";
         } else {
@@ -64,14 +64,14 @@ public abstract class AbstractSqlGenerator {
     }
 
     private static StringBuilder buildCond(Cond cond, StringBuilder sql, List<Object> params) {
-        String field = getField(cond.field());
+        String field = buildField(cond.field());
         String expr = parseSqlExpr(field, cond.expr(), params);
         sql.append(field).append(BLANK).append(cond.op().getSymbol()).append(BLANK).append(expr);
         return sql;
     }
 
     private static StringBuilder buildSet(Set set, StringBuilder sql, List<Object> params) {
-        String field = getField(set.field());
+        String field = buildField(set.field());
         String expr = parseSqlExpr(field, set.expr(), params);
         sql.append(field).append(BLANK).append(expr);
         return sql;
@@ -80,13 +80,13 @@ public abstract class AbstractSqlGenerator {
     private static String buildSelectField(SelectField selectField, StringBuilder sql, List<Object> params) {
         Object value = selectField.field();
         if (value instanceof FieldGetter<?, ?>  || value instanceof String) {
-            String out = getField(value);
+            String out = buildField(value);
             sql.append(out);
             return out;
         } else if (value instanceof SqlFnExpr<?> exp) {
             SqlFn<?> fn = exp.apply();
             SqlFnName name = fn.name();
-            String field = (fn.field() == null && name == COUNT) ? ASTERISK : getField(fn.field());
+            String field = (fn.field() == null && name == COUNT) ? ASTERISK : buildField(fn.field());
             String alias = selectField.alias() == null ? null : LambdaUtil.fieldName(selectField.alias());
             String fieldOrAlias = Objects.requireNonNullElse(alias, field);
             if (name == SqlFnName.IF_NULL) {
@@ -103,7 +103,7 @@ public abstract class AbstractSqlGenerator {
     }
 
     private static StringBuilder buildGroupBy(GroupBy group, StringBuilder sql) {
-        sql.append(getField(group.field()));
+        sql.append(buildField(group.field()));
         return sql;
     }
 
@@ -111,7 +111,7 @@ public abstract class AbstractSqlGenerator {
         Object field = order.field();
         String name;
         if (field instanceof FieldGetter<?, ?> getter) {
-            name = getField(getter);
+            name = buildField(getter);
         } else {
             name = (String) field;
             //字符串类型可以是前端过来的。必须检查
@@ -122,12 +122,11 @@ public abstract class AbstractSqlGenerator {
     }
 
     private static StringBuilder buildDistinct(Distinct distinct, StringBuilder sql) {
-        FieldGetter<?, ?> fieldGetter = distinct.field();
-        if (fieldGetter == null) {
+        FieldGetter<?, ?> field = distinct.field();
+        if (field == null) {
             sql.append(DISTINCT);
         } else {
-            String field = getField(fieldGetter);
-            sql.append(DISTINCT).append(BRACKET_LEFT).append(field).append(BRACKET_RIGHT);
+            sql.append(DISTINCT).append(BRACKET_LEFT).append(buildField(field)).append(BRACKET_RIGHT);
         }
         return sql;
     }
@@ -141,9 +140,7 @@ public abstract class AbstractSqlGenerator {
             case Node.OrderBy order -> buildOrderBy(order, sql);
             case Node.SelectField sf -> buildSelectField(sf, sql, params);
             case Node.Distinct distinct -> buildDistinct(distinct, sql);
-            case null, default -> {
-                yield null;
-            }
+            case null, default -> null;
         };
     }
 
@@ -172,10 +169,10 @@ public abstract class AbstractSqlGenerator {
         if (!wheres.isEmpty()) {
             removeLastOr(wheres);
             sql.append(WHERE);
-            for (int i = 0, whereNodesSize = wheres.size(); i < whereNodesSize; i++) {
+            for (int i = 0, size = wheres.size(); i < size; i++) {
                 Node node = wheres.get(i);
                 builder(node, sql, params);
-                if (i < whereNodesSize - 1) {
+                if (i < size - 1) {
                     Type type = wheres.get(i + 1).type();
                     if (type == Type.COND && node.type() != Type.OR) {
                         sql.append(AND);

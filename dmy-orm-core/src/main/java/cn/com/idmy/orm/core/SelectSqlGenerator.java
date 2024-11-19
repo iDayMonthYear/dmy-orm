@@ -1,7 +1,7 @@
-package cn.com.idmy.orm.ast;
+package cn.com.idmy.orm.core;
 
 import cn.com.idmy.base.model.Pair;
-import cn.com.idmy.orm.ast.Node.*;
+import cn.com.idmy.orm.core.Node.*;
 import cn.com.idmy.orm.util.OrmUtil;
 import lombok.extern.slf4j.Slf4j;
 
@@ -10,12 +10,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static cn.com.idmy.orm.ast.SqlConsts.ASTERISK;
-import static cn.com.idmy.orm.ast.SqlConsts.DELIMITER;
-import static cn.com.idmy.orm.ast.SqlConsts.FROM;
-import static cn.com.idmy.orm.ast.SqlConsts.GROUP_BY;
-import static cn.com.idmy.orm.ast.SqlConsts.ORDER_BY;
-import static cn.com.idmy.orm.ast.SqlConsts.SELECT;
+import static cn.com.idmy.orm.core.SqlConsts.ASTERISK;
+import static cn.com.idmy.orm.core.SqlConsts.DELIMITER;
+import static cn.com.idmy.orm.core.SqlConsts.FROM;
+import static cn.com.idmy.orm.core.SqlConsts.GROUP_BY;
+import static cn.com.idmy.orm.core.SqlConsts.ORDER_BY;
+import static cn.com.idmy.orm.core.SqlConsts.SELECT;
 
 @Slf4j
 public class SelectSqlGenerator extends AbstractSqlGenerator {

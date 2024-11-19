@@ -8,4 +8,8 @@ public class OrmException extends RuntimeException {
     public OrmException(Exception e) {
         super(e);
     }
+
+    public OrmException(String msg, Exception e) {
+        super(msg, e);
+    }
 }

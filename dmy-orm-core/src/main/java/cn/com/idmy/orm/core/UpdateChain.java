@@ -1,7 +1,7 @@
-package cn.com.idmy.orm.ast;
+package cn.com.idmy.orm.core;
 
 import cn.com.idmy.base.model.Pair;
-import cn.com.idmy.orm.ast.Node.Set;
+import cn.com.idmy.orm.core.Node.Set;
 import cn.com.idmy.orm.mybatis.MybatisDao;
 import lombok.Getter;
 import lombok.experimental.Accessors;
@@ -20,7 +20,7 @@ public class UpdateChain<T> extends LambdaWhere<T, UpdateChain<T>> {
     }
 
     public static <T> UpdateChain<T> of(MybatisDao<T, ?> dao) {
-        return new UpdateChain<>(dao.entityType());
+        return new UpdateChain<>(dao.entityClass());
     }
 
     public UpdateChain<T> set(FieldGetter<T, ?> field, Object expr) {

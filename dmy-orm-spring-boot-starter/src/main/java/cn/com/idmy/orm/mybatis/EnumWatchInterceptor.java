@@ -23,14 +23,13 @@ class EnumWatchInterceptor implements Interceptor {
     public Object intercept(Invocation invocation) throws Throwable {
         Object[] args = invocation.getArgs();
         MappedStatement ms = (MappedStatement) args[0];
-        Object parameter = args[1];
-
         // 获取SQL类型
         WatchAction action = getSqlAction(ms);
         if (action == null) {
             return invocation.proceed();
         }
 
+        Object parameter = args[1];
         // 检查实体类中的枚举字段
         checkEnumFields(parameter, action, WatchTiming.BEFORE);
 

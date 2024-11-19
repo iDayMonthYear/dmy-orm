@@ -1,7 +1,7 @@
-package cn.com.idmy.orm.ast;
+package cn.com.idmy.orm.core;
 
 import cn.com.idmy.base.model.Pair;
-import cn.com.idmy.orm.ast.Node.Or;
+import cn.com.idmy.orm.core.Node.Or;
 import lombok.Getter;
 import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;

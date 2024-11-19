@@ -1,4 +1,4 @@
-package cn.com.idmy.orm.ast;
+package cn.com.idmy.orm.core;
 
 import cn.com.idmy.base.model.Pair;
 import cn.com.idmy.orm.mybatis.MybatisDao;
@@ -20,7 +20,7 @@ public class UpdateWhere<T> extends LambdaWhere<T, UpdateWhere<T>> {
     }
 
     public static <T> UpdateWhere<T> of(MybatisDao<T, ?> dao) {
-        return new UpdateWhere<>(dao.entityType());
+        return new UpdateWhere<>(dao.entityClass());
     }
 
     public static <T> UpdateWhere<T> of(MybatisDao<T, ?> dao, T entity) {

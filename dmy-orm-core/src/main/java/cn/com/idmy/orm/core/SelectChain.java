@@ -1,10 +1,10 @@
-package cn.com.idmy.orm.ast;
+package cn.com.idmy.orm.core;
 
 import cn.com.idmy.base.model.Pair;
-import cn.com.idmy.orm.ast.Node.Distinct;
-import cn.com.idmy.orm.ast.Node.GroupBy;
-import cn.com.idmy.orm.ast.Node.OrderBy;
-import cn.com.idmy.orm.ast.Node.SelectField;
+import cn.com.idmy.orm.core.Node.Distinct;
+import cn.com.idmy.orm.core.Node.GroupBy;
+import cn.com.idmy.orm.core.Node.OrderBy;
+import cn.com.idmy.orm.core.Node.SelectField;
 import cn.com.idmy.orm.mybatis.MybatisDao;
 import lombok.Getter;
 import lombok.experimental.Accessors;
@@ -24,7 +24,7 @@ public class SelectChain<T> extends LambdaWhere<T, SelectChain<T>> {
     }
 
     public static <T> SelectChain<T> of(MybatisDao<T, ?> dao) {
-        return new SelectChain<>(dao.entityType());
+        return new SelectChain<>(dao.entityClass());
     }
 
     public SelectChain<T> distinct() {
@@ -43,9 +43,12 @@ public class SelectChain<T> extends LambdaWhere<T, SelectChain<T>> {
         return addNode(new SelectField(expr, alias));
     }
 
-    public SelectChain<T> select(FieldGetter<T, ?>... fields) {
-        for (FieldGetter<T, ?> f : fields) {
-            addNode(new SelectField(f));
+    @SafeVarargs
+    public final SelectChain<T> select(FieldGetter<T, ?>... fields) {
+        if (fields != null) {
+            for (FieldGetter<T, ?> f : fields) {
+                addNode(new SelectField(f));
+            }
         }
         return this;
     }

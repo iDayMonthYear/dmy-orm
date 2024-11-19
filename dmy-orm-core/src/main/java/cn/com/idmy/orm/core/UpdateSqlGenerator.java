@@ -1,19 +1,19 @@
-package cn.com.idmy.orm.ast;
+package cn.com.idmy.orm.core;
 
 import cn.com.idmy.base.model.Pair;
-import cn.com.idmy.orm.ast.Node.Cond;
-import cn.com.idmy.orm.ast.Node.Or;
-import cn.com.idmy.orm.ast.Node.Set;
-import cn.com.idmy.orm.ast.Node.Type;
+import cn.com.idmy.orm.core.Node.Cond;
+import cn.com.idmy.orm.core.Node.Or;
+import cn.com.idmy.orm.core.Node.Set;
+import cn.com.idmy.orm.core.Node.Type;
 import cn.com.idmy.orm.util.OrmUtil;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static cn.com.idmy.orm.ast.SqlConsts.DELIMITER;
-import static cn.com.idmy.orm.ast.SqlConsts.SET;
-import static cn.com.idmy.orm.ast.SqlConsts.UPDATE;
+import static cn.com.idmy.orm.core.SqlConsts.DELIMITER;
+import static cn.com.idmy.orm.core.SqlConsts.SET;
+import static cn.com.idmy.orm.core.SqlConsts.UPDATE;
 
 @Slf4j
 public class UpdateSqlGenerator extends AbstractSqlGenerator {
