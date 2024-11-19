@@ -3,6 +3,7 @@ package cn.com.idmy.orm.core.ast;
 import cn.com.idmy.base.model.Pair;
 import cn.com.idmy.orm.core.ast.Node.Cond;
 import cn.com.idmy.orm.core.ast.Node.Or;
+import cn.com.idmy.orm.core.util.OrmUtil;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
@@ -24,7 +25,7 @@ public class DeleteSqlGenerator extends AbstractSqlGenerator {
             }
         }
         List<Object> params = new ArrayList<>();
-        StringBuilder sql = new StringBuilder(DELETE).append(FROM).append(getTableName(deleteChain.table()));
+        StringBuilder sql = new StringBuilder(DELETE).append(FROM).append(OrmUtil.getTableName(deleteChain.table()));
         buildWhere(wheres, sql, params);
         return Pair.of(sql.toString(), params);
     }

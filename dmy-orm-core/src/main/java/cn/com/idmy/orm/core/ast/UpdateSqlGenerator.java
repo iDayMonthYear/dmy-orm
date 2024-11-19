@@ -5,6 +5,7 @@ import cn.com.idmy.orm.core.ast.Node.Cond;
 import cn.com.idmy.orm.core.ast.Node.Or;
 import cn.com.idmy.orm.core.ast.Node.Set;
 import cn.com.idmy.orm.core.ast.Node.Type;
+import cn.com.idmy.orm.core.util.OrmUtil;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
@@ -29,7 +30,7 @@ public class UpdateSqlGenerator extends AbstractSqlGenerator {
                 skipAdjoinOr(node, wheres);
             }
         }
-        StringBuilder sql = new StringBuilder(UPDATE).append(getTableName(update.table())).append(SET);
+        StringBuilder sql = new StringBuilder(UPDATE).append(OrmUtil.getTableName(update.table())).append(SET);
         List<Object> params = new ArrayList<>();
         if (!sets.isEmpty()) {
             for (int i = 0, setsSize = sets.size(); i < setsSize; i++) {

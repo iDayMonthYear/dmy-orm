@@ -1,16 +1,13 @@
 package cn.com.idmy.orm.core.ast;
 
-import cn.com.idmy.orm.annotation.Table;
-import cn.com.idmy.orm.annotation.TableField;
 import cn.com.idmy.orm.core.ast.Node.*;
 import cn.com.idmy.orm.core.util.LambdaUtil;
 import cn.com.idmy.orm.core.util.SqlUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.hutool.core.collection.CollUtil;
-import org.dromara.hutool.core.text.StrUtil;
 
-import java.lang.reflect.Field;
 import java.util.List;
+import java.util.Objects;
 
 import static cn.com.idmy.orm.core.ast.SqlConsts.*;
 import static cn.com.idmy.orm.core.ast.SqlFnName.COUNT;
@@ -18,26 +15,6 @@ import static cn.com.idmy.orm.core.ast.SqlFnName.COUNT;
 
 @Slf4j
 public abstract class AbstractSqlGenerator {
-    protected static String getTableName(Class<?> entityClass) {
-        if (entityClass.isAnnotationPresent(Table.class)) {
-            Table table = entityClass.getAnnotation(Table.class);
-            String value = table.value();
-            return StrUtil.isBlank(value) ? entityClass.getSimpleName() : value;
-        } else {
-            return entityClass.getSimpleName();
-        }
-    }
-
-    protected static String getFieldName(Field field) {
-        if (field.isAnnotationPresent(TableField.class)) {
-            TableField tableField = field.getAnnotation(TableField.class);
-            String value = tableField.value();
-            return StrUtil.isBlank(value) ? field.getName() : value;
-        } else {
-            return field.getName(); // 默认使用字段名
-        }
-    }
-
     protected static String getField(FieldGetter<?, ?> field) {
         return "`" + LambdaUtil.fieldName(field) + "`";
     }
@@ -106,12 +83,7 @@ public abstract class AbstractSqlGenerator {
             SqlFnName name = fn.name();
             String field = (fn.field() == null && name == COUNT) ? ASTERISK : getField(fn.field());
             String alias = selectField.alias() == null ? null : LambdaUtil.fieldName(selectField.alias());
-            final String fieldOrAlias;
-            if (alias == null) {
-                fieldOrAlias = field;
-            } else {
-                fieldOrAlias = alias;
-            }
+            String fieldOrAlias = Objects.requireNonNullElse(alias, field);
             if (name == SqlFnName.IF_NULL) {
                 params.add(fn.value());
                 sql.append(name.getName()).append(BRACKET_LEFT).append(field).append(DELIMITER).append(PLACEHOLDER).append(BRACKET_RIGHT).append(BLANK).append(fieldOrAlias);

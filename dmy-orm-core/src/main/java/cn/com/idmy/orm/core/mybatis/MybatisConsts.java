@@ -6,4 +6,8 @@ public interface MybatisConsts {
 
     String PRIMARY_KEY = "$$primaryKey";
     String PRIMARY_VALUE = "$$primaryValue";
+
+     String ENTITY = "$$entity";
+     String ENTITIES = "$$entities";
+
 }

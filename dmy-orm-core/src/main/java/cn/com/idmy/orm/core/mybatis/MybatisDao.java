@@ -4,16 +4,15 @@ import cn.com.idmy.orm.core.ast.DeleteChain;
 import cn.com.idmy.orm.core.ast.SelectChain;
 import cn.com.idmy.orm.core.ast.UpdateChain;
 import jakarta.annotation.Nullable;
-import org.apache.ibatis.annotations.DeleteProvider;
-import org.apache.ibatis.annotations.Param;
-import org.apache.ibatis.annotations.SelectProvider;
-import org.apache.ibatis.annotations.UpdateProvider;
+import org.apache.ibatis.annotations.*;
 import org.dromara.hutool.core.reflect.TypeUtil;
 
 import java.util.Collection;
 import java.util.List;
 
 import static cn.com.idmy.orm.core.mybatis.MybatisConsts.CHAIN;
+import static cn.com.idmy.orm.core.mybatis.MybatisConsts.ENTITIES;
+import static cn.com.idmy.orm.core.mybatis.MybatisConsts.ENTITY;
 import static cn.com.idmy.orm.core.mybatis.MybatisConsts.PRIMARY_VALUE;
 
 public interface MybatisDao<T, ID> {
@@ -46,4 +45,13 @@ public interface MybatisDao<T, ID> {
 
     @DeleteProvider(type = MybatisSqlProvider.class, method = "deleteByIds")
     int deleteByIds(@Param(PRIMARY_VALUE) Collection<ID> ids);
+
+    @InsertProvider(type = MybatisSqlProvider.class, method = "insert")
+    int insert(@Param(ENTITY) T entity);
+
+    @InsertProvider(type = MybatisSqlProvider.class, method = "inserts")
+    int inserts(@Param(ENTITIES) Collection<T> entities);
+
+    @UpdateProvider(type = MybatisSqlProvider.class, method = "updateById")
+    int updateById(@Param(ENTITY) T entity);
 }

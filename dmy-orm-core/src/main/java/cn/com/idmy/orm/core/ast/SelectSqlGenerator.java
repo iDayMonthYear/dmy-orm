@@ -2,6 +2,7 @@ package cn.com.idmy.orm.core.ast;
 
 import cn.com.idmy.base.model.Pair;
 import cn.com.idmy.orm.core.ast.Node.*;
+import cn.com.idmy.orm.core.util.OrmUtil;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
@@ -47,7 +48,7 @@ public class SelectSqlGenerator extends AbstractSqlGenerator {
             }
         }
         buildSelectField(selectFields, sql, params);
-        sql.append(FROM).append(getTableName(select.table()));
+        sql.append(FROM).append(OrmUtil.getTableName(select.table()));
         buildWhere(wheres, sql, params);
         buildGroupBy(groups, sql, params);
         buildOrderBy(orders, sql, params);
