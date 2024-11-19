@@ -16,6 +16,8 @@
 package cn.com.idmy.orm.core.mybatis;
 
 import cn.com.idmy.orm.core.mybatis.handler.EnumTypeHandler;
+import cn.com.idmy.orm.core.mybatis.handler.JSONArrayTypeHandler;
+import cn.com.idmy.orm.core.mybatis.handler.JSONObjectTypeHandler;
 import cn.com.idmy.orm.core.mybatis.handler.JsonTypeHandler;
 import org.apache.ibatis.executor.keygen.SelectKeyGenerator;
 import org.apache.ibatis.executor.parameter.ParameterHandler;
@@ -34,13 +36,15 @@ public class MybatisConfiguration extends Configuration {
         registry.setDefaultEnumTypeHandler(EnumTypeHandler.class);
         // JSON类型处理器
         registry.register(JsonTypeHandler.class);
+        registry.register(JSONObjectTypeHandler.class);
+        registry.register(JSONArrayTypeHandler.class);
     }
 
     @Override
     public ParameterHandler newParameterHandler(MappedStatement ms, Object paramObj, BoundSql boundSql) {
         String id = ms.getId();
         if (!id.endsWith(SelectKeyGenerator.SELECT_KEY_SUFFIX)) {
-            if (paramObj instanceof Map<?, ?> map && map.containsKey(MybatisConsts.SQL_ARGS)) {
+            if (paramObj instanceof Map<?, ?> map && map.containsKey(MybatisConsts.SQL_PARAMS)) {
                 PreparedParameterHandler handler = new PreparedParameterHandler(ms, paramObj, boundSql);
                 return (ParameterHandler) interceptorChain.pluginAll(handler);
             }

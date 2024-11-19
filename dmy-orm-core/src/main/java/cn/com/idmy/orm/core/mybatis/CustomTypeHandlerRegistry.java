@@ -2,13 +2,15 @@ package cn.com.idmy.orm.core.mybatis;
 
 import cn.com.idmy.orm.core.ast.FieldGetter;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.RequiredArgsConstructor;
 import org.apache.ibatis.type.TypeHandler;
 import org.dromara.hutool.core.func.LambdaUtil;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class FieldTypeHandlerRegistry {
+public class CustomTypeHandlerRegistry {
     private static final Map<TypeHandlerKey, Class<? extends TypeHandler<?>>> TYPE_HANDLERS = new ConcurrentHashMap<>();
 
     public static <T, R> void register(Class<T> entityClass, FieldGetter<T, R> field, Class<? extends TypeHandler<?>> handlerClass) {
@@ -30,30 +32,10 @@ public class FieldTypeHandlerRegistry {
     }
 
     @Data
+    @RequiredArgsConstructor
+    @EqualsAndHashCode(of = {"entityClass", "fieldName"})
     private static class TypeHandlerKey {
         private final Class<?> entityClass;
         private final String fieldName;
-
-        public TypeHandlerKey(Class<?> entityClass, String fieldName) {
-            this.entityClass = entityClass;
-            this.fieldName = fieldName;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) {
-                return true;
-            }
-            if (o == null || getClass() != o.getClass()) {
-                return false;
-            }
-            TypeHandlerKey that = (TypeHandlerKey) o;
-            return entityClass.equals(that.entityClass) && fieldName.equals(that.fieldName);
-        }
-
-        @Override
-        public int hashCode() {
-            return 31 * entityClass.hashCode() + fieldName.hashCode();
-        }
     }
 }

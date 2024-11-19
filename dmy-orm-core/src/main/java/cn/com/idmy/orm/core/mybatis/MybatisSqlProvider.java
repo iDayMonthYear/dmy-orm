@@ -11,7 +11,7 @@ import java.util.Map;
 @SuppressWarnings({"rawtypes", "DuplicatedCode"})
 public class MybatisSqlProvider {
     private static void setParams(Map<String, Object> params, Pair<String, List<Object>> pair) {
-        params.put(MybatisConsts.SQL_ARGS, pair.right);
+        params.put(MybatisConsts.SQL_PARAMS, pair.right);
     }
 
     public String get(Map<String, Object> params) {
