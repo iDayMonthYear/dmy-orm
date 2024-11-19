@@ -1,11 +1,11 @@
 package cn.com.idmy.orm.core.ast;
 
 import cn.com.idmy.base.model.Pair;
-import cn.com.idmy.orm.core.OrmDao;
 import cn.com.idmy.orm.core.ast.Node.Distinct;
 import cn.com.idmy.orm.core.ast.Node.GroupBy;
 import cn.com.idmy.orm.core.ast.Node.OrderBy;
 import cn.com.idmy.orm.core.ast.Node.SelectField;
+import cn.com.idmy.orm.core.mybatis.MybatisDao;
 import lombok.Getter;
 import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
@@ -23,7 +23,7 @@ public class SelectChain<T> extends LambdaWhere<T, SelectChain<T>> {
         super(table);
     }
 
-    public static <T> SelectChain<T> of(OrmDao<T> dao) {
+    public static <T> SelectChain<T> of(MybatisDao<T, ?> dao) {
         return new SelectChain<>(dao.entityType());
     }
 

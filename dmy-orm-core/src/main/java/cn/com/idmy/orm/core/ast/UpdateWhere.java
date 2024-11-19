@@ -1,7 +1,7 @@
 package cn.com.idmy.orm.core.ast;
 
 import cn.com.idmy.base.model.Pair;
-import cn.com.idmy.orm.core.OrmDao;
+import cn.com.idmy.orm.core.mybatis.MybatisDao;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
@@ -21,11 +21,11 @@ public class UpdateWhere<T> extends LambdaWhere<T, UpdateWhere<T>> {
         super(table);
     }
 
-    public static <T> UpdateWhere<T> of(OrmDao<T> dao) {
+    public static <T> UpdateWhere<T> of(MybatisDao<T, ?> dao) {
         return new UpdateWhere<>(dao.entityType());
     }
 
-    public static <T> UpdateWhere<T> of(OrmDao<T> dao, T entity) {
+    public static <T> UpdateWhere<T> of(MybatisDao<T, ?> dao, T entity) {
         UpdateWhere<T> where = of(dao);
         where.entity = entity;
         return where;

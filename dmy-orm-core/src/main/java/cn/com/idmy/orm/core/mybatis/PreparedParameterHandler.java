@@ -31,8 +31,8 @@ public class PreparedParameterHandler extends DefaultParameterHandler {
     @SuppressWarnings({"rawtypes", "unchecked"})
     public void setParameters(PreparedStatement ps) {
         try {
-            Map parameters = (Map) getParameterObject();
-            List<Object> sqlParams = (List<Object>) parameters.get(MybatisConsts.SQL_PARAMS);
+            Map map = (Map) getParameterObject();
+            List<Object> sqlParams = (List<Object>) map.get(MybatisConsts.SQL_PARAMS);
             if (sqlParams == null) {
                 super.setParameters(ps);
             } else {
@@ -49,28 +49,21 @@ public class PreparedParameterHandler extends DefaultParameterHandler {
     private void setParameter(PreparedStatement ps, int index, Object value) throws SQLException {
         if (value == null) {
             ps.setObject(index, null);
-            return;
-        }
-
-        if (value instanceof Collection<?> collection) {
-            for (Object item : collection) {
-                setParameter(ps, index++, item);
-            }
-            return;
-        }
-
-        if (value.getClass().isArray()) {
+        } else if (value.getClass().isArray()) {
             Object[] array = (Object[]) value;
             for (Object item : array) {
                 setParameter(ps, index++, item);
             }
-            return;
+        } else if (value instanceof Collection<?> collection) {
+            for (Object item : collection) {
+                setParameter(ps, index++, item);
+            }
+        } else {
+            TypeHandler typeHandler = getTypeHandler(value);
+            // 此处的 jdbcType 可以为 null 的，原因是 value 不为 null，
+            // 只有 value 为 null 时， jdbcType 不允许为 null
+            typeHandler.setParameter(ps, index, value, null);
         }
-
-        TypeHandler typeHandler = getTypeHandler(value);
-        // 此处的 jdbcType 可以为 null 的，原因是 value 不为 null，
-        // 只有 value 为 null 时， jdbcType 不允许为 null
-        typeHandler.setParameter(ps, index, value, null);
     }
 
     private static final Map<String, Class<?>> ENTITY_CLASS_CACHE = new ConcurrentHashMap<>();
@@ -78,7 +71,6 @@ public class PreparedParameterHandler extends DefaultParameterHandler {
     private TypeHandler<?> getTypeHandler(Object value) {
         Class<?> valueType = value.getClass();
 
-        // 检查是否有自定义TypeHandler
         String msId = mappedStatement.getId();
         String entityClassName = msId.substring(0, msId.lastIndexOf("."));
         Class<?> entityClass = getEntityClass(entityClassName);
@@ -94,7 +86,6 @@ public class PreparedParameterHandler extends DefaultParameterHandler {
             }
         }
 
-        // 使用MyBatis默认的TypeHandler
         return typeHandlerRegistry.getTypeHandler(valueType);
     }
 

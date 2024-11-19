@@ -1,7 +1,7 @@
 package cn.com.idmy.orm.core.ast;
 
 import cn.com.idmy.base.model.Pair;
-import cn.com.idmy.orm.core.OrmDao;
+import cn.com.idmy.orm.core.mybatis.MybatisDao;
 import lombok.Getter;
 import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
@@ -17,7 +17,7 @@ public class DeleteChain<T> extends LambdaWhere<T, DeleteChain<T>> {
         super(table);
     }
 
-    public static <T> DeleteChain<T> of(OrmDao<T> dao) {
+    public static <T> DeleteChain<T> of(MybatisDao<T, ?> dao) {
         return new DeleteChain<>(dao.entityType());
     }
 

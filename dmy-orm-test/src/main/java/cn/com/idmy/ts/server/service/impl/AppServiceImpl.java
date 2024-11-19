@@ -18,7 +18,7 @@ public class AppServiceImpl  implements AppService {
     @Override
     public List<App> all() {
         SelectChain<App> chain = SelectChain.of(appDao);
-        chain.eq(App::getKey, "dmy-ts-admin");
+        chain.in(App::getKey, "dmy-ts-admin", "saas-invoice-admin");
         List<App> apps = appDao.find(chain);
         return apps;
     }
