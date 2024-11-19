@@ -1,7 +1,7 @@
 package cn.com.idmy.ts.server.service.impl;
 
 
-import cn.com.idmy.orm.core.ast.SelectChain;
+import cn.com.idmy.orm.ast.SelectChain;
 import cn.com.idmy.ts.server.dao.AppDao;
 import cn.com.idmy.ts.server.model.entity.App;
 import cn.com.idmy.ts.server.service.AppService;
