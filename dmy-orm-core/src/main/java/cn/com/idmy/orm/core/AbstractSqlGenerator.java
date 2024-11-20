@@ -17,10 +17,10 @@ import static cn.com.idmy.orm.core.SqlFnName.COUNT;
 public abstract class AbstractSqlGenerator {
     protected static String buildColumn(Object col) {
         if (col instanceof ColumnGetter<?, ?> getter) {
-            return "`" + LambdaUtil.getFieldName(getter) + "`";
+            return STRESS_MARK + LambdaUtil.getFieldName(getter) + STRESS_MARK;
         } else {
             SqlUtil.checkColumn((String) col);
-            return "`" + col + "`";
+            return STRESS_MARK + col + STRESS_MARK;
         }
     }
 

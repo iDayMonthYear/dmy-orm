@@ -57,8 +57,6 @@ class PreparedParameterHandler extends DefaultParameterHandler {
             }
         } else {
             TypeHandler typeHandler = getTypeHandler(value, params);
-            // 此处的 jdbcType 可以为 null 的，原因是 value 不为 null，
-            // 只有 value 为 null 时， jdbcType 不允许为 null
             typeHandler.setParameter(ps, index, value, null);
         }
     }

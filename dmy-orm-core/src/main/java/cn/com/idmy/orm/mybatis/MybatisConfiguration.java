@@ -19,6 +19,7 @@ import cn.com.idmy.orm.mybatis.handler.EnumTypeHandler;
 import cn.com.idmy.orm.mybatis.handler.JSONArrayTypeHandler;
 import cn.com.idmy.orm.mybatis.handler.JSONObjectTypeHandler;
 import cn.com.idmy.orm.mybatis.handler.JsonTypeHandler;
+import org.apache.ibatis.executor.keygen.NoKeyGenerator;
 import org.apache.ibatis.executor.keygen.SelectKeyGenerator;
 import org.apache.ibatis.executor.parameter.ParameterHandler;
 import org.apache.ibatis.mapping.BoundSql;
@@ -26,6 +27,8 @@ import org.apache.ibatis.mapping.MappedStatement;
 import org.apache.ibatis.session.Configuration;
 
 import java.util.Map;
+
+import static cn.com.idmy.orm.core.TableManager.getTableInfo;
 
 class MybatisConfiguration extends Configuration {
     public MybatisConfiguration() {
@@ -37,9 +40,6 @@ class MybatisConfiguration extends Configuration {
         registry.register(JsonTypeHandler.class);
         registry.register(JSONObjectTypeHandler.class);
         registry.register(JSONArrayTypeHandler.class);
-
-        // 默认启用自增主键
-        setUseGeneratedKeys(true);
     }
 
     @Override
@@ -52,5 +52,48 @@ class MybatisConfiguration extends Configuration {
             }
         }
         return super.newParameterHandler(ms, param, boundSql);
+    }
+
+    @Override
+    public void addMappedStatement(MappedStatement ms) {
+        if (ms.getId().endsWith(MybatisConsts.INSERT) || ms.getId().endsWith(MybatisConsts.INSERTS) && ms.getKeyGenerator() == NoKeyGenerator.INSTANCE) {
+            ms = replaceEntityIdGenerator(ms);
+        }
+        super.addMappedStatement(ms);
+    }
+
+    private MappedStatement replaceEntityIdGenerator(MappedStatement ms) {
+        var tableInfo = getTableInfo(ms);
+        if (tableInfo == null) {
+            return ms;
+        }
+
+        var keyGenerator = MybatisIdGeneratorUtil.create(ms, tableInfo);
+        if (keyGenerator == NoKeyGenerator.INSTANCE) {
+            return ms;
+        }
+
+        if (ms.getId().endsWith(MybatisConsts.INSERTS)) {
+            keyGenerator = new EntitiesIdGenerator(keyGenerator);
+        }
+
+        return new MappedStatement.Builder(ms.getConfiguration(), ms.getId(), ms.getSqlSource(), ms.getSqlCommandType())
+                .resource(ms.getResource())
+                .fetchSize(ms.getFetchSize())
+                .timeout(ms.getTimeout())
+                .statementType(ms.getStatementType())
+                .keyGenerator(keyGenerator) // 替换主键生成器
+                .keyProperty(MybatisConsts.ENTITY + "." + tableInfo.id().field().getName())
+                .keyColumn(tableInfo.id().name())
+                .databaseId(databaseId)
+                .lang(ms.getLang())
+                .resultOrdered(ms.isResultOrdered())
+                .resultSets(ms.getResultSets() == null ? null : String.join(",", ms.getResultSets()))
+                .resultMaps(ms.getResultMaps())
+                .resultSetType(ms.getResultSetType())
+                .flushCacheRequired(ms.isFlushCacheRequired())
+                .useCache(ms.isUseCache())
+                .cache(ms.getCache())
+                .build();
     }
 }

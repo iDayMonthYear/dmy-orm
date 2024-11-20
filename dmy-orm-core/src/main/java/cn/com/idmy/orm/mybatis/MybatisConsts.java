@@ -7,4 +7,11 @@ interface MybatisConsts {
     String ENTITY = "$$entity";
     String ENTITY_CLASS = "$$entityClass";
     String ENTITIES = "$$entities";
+
+    String GET = "get";
+    String FIND = "find";
+    String DELETE = "delete";
+    String UPDATE = "update";
+    String INSERT = "insert";
+    String INSERTS = "inserts";
 }

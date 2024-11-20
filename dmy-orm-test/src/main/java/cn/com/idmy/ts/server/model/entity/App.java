@@ -16,6 +16,7 @@ import java.time.LocalDateTime;
 @Table
 public class App  {
     @Id
+    protected Long id;
     protected String key;
     protected String name;
     protected LocalDateTime createdAt;

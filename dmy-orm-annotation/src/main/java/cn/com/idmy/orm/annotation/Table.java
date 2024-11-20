@@ -1,4 +1,3 @@
-
 package cn.com.idmy.orm.annotation;
 
 import java.lang.annotation.*;
@@ -16,14 +15,19 @@ public @interface Table {
     @Retention(RetentionPolicy.RUNTIME)
     @Target({ElementType.FIELD})
     @interface Id {
-        Type value() default Type.AUTO;
+        Type type() default Type.AUTO;
 
-        String column() default "";
+        String value() default "";
+
+        String name() default "";
+
+        boolean before() default true;
 
         String comment() default "";
 
         enum Type {
             AUTO,
+            GENERATOR,
             SEQUENCE,
             NONE
         }

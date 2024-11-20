@@ -42,7 +42,7 @@ public class OrmAutoConfiguration {
         SqlSessionFactoryBean factory = new SqlSessionFactoryBean();
         factory.setDataSource(dataSource);
         factory.setConfiguration(new MybatisConfiguration());
-        factory.setPlugins(enumWatchInterceptor);
+//        factory.setPlugins(enumWatchInterceptor);
         return factory.getObject();
     }
 }

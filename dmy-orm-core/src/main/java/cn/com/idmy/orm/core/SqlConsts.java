@@ -15,11 +15,11 @@ public final class SqlConsts {
     public static final String PLACEHOLDER = "?";
     public static final String PERCENT_SIGN = "%";
     public static final String SINGLE_QUOTE = "'";
+    public static final String STRESS_MARK = "`";
     public static final String BRACKET_LEFT = "(";
     public static final String BRACKET_RIGHT = ")";
     public static final String HINT_START = "/*+ ";
     public static final String HINT_END = " */ ";
-
 
     public static final String AS = " AS ";
     public static final String OR = " OR ";
@@ -48,32 +48,12 @@ public final class SqlConsts {
     public static final String LIMIT = " LIMIT ";
     public static final String OFFSET = " OFFSET ";
 
-    public static final String GT = " > ";
-    public static final String GE = " >= ";
-    public static final String LT = " < ";
-    public static final String LE = " <= ";
-    public static final String LIKE = " LIKE ";
-    public static final String NOT_LIKE = " NOT LIKE ";
-    public static final String EQUALS = " = ";
-    public static final String NOT_EQUALS = " != ";
-    public static final String IS_NULL = " IS NULL ";
-    public static final String IS_NOT_NULL = " IS NOT NULL ";
-    public static final String IN = " IN ";
-    public static final String NOT_IN = " NOT IN ";
-    public static final String BETWEEN = " BETWEEN ";
-    public static final String NOT_BETWEEN = " NOT BETWEEN ";
-
 
     public static final String ASC = " ASC";
     public static final String DESC = " DESC";
     public static final String NULLS_FIRST = " NULLS FIRST";
     public static final String NULLS_LAST = " NULLS LAST";
 
-
-    public static final String PLUS_SIGN = " + ";
-    public static final String MINUS_SIGN = " - ";
-    public static final String DIVISION_SIGN = " / ";
-    public static final String MULTIPLICATION_SIGN = " * ";
 
     public static final String EQUALS_PLACEHOLDER = " = ? ";
     public static final String AND_PLACEHOLDER = BLANK + PLACEHOLDER + AND + PLACEHOLDER + BLANK;

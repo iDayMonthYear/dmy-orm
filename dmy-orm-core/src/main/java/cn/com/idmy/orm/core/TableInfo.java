@@ -7,21 +7,24 @@ import java.util.Map;
 
 public record TableInfo(
         Class<?> entityClass,
-        String tableName,
+        String name,
+        TableIdInfo id,
         String comment,
-        Field idField,
-        String idColumnName,
-        Table.Id.Type idType,
-        TableColumn[] columns,
-        Map<String, TableColumn> columnMap) {
-    public TableColumn getColumn(String columnName) {
-        return columnMap.get(columnName);
+        TableColumnInfo[] columns,
+        Map<String, TableColumnInfo> columnMap) {
+
+    public record TableIdInfo(
+            Field field,
+            String name,
+            String value,
+            Table.Id.Type type,
+            boolean before,
+            String comment) {
     }
 
-    public record TableColumn(
+    public record TableColumnInfo(
             Field field,
-            String columnName,
-            Class<?> columnType,
+            String name,
             boolean large,
             boolean logicDelete,
             boolean version,

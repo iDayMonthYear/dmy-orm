@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 
 @Getter
 @RequiredArgsConstructor
-public enum Op {
+enum Op {
     EQ("="),            // Equal
     NE("<>"),          // Not Equal
     LT("<"),           // Less Than
@@ -18,6 +18,5 @@ public enum Op {
     LIKE("like"),      // Like
     IS_NULL("is null"), // Is Null
     IS_NOT_NULL("is not null"); // Is Not Null
-    ;
     private final String symbol;
 }
