@@ -1,16 +1,13 @@
 package cn.com.idmy.orm.mybatis;
 
 import cn.com.idmy.orm.OrmException;
-import cn.com.idmy.orm.core.AbstractWhere;
 import cn.com.idmy.orm.core.TableManager;
-import jakarta.annotation.Nullable;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.mapping.BoundSql;
 import org.apache.ibatis.mapping.MappedStatement;
 import org.apache.ibatis.scripting.defaults.DefaultParameterHandler;
 import org.apache.ibatis.type.TypeHandler;
 import org.apache.ibatis.type.TypeHandlerRegistry;
-import org.dromara.hutool.core.collection.CollUtil;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -69,38 +66,18 @@ class PreparedParameterHandler extends DefaultParameterHandler {
     private TypeHandler<?> getTypeHandler(Object value, Map<String, Object> params) {
         var valueType = value.getClass();
         var entityClass = getEntityClass(params);
-
-        if (entityClass != null) {
-            var customHandler = TableManager.getHandler(entityClass, valueType.getName());
-            if (customHandler != null) {
-                try {
-                    return customHandler.getDeclaredConstructor().newInstance();
-                } catch (Exception e) {
-                    log.warn("Failed to create custom type handler", e);
-                }
+        var customHandler = TableManager.getHandler(entityClass, valueType.getName());
+        if (customHandler != null) {
+            try {
+                return customHandler.getDeclaredConstructor().newInstance();
+            } catch (Exception e) {
+                log.warn("Failed to create custom type handler", e);
             }
         }
-
         return typeHandlerRegistry.getTypeHandler(valueType);
     }
 
-    @Nullable
-    public static Class<?> getEntityClass(Map<String, Object> params) {
-        var chain = params.get(MybatisConsts.CHAIN);
-        if (chain instanceof AbstractWhere<?, ?> where) {
-            return where.entityClass();
-        } else {
-            var entity = params.get(MybatisConsts.ENTITY);
-            if (entity == null) {
-                var entities = (Collection<?>) params.get(MybatisConsts.ENTITIES);
-                if (CollUtil.isEmpty(entities)) {
-                    return null;
-                } else {
-                    return entities.iterator().next().getClass();
-                }
-            } else {
-                return entity.getClass();
-            }
-        }
+    private static Class<?> getEntityClass(Map<String, Object> params) {
+        return (Class<?>) params.get(MybatisConsts.ENTITY_CLASS);
     }
 }

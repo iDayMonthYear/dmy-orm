@@ -5,5 +5,6 @@ interface MybatisConsts {
     String SQL_PARAMS = "$$sqlParams";
 
     String ENTITY = "$$entity";
+    String ENTITY_CLASS = "$$entityClass";
     String ENTITIES = "$$entities";
 }
