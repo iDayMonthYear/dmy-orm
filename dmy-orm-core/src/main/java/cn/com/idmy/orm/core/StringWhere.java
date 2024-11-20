@@ -7,51 +7,51 @@ public interface StringWhere<T, WHERE extends StringWhere<T, WHERE>> {
     WHERE addNode(Node node);
 
     //region 等于
-    default WHERE eq(String field, Object value) {
-        return addNode(new Cond(field, Op.EQ, value));
+    default WHERE eq(String col, Object val) {
+        return addNode(new Cond(col, Op.EQ, val));
     }
     //endregion
 
     //region 不等于
-    default WHERE ne(String field, Object value) {
-        return addNode(new Cond(field, Op.NE, value));
+    default WHERE ne(String col, Object val) {
+        return addNode(new Cond(col, Op.NE, val));
     }
     //endregion
 
     //region 大于 >
-    default WHERE gt(String field, Object value) {
-        return addNode(new Cond(field, Op.GT, value));
+    default WHERE gt(String col, Object val) {
+        return addNode(new Cond(col, Op.GT, val));
     }
     //endregion
 
     //region 大于等于 >=
-    default WHERE ge(String field, Object value) {
-        return addNode(new Cond(field, Op.GE, value));
+    default WHERE ge(String col, Object val) {
+        return addNode(new Cond(col, Op.GE, val));
     }
 
     //endregion
 
     //region 小于 <
-    default WHERE lt(String field, Object value) {
-        return addNode(new Cond(field, Op.LT, value));
+    default WHERE lt(String col, Object val) {
+        return addNode(new Cond(col, Op.LT, val));
     }
 
     //endregion
 
     //region 小于等于 <=
-    default WHERE le(String field, Object value) {
-        return addNode(new Cond(field, Op.LE, value));
+    default WHERE le(String col, Object val) {
+        return addNode(new Cond(col, Op.LE, val));
     }
 
     //endregion
 
     //region in
-    default WHERE in(String field, Object value) {
-        return addNode(new Cond(field, Op.IN, value));
+    default WHERE in(String col, Object val) {
+        return addNode(new Cond(col, Op.IN, val));
     }
 
-    default WHERE in(String field, Object... values) {
-        return addNode(new Cond(field, Op.IN, values));
+    default WHERE in(String col, Object... vals) {
+        return addNode(new Cond(col, Op.IN, vals));
     }
     //endregion
 }

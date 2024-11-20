@@ -1,6 +1,6 @@
 package cn.com.idmy.orm.core;
 
-import cn.com.idmy.orm.core.Node.SelectField;
+import cn.com.idmy.orm.core.Node.SelectColumn;
 import cn.com.idmy.orm.mybatis.MybatisDao;
 import lombok.Getter;
 import lombok.experimental.Accessors;
@@ -25,9 +25,9 @@ public class StringSelectChain<T> extends SelectChain<T> implements StringWhere<
         return new StringSelectChain<>(dao.entityClass());
     }
 
-    public StringSelectChain<T> select(String... fields) {
-        for (String f : fields) {
-            addNode(new SelectField(f));
+    public StringSelectChain<T> select(String... cols) {
+        for (String c : cols) {
+            addNode(new SelectColumn(c));
         }
         return this;
     }

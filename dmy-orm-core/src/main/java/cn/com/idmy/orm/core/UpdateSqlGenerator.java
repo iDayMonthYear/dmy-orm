@@ -5,7 +5,6 @@ import cn.com.idmy.orm.core.Node.Cond;
 import cn.com.idmy.orm.core.Node.Or;
 import cn.com.idmy.orm.core.Node.Set;
 import cn.com.idmy.orm.core.Node.Type;
-import cn.com.idmy.orm.util.OrmUtil;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
@@ -18,10 +17,10 @@ import static cn.com.idmy.orm.core.SqlConsts.UPDATE;
 @Slf4j
 public class UpdateSqlGenerator extends AbstractSqlGenerator {
     public static Pair<String, List<Object>> gen(UpdateChain<?> chain) {
-        List<Node> nodes = chain.nodes();
-        List<Set> sets = new ArrayList<>(nodes.size());
-        List<Node> wheres = new ArrayList<>(nodes.size());
-        for (Node node : nodes) {
+        var nodes = chain.nodes();
+        var sets = new ArrayList<Set>(nodes.size());
+        var wheres = new ArrayList<Node>(nodes.size());
+        for (var node : nodes) {
             if (node instanceof Set set) {
                 sets.add(set);
             } else if (node instanceof Cond) {
@@ -30,8 +29,8 @@ public class UpdateSqlGenerator extends AbstractSqlGenerator {
                 skipAdjoinOr(node, wheres);
             }
         }
-        StringBuilder sql = new StringBuilder(UPDATE).append(OrmUtil.getTableName(chain.entityClass())).append(SET);
-        List<Object> params = new ArrayList<>(chain.sqlParamsSize());
+        var sql = new StringBuilder(UPDATE).append(TableManager.getTableName(chain.entityClass())).append(SET);
+        var params = new ArrayList<>(chain.sqlParamsSize());
         if (!sets.isEmpty()) {
             for (int i = 0, setsSize = sets.size(); i < setsSize; i++) {
                 Set set = sets.get(i);

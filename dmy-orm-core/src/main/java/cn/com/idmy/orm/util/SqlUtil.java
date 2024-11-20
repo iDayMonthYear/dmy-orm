@@ -5,9 +5,26 @@ import java.util.regex.Pattern;
 public class SqlUtil {
     private static final Pattern FIELD_PATTERN = Pattern.compile("[a-zA-Z0-9_]+");
 
-    public static void checkField(String field) {
+    public static void checkColumn(String field) {
         if (!FIELD_PATTERN.matcher(field).matches()) {
-            throw new IllegalArgumentException("非法字段名：" + field);
+            throw new IllegalArgumentException("非法列名：" + field);
         }
+    }
+
+    public static boolean toBoolean(int result) {
+        return result > 0 || result == -2;
+    }
+
+    public static boolean toBoolean(long result) {
+        return result > 0;
+    }
+
+    public static boolean toBoolean(int[] results) {
+        for (int result : results) {
+            if (toBoolean(result)) {
+                return true;
+            }
+        }
+        return false;
     }
 }

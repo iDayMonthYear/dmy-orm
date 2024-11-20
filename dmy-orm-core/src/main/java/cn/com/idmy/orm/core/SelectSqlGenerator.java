@@ -2,7 +2,6 @@ package cn.com.idmy.orm.core;
 
 import cn.com.idmy.base.model.Pair;
 import cn.com.idmy.orm.core.Node.*;
-import cn.com.idmy.orm.util.OrmUtil;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
@@ -20,16 +19,16 @@ import static cn.com.idmy.orm.core.SqlConsts.SELECT;
 @Slf4j
 public class SelectSqlGenerator extends AbstractSqlGenerator {
     public static Pair<String, List<Object>> gen(SelectChain<?> chain) {
-        List<Node> nodes = chain.nodes();
-        List<SelectField> selectFields = new ArrayList<>(nodes.size());
-        List<Node> wheres = new ArrayList<>(nodes.size());
-        List<GroupBy> groups = new ArrayList<>(1);
-        List<OrderBy> orders = new ArrayList<>(4);
+        var nodes = chain.nodes();
+        var selectColumns = new ArrayList<SelectColumn>(nodes.size());
+        var wheres = new ArrayList<Node>(nodes.size());
+        var groups = new ArrayList<GroupBy>(1);
+        var orders = new ArrayList<OrderBy>(2);
         Distinct distinct = null;
         for (Node node : nodes) {
             switch (node) {
                 case Cond cond -> wheres.add(cond);
-                case SelectField selectField -> selectFields.add(selectField);
+                case SelectColumn selectColumn -> selectColumns.add(selectColumn);
                 case GroupBy groupBy -> groups.add(groupBy);
                 case OrderBy orderBy -> orders.add(orderBy);
                 case Or or -> skipAdjoinOr(or, wheres);
@@ -39,39 +38,39 @@ public class SelectSqlGenerator extends AbstractSqlGenerator {
             }
         }
 
-        List<Object> params = new ArrayList<>(chain.sqlParamsSize());
-        StringBuilder sql = new StringBuilder(SELECT);
+        var params = new ArrayList<>(chain.sqlParamsSize());
+        var sql = new StringBuilder(SELECT);
         if (distinct != null) {
             builder(distinct, sql, params);
-            if (!selectFields.isEmpty()) {
+            if (!selectColumns.isEmpty()) {
                 sql.append(DELIMITER);
             }
         }
-        buildSelectField(selectFields, sql, params);
-        sql.append(FROM).append(OrmUtil.getTableName(chain.entityClass()));
+        buildSelectColumn(selectColumns, sql, params);
+        sql.append(FROM).append(TableManager.getTableName(chain.entityClass()));
         buildWhere(wheres, sql, params);
         buildGroupBy(groups, sql, params);
         buildOrderBy(orders, sql, params);
         return Pair.of(sql.toString(), params);
     }
 
-    private static void buildSelectField(List<SelectField> selectFields, StringBuilder sql, List<Object> params) {
-        if (selectFields.isEmpty()) {
+    private static void buildSelectColumn(List<SelectColumn> selectColumns, StringBuilder sql, List<Object> params) {
+        if (selectColumns.isEmpty()) {
             sql.append(ASTERISK);
         } else {
-            Set<String> set = new HashSet<>(selectFields.size());
-            for (int i = 0, size = selectFields.size(); i < size; i++) {
-                SelectField selectField = selectFields.get(i);
-                String field = (String) builder(selectField, sql, params);
+            Set<String> set = new HashSet<>(selectColumns.size());
+            for (int i = 0, size = selectColumns.size(); i < size; i++) {
+                var selectColumn = selectColumns.get(i);
+                var column = (String) builder(selectColumn, sql, params);
                 if (log.isDebugEnabled()) {
-                    if (set.contains(field)) {
-                        log.error("select {} 字段名重复会导致映射到实体类异常", field);
+                    if (set.contains(column)) {
+                        log.error("select {} 列名重复会导致映射到实体类异常", column);
                     }
-                    set.add(field);
+                    set.add(column);
                 }
                 if (i < size - 1) {
-                    Type type = selectFields.get(i + 1).type();
-                    if (type == Type.SELECT_FIELD) {
+                    Type type = selectColumns.get(i + 1).type();
+                    if (type == Type.SELECT_COLUMN) {
                         sql.append(DELIMITER);
                     }
                 }

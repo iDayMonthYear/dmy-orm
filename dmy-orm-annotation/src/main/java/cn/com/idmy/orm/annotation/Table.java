@@ -1,10 +1,7 @@
 
 package cn.com.idmy.orm.annotation;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.lang.annotation.*;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE})
@@ -14,4 +11,40 @@ public @interface Table {
     String schema() default "";
 
     String comment() default "";
+
+    @Inherited
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target({ElementType.FIELD})
+    @interface Id {
+        Type value() default Type.AUTO;
+
+        String column() default "";
+
+        String comment() default "";
+
+        enum Type {
+            AUTO,
+            SEQUENCE,
+            NONE
+        }
+    }
+
+    @Inherited
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target({ElementType.FIELD})
+    @interface Column {
+        String value() default "";
+
+        boolean ignore() default false;
+
+        boolean large() default false;
+
+        boolean logicDelete() default false;
+
+        boolean version() default false;
+
+        boolean tenant() default false;
+
+        String comment() default "";
+    }
 }

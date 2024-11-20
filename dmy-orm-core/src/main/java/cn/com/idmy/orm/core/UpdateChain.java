@@ -23,12 +23,12 @@ public class UpdateChain<T> extends LambdaWhere<T, UpdateChain<T>> {
         return new UpdateChain<>(dao.entityClass());
     }
 
-    public UpdateChain<T> set(FieldGetter<T, ?> field, Object expr) {
-        return addNode(new Set(field,  expr));
+    public UpdateChain<T> set(ColumnGetter<T, ?> col, Object expr) {
+        return addNode(new Set(col,  expr));
     }
 
-    public UpdateChain<T> set(FieldGetter<T, ?> field, SqlOpExpr expr) {
-        return addNode(new Set(field, expr));
+    public UpdateChain<T> set(ColumnGetter<T, ?> col, SqlOpExpr expr) {
+        return addNode(new Set(col, expr));
     }
 
     @Override

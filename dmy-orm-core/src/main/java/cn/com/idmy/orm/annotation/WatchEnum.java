@@ -21,20 +21,20 @@ public @interface WatchEnum {
     /**
      * 数据库操作类型
      */
-    WatchAction action() default WatchAction.INSERT;
+    Action action() default Action.INSERT;
 
     /**
      * 执行时机
      */
-    WatchTiming timing() default WatchTiming.BEFORE;
+    Timing timing() default Timing.BEFORE;
 
-    enum WatchAction {
+    enum Action {
         INSERT,
         UPDATE,
         DELETE
     }
 
-    enum WatchTiming {
+    enum Timing {
         BEFORE,
         AFTER
     }

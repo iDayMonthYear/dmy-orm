@@ -11,7 +11,7 @@ import java.math.BigDecimal;
 @Accessors(fluent = true, chain = false)
 @RequiredArgsConstructor
 public class SqlOp {
-    private final String field;
+    private final String column;
     private String op;
     private Object value;
 

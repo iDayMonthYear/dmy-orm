@@ -5,6 +5,5 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @Data
 @ConfigurationProperties(prefix = "dmy.orm")
-public class OrmProperties {
-    // 可以添加其他必要的配置属性
-} 
+public class OrmProps {
+}

@@ -2,8 +2,8 @@ package cn.com.idmy.orm.mybatis;
 
 import cn.com.idmy.orm.OrmException;
 import cn.com.idmy.orm.annotation.WatchEnum;
-import cn.com.idmy.orm.annotation.WatchEnum.WatchAction;
-import cn.com.idmy.orm.annotation.WatchEnum.WatchTiming;
+import cn.com.idmy.orm.annotation.WatchEnum.Action;
+import cn.com.idmy.orm.annotation.WatchEnum.Timing;
 import cn.com.idmy.orm.listener.EnumWatchEvent;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.event.EventListener;
@@ -63,7 +63,7 @@ class EnumWatchListener {
         }
     }
 
-    private record WatchKey(Class<?> entityClass, Class<?> enumClass, WatchAction action, WatchTiming timing) {
+    private record WatchKey(Class<?> entityClass, Class<?> enumClass, Action action, Timing timing) {
         @Override
         public boolean equals(Object o) {
             if (this == o) {

@@ -17,7 +17,7 @@ public class Node {
         SET,
         OR,
         AND,
-        SELECT_FIELD,
+        SELECT_COLUMN,
         DISTINCT,
         LIMIT,
         OFFSET;
@@ -28,20 +28,20 @@ public class Node {
     @Getter
     @Accessors(fluent = true)
     static final class Cond extends Node {
-        private final Object field;
+        private final Object column;
         private final Op op;
         private final Object expr;
 
-        Cond(FieldGetter<?, ?> field, Op op, Object expr) {
+        Cond(ColumnGetter<?, ?> column, Op op, Object expr) {
             super(Type.COND);
-            this.field = field;
+            this.column = column;
             this.op = op;
             this.expr = expr;
         }
 
-        Cond(String field, Op op, Object expr) {
+        Cond(String column, Op op, Object expr) {
             super(Type.COND);
-            this.field = field;
+            this.column = column;
             this.op = op;
             this.expr = expr;
         }
@@ -57,12 +57,12 @@ public class Node {
     @Getter
     @Accessors(fluent = true)
     static final class Set extends Node {
-        private final FieldGetter<?, ?> field;
+        private final ColumnGetter<?, ?> column;
         private final Object expr;
 
-        Set(FieldGetter<?, ?> field, Object expr) {
+        Set(ColumnGetter<?, ?> column, Object expr) {
             super(Type.SET);
-            this.field = field;
+            this.column = column;
             this.expr = expr;
         }
     }
@@ -70,57 +70,58 @@ public class Node {
     @Getter
     @Accessors(fluent = true)
     static final class GroupBy extends Node {
-        private final FieldGetter<?, ?> field;
+        private final ColumnGetter<?, ?> column;
 
-        GroupBy(FieldGetter<?, ?> field) {
+        GroupBy(ColumnGetter<?, ?> column) {
             super(Type.GROUP_BY);
-            this.field = field;
+            this.column = column;
         }
     }
 
     @Getter
     @Accessors(fluent = true)
     static final class OrderBy extends Node {
-        private final Object field;
+        private final Object column;
         private final boolean desc;
 
-        OrderBy(FieldGetter<?, ?> field, boolean desc) {
+        OrderBy(ColumnGetter<?, ?> column, boolean desc) {
             super(Type.ORDER_BY);
-            this.field = field;
+            this.column = column;
             this.desc = desc;
         }
 
-        OrderBy(String field, boolean desc) {
+        OrderBy(String column, boolean desc) {
             super(Type.ORDER_BY);
-            this.field = field;
+            this.column = column;
             this.desc = desc;
         }
     }
 
     @Getter
     @Accessors(fluent = true)
-    static final class SelectField extends Node {
-        private final Object field; //FieldGetter<?, ?> | SqlFnExpr
-        private FieldGetter<?, ?> alias;
+    static final class SelectColumn extends Node {
+        private final Object column; //ColumnGetter<?, ?> | SqlFnExpr
+        @Nullable
+        private ColumnGetter<?, ?> alias;
 
-        SelectField(FieldGetter<?, ?> field) {
-            super(Type.SELECT_FIELD);
-            this.field = field;
+        SelectColumn(ColumnGetter<?, ?> column) {
+            super(Type.SELECT_COLUMN);
+            this.column = column;
         }
 
-        SelectField(String field) {
-            super(Type.SELECT_FIELD);
-            this.field = field;
+        SelectColumn(String column) {
+            super(Type.SELECT_COLUMN);
+            this.column = column;
         }
 
-        SelectField(SqlFnExpr<?> expr) {
-            super(Type.SELECT_FIELD);
-            this.field = expr;
+        SelectColumn(SqlFnExpr<?> expr) {
+            super(Type.SELECT_COLUMN);
+            this.column = expr;
         }
 
-        SelectField(SqlFnExpr<?> expr, FieldGetter<?, ?> alias) {
-            super(Type.SELECT_FIELD);
-            this.field = expr;
+        SelectColumn(SqlFnExpr<?> expr, ColumnGetter<?, ?> alias) {
+            super(Type.SELECT_COLUMN);
+            this.column = expr;
             this.alias = alias;
         }
     }
@@ -129,15 +130,15 @@ public class Node {
     @Accessors(fluent = true)
     static final class Distinct extends Node {
         @Nullable
-        private FieldGetter<?, ?> field;
+        private ColumnGetter<?, ?> column;
 
         Distinct() {
             super(Type.DISTINCT);
         }
 
-        Distinct(@Nullable FieldGetter<?, ?> field) {
+        Distinct(@Nullable ColumnGetter<?, ?> column) {
             this();
-            this.field = field;
+            this.column = column;
         }
     }
 }

@@ -1,6 +1,7 @@
 package cn.com.idmy.ts.server.model.entity;
+
 import cn.com.idmy.orm.annotation.Table;
-import cn.com.idmy.orm.annotation.TableId;
+import cn.com.idmy.orm.annotation.Table.Id;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -14,7 +15,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Table
 public class App  {
-    @TableId
+    @Id
     protected String key;
     protected String name;
     protected LocalDateTime createdAt;

@@ -24,7 +24,7 @@ public class UpdateWhere<T> extends LambdaWhere<T, UpdateWhere<T>> {
     }
 
     public static <T> UpdateWhere<T> of(MybatisDao<T, ?> dao, T entity) {
-        UpdateWhere<T> where = of(dao);
+        var where = of(dao);
         where.entityClass = (Class<T>) entity.getClass();
         return where;
     }

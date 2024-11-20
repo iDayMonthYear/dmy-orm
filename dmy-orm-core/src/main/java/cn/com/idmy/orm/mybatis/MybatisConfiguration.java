@@ -24,14 +24,13 @@ import org.apache.ibatis.executor.parameter.ParameterHandler;
 import org.apache.ibatis.mapping.BoundSql;
 import org.apache.ibatis.mapping.MappedStatement;
 import org.apache.ibatis.session.Configuration;
-import org.apache.ibatis.type.TypeHandlerRegistry;
 
 import java.util.Map;
 
 class MybatisConfiguration extends Configuration {
     public MybatisConfiguration() {
         // 注册默认的类型处理器
-        TypeHandlerRegistry registry = getTypeHandlerRegistry();
+        var registry = getTypeHandlerRegistry();
         // 枚举类型处理器
         registry.setDefaultEnumTypeHandler(EnumTypeHandler.class);
         // JSON类型处理器
@@ -45,10 +44,10 @@ class MybatisConfiguration extends Configuration {
 
     @Override
     public ParameterHandler newParameterHandler(MappedStatement ms, Object param, BoundSql boundSql) {
-        String id = ms.getId();
+        var id = ms.getId();
         if (!id.endsWith(SelectKeyGenerator.SELECT_KEY_SUFFIX)) {
             if (param instanceof Map<?, ?> map && map.containsKey(MybatisConsts.SQL_PARAMS)) {
-                PreparedParameterHandler handler = new PreparedParameterHandler(ms, param, boundSql);
+                var handler = new PreparedParameterHandler(ms, param, boundSql);
                 return (ParameterHandler) interceptorChain.pluginAll(handler);
             }
         }

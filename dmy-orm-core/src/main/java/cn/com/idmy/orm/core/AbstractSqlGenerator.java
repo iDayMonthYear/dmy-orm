@@ -1,10 +1,10 @@
 package cn.com.idmy.orm.core;
 
 import cn.com.idmy.orm.core.Node.*;
-import cn.com.idmy.orm.util.LambdaUtil;
 import cn.com.idmy.orm.util.SqlUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.hutool.core.collection.CollUtil;
+import org.dromara.hutool.core.func.LambdaUtil;
 
 import java.util.List;
 import java.util.Objects;
@@ -15,21 +15,21 @@ import static cn.com.idmy.orm.core.SqlFnName.COUNT;
 
 @Slf4j
 public abstract class AbstractSqlGenerator {
-    protected static String buildField(Object field) {
-        if (field instanceof FieldGetter<?, ?> f) {
-            return "`" + LambdaUtil.fieldName(f) + "`";
+    protected static String buildColumn(Object col) {
+        if (col instanceof ColumnGetter<?, ?> getter) {
+            return "`" + LambdaUtil.getFieldName(getter) + "`";
         } else {
-            SqlUtil.checkField((String) field);
-            return "`" + field + "`";
+            SqlUtil.checkColumn((String) col);
+            return "`" + col + "`";
         }
     }
 
-    private static String parseSqlExpr(String field, Object expr, List<Object> params) {
+    private static String parseSqlExpr(String column, Object expr, List<Object> params) {
         StringBuilder sql = new StringBuilder();
         if (expr instanceof SqlOpExpr sqlOpExpr) {
-            SqlOp sqlOp = sqlOpExpr.apply(new SqlOp(field));
+            SqlOp sqlOp = sqlOpExpr.apply(new SqlOp(column));
             params.add(sqlOp.value());
-            return sql.append(sqlOp.field()).append(BLANK).append(sqlOp.op()).append(BLANK).append(PLACEHOLDER).toString();
+            return sql.append(sqlOp.column()).append(BLANK).append(sqlOp.op()).append(BLANK).append(PLACEHOLDER).toString();
         } else {
             params.add(expr);
             placeholder(expr, sql);
@@ -64,69 +64,65 @@ public abstract class AbstractSqlGenerator {
     }
 
     private static StringBuilder buildCond(Cond cond, StringBuilder sql, List<Object> params) {
-        String field = buildField(cond.field());
-        String expr = parseSqlExpr(field, cond.expr(), params);
-        sql.append(field).append(BLANK).append(cond.op().getSymbol()).append(BLANK).append(expr);
-        return sql;
+        String column = buildColumn(cond.column());
+        String expr = parseSqlExpr(column, cond.expr(), params);
+        return sql.append(column).append(BLANK).append(cond.op().getSymbol()).append(BLANK).append(expr);
     }
 
     private static StringBuilder buildSet(Set set, StringBuilder sql, List<Object> params) {
-        String field = buildField(set.field());
-        String expr = parseSqlExpr(field, set.expr(), params);
-        sql.append(field).append(BLANK).append(expr);
-        return sql;
+        var column = buildColumn(set.column());
+        var expr = parseSqlExpr(column, set.expr(), params);
+        return sql.append(column).append(BLANK).append(expr);
     }
 
-    private static String buildSelectField(SelectField selectField, StringBuilder sql, List<Object> params) {
-        Object value = selectField.field();
-        if (value instanceof FieldGetter<?, ?>  || value instanceof String) {
-            String out = buildField(value);
+    private static String buildSelectColumn(SelectColumn selectColumn, StringBuilder sql, List<Object> params) {
+        var column = selectColumn.column();
+        if (column instanceof ColumnGetter<?, ?> || column instanceof String) {
+            var out = buildColumn(column);
             sql.append(out);
             return out;
-        } else if (value instanceof SqlFnExpr<?> exp) {
-            SqlFn<?> fn = exp.apply();
-            SqlFnName name = fn.name();
-            String field = (fn.field() == null && name == COUNT) ? ASTERISK : buildField(fn.field());
-            String alias = selectField.alias() == null ? null : LambdaUtil.fieldName(selectField.alias());
-            String fieldOrAlias = Objects.requireNonNullElse(alias, field);
+        } else {
+            var expr = (SqlFnExpr<?>) column;
+            var fn = expr.apply();
+            var name = fn.name();
+            var col = (fn.column() == null && name == COUNT) ? ASTERISK : buildColumn(fn.column());
+            var alias = selectColumn.alias() == null ? null : LambdaUtil.getFieldName(selectColumn.alias());
+            var colOrAlias = Objects.requireNonNullElse(alias, col);
             if (name == SqlFnName.IF_NULL) {
                 params.add(fn.value());
-                sql.append(name.getName()).append(BRACKET_LEFT).append(field).append(DELIMITER).append(PLACEHOLDER).append(BRACKET_RIGHT).append(BLANK).append(fieldOrAlias);
+                sql.append(name.getName()).append(BRACKET_LEFT).append(col).append(DELIMITER).append(PLACEHOLDER).append(BRACKET_RIGHT).append(BLANK).append(colOrAlias);
             } else {
-                sql.append(name.getName()).append(BRACKET_LEFT).append(field).append(BRACKET_RIGHT).append(BLANK).append(fieldOrAlias);
+                sql.append(name.getName()).append(BRACKET_LEFT).append(col).append(BRACKET_RIGHT).append(BLANK).append(colOrAlias);
             }
-            return fieldOrAlias;
-        } else {
-            sql.append(value);
-            return (String) value;
+            return colOrAlias;
         }
     }
 
     private static StringBuilder buildGroupBy(GroupBy group, StringBuilder sql) {
-        sql.append(buildField(group.field()));
+        sql.append(buildColumn(group.column()));
         return sql;
     }
 
     private static StringBuilder buildOrderBy(OrderBy order, StringBuilder sql) {
-        Object field = order.field();
+        Object column = order.column();
         String name;
-        if (field instanceof FieldGetter<?, ?> getter) {
-            name = buildField(getter);
+        if (column instanceof ColumnGetter<?, ?> getter) {
+            name = buildColumn(getter);
         } else {
-            name = (String) field;
+            name = (String) column;
             //字符串类型可以是前端过来的。必须检查
-            SqlUtil.checkField(name);
+            SqlUtil.checkColumn(name);
         }
         sql.append(name).append(order.desc() ? DESC : EMPTY);
         return sql;
     }
 
     private static StringBuilder buildDistinct(Distinct distinct, StringBuilder sql) {
-        FieldGetter<?, ?> field = distinct.field();
-        if (field == null) {
+        var column = distinct.column();
+        if (column == null) {
             sql.append(DISTINCT);
         } else {
-            sql.append(DISTINCT).append(BRACKET_LEFT).append(buildField(field)).append(BRACKET_RIGHT);
+            sql.append(DISTINCT).append(BRACKET_LEFT).append(buildColumn(column)).append(BRACKET_RIGHT);
         }
         return sql;
     }
@@ -138,7 +134,7 @@ public abstract class AbstractSqlGenerator {
             case Node.Set set -> buildSet(set, sql, params);
             case Node.GroupBy group -> buildGroupBy(group, sql);
             case Node.OrderBy order -> buildOrderBy(order, sql);
-            case Node.SelectField sf -> buildSelectField(sf, sql, params);
+            case SelectColumn sf -> buildSelectColumn(sf, sql, params);
             case Node.Distinct distinct -> buildDistinct(distinct, sql);
             case null, default -> null;
         };

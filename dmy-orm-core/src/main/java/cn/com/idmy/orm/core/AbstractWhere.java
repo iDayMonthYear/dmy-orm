@@ -32,12 +32,12 @@ public abstract class AbstractWhere<T, WHERE extends AbstractWhere<T, WHERE>> {
             return sql().left;
         } catch (Exception e) {
             log.warn("SQL生成失败：{}", e.getMessage());
-            return null;
+            return "异常";
         }
     }
 
-    protected WHERE addNode(Node ast) {
-        nodes.add(ast);
+    protected WHERE addNode(Node node) {
+        nodes.add(node);
         return typedThis;
     }
 

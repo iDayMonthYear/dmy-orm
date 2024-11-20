@@ -17,25 +17,25 @@ public abstract class LambdaWhere<T, WHERE extends LambdaWhere<T, WHERE>> extend
     }
 
     //region 等于
-    public WHERE eq(FieldGetter<T, ?> field, Object value) {
-        return addNode(new Cond(field, Op.EQ, value));
+    public WHERE eq(ColumnGetter<T, ?> col, Object val) {
+        return addNode(new Cond(col, Op.EQ, val));
     }
 
-    public WHERE eq(FieldGetter<T, ?> field, SqlOpExpr expr) {
-        return addNode(new Cond(field, Op.EQ, expr));
+    public WHERE eq(ColumnGetter<T, ?> col, SqlOpExpr expr) {
+        return addNode(new Cond(col, Op.EQ, expr));
     }
 
-    public WHERE eq(FieldGetter<T, ?> field, Object value, boolean if0) {
+    public WHERE eq(ColumnGetter<T, ?> col, Object val, boolean if0) {
         if (if0) {
-            return addNode(new Cond(field, Op.EQ, value));
+            return addNode(new Cond(col, Op.EQ, val));
         } else {
             return typedThis;
         }
     }
 
-    public WHERE eq(FieldGetter<T, ?> field, SqlOpExpr expr, boolean if0) {
+    public WHERE eq(ColumnGetter<T, ?> col, SqlOpExpr expr, boolean if0) {
         if (if0) {
-            return addNode(new Cond(field, Op.EQ, expr));
+            return addNode(new Cond(col, Op.EQ, expr));
         } else {
             return typedThis;
         }
@@ -43,25 +43,25 @@ public abstract class LambdaWhere<T, WHERE extends LambdaWhere<T, WHERE>> extend
     //endregion
 
     //region 不等于
-    public WHERE ne(FieldGetter<T, ?> field, Object value) {
-        return addNode(new Cond(field, Op.NE, value));
+    public WHERE ne(ColumnGetter<T, ?> col, Object val) {
+        return addNode(new Cond(col, Op.NE, val));
     }
 
-    public WHERE ne(FieldGetter<T, ?> field, SqlOpExpr expr) {
-        return addNode(new Cond(field, Op.NE, expr));
+    public WHERE ne(ColumnGetter<T, ?> col, SqlOpExpr expr) {
+        return addNode(new Cond(col, Op.NE, expr));
     }
 
-    public WHERE ne(FieldGetter<T, ?> field, Object value, boolean if0) {
+    public WHERE ne(ColumnGetter<T, ?> col, Object val, boolean if0) {
         if (if0) {
-            return addNode(new Cond(field, Op.NE, value));
+            return addNode(new Cond(col, Op.NE, val));
         } else {
             return typedThis;
         }
     }
 
-    public WHERE ne(FieldGetter<T, ?> field, SqlOpExpr expr, boolean if0) {
+    public WHERE ne(ColumnGetter<T, ?> col, SqlOpExpr expr, boolean if0) {
         if (if0) {
-            return addNode(new Cond(field, Op.NE, expr));
+            return addNode(new Cond(col, Op.NE, expr));
         } else {
             return typedThis;
         }
@@ -69,25 +69,25 @@ public abstract class LambdaWhere<T, WHERE extends LambdaWhere<T, WHERE>> extend
     //endregion
 
     //region 大于 >
-    public WHERE gt(FieldGetter<T, ?> field, Object value) {
-        return addNode(new Cond(field, Op.GT, value));
+    public WHERE gt(ColumnGetter<T, ?> col, Object val) {
+        return addNode(new Cond(col, Op.GT, val));
     }
 
-    public WHERE gt(FieldGetter<T, ?> field, SqlOpExpr expr) {
-        return addNode(new Cond(field, Op.GT, expr));
+    public WHERE gt(ColumnGetter<T, ?> col, SqlOpExpr expr) {
+        return addNode(new Cond(col, Op.GT, expr));
     }
 
-    public WHERE gt(FieldGetter<T, ?> field, Object value, boolean if0) {
+    public WHERE gt(ColumnGetter<T, ?> col, Object val, boolean if0) {
         if (if0) {
-            return addNode(new Cond(field, Op.GT, value));
+            return addNode(new Cond(col, Op.GT, val));
         } else {
             return typedThis;
         }
     }
 
-    public WHERE gt(FieldGetter<T, ?> field, SqlOpExpr expr, boolean if0) {
+    public WHERE gt(ColumnGetter<T, ?> col, SqlOpExpr expr, boolean if0) {
         if (if0) {
-            return addNode(new Cond(field, Op.GT, expr));
+            return addNode(new Cond(col, Op.GT, expr));
         } else {
             return typedThis;
         }
@@ -95,25 +95,25 @@ public abstract class LambdaWhere<T, WHERE extends LambdaWhere<T, WHERE>> extend
     //endregion
 
     //region 大于等于 >=
-    public WHERE ge(FieldGetter<T, ?> field, Object value) {
-        return addNode(new Cond(field, Op.GE, value));
+    public WHERE ge(ColumnGetter<T, ?> col, Object val) {
+        return addNode(new Cond(col, Op.GE, val));
     }
 
-    public WHERE ge(FieldGetter<T, ?> field, SqlOpExpr expr) {
-        return addNode(new Cond(field, Op.GE, expr));
+    public WHERE ge(ColumnGetter<T, ?> col, SqlOpExpr expr) {
+        return addNode(new Cond(col, Op.GE, expr));
     }
 
-    public WHERE ge(FieldGetter<T, ?> field, Object value, boolean if0) {
+    public WHERE ge(ColumnGetter<T, ?> col, Object val, boolean if0) {
         if (if0) {
-            return addNode(new Cond(field, Op.GE, value));
+            return addNode(new Cond(col, Op.GE, val));
         } else {
             return typedThis;
         }
     }
 
-    public WHERE ge(FieldGetter<T, ?> field, SqlOpExpr expr, boolean if0) {
+    public WHERE ge(ColumnGetter<T, ?> col, SqlOpExpr expr, boolean if0) {
         if (if0) {
-            return addNode(new Cond(field, Op.GE, expr));
+            return addNode(new Cond(col, Op.GE, expr));
         } else {
             return typedThis;
         }
@@ -121,25 +121,25 @@ public abstract class LambdaWhere<T, WHERE extends LambdaWhere<T, WHERE>> extend
     //endregion
 
     //region 小于 <
-    public WHERE lt(FieldGetter<T, ?> field, Object value) {
-        return addNode(new Cond(field, Op.LT, value));
+    public WHERE lt(ColumnGetter<T, ?> col, Object val) {
+        return addNode(new Cond(col, Op.LT, val));
     }
 
-    public WHERE lt(FieldGetter<T, ?> field, SqlOpExpr expr) {
-        return addNode(new Cond(field, Op.LT, expr));
+    public WHERE lt(ColumnGetter<T, ?> col, SqlOpExpr expr) {
+        return addNode(new Cond(col, Op.LT, expr));
     }
 
-    public WHERE lt(FieldGetter<T, ?> field, Object value, boolean if0) {
+    public WHERE lt(ColumnGetter<T, ?> col, Object val, boolean if0) {
         if (if0) {
-            return addNode(new Cond(field, Op.LT, value));
+            return addNode(new Cond(col, Op.LT, val));
         } else {
             return typedThis;
         }
     }
 
-    public WHERE lt(FieldGetter<T, ?> field, SqlOpExpr expr, boolean if0) {
+    public WHERE lt(ColumnGetter<T, ?> col, SqlOpExpr expr, boolean if0) {
         if (if0) {
-            return addNode(new Cond(field, Op.LT, expr));
+            return addNode(new Cond(col, Op.LT, expr));
         } else {
             return typedThis;
         }
@@ -147,25 +147,25 @@ public abstract class LambdaWhere<T, WHERE extends LambdaWhere<T, WHERE>> extend
     //endregion
 
     //region 小于等于 <=
-    public WHERE le(FieldGetter<T, ?> field, Object value) {
-        return addNode(new Cond(field, Op.LE, value));
+    public WHERE le(ColumnGetter<T, ?> col, Object val) {
+        return addNode(new Cond(col, Op.LE, val));
     }
 
-    public WHERE le(FieldGetter<T, ?> field, SqlOpExpr expr) {
-        return addNode(new Cond(field, Op.LE, expr));
+    public WHERE le(ColumnGetter<T, ?> col, SqlOpExpr expr) {
+        return addNode(new Cond(col, Op.LE, expr));
     }
 
-    public WHERE le(FieldGetter<T, ?> field, Object value, boolean if0) {
+    public WHERE le(ColumnGetter<T, ?> col, Object val, boolean if0) {
         if (if0) {
-            return addNode(new Cond(field, Op.LE, value));
+            return addNode(new Cond(col, Op.LE, val));
         } else {
             return typedThis;
         }
     }
 
-    public WHERE le(FieldGetter<T, ?> field, SqlOpExpr expr, boolean if0) {
+    public WHERE le(ColumnGetter<T, ?> col, SqlOpExpr expr, boolean if0) {
         if (if0) {
-            return addNode(new Cond(field, Op.LE, expr));
+            return addNode(new Cond(col, Op.LE, expr));
         } else {
             return typedThis;
         }
@@ -173,25 +173,25 @@ public abstract class LambdaWhere<T, WHERE extends LambdaWhere<T, WHERE>> extend
     //endregion
 
     //region in
-    public WHERE in(FieldGetter<T, ?> field, Object value) {
-        return addNode(new Cond(field, Op.IN, value));
+    public WHERE in(ColumnGetter<T, ?> col, Object val) {
+        return addNode(new Cond(col, Op.IN, val));
     }
 
-    public WHERE in(FieldGetter<T, ?> field, Object... values) {
-        return addNode(new Cond(field, Op.IN, values));
+    public WHERE in(ColumnGetter<T, ?> col, Object... vals) {
+        return addNode(new Cond(col, Op.IN, vals));
     }
 
-    public WHERE in(FieldGetter<T, ?> field, Object value, boolean if0) {
+    public WHERE in(ColumnGetter<T, ?> col, Object val, boolean if0) {
         if (if0) {
-            return addNode(new Cond(field, Op.IN, value));
+            return addNode(new Cond(col, Op.IN, val));
         } else {
             return typedThis;
         }
     }
 
-    public WHERE in(FieldGetter<T, ?> field, Collection<Object> values, boolean if0) {
+    public WHERE in(ColumnGetter<T, ?> col, Collection<Object> vals, boolean if0) {
         if (if0) {
-            return addNode(new Cond(field, Op.IN, values));
+            return addNode(new Cond(col, Op.IN, vals));
         } else {
             return typedThis;
         }
