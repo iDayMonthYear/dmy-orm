@@ -6,4 +6,5 @@ interface MybatisConsts {
 
     String ENTITY = "$$entity";
     String ENTITIES = "$$entities";
+    String PLACEHOLDER = "$$placeholder";
 }

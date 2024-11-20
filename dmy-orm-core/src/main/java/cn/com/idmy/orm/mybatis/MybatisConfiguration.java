@@ -38,17 +38,20 @@ class MybatisConfiguration extends Configuration {
         registry.register(JsonTypeHandler.class);
         registry.register(JSONObjectTypeHandler.class);
         registry.register(JSONArrayTypeHandler.class);
+
+        // 默认启用自增主键
+        setUseGeneratedKeys(true);
     }
 
     @Override
-    public ParameterHandler newParameterHandler(MappedStatement ms, Object paramObj, BoundSql boundSql) {
+    public ParameterHandler newParameterHandler(MappedStatement ms, Object param, BoundSql boundSql) {
         String id = ms.getId();
         if (!id.endsWith(SelectKeyGenerator.SELECT_KEY_SUFFIX)) {
-            if (paramObj instanceof Map<?, ?> map && map.containsKey(MybatisConsts.SQL_PARAMS)) {
-                PreparedParameterHandler handler = new PreparedParameterHandler(ms, paramObj, boundSql);
+            if (param instanceof Map<?, ?> map && map.containsKey(MybatisConsts.SQL_PARAMS)) {
+                PreparedParameterHandler handler = new PreparedParameterHandler(ms, param, boundSql);
                 return (ParameterHandler) interceptorChain.pluginAll(handler);
             }
         }
-        return super.newParameterHandler(ms, paramObj, boundSql);
+        return super.newParameterHandler(ms, param, boundSql);
     }
 }

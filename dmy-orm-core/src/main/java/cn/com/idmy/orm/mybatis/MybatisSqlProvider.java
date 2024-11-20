@@ -47,39 +47,44 @@ public class MybatisSqlProvider {
 
     public String insert(Map<String, Object> params, ProviderContext context) {
         Class<?> entityClass = getEntityClass(context);
-        Object entity = params.get("entity");
-        List<String> columns = OrmUtil.findFields(entityClass, entity);
-        List<Object> values = OrmUtil.findValues(entityClass, entity);
+        Object entity = params.get(MybatisConsts.ENTITY);
+        
+        // 使用新的方法获取插入字段和值
+        List<String> fields = OrmUtil.findInsertFields(entityClass, entity);
+        List<Object> values = OrmUtil.findInsertValues(entityClass, entity);
         params.put(MybatisConsts.SQL_PARAMS, values);
 
         return "INSERT INTO " +
                 OrmUtil.getTableName(entityClass) +
                 SqlConsts.BRACKET_LEFT +
-                String.join(SqlConsts.DELIMITER, columns) +
+                String.join(SqlConsts.DELIMITER, fields) +
                 SqlConsts.BRACKET_RIGHT +
-                " VALUES " +
+                SqlConsts.VALUES +
                 SqlConsts.BRACKET_LEFT +
-                String.join(SqlConsts.DELIMITER, Collections.nCopies(columns.size(), SqlConsts.PLACEHOLDER)) +
+                String.join(SqlConsts.DELIMITER, Collections.nCopies(fields.size(), SqlConsts.PLACEHOLDER)) +
                 SqlConsts.BRACKET_RIGHT;
     }
 
     public String inserts(Map<String, Object> params, ProviderContext context) {
         Class<?> entityClass = getEntityClass(context);
-        Collection<?> entities = (Collection<?>) params.get("entities");
+        Collection<?> entities = (Collection<?>) params.get(MybatisConsts.ENTITIES);
         if (CollUtil.isEmpty(entities)) {
-            throw new OrmException("Batch insert entities cannot be empty");
+            throw new OrmException("入参不能为空");
         }
 
-        List<String> columns = OrmUtil.findFields(entityClass, entities.iterator().next());
+        // 使用新的方法获取插入字段
+        List<String> fields = OrmUtil.findInsertFields(entityClass, entities.iterator().next());
         List<Object> values = new ArrayList<>();
         StringBuilder sql = new StringBuilder("INSERT INTO ")
                 .append(OrmUtil.getTableName(entityClass))
                 .append(SqlConsts.BRACKET_LEFT)
-                .append(String.join(SqlConsts.DELIMITER, columns))
+                .append(String.join(SqlConsts.DELIMITER, fields))
                 .append(SqlConsts.BRACKET_RIGHT)
-                .append(" VALUES ");
+                .append(SqlConsts.VALUES);
 
-        String placeholder = SqlConsts.BRACKET_LEFT + String.join(SqlConsts.DELIMITER, Collections.nCopies(columns.size(), SqlConsts.PLACEHOLDER)) + SqlConsts.BRACKET_RIGHT;
+        String placeholder = SqlConsts.BRACKET_LEFT + 
+            String.join(SqlConsts.DELIMITER, Collections.nCopies(fields.size(), SqlConsts.PLACEHOLDER)) + 
+            SqlConsts.BRACKET_RIGHT;
 
         int i = 0;
         for (Object entity : entities) {
@@ -87,7 +92,7 @@ public class MybatisSqlProvider {
                 sql.append(SqlConsts.DELIMITER);
             }
             sql.append(placeholder);
-            values.addAll(OrmUtil.findValues(entityClass, entity));
+            values.addAll(OrmUtil.findInsertValues(entityClass, entity));
             i++;
         }
 
@@ -96,21 +101,19 @@ public class MybatisSqlProvider {
     }
 
     public String updateById(Map<String, Object> params, ProviderContext context) {
-        Class<?> entityClass = getEntityClass(context);
-        Object entity = params.get("entity");
-        List<String> columns = OrmUtil.findFields(entityClass, entity);
-        List<Object> values = OrmUtil.findValues(entityClass, entity);
-
-        StringBuilder sql = new StringBuilder(SqlConsts.UPDATE)
+        var entityClass = getEntityClass(context);
+        var entity = params.get(MybatisConsts.ENTITY);
+        var fields = OrmUtil.findFields(entityClass, entity);
+        var values = OrmUtil.findValues(entityClass, entity);
+        var sql = new StringBuilder(SqlConsts.UPDATE)
                 .append(OrmUtil.getTableName(entityClass))
                 .append(SqlConsts.SET);
 
-        for (int i = 0; i < columns.size(); i++) {
+        for (int i = 0; i < fields.size(); i++) {
             if (i > 0) {
                 sql.append(SqlConsts.DELIMITER);
             }
-            sql.append(columns.get(i))
-                    .append(SqlConsts.EQUALS_PLACEHOLDER);
+            sql.append(fields.get(i)).append(SqlConsts.EQUALS_PLACEHOLDER);
         }
 
         sql.append(SqlConsts.WHERE)

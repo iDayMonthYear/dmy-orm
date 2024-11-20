@@ -32,14 +32,28 @@ public class OrmAutoConfiguration {
         return new EnumWatchInterceptor(ctx);
     }
 
+    @Bean
+    InsertInterceptor insertInterceptor() {
+        return new InsertInterceptor();
+    }
+
     @Lazy
     @Bean
     @ConditionalOnMissingBean
-    SqlSessionFactory sqlSessionFactory(DataSource dataSource, EnumWatchInterceptor interceptor) throws Exception {
+    SqlSessionFactory sqlSessionFactory(
+        DataSource dataSource, 
+        EnumWatchInterceptor enumWatchInterceptor,
+        InsertInterceptor insertInterceptor
+    ) throws Exception {
         SqlSessionFactoryBean factory = new SqlSessionFactoryBean();
         factory.setDataSource(dataSource);
         factory.setConfiguration(new MybatisConfiguration());
-        factory.setPlugins(interceptor);
+        factory.setPlugins(enumWatchInterceptor, insertInterceptor);
         return factory.getObject();
+    }
+
+    @Bean
+    public static KeyPropertyAnnotationProcessor keyPropertyAnnotationProcessor() {
+        return new KeyPropertyAnnotationProcessor();
     }
 }
