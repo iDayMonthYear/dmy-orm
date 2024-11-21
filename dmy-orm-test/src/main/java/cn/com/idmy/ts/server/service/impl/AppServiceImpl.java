@@ -50,7 +50,7 @@ public class AppServiceImpl implements AppService {
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
                 .build();
-        appDao.inserts(List.of(newApp1, newApp2));
+        appDao.creates(List.of(newApp1, newApp2));
 
         // Test read
         App app = get(newApp1.getId());

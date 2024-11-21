@@ -13,6 +13,7 @@ import java.util.List;
 @Getter
 @Setter
 @Accessors(fluent = true)
+@Deprecated
 public class UpdateWhere<T> extends LambdaWhere<T, UpdateWhere<T>> {
     private UpdateWhere(Class<T> entityClass) {
         super(entityClass);

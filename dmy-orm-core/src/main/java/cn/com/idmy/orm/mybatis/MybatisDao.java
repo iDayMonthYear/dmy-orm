@@ -4,8 +4,6 @@ import cn.com.idmy.orm.core.*;
 import jakarta.annotation.Nullable;
 import lombok.NonNull;
 import org.apache.ibatis.annotations.*;
-import org.dromara.hutool.core.array.ArrayUtil;
-import org.dromara.hutool.core.collection.CollUtil;
 import org.dromara.hutool.core.reflect.ClassUtil;
 
 import java.math.BigDecimal;
@@ -14,13 +12,13 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static cn.com.idmy.orm.mybatis.MybatisConsts.CHAIN;
+import static cn.com.idmy.orm.mybatis.MybatisConsts.CREATE;
+import static cn.com.idmy.orm.mybatis.MybatisConsts.CREATES;
 import static cn.com.idmy.orm.mybatis.MybatisConsts.DELETE;
 import static cn.com.idmy.orm.mybatis.MybatisConsts.ENTITIES;
 import static cn.com.idmy.orm.mybatis.MybatisConsts.ENTITY;
 import static cn.com.idmy.orm.mybatis.MybatisConsts.FIND;
 import static cn.com.idmy.orm.mybatis.MybatisConsts.GET;
-import static cn.com.idmy.orm.mybatis.MybatisConsts.INSERT;
-import static cn.com.idmy.orm.mybatis.MybatisConsts.INSERTS;
 import static cn.com.idmy.orm.mybatis.MybatisConsts.UPDATE;
 
 public interface MybatisDao<T, ID> {
@@ -28,6 +26,12 @@ public interface MybatisDao<T, ID> {
     default Class<T> entityClass() {
         return (Class<T>) ClassUtil.getTypeArgument(getClass());
     }
+
+    @InsertProvider(type = MybatisSqlProvider.class, method = CREATE)
+    int create(@NonNull @Param(ENTITY) T entity);
+
+    @InsertProvider(type = MybatisSqlProvider.class, method = CREATES)
+    int creates(@NonNull @Param(ENTITIES) Collection<T> entities);
 
     @Nullable
     @SelectProvider(type = MybatisSqlProvider.class, method = GET)
@@ -41,47 +45,6 @@ public interface MybatisDao<T, ID> {
 
     @DeleteProvider(type = MybatisSqlProvider.class, method = DELETE)
     int delete(@NonNull @Param(CHAIN) DeleteChain<T> delete);
-
-    @InsertProvider(type = MybatisSqlProvider.class, method = INSERT)
-    int insert(@NonNull @Param(ENTITY) T entity);
-
-    @InsertProvider(type = MybatisSqlProvider.class, method = INSERTS)
-    int inserts(@NonNull @Param(ENTITIES) Collection<T> entities);
-
-    default List<T> all() {
-        return find(SelectChain.of(this));
-    }
-
-    default List<T> find(@NonNull Collection<ID> ids) {
-        if (CollUtil.isEmpty(ids)) {
-            return Collections.emptyList();
-        } else {
-            var chain = StringSelectChain.of(this);
-            chain.sqlParamsSize(1);
-            chain.in(TableManager.getIdName(entityClass()), ids);
-            return find(chain);
-        }
-    }
-
-    default <R> List<R> find(@NonNull Collection<ID> ids, @NonNull ColumnGetter<T, R> getter) {
-        if (CollUtil.isEmpty(ids)) {
-            return Collections.emptyList();
-        } else {
-            var chain = (StringSelectChain<T>) StringSelectChain.of(this).select(getter);
-            chain.sqlParamsSize(1);
-            chain.in(TableManager.getIdName(entityClass()), ids);
-            return find(chain).stream().map(getter::get).toList();
-        }
-    }
-
-    default <R> List<R> find(@NonNull SelectChain<T> chain, @NonNull ColumnGetter<T, R> getter) {
-        if (chain.hasSelectColumn()) {
-            throw new IllegalArgumentException("select ... from 中间不能有字段或者函数");
-        } else {
-            var ts = find(chain.select(getter));
-            return ts.stream().map(getter::get).toList();
-        }
-    }
 
     @Nullable
     default T get(@NonNull ID id) {
@@ -110,6 +73,41 @@ public interface MybatisDao<T, ID> {
         }
     }
 
+    default List<T> all() {
+        return find(SelectChain.of(this));
+    }
+
+    default List<T> find(@NonNull Collection<ID> ids) {
+        if (ids.isEmpty()) {
+            return Collections.emptyList();
+        } else {
+            var chain = StringSelectChain.of(this);
+            chain.sqlParamsSize(1);
+            chain.in(TableManager.getIdName(entityClass()), ids);
+            return find(chain);
+        }
+    }
+
+    default <R> List<R> find(@NonNull Collection<ID> ids, @NonNull ColumnGetter<T, R> getter) {
+        if (ids.isEmpty()) {
+            return Collections.emptyList();
+        } else {
+            var chain = (StringSelectChain<T>) StringSelectChain.of(this).select(getter);
+            chain.sqlParamsSize(1);
+            chain.in(TableManager.getIdName(entityClass()), ids);
+            return find(chain).stream().map(getter::get).toList();
+        }
+    }
+
+    default <R> List<R> find(@NonNull SelectChain<T> chain, @NonNull ColumnGetter<T, R> getter) {
+        if (chain.hasSelectColumn()) {
+            throw new IllegalArgumentException("select ... from 中间不能有字段或者函数");
+        } else {
+            var ts = find(chain.select(getter));
+            return ts.stream().map(getter::get).toList();
+        }
+    }
+
     default long count(@NonNull SelectChain<T> chain) {
         if (chain.hasSelectColumn()) {
             throw new IllegalArgumentException("select ... from 中间不能有字段或者函数");
@@ -126,7 +124,7 @@ public interface MybatisDao<T, ID> {
         return count(chain) > 0;
     }
 
-    default boolean notExist(@NonNull ID id) {
+    default boolean notExists(@NonNull ID id) {
         return !exists(id);
     }
 
@@ -134,7 +132,7 @@ public interface MybatisDao<T, ID> {
         return count(chain) > 0;
     }
 
-    default boolean notExist(@NonNull SelectChain<T> chain) {
+    default boolean notExists(@NonNull SelectChain<T> chain) {
         return !exists(chain);
     }
 
@@ -166,26 +164,24 @@ public interface MybatisDao<T, ID> {
     }
 
     default Map<ID, T> map(@NonNull ID... ids) {
-        if (ArrayUtil.isEmpty(ids)) {
+        if (ids.length == 0) {
             return Collections.emptyMap();
         } else {
-            var id = TableManager.getIdName(entityClass());
             var chain = StringSelectChain.of(this);
             chain.sqlParamsSize(1);
-            chain.in(id, ids);
+            chain.in(TableManager.getIdName(entityClass()), ids);
             var entities = find(chain);
             return entities.stream().collect(Collectors.toMap(TableManager::getIdValue, Function.identity()));
         }
     }
 
     default Map<ID, T> map(@NonNull Collection<ID> ids) {
-        if (CollUtil.isEmpty(ids)) {
+        if (ids.isEmpty()) {
             return Collections.emptyMap();
         } else {
-            var id = TableManager.getIdName(entityClass());
             var chain = StringSelectChain.of(this);
             chain.sqlParamsSize(1);
-            chain.in(id, ids);
+            chain.in(TableManager.getIdName(entityClass()), ids);
             var entities = find(chain);
             return entities.stream().collect(Collectors.toMap(TableManager::getIdValue, Function.identity()));
         }
@@ -199,7 +195,7 @@ public interface MybatisDao<T, ID> {
     }
 
     default int delete(@NonNull Collection<ID> ids) {
-        if (CollUtil.isEmpty(ids)) {
+        if (ids.isEmpty()) {
             return 0;
         } else {
             var chain = StringDeleteChain.of(this);

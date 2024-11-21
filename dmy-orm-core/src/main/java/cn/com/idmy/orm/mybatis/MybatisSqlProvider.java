@@ -26,7 +26,7 @@ public class MybatisSqlProvider {
         return buildCommonSql(params);
     }
 
-    public String insert(Map<String, Object> params) {
+    public String create(Map<String, Object> params) {
         var entity = params.get(MybatisConsts.ENTITY);
         var table = TableManager.getTableInfo(entity.getClass());
         var columns = table.columns();
@@ -55,7 +55,7 @@ public class MybatisSqlProvider {
         return sql.append(SqlConsts.BRACKET_RIGHT).append(values).append(SqlConsts.BRACKET_RIGHT).toString();
     }
 
-    public String inserts(Map<String, Object> params) {
+    public String creates(Map<String, Object> params) {
         var entities = MybatisConsts.findEntities(params);
         if (entities.isEmpty()) {
             throw new OrmException("批量插入的实体集合不能为空");
