@@ -27,19 +27,18 @@ DMY-ORM 是一个轻量级的 ORM 框架，基于 MyBatis 构建，提供类型�
 ### 实体定义
 
 ```java
+import com.alibaba.fastjson2.JSONArray;
+
 @Table("t_user")
 public class User {
-    @Table.Id(type = Type.AUTO)
+    @Id(type = Type.AUTO)
     private Long id;
-    
-    @Table.Column("user_name") 
+
+    @Column("user_name")
     private String name;
-    
-    @EnumValue
     private UserStatus status;
-    
-    @Column
-    private JSONObject extra;
+    private JSONObject jsonObject;
+    private JSONArray jsonArray;
 }
 ```
 
