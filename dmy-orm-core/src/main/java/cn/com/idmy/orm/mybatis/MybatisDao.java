@@ -23,6 +23,9 @@ public interface MybatisDao<T, ID> {
     @InsertProvider(type = MybatisSqlProvider.class, method = INSERT)
     int insert(@NonNull @Param(ENTITY) T entity);
 
+    /**
+     * 批量插入主键为自增时，不会回写到实体类。（需要查询回写，影响性能）
+     */
     @InsertProvider(type = MybatisSqlProvider.class, method = INSERTS)
     int inserts(@NonNull @Param(ENTITIES) Collection<T> entities);
 
