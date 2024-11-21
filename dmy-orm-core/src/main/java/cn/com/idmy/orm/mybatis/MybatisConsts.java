@@ -17,8 +17,9 @@ class MybatisConsts {
     static final String FIND = "find";
     static final String DELETE = "delete";
     static final String UPDATE = "update";
-    static final String CREATE = "create";
-    static final String CREATES = "creates";
+    static final String COUNT = "count";
+    static final String INSERT = "insert";
+    static final String INSERTS = "inserts";
 
     private static final String ENTITY_CLASS = "$$entityClass$";
 

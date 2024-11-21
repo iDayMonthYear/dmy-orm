@@ -1,9 +1,7 @@
 package cn.com.idmy.orm.mybatis;
 
 import cn.com.idmy.orm.OrmException;
-import cn.com.idmy.orm.core.AbstractWhere;
-import cn.com.idmy.orm.core.SqlConsts;
-import cn.com.idmy.orm.core.TableManager;
+import cn.com.idmy.orm.core.*;
 import org.dromara.hutool.core.reflect.FieldUtil;
 
 import java.util.ArrayList;
@@ -26,7 +24,19 @@ public class MybatisSqlProvider {
         return buildCommonSql(params);
     }
 
-    public String create(Map<String, Object> params) {
+    public String count(Map<String, Object> params) {
+        var where = (SelectChain<?>) params.get(MybatisConsts.CHAIN);
+        if (where.hasSelectColumn()) {
+            throw new IllegalArgumentException("select ... from 中间不能有字段或者函数");
+        }
+        where.select(SqlFn::count);
+        MybatisConsts.putEntityClass(params, where.entityClass());
+        var pair = where.sql();
+        params.put(MybatisConsts.SQL_PARAMS, pair.right);
+        return pair.left;
+    }
+
+    public String insert(Map<String, Object> params) {
         var entity = params.get(MybatisConsts.ENTITY);
         var table = TableManager.getTableInfo(entity.getClass());
         var columns = table.columns();
@@ -55,7 +65,7 @@ public class MybatisSqlProvider {
         return sql.append(SqlConsts.BRACKET_RIGHT).append(values).append(SqlConsts.BRACKET_RIGHT).toString();
     }
 
-    public String creates(Map<String, Object> params) {
+    public String inserts(Map<String, Object> params) {
         var entities = MybatisConsts.findEntities(params);
         if (entities.isEmpty()) {
             throw new OrmException("批量插入的实体集合不能为空");
@@ -85,7 +95,7 @@ public class MybatisSqlProvider {
                 sql.append(SqlConsts.DELIMITER);
             }
             sql.append(SqlConsts.BRACKET_LEFT);
-            for (int i = 0, size = columns.length - 1; i < size; i++) {
+            for (int i = 0, size = columns.length; i < size; i++) {
                 sql.append(SqlConsts.PLACEHOLDER);
                 sqlParams.add(FieldUtil.getFieldValue(entity, columns[i].name()));
                 if (i < size - 1) {
@@ -110,9 +120,9 @@ public class MybatisSqlProvider {
 
     private static String buildCommonSql(Map<String, Object> params) {
         var where = (AbstractWhere<?, ?>) params.get(MybatisConsts.CHAIN);
+        MybatisConsts.putEntityClass(params, where.entityClass());
         var pair = where.sql();
         params.put(MybatisConsts.SQL_PARAMS, pair.right);
-        MybatisConsts.putEntityClass(params, where.entityClass());
         return pair.left;
     }
 }

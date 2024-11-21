@@ -55,7 +55,7 @@ class MybatisConfiguration extends Configuration {
     public void addMappedStatement(MappedStatement ms) {
         if (ms.getKeyGenerator() == NoKeyGenerator.INSTANCE) {
             String msId = ms.getId();
-            if (msId.endsWith(MybatisConsts.CREATE) || msId.endsWith(MybatisConsts.CREATES)) {
+            if (msId.endsWith(MybatisConsts.INSERT) || msId.endsWith(MybatisConsts.INSERTS)) {
                 ms = replaceEntityIdGenerator(ms);
             }
         }
@@ -73,7 +73,7 @@ class MybatisConfiguration extends Configuration {
             return ms;
         }
 
-        if (ms.getId().endsWith(MybatisConsts.CREATES)) {
+        if (ms.getId().endsWith(MybatisConsts.INSERTS)) {
             idGenerator = new EntitiesIdGenerator(idGenerator);
         }
 

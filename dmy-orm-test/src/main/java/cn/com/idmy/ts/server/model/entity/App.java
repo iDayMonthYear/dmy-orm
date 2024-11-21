@@ -19,6 +19,7 @@ public class App  {
     protected Long id;
     protected String key;
     protected String name;
+    protected Long a;
     protected LocalDateTime createdAt;
     protected LocalDateTime updatedAt;
 }

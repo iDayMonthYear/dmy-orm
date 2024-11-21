@@ -26,6 +26,15 @@ abstract class AbstractSqlGenerator {
         }
     }
 
+    protected static String buildSqlFn(SqlFn<?> fn) {
+        SqlFnName name = fn.name();
+        if (name == COUNT && fn.column() == null) {
+            return ASTERISK;
+        } else {
+            return buildColumn(fn.column());
+        }
+    }
+
     private static String buildSqlExpr(String column, Object expr, List<Object> params) {
         StringBuilder sql = new StringBuilder();
         if (expr instanceof SqlOpExpr sqlOpExpr) {
@@ -82,10 +91,10 @@ abstract class AbstractSqlGenerator {
         } else {
             var expr = (SqlFnExpr<?>) column;
             var fn = expr.apply();
-            var name = fn.name();
-            var col = (fn.column() == null && name == COUNT) ? ASTERISK : buildColumn(fn.column());
+            var col = buildSqlFn(fn);
             var alias = selectColumn.alias() == null ? null : LambdaUtil.getFieldName(selectColumn.alias());
-            var colOrAlias = Objects.requireNonNullElse(alias, col);
+            var colOrAlias = Objects.requireNonNullElse(alias, col.equals(ASTERISK) ? BLANK : col);
+            var name = fn.name();
             if (name == SqlFnName.IF_NULL) {
                 params.add(fn.value());
                 sql.append(name.getName()).append(BRACKET_LEFT).append(col).append(DELIMITER).append(PLACEHOLDER).append(BRACKET_RIGHT).append(BLANK).append(colOrAlias);

@@ -4,22 +4,15 @@ import cn.com.idmy.orm.core.*;
 import jakarta.annotation.Nullable;
 import lombok.NonNull;
 import org.apache.ibatis.annotations.*;
+import org.dromara.hutool.core.collection.CollStreamUtil;
 import org.dromara.hutool.core.reflect.ClassUtil;
 
-import java.math.BigDecimal;
-import java.util.*;
-import java.util.function.Function;
-import java.util.stream.Collectors;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
-import static cn.com.idmy.orm.mybatis.MybatisConsts.CHAIN;
-import static cn.com.idmy.orm.mybatis.MybatisConsts.CREATE;
-import static cn.com.idmy.orm.mybatis.MybatisConsts.CREATES;
-import static cn.com.idmy.orm.mybatis.MybatisConsts.DELETE;
-import static cn.com.idmy.orm.mybatis.MybatisConsts.ENTITIES;
-import static cn.com.idmy.orm.mybatis.MybatisConsts.ENTITY;
-import static cn.com.idmy.orm.mybatis.MybatisConsts.FIND;
-import static cn.com.idmy.orm.mybatis.MybatisConsts.GET;
-import static cn.com.idmy.orm.mybatis.MybatisConsts.UPDATE;
+import static cn.com.idmy.orm.mybatis.MybatisConsts.*;
 
 public interface MybatisDao<T, ID> {
     @SuppressWarnings({"unchecked"})
@@ -27,11 +20,11 @@ public interface MybatisDao<T, ID> {
         return (Class<T>) ClassUtil.getTypeArgument(getClass());
     }
 
-    @InsertProvider(type = MybatisSqlProvider.class, method = CREATE)
-    int create(@NonNull @Param(ENTITY) T entity);
+    @InsertProvider(type = MybatisSqlProvider.class, method = INSERT)
+    int insert(@NonNull @Param(ENTITY) T entity);
 
-    @InsertProvider(type = MybatisSqlProvider.class, method = CREATES)
-    int creates(@NonNull @Param(ENTITIES) Collection<T> entities);
+    @InsertProvider(type = MybatisSqlProvider.class, method = INSERTS)
+    int inserts(@NonNull @Param(ENTITIES) Collection<T> entities);
 
     @Nullable
     @SelectProvider(type = MybatisSqlProvider.class, method = GET)
@@ -46,31 +39,39 @@ public interface MybatisDao<T, ID> {
     @DeleteProvider(type = MybatisSqlProvider.class, method = DELETE)
     int delete(@NonNull @Param(CHAIN) DeleteChain<T> delete);
 
+    @SelectProvider(type = MybatisSqlProvider.class, method = COUNT)
+    long count(@NonNull @Param(CHAIN) SelectChain<T> select);
+
     @Nullable
     default T get(@NonNull ID id) {
         return get(StringSelectChain.of(this).eq(TableManager.getIdName(entityClass()), id));
     }
 
     @Nullable
-    default <R> R get(@NonNull ID id, @NonNull ColumnGetter<T, R> getter) {
+    default <R> R get(@NonNull ColumnGetter<T, R> getter, @NonNull ID id) {
         var chain = (StringSelectChain<T>) StringSelectChain.of(this).select(getter);
         chain.sqlParamsSize(1);
         chain.eq(TableManager.getIdName(entityClass()), id);
         T t = get(chain);
-        return Optional.ofNullable(t).map(getter::get).orElse(null);
+        return getter.get(t);
     }
 
     @Nullable
-    default <R> R get(@NonNull SelectChain<T> chain, @NonNull ColumnGetter<T, R> getter) {
+    default <R> R get(@NonNull ColumnGetter<T, R> getter, @NonNull SelectChain<T> chain) {
         if (chain.hasSelectColumn()) {
             throw new IllegalArgumentException("select ... from 中间不能有字段或者函数");
         }
         T t = get(chain.select(getter));
-        if (t == null) {
-            return null;
-        } else {
-            return getter.get(t);
+        return getter.get(t);
+    }
+
+    @SuppressWarnings({"unchecked"})
+    @Nullable
+    default T get(@NonNull SelectChain<T> chain, @NonNull ColumnGetter<T, ?>... getters) {
+        if (chain.hasSelectColumn()) {
+            throw new IllegalArgumentException("select ... from 中间不能有字段或者函数");
         }
+        return get(chain.select(getters));
     }
 
     default List<T> all() {
@@ -88,7 +89,7 @@ public interface MybatisDao<T, ID> {
         }
     }
 
-    default <R> List<R> find(@NonNull Collection<ID> ids, @NonNull ColumnGetter<T, R> getter) {
+    default <R> List<R> find(@NonNull ColumnGetter<T, R> getter, @NonNull Collection<ID> ids) {
         if (ids.isEmpty()) {
             return Collections.emptyList();
         } else {
@@ -99,21 +100,12 @@ public interface MybatisDao<T, ID> {
         }
     }
 
-    default <R> List<R> find(@NonNull SelectChain<T> chain, @NonNull ColumnGetter<T, R> getter) {
+    default <R> List<R> find(@NonNull ColumnGetter<T, R> getter, @NonNull SelectChain<T> chain) {
         if (chain.hasSelectColumn()) {
             throw new IllegalArgumentException("select ... from 中间不能有字段或者函数");
         } else {
             var ts = find(chain.select(getter));
             return ts.stream().map(getter::get).toList();
-        }
-    }
-
-    default long count(@NonNull SelectChain<T> chain) {
-        if (chain.hasSelectColumn()) {
-            throw new IllegalArgumentException("select ... from 中间不能有字段或者函数");
-        } else {
-            T t = get(chain.select(SqlFn::count));
-            return (long) t;
         }
     }
 
@@ -136,42 +128,47 @@ public interface MybatisDao<T, ID> {
         return !exists(chain);
     }
 
-    default long sumLong(@NonNull SelectChain<T> chain, @NonNull ColumnGetter<T, Long> getter) {
+    default <R extends Number> R fn(@NonNull SqlFnName name, @NonNull ColumnGetter<T, R> getter, @NonNull SelectChain<T> chain) {
         if (chain.hasSelectColumn()) {
             throw new IllegalArgumentException("select ... from 中间不能有字段或者函数");
+        } else if (name == SqlFnName.IF_NULL) {
+            throw new IllegalArgumentException("不支持ifnull");
         } else {
-            T t = get(chain.select(() -> SqlFn.sum(getter)));
+            T t = get(chain.select(() -> new SqlFn<>(name, getter)));
             return getter.get(t);
         }
     }
 
-    default int sumInt(@NonNull SelectChain<T> chain, @NonNull ColumnGetter<T, Integer> getter) {
-        if (chain.hasSelectColumn()) {
-            throw new IllegalArgumentException("select ... from 中间不能有字段或者函数");
-        } else {
-            T t = get(chain.select(() -> SqlFn.sum(getter)));
-            return getter.get(t);
-        }
+    default <R extends Number> R sum(@NonNull ColumnGetter<T, R> getter, @NonNull SelectChain<T> chain) {
+        return fn(SqlFnName.SUM, getter, chain);
     }
 
-    default BigDecimal sumBigDecimal(@NonNull SelectChain<T> chain, @NonNull ColumnGetter<T, BigDecimal> getter) {
-        if (chain.hasSelectColumn()) {
-            throw new IllegalArgumentException("select ... from 中间不能有字段或者函数");
-        } else {
-            T t = get(chain.select(() -> SqlFn.sum(getter)));
-            return getter.get(t);
-        }
+    default <R extends Number> R avg(@NonNull ColumnGetter<T, R> getter, @NonNull SelectChain<T> chain) {
+        return fn(SqlFnName.AVG, getter, chain);
     }
 
+    default <R extends Number> R min(@NonNull ColumnGetter<T, R> getter, @NonNull SelectChain<T> chain) {
+        return fn(SqlFnName.MIN, getter, chain);
+    }
+
+    default <R extends Number> R max(@NonNull ColumnGetter<T, R> getter, @NonNull SelectChain<T> chain) {
+        return fn(SqlFnName.MAX, getter, chain);
+    }
+
+    default <R extends Number> R abs(@NonNull ColumnGetter<T, R> getter, @NonNull SelectChain<T> chain) {
+        return fn(SqlFnName.ABS, getter, chain);
+    }
+
+    @SuppressWarnings({"unchecked"})
     default Map<ID, T> map(@NonNull ID... ids) {
         if (ids.length == 0) {
             return Collections.emptyMap();
         } else {
             var chain = StringSelectChain.of(this);
             chain.sqlParamsSize(1);
-            chain.in(TableManager.getIdName(entityClass()), ids);
+            chain.in(TableManager.getIdName(entityClass()), (Object) ids);
             var entities = find(chain);
-            return entities.stream().collect(Collectors.toMap(TableManager::getIdValue, Function.identity()));
+            return CollStreamUtil.toIdentityMap(entities, TableManager::getIdValue);
         }
     }
 
@@ -182,9 +179,12 @@ public interface MybatisDao<T, ID> {
             var chain = StringSelectChain.of(this);
             chain.sqlParamsSize(1);
             chain.in(TableManager.getIdName(entityClass()), ids);
-            var entities = find(chain);
-            return entities.stream().collect(Collectors.toMap(TableManager::getIdValue, Function.identity()));
+            return CollStreamUtil.toIdentityMap(find(chain), TableManager::getIdValue);
         }
+    }
+
+    default <R> Map<R, T> map(@NonNull ColumnGetter<T, R> getter, @NonNull SelectChain<T> chain) {
+        return CollStreamUtil.toIdentityMap(find(chain), getter::get);
     }
 
     default int delete(@NonNull ID id) {
