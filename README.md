@@ -76,7 +76,7 @@ userDao.delete(DeleteChain.of(userDao).eq(User::getStatus, UserStatus.INACTIVE))
 
 ## 核心功能
 
-#### 单条记录查询
+### 单条记录查询
 
 ```java
 // 根据 ID 查询
@@ -99,7 +99,7 @@ Integer age = userDao.get(
 );
 ```
 
-#### 列表查询
+### 列表查询
 
 ```java
 // 查询所有记录
@@ -125,7 +125,7 @@ List<String> names = userDao.find(
 );
 ```
 
-#### 链式查询
+### 链式查询
 
 ```java
 SelectChain.of(userDao)
@@ -142,7 +142,7 @@ SelectChain.of(userDao)
 .nulls(User::getUpdateTime, true); // true = IS NULL， false = IS NOT NULL， null = 条件不生效 方便前端传一个条件来筛选
 ```
 
-#### Map 转换
+### Map 转换
 
 ```java
 // ID 作为 key
@@ -156,7 +156,7 @@ Map<String, User> nameMap = userDao.map(
 );
 ```
 
-#### 存在性判断
+### 存在性判断
 
 ```java
 // 判断 ID 是否存在
@@ -169,7 +169,7 @@ boolean exists = userDao.exists(
 );
 ```
 
-#### 排序和分组
+### 排序和分组
 
 ```java
 SelectChain.of(userDao)
@@ -178,7 +178,7 @@ SelectChain.of(userDao)
 .orderBy(User::getId, false); // ASC
 ```
 
-#### 聚合函数
+### 聚合函数
 
 ```java
 // COUNT
@@ -256,9 +256,8 @@ public class OrderIdGenerator implements IdGenerator {
 }
 ```
 
-
-
 ### TypeHandler 的注册与使用
+
 `TypeHandler` 是 MyBatis 中用于处理 Java 类型与数据库类型之间转换的接口。在 DMY-ORM 中，`TableManager` 类提供了注册和获取 `TypeHandler` 的功能，以便在 ORM 操作中使用自定义的类型处理器。
 
 #### 注册 TypeHandler
@@ -277,7 +276,7 @@ TableManager.register(User.class, User::getStatus, UserStatusTypeHandler.class);
 
 在上面的示例中，我们为 `User` 实体类的 `status` 字段注册了一个自定义的 `UserStatusTypeHandler`。
 
-##### 为什么怎么设计？
+#### 为什么怎么设计？
 
 `分开模型层与 TypeHandler 的好处`
 
@@ -324,6 +323,7 @@ public class User {
 ```
 
 在这种设计中，`User` 类只关注数据结构，而 `TypeHandler` 的注册和使用则在其他地方进行。这种方式使得模型层与服务层解耦，提高了代码的灵活性和可维护性。
+
 ## 配置说明
 
 ### application.yml
