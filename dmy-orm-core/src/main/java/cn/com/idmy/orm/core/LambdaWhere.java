@@ -25,11 +25,11 @@ public abstract class LambdaWhere<T, WHERE extends LambdaWhere<T, WHERE>> extend
     }
 
     public WHERE eq(ColumnGetter<T, ?> col, Object val, boolean if0) {
-        return if0 ? addNode(new Cond(col, Op.EQ, val)) : $this;
+        return if0 ? eq(col, val) : $this;
     }
 
     public WHERE eq(ColumnGetter<T, ?> col, SqlOpExpr expr, boolean if0) {
-        return if0 ? addNode(new Cond(col, Op.EQ, expr)) : $this;
+        return if0 ? eq(col, expr) : $this;
     }
     //endregion
 
@@ -43,11 +43,11 @@ public abstract class LambdaWhere<T, WHERE extends LambdaWhere<T, WHERE>> extend
     }
 
     public WHERE ne(ColumnGetter<T, ?> col, Object val, boolean if0) {
-        return if0 ? addNode(new Cond(col, Op.NE, val)) : $this;
+        return if0 ? ne(col, val) : $this;
     }
 
     public WHERE ne(ColumnGetter<T, ?> col, SqlOpExpr expr, boolean if0) {
-        return if0 ? addNode(new Cond(col, Op.NE, expr)) : $this;
+        return if0 ? ne(col, expr) : $this;
     }
     //endregion
 
@@ -61,11 +61,11 @@ public abstract class LambdaWhere<T, WHERE extends LambdaWhere<T, WHERE>> extend
     }
 
     public WHERE gt(ColumnGetter<T, ?> col, Object val, boolean if0) {
-        return if0 ? addNode(new Cond(col, Op.GT, val)) : $this;
+        return if0 ? gt(col, val) : $this;
     }
 
     public WHERE gt(ColumnGetter<T, ?> col, SqlOpExpr expr, boolean if0) {
-        return if0 ? addNode(new Cond(col, Op.GT, expr)) : $this;
+        return if0 ? gt(col, expr) : $this;
     }
     //endregion
 
@@ -79,11 +79,11 @@ public abstract class LambdaWhere<T, WHERE extends LambdaWhere<T, WHERE>> extend
     }
 
     public WHERE ge(ColumnGetter<T, ?> col, Object val, boolean if0) {
-        return if0 ? addNode(new Cond(col, Op.GE, val)) : $this;
+        return if0 ? ge(col, val) : $this;
     }
 
     public WHERE ge(ColumnGetter<T, ?> col, SqlOpExpr expr, boolean if0) {
-        return if0 ? addNode(new Cond(col, Op.GE, expr)) : $this;
+        return if0 ? ge(col, expr) : $this;
     }
     //endregion
 
@@ -97,11 +97,11 @@ public abstract class LambdaWhere<T, WHERE extends LambdaWhere<T, WHERE>> extend
     }
 
     public WHERE lt(ColumnGetter<T, ?> col, Object val, boolean if0) {
-        return if0 ? addNode(new Cond(col, Op.LT, val)) : $this;
+        return if0 ? lt(col, val) : $this;
     }
 
     public WHERE lt(ColumnGetter<T, ?> col, SqlOpExpr expr, boolean if0) {
-        return if0 ? addNode(new Cond(col, Op.LT, expr)) : $this;
+        return if0 ? lt(col, expr) : $this;
     }
     //endregion
 
@@ -115,21 +115,41 @@ public abstract class LambdaWhere<T, WHERE extends LambdaWhere<T, WHERE>> extend
     }
 
     public WHERE le(ColumnGetter<T, ?> col, Object val, boolean if0) {
-        return if0 ? addNode(new Cond(col, Op.LE, val)) : $this;
+        return if0 ? le(col, val) : $this;
     }
 
     public WHERE le(ColumnGetter<T, ?> col, SqlOpExpr expr, boolean if0) {
-        return if0 ? addNode(new Cond(col, Op.LE, expr)) : $this;
+        return if0 ? le(col, expr) : $this;
     }
     //endregion
 
     //region like
     public WHERE like(ColumnGetter<T, ?> col, String val) {
-        return addNode(new Cond(col, Op.LIKE, val));
+        return addNode(new Cond(col, Op.LIKE, "%" + val + "%"));
     }
 
     public WHERE like(ColumnGetter<T, ?> col, String val, boolean if0) {
-        return if0 ? addNode(new Cond(col, Op.LIKE, val)) : $this;
+        return if0 ? like(col, val) : $this;
+    }
+    //endregion
+
+    //region startsWith
+    public WHERE startsWith(ColumnGetter<T, ?> col, String val) {
+        return addNode(new Cond(col, Op.LIKE, val + "%"));
+    }
+
+    public WHERE startsWith(ColumnGetter<T, ?> col, String val, boolean if0) {
+        return if0 ? startsWith(col, val) : $this;
+    }
+    //endregion
+
+    //region endsWith
+    public WHERE endsWith(ColumnGetter<T, ?> col, String val) {
+        return addNode(new Cond(col, Op.LIKE, "%" + val));
+    }
+
+    public WHERE endsWith(ColumnGetter<T, ?> col, String val, boolean if0) {
+        return if0 ? endsWith(col, val) : $this;
     }
     //endregion
 
@@ -143,11 +163,11 @@ public abstract class LambdaWhere<T, WHERE extends LambdaWhere<T, WHERE>> extend
     }
 
     public WHERE in(ColumnGetter<T, ?> col, Object val, boolean if0) {
-        return if0 ? addNode(new Cond(col, Op.IN, val)) : $this;
+        return if0 ? in(col, val) : $this;
     }
 
     public WHERE in(ColumnGetter<T, ?> col, Collection<Object> vals, boolean if0) {
-        return if0 ? addNode(new Cond(col, Op.IN, vals)) : $this;
+        return if0 ? in(col, vals) : $this;
     }
     //endregion
 
@@ -184,12 +204,23 @@ public abstract class LambdaWhere<T, WHERE extends LambdaWhere<T, WHERE>> extend
     //endregion
 
     //region between
-    public WHERE between(ColumnGetter<T, ?> col, Object[] vals) {
-        return addNode(new Cond(col, Op.BETWEEN, vals));
+    public WHERE between(ColumnGetter<T, ?> col, Object[] pair) {
+        return addNode(new Cond(col, Op.BETWEEN, pair));
     }
 
-    public WHERE between(ColumnGetter<T, ?> col, Object[] vals, boolean if0) {
-        return if0 ? addNode(new Cond(col, Op.BETWEEN, vals)) : $this;
+    public WHERE between(ColumnGetter<T, ?> col, Object[] pair, boolean if0) {
+        return if0 ? between(col, pair) : $this;
     }
     //endregion
+
+    //region between
+    public WHERE notBetween(ColumnGetter<T, ?> col, Object[] pair) {
+        return addNode(new Cond(col, Op.NOT_BETWEEN, pair));
+    }
+
+    public WHERE notBetween(ColumnGetter<T, ?> col, Object[] pair, boolean if0) {
+        return if0 ? notBetween(col, pair) : $this;
+    }
+    //endregion
+
 }

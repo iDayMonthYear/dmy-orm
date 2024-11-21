@@ -14,6 +14,7 @@ enum Op {
     GE(">="),          // Greater Than or Equal
     IN("in"),          // In
     NOT_IN("not in"),  // Not In
+    NOT_BETWEEN("not between"), // Between
     BETWEEN("between"), // Between
     LIKE("like"),      // Like
     IS_NULL("is null"), // Is Null

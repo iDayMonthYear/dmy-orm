@@ -9,6 +9,8 @@ import java.util.Map;
 
 public class MybatisSqlProvider {
     public String get(Map<String, Object> params) {
+        var where = (SelectChain<?>) params.get(MybatisConsts.CHAIN);
+        where.limit(1);
         return buildCommonSql(params);
     }
 

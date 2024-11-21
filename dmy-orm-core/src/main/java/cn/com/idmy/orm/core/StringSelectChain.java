@@ -1,5 +1,7 @@
 package cn.com.idmy.orm.core;
 
+import cn.com.idmy.orm.core.Node.Limit;
+import cn.com.idmy.orm.core.Node.Offset;
 import cn.com.idmy.orm.core.Node.SelectColumn;
 import cn.com.idmy.orm.mybatis.MybatisDao;
 import lombok.Getter;
@@ -29,6 +31,16 @@ public class StringSelectChain<T> extends SelectChain<T> implements StringWhere<
         for (String c : cols) {
             addNode(new SelectColumn(c));
         }
+        return this;
+    }
+
+    public StringSelectChain<T> limit(int limit) {
+        addNode(new Limit(limit));
+        return this;
+    }
+
+    public StringSelectChain<T> offset(int offset) {
+        addNode(new Offset(offset));
         return this;
     }
 }

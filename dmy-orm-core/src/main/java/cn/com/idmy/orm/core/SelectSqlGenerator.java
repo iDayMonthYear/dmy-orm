@@ -13,6 +13,8 @@ import static cn.com.idmy.orm.core.SqlConsts.ASTERISK;
 import static cn.com.idmy.orm.core.SqlConsts.DELIMITER;
 import static cn.com.idmy.orm.core.SqlConsts.FROM;
 import static cn.com.idmy.orm.core.SqlConsts.GROUP_BY;
+import static cn.com.idmy.orm.core.SqlConsts.LIMIT;
+import static cn.com.idmy.orm.core.SqlConsts.OFFSET;
 import static cn.com.idmy.orm.core.SqlConsts.ORDER_BY;
 import static cn.com.idmy.orm.core.SqlConsts.SELECT;
 
@@ -25,6 +27,8 @@ class SelectSqlGenerator extends AbstractSqlGenerator {
         var groups = new ArrayList<GroupBy>(1);
         var orders = new ArrayList<OrderBy>(2);
         Distinct distinct = null;
+        Limit limit = null;
+        Offset offset = null;
         for (Node node : nodes) {
             switch (node) {
                 case Cond cond -> wheres.add(cond);
@@ -33,6 +37,8 @@ class SelectSqlGenerator extends AbstractSqlGenerator {
                 case OrderBy orderBy -> orders.add(orderBy);
                 case Or or -> skipAdjoinOr(or, wheres);
                 case Distinct d -> distinct = d;
+                case Limit l -> limit = l;
+                case Offset o -> offset = o;
                 case null, default -> {
                 }
             }
@@ -51,6 +57,12 @@ class SelectSqlGenerator extends AbstractSqlGenerator {
         buildWhere(wheres, sql, params);
         buildGroupBy(groups, sql, params);
         buildOrderBy(orders, sql, params);
+        if (limit != null) {
+            sql.append(LIMIT).append(limit.limit());
+        }
+        if (offset != null) {
+            sql.append(OFFSET).append(offset.offset());
+        }
         return Pair.of(sql.toString(), params);
     }
 
