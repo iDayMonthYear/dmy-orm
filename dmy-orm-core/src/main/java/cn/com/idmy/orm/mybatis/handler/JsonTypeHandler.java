@@ -4,6 +4,7 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.TypeReference;
 import org.apache.ibatis.type.BaseTypeHandler;
 import org.apache.ibatis.type.JdbcType;
+import org.apache.ibatis.type.MappedJdbcTypes;
 import org.apache.ibatis.type.MappedTypes;
 
 import java.lang.reflect.Type;
@@ -13,6 +14,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 @MappedTypes({Object.class})
+@MappedJdbcTypes({JdbcType.VARCHAR})
 public class JsonTypeHandler<T> extends BaseTypeHandler<T> {
     private final Type type;
     
