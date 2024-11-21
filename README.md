@@ -1,6 +1,6 @@
 # DMY-ORM
 
-DMY-ORM 是一个轻量级的 ORM 框架，基于 MyBatis 构建，提供类型安全的链式查询、灵活的类型处理和强大的枚举支持。
+DMY-ORM 是一个只有单表查询轻量级的 ORM 框架，基于 MyBatis 构建，提供类型安全的链式查询、灵活的类型处理和强大的枚举支持。
 
 ## 特性
 
@@ -268,7 +268,7 @@ public class OrderIdGenerator implements IdGenerator {
 - `col`：一个 `ColumnGetter` 函数，用于获取字段名。
 - `handlerClass`：自定义的 `TypeHandler` 类。
 
-##### 示例代码
+#### 示例
 
 ```java
 TableManager.register(User.class, User::getStatus, UserStatusTypeHandler.class);
@@ -276,17 +276,16 @@ TableManager.register(User.class, User::getStatus, UserStatusTypeHandler.class);
 
 在上面的示例中，我们为 `User` 实体类的 `status` 字段注册了一个自定义的 `UserStatusTypeHandler`。
 
-#### 为什么怎么设计？
-
-`分开模型层与 TypeHandler 的好处`
+### TypeHandler 注册为什么怎么设计？
 
 将实体类与 `TypeHandler` 分开可以避免模型层直接引入 MyBatis 依赖，从而提高代码的可维护性和可测试性。
 
-## 示例
+#### 示例
 
 假设我们有一个用户实体类 `User`，如果我们将 `TypeHandler` 直接放在 `@Table.Column` 注解中，`User` 类可能会如下所示：
 
 ```java
+@Data
 @Table("users")
 public class User {
     @Table.Id
@@ -299,7 +298,7 @@ public class User {
 
 在这个例子中，`User` 类直接依赖于 MyBatis 的 `TypeHandler`，这使得模型层与 MyBatis 紧密耦合。
 
-## 缺点
+#### 缺点
 
 1. **降低可重用性**：如果将 `User` 类用于其他上下文（如不同的 ORM 框架），则需要重写或修改 `User` 类，因为它依赖于 MyBatis。
   
@@ -307,11 +306,12 @@ public class User {
 
 3. **影响测试**：在单元测试中，测试 `User` 类时需要引入 MyBatis 的依赖，增加了测试的复杂性和时间。
 
-## 改进后的设计
+#### 改进后的设计
 
 通过将 `TypeHandler` 设计为独立的组件，`User` 类可以保持简单，不再依赖于 MyBatis：
 
 ```java
+@Data
 @Table("users")
 public class User {
     @Table.Id
@@ -320,6 +320,10 @@ public class User {
     // 不再直接依赖 MyBatis
     private UserStatus status;
 }
+```
+
+```java
+TableManager.register(User.class, User::getStatus, MyBatisTypeHandler.class);
 ```
 
 在这种设计中，`User` 类只关注数据结构，而 `TypeHandler` 的注册和使用则在其他地方进行。这种方式使得模型层与服务层解耦，提高了代码的灵活性和可维护性。
