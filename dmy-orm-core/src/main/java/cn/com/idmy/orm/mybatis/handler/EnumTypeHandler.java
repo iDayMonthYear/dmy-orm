@@ -14,18 +14,17 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class EnumTypeHandler<E extends Enum<E>> extends BaseTypeHandler<E> {
-    private static final Map<Class<?>, Field> ENUM_VALUE_FIELD_CACHE = new ConcurrentHashMap<>();
+    private static final Map<Class<?>, Field> enumValueFieldCache = new ConcurrentHashMap<>();
     private final Class<E> type;
     private final Field valueField;
-    
+
     public EnumTypeHandler(Class<E> type) {
         this.type = type;
         this.valueField = getEnumValueField(type);
     }
-    
+
     @Override
-    public void setNonNullParameter(PreparedStatement ps, int i, E parameter, JdbcType jdbcType) 
-        throws SQLException {
+    public void setNonNullParameter(PreparedStatement ps, int i, E parameter, JdbcType jdbcType) throws SQLException {
         if (valueField != null) {
             try {
                 ps.setObject(i, valueField.get(parameter));
@@ -57,7 +56,7 @@ public class EnumTypeHandler<E extends Enum<E>> extends BaseTypeHandler<E> {
 
     @Nullable
     private Field getEnumValueField(Class<E> enumType) {
-        return ENUM_VALUE_FIELD_CACHE.computeIfAbsent(enumType, k -> {
+        return enumValueFieldCache.computeIfAbsent(enumType, k -> {
             for (Field field : enumType.getDeclaredFields()) {
                 if (field.isAnnotationPresent(EnumValue.class)) {
                     field.setAccessible(true);
@@ -67,7 +66,7 @@ public class EnumTypeHandler<E extends Enum<E>> extends BaseTypeHandler<E> {
             return null;
         });
     }
-    
+
     private E valueOf(Object value) throws SQLException {
         if (valueField != null) {
             for (E enumConstant : type.getEnumConstants()) {

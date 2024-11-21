@@ -11,7 +11,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 @MappedTypes(JSONArray.class)
-public class JSONArrayTypeHandler extends BaseTypeHandler<JSONArray> {
+public class JsonArrayTypeHandler extends BaseTypeHandler<JSONArray> {
     
     @Override
     public void setNonNullParameter(PreparedStatement ps, int i, JSONArray parameter, JdbcType jdbcType) 

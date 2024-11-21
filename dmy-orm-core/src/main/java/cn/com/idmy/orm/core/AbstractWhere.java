@@ -15,6 +15,7 @@ import java.util.List;
 @Accessors(fluent = true, chain = true)
 public abstract class AbstractWhere<T, WHERE extends AbstractWhere<T, WHERE>> {
     protected final List<Node> nodes = new ArrayList<>();
+    @SuppressWarnings({"unchecked"})
     protected final WHERE typedThis = (WHERE) this;
     protected Class<T> entityClass;
     @Setter

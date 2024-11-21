@@ -13,7 +13,6 @@ public enum SqlFnName {
     AVG("avg"),
     ABS("abs"),
     LENGTH("length"),
-    IF_NULL("ifnull"),
-    ;
+    IF_NULL("ifnull");
     private final String name;
 }

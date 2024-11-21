@@ -14,38 +14,45 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static cn.com.idmy.orm.mybatis.MybatisConsts.CHAIN;
+import static cn.com.idmy.orm.mybatis.MybatisConsts.DELETE;
 import static cn.com.idmy.orm.mybatis.MybatisConsts.ENTITIES;
 import static cn.com.idmy.orm.mybatis.MybatisConsts.ENTITY;
+import static cn.com.idmy.orm.mybatis.MybatisConsts.FIND;
+import static cn.com.idmy.orm.mybatis.MybatisConsts.GET;
+import static cn.com.idmy.orm.mybatis.MybatisConsts.INSERT;
+import static cn.com.idmy.orm.mybatis.MybatisConsts.INSERTS;
+import static cn.com.idmy.orm.mybatis.MybatisConsts.UPDATE;
 
 public interface MybatisDao<T, ID> {
+    @SuppressWarnings({"unchecked"})
     default Class<T> entityClass() {
         return (Class<T>) ClassUtil.getTypeArgument(getClass());
     }
 
     @Nullable
-    @SelectProvider(type = MybatisSqlProvider.class, method = MybatisConsts.GET)
+    @SelectProvider(type = MybatisSqlProvider.class, method = GET)
     T get(@NonNull @Param(CHAIN) SelectChain<T> select);
 
-    @SelectProvider(type = MybatisSqlProvider.class, method = MybatisConsts.FIND)
+    @SelectProvider(type = MybatisSqlProvider.class, method = FIND)
     List<T> find(@NonNull @Param(CHAIN) SelectChain<T> select);
 
-    @UpdateProvider(type = MybatisSqlProvider.class, method = MybatisConsts.UPDATE)
+    @UpdateProvider(type = MybatisSqlProvider.class, method = UPDATE)
     int update(@NonNull @Param(CHAIN) UpdateChain<T> update);
 
-    @DeleteProvider(type = MybatisSqlProvider.class, method = MybatisConsts.DELETE)
+    @DeleteProvider(type = MybatisSqlProvider.class, method = DELETE)
     int delete(@NonNull @Param(CHAIN) DeleteChain<T> delete);
 
-    @InsertProvider(type = MybatisSqlProvider.class, method = MybatisConsts.INSERT)
+    @InsertProvider(type = MybatisSqlProvider.class, method = INSERT)
     int insert(@NonNull @Param(ENTITY) T entity);
 
-    @InsertProvider(type = MybatisSqlProvider.class, method = MybatisConsts.INSERTS)
+    @InsertProvider(type = MybatisSqlProvider.class, method = INSERTS)
     int inserts(@NonNull @Param(ENTITIES) Collection<T> entities);
 
     default List<T> all() {
         return find(SelectChain.of(this));
     }
 
-    default List<T> find(Collection<ID> ids) {
+    default List<T> find(@NonNull Collection<ID> ids) {
         if (CollUtil.isEmpty(ids)) {
             return Collections.emptyList();
         } else {
@@ -56,7 +63,7 @@ public interface MybatisDao<T, ID> {
         }
     }
 
-    default <R> List<R> find(Collection<ID> ids, ColumnGetter<T, R> getter) {
+    default <R> List<R> find(@NonNull Collection<ID> ids, @NonNull ColumnGetter<T, R> getter) {
         if (CollUtil.isEmpty(ids)) {
             return Collections.emptyList();
         } else {
@@ -67,7 +74,7 @@ public interface MybatisDao<T, ID> {
         }
     }
 
-    default <R> List<R> find(SelectChain<T> chain, ColumnGetter<T, R> getter) {
+    default <R> List<R> find(@NonNull SelectChain<T> chain, @NonNull ColumnGetter<T, R> getter) {
         if (chain.hasSelectColumn()) {
             throw new IllegalArgumentException("select ... from 中间不能有字段或者函数");
         } else {
@@ -123,7 +130,7 @@ public interface MybatisDao<T, ID> {
         return !exists(id);
     }
 
-    default boolean exists(SelectChain<T> chain) {
+    default boolean exists(@NonNull SelectChain<T> chain) {
         return count(chain) > 0;
     }
 

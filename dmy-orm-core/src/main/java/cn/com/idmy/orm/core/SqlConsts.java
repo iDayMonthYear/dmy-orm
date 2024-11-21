@@ -1,60 +1,53 @@
 package cn.com.idmy.orm.core;
 
-public final class SqlConsts {
+public interface SqlConsts {
+    String EMPTY = "";
+    String BLANK = " ";
+    String ASTERISK = "*";
+    String REFERENCE = ".";
+    String SEMICOLON = ";";
+    String DELIMITER = ", ";
+    String PLACEHOLDER = "?";
+    String PERCENT_SIGN = "%";
+    String SINGLE_QUOTE = "'";
+    String STRESS_MARK = "`";
+    String BRACKET_LEFT = "(";
+    String BRACKET_RIGHT = ")";
+    String HINT_START = "/*+ ";
+    String HINT_END = " */ ";
 
-    private SqlConsts() {
-    }
+    String AS = " AS ";
+    String OR = " OR ";
+    String END = " END";
+    String AND = " AND ";
+    String SET = " SET ";
+    String FROM = " FROM ";
+    String WHERE = " WHERE ";
+    String SELECT = "SELECT ";
+    String VALUES = " VALUES ";
+    String DELETE = "DELETE";
+    String UPDATE = "UPDATE ";
+    String HAVING = " HAVING ";
+    String DISTINCT = "DISTINCT ";
+    String GROUP_BY = " GROUP BY ";
+    String ORDER_BY = " ORDER BY ";
+    String INSERT = "INSERT";
+    String INTO = " INTO ";
+    String WITH = "WITH ";
+    String RECURSIVE = "RECURSIVE ";
+    String INSERT_INTO = INSERT + INTO;
+    String DELETE_FROM = DELETE + FROM;
+    String SELECT_ALL_FROM = SELECT + ASTERISK + FROM;
 
-
-    public static final String EMPTY = "";
-    public static final String BLANK = " ";
-    public static final String ASTERISK = "*";
-    public static final String REFERENCE = ".";
-    public static final String SEMICOLON = ";";
-    public static final String DELIMITER = ", ";
-    public static final String PLACEHOLDER = "?";
-    public static final String PERCENT_SIGN = "%";
-    public static final String SINGLE_QUOTE = "'";
-    public static final String STRESS_MARK = "`";
-    public static final String BRACKET_LEFT = "(";
-    public static final String BRACKET_RIGHT = ")";
-    public static final String HINT_START = "/*+ ";
-    public static final String HINT_END = " */ ";
-
-    public static final String AS = " AS ";
-    public static final String OR = " OR ";
-    public static final String END = " END";
-    public static final String AND = " AND ";
-    public static final String SET = " SET ";
-    public static final String FROM = " FROM ";
-    public static final String WHERE = " WHERE ";
-    public static final String SELECT = "SELECT ";
-    public static final String VALUES = " VALUES ";
-    public static final String DELETE = "DELETE";
-    public static final String UPDATE = "UPDATE ";
-    public static final String HAVING = " HAVING ";
-    public static final String DISTINCT = "DISTINCT ";
-    public static final String GROUP_BY = " GROUP BY ";
-    public static final String ORDER_BY = " ORDER BY ";
-    public static final String INSERT = "INSERT";
-    public static final String INTO = " INTO ";
-    public static final String WITH = "WITH ";
-    public static final String RECURSIVE = "RECURSIVE ";
-    public static final String INSERT_INTO = INSERT + INTO;
-    public static final String DELETE_FROM = DELETE + FROM;
-    public static final String SELECT_ALL_FROM = SELECT + ASTERISK + FROM;
+    String LIMIT = " LIMIT ";
+    String OFFSET = " OFFSET ";
 
 
-    public static final String LIMIT = " LIMIT ";
-    public static final String OFFSET = " OFFSET ";
+    String ASC = " ASC";
+    String DESC = " DESC";
+    String NULLS_FIRST = " NULLS FIRST";
+    String NULLS_LAST = " NULLS LAST";
 
-
-    public static final String ASC = " ASC";
-    public static final String DESC = " DESC";
-    public static final String NULLS_FIRST = " NULLS FIRST";
-    public static final String NULLS_LAST = " NULLS LAST";
-
-
-    public static final String EQUALS_PLACEHOLDER = " = ? ";
-    public static final String AND_PLACEHOLDER = BLANK + PLACEHOLDER + AND + PLACEHOLDER + BLANK;
+    String EQUALS_PLACEHOLDER = " = ? ";
+    String AND_PLACEHOLDER = BLANK + PLACEHOLDER + AND + PLACEHOLDER + BLANK;
 }

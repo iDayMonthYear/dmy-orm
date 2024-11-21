@@ -2,6 +2,7 @@ package cn.com.idmy.orm.core;
 
 import cn.com.idmy.orm.core.Node.*;
 import cn.com.idmy.orm.util.SqlUtil;
+import jakarta.annotation.Nullable;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.hutool.core.collection.CollUtil;
 import org.dromara.hutool.core.func.LambdaUtil;
@@ -24,7 +25,7 @@ public abstract class AbstractSqlGenerator {
         }
     }
 
-    private static String parseSqlExpr(String column, Object expr, List<Object> params) {
+    private static String buildSqlExpr(String column, Object expr, List<Object> params) {
         StringBuilder sql = new StringBuilder();
         if (expr instanceof SqlOpExpr sqlOpExpr) {
             SqlOp sqlOp = sqlOpExpr.apply(new SqlOp(column));
@@ -65,13 +66,13 @@ public abstract class AbstractSqlGenerator {
 
     private static StringBuilder buildCond(Cond cond, StringBuilder sql, List<Object> params) {
         String column = buildColumn(cond.column());
-        String expr = parseSqlExpr(column, cond.expr(), params);
+        String expr = buildSqlExpr(column, cond.expr(), params);
         return sql.append(column).append(BLANK).append(cond.op().getSymbol()).append(BLANK).append(expr);
     }
 
     private static StringBuilder buildSet(Set set, StringBuilder sql, List<Object> params) {
         var column = buildColumn(set.column());
-        var expr = parseSqlExpr(column, set.expr(), params);
+        var expr = buildSqlExpr(column, set.expr(), params);
         return sql.append(column).append(BLANK).append(expr);
     }
 
@@ -127,6 +128,7 @@ public abstract class AbstractSqlGenerator {
         return sql;
     }
 
+    @Nullable
     protected static Object builder(Node node, StringBuilder sql, List<Object> params) {
         return switch (node) {
             case Node.Or ignored -> sql.append(SqlConsts.OR);
@@ -134,7 +136,7 @@ public abstract class AbstractSqlGenerator {
             case Node.Set set -> buildSet(set, sql, params);
             case Node.GroupBy group -> buildGroupBy(group, sql);
             case Node.OrderBy order -> buildOrderBy(order, sql);
-            case SelectColumn sf -> buildSelectColumn(sf, sql, params);
+            case Node.SelectColumn col -> buildSelectColumn(col, sql, params);
             case Node.Distinct distinct -> buildDistinct(distinct, sql);
             case null, default -> null;
         };

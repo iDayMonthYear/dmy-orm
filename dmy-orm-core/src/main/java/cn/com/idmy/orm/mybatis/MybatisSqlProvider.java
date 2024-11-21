@@ -7,7 +7,6 @@ import cn.com.idmy.orm.core.TableManager;
 import org.dromara.hutool.core.reflect.FieldUtil;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -18,7 +17,7 @@ public class MybatisSqlProvider {
         var chain = (LambdaWhere<?, ?>) params.get(MybatisConsts.CHAIN);
         var pair = chain.sql();
         params.put(MybatisConsts.SQL_PARAMS, pair.right);
-        params.put(MybatisConsts.ENTITY_CLASS, chain.entityClass());
+        MybatisConsts.putEntityClass(params, chain.entityClass());
         return pair.left;
     }
 
@@ -66,12 +65,12 @@ public class MybatisSqlProvider {
             }
         }
 
-        params.put(MybatisConsts.ENTITY_CLASS, entityClass);
+        MybatisConsts.putEntityClass(params, entityClass);
         return sql.append(SqlConsts.BRACKET_RIGHT).append(values).append(SqlConsts.BRACKET_RIGHT).toString();
     }
 
     public String inserts(Map<String, Object> params) {
-        var entities = (Collection<?>) params.get(MybatisConsts.ENTITIES);
+        var entities = MybatisConsts.findEntities(params);
         if (entities.isEmpty()) {
             throw new OrmException("批量插入的实体集合不能为空");
         }
@@ -118,7 +117,7 @@ public class MybatisSqlProvider {
             sql.append(SqlConsts.BRACKET_RIGHT);
         }
 
-        params.put(MybatisConsts.ENTITY_CLASS, entityClass);
+        MybatisConsts.putEntityClass(params, entityClass);
         return sql.toString();
     }
 }

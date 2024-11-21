@@ -8,7 +8,6 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Lazy;
 
 import javax.sql.DataSource;
 
@@ -32,7 +31,6 @@ public class OrmAutoConfiguration {
         return new EnumWatchInterceptor(ctx);
     }
 
-    @Lazy
     @Bean
     @ConditionalOnMissingBean
     SqlSessionFactory sqlSessionFactory(
@@ -44,5 +42,11 @@ public class OrmAutoConfiguration {
         factory.setConfiguration(new MybatisConfiguration());
 //        factory.setPlugins(enumWatchInterceptor);
         return factory.getObject();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    CheckDatabaseColumn checkDatabaseColumn(ApplicationContext ctx, SqlSessionFactory factory, OrmProps props) {
+        return props.isCheckDatabaseColumn() ? new CheckDatabaseColumn(ctx, factory) : null;
     }
 }

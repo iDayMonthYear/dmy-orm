@@ -11,7 +11,6 @@ import java.util.Collection;
 @Getter
 @Accessors(fluent = true, chain = false)
 public abstract class LambdaWhere<T, WHERE extends LambdaWhere<T, WHERE>> extends AbstractWhere<T, WHERE> {
-
     protected LambdaWhere(Class<T> entityClass) {
         super(entityClass);
     }

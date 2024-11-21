@@ -20,7 +20,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(of = "id")
-@Table("ts_taskLog")
+@Table("ts_task_Log")
 public class TaskLog {
     @Id
     protected Long id;

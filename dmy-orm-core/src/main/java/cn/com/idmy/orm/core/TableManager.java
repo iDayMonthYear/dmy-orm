@@ -45,6 +45,7 @@ public class TableManager {
         });
     }
 
+
     private static TableInfo init(Class<?> entityClass) {
         final String tableName;
         final String tableComment;
@@ -95,7 +96,7 @@ public class TableManager {
                     comment = column.comment();
                 }
                 name = StrUtil.isBlank(name) ? field.getName() : name;
-                TableColumnInfo fieldInfo = new TableColumnInfo(
+                var columnInfo = new TableColumnInfo(
                         field,
                         name,
                         large,
@@ -104,8 +105,8 @@ public class TableManager {
                         tenant,
                         comment
                 );
-                columns.add(fieldInfo);
-                columnMap.put(name, fieldInfo);
+                columns.add(columnInfo);
+                columnMap.put(name, columnInfo);
             }
         }
         if (idInfo == null) {

@@ -6,4 +6,5 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @Data
 @ConfigurationProperties(prefix = "dmy.orm")
 public class OrmProps {
+    private boolean checkDatabaseColumn;
 }

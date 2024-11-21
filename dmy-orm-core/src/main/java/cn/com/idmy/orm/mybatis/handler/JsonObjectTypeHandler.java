@@ -11,7 +11,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 @MappedTypes(JSONObject.class)
-public class JSONObjectTypeHandler extends BaseTypeHandler<JSONObject> {
+public class JsonObjectTypeHandler extends BaseTypeHandler<JSONObject> {
     
     @Override
     public void setNonNullParameter(PreparedStatement ps, int i, JSONObject parameter, JdbcType jdbcType) 

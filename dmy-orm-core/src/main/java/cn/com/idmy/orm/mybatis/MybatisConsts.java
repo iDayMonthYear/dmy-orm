@@ -1,17 +1,33 @@
 package cn.com.idmy.orm.mybatis;
 
-interface MybatisConsts {
-    String CHAIN = "$$chain";
-    String SQL_PARAMS = "$$sqlParams";
+import java.util.List;
+import java.util.Map;
 
-    String ENTITY = "$$entity";
-    String ENTITY_CLASS = "$$entityClass";
-    String ENTITIES = "$$entities";
+class MybatisConsts {
+    static final String CHAIN = "$chain$";
+    static final String SQL_PARAMS = "$sqlParams$";
 
-    String GET = "get";
-    String FIND = "find";
-    String DELETE = "delete";
-    String UPDATE = "update";
-    String INSERT = "insert";
-    String INSERTS = "inserts";
+    static final String ENTITY = "$entity$";
+    static final String ENTITIES = "$entities$";
+
+    static final String GET = "get";
+    static final String FIND = "find";
+    static final String DELETE = "delete";
+    static final String UPDATE = "update";
+    static final String INSERT = "insert";
+    static final String INSERTS = "inserts";
+
+    private static final String ENTITY_CLASS = "$$entityClass$";
+
+    static void putEntityClass(Map<String, Object> params, Class<?> entityClass) {
+        params.put(ENTITY_CLASS, entityClass);
+    }
+
+    static Class<?> getEntityClass(Map<String, Object> params) {
+        return (Class<?>) params.get(ENTITY_CLASS);
+    }
+
+    static List<Object> findEntities(Map<String, Object> params) {
+        return (List<Object>) params.get(ENTITIES);
+    }
 }

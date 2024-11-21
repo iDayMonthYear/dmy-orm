@@ -30,7 +30,7 @@ public class MybatisIdGeneratorUtil {
         } else if (type == Type.GENERATOR) {
             return new CustomIdGenerator(ms.getConfiguration(), table);
         } else {
-            String sequence = id.value();
+            var sequence = id.value();
             if (StrUtil.isBlank(sequence)) {
                 throw new OrmException(StrUtil.format("Please config sequence by @Table.Id(value=\"...\") for field: {} in class: {}", id.name(), table.entityClass().getSimpleName()));
             } else {

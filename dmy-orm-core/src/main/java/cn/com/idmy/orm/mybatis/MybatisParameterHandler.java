@@ -16,10 +16,10 @@ import java.util.List;
 import java.util.Map;
 
 @Slf4j
-class PreparedParameterHandler extends DefaultParameterHandler {
+class MybatisParameterHandler extends DefaultParameterHandler {
     private final TypeHandlerRegistry typeHandlerRegistry;
 
-    public PreparedParameterHandler(MappedStatement mappedStatement, Object parameterObject, BoundSql boundSql) {
+    public MybatisParameterHandler(MappedStatement mappedStatement, Object parameterObject, BoundSql boundSql) {
         super(mappedStatement, parameterObject, boundSql);
         this.typeHandlerRegistry = mappedStatement.getConfiguration().getTypeHandlerRegistry();
     }
@@ -63,7 +63,7 @@ class PreparedParameterHandler extends DefaultParameterHandler {
 
     private TypeHandler<?> getTypeHandler(Object value, Map<String, Object> params) {
         var valueType = value.getClass();
-        var entityClass = getEntityClass(params);
+        var entityClass = MybatisConsts.getEntityClass(params);
         var customHandler = TableManager.getHandler(entityClass, valueType.getName());
         if (customHandler != null) {
             try {
@@ -73,9 +73,5 @@ class PreparedParameterHandler extends DefaultParameterHandler {
             }
         }
         return typeHandlerRegistry.getTypeHandler(valueType);
-    }
-
-    private static Class<?> getEntityClass(Map<String, Object> params) {
-        return (Class<?>) params.get(MybatisConsts.ENTITY_CLASS);
     }
 }
