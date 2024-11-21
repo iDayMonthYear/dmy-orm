@@ -1,6 +1,6 @@
 package cn.com.idmy.ts.server.dao;
 
-import cn.com.idmy.orm.mybatis.MybatisDao;
+import cn.com.idmy.orm.core.MybatisDao;
 import cn.com.idmy.ts.server.model.entity.App;
 import org.apache.ibatis.annotations.Mapper;
 

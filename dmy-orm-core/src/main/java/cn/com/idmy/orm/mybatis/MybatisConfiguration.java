@@ -15,6 +15,7 @@
  */
 package cn.com.idmy.orm.mybatis;
 
+import cn.com.idmy.orm.core.MybatisSqlProvider;
 import cn.com.idmy.orm.mybatis.handler.EnumTypeHandler;
 import cn.com.idmy.orm.mybatis.handler.JsonArrayTypeHandler;
 import cn.com.idmy.orm.mybatis.handler.JsonObjectTypeHandler;
@@ -43,7 +44,7 @@ class MybatisConfiguration extends Configuration {
     public ParameterHandler newParameterHandler(MappedStatement ms, Object param, BoundSql boundSql) {
         var msId = ms.getId();
         if (!msId.endsWith(SelectKeyGenerator.SELECT_KEY_SUFFIX)) {
-            if (param instanceof Map<?, ?> map && map.containsKey(MybatisConsts.SQL_PARAMS)) {
+            if (param instanceof Map<?, ?> map && map.containsKey(MybatisSqlProvider.SQL_PARAMS)) {
                 var handler = new MybatisParameterHandler(ms, param, boundSql);
                 return (ParameterHandler) interceptorChain.pluginAll(handler);
             }
@@ -55,7 +56,7 @@ class MybatisConfiguration extends Configuration {
     public void addMappedStatement(MappedStatement ms) {
         if (ms.getKeyGenerator() == NoKeyGenerator.INSTANCE) {
             String msId = ms.getId();
-            if (msId.endsWith(MybatisConsts.INSERT) || msId.endsWith(MybatisConsts.INSERTS)) {
+            if (msId.endsWith(MybatisSqlProvider.INSERT) || msId.endsWith(MybatisSqlProvider.INSERTS)) {
                 ms = replaceEntityIdGenerator(ms);
             }
         }
@@ -73,7 +74,7 @@ class MybatisConfiguration extends Configuration {
             return ms;
         }
 
-        if (ms.getId().endsWith(MybatisConsts.INSERTS)) {
+        if (ms.getId().endsWith(MybatisSqlProvider.INSERTS)) {
             idGenerator = new EntitiesIdGenerator(idGenerator);
         }
 
@@ -83,7 +84,7 @@ class MybatisConfiguration extends Configuration {
                 .timeout(ms.getTimeout())
                 .statementType(ms.getStatementType())
                 .keyGenerator(idGenerator) // 替换主键生成器
-                .keyProperty(MybatisConsts.ENTITY + "." + tableInfo.id().field().getName())
+                .keyProperty(MybatisSqlProvider.ENTITY + "." + tableInfo.id().field().getName())
                 .keyColumn(tableInfo.id().name())
                 .databaseId(databaseId)
                 .lang(ms.getLang())

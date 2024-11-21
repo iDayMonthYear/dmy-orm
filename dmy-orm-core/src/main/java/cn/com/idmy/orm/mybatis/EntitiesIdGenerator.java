@@ -1,5 +1,6 @@
 package cn.com.idmy.orm.mybatis;
 
+import cn.com.idmy.orm.core.MybatisSqlProvider;
 import lombok.RequiredArgsConstructor;
 import org.apache.ibatis.executor.Executor;
 import org.apache.ibatis.executor.keygen.KeyGenerator;
@@ -17,11 +18,11 @@ public class EntitiesIdGenerator implements KeyGenerator {
     @SuppressWarnings({"unchecked"})
     public void processBefore(Executor executor, MappedStatement ms, Statement st, Object parameter) {
         var params = (Map<String, Object>) parameter;
-        var entities = MybatisConsts.findEntities(params);
+        var entities = MybatisSqlProvider.findEntities(params);
         if (CollUtil.isNotEmpty(entities)) {
             for (var entity : entities) {
-                params.put(MybatisConsts.ENTITY, entity);
-                MybatisConsts.putEntityClass(params, entity.getClass());
+                params.put(MybatisSqlProvider.ENTITY, entity);
+                MybatisSqlProvider.putEntityClass(params, entity.getClass());
                 keyGenerator.processBefore(executor, ms, st, parameter);
             }
         }

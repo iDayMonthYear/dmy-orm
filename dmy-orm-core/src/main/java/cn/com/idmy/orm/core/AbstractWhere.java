@@ -3,6 +3,7 @@ package cn.com.idmy.orm.core;
 import cn.com.idmy.base.model.Pair;
 import cn.com.idmy.orm.core.Node.Or;
 import jakarta.annotation.Nullable;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
@@ -12,14 +13,19 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
-@Getter
 @Accessors(fluent = true, chain = true)
 public abstract class AbstractWhere<T, WHERE extends AbstractWhere<T, WHERE>> {
-    protected final List<Node> nodes = new ArrayList<>();
+    @Getter(value = AccessLevel.PROTECTED)
+    final List<Node> nodes = new ArrayList<>();
+
     @SuppressWarnings({"unchecked"})
     protected final WHERE $this = (WHERE) this;
+
+    @Getter(value = AccessLevel.PROTECTED)
     protected Class<T> entityClass;
-    @Setter
+
+    @Setter(value = AccessLevel.PROTECTED)
+    @Getter(value = AccessLevel.PROTECTED)
     protected int sqlParamsSize;
 
     protected AbstractWhere(Class<T> entityClass) {
@@ -38,10 +44,8 @@ public abstract class AbstractWhere<T, WHERE extends AbstractWhere<T, WHERE>> {
         }
     }
 
-    protected WHERE addNode(@Nullable Node node) {
-        if (node != null) {
-            nodes.add(node);
-        }
+    WHERE addNode(@Nullable Node node) {
+        nodes.add(node);
         return $this;
     }
 

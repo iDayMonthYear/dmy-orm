@@ -135,7 +135,9 @@ SelectChain.of(userDao)
 .ge(User::getAge, 18) // 大于等于
 .lt(User::getAge, 60) // 小于
 .le(User::getAge, 60) // 小于等于
-.like(User::getName, "%张%") // 模糊查询
+.like(User::getName, "张") // 模糊查询
+.startsWith(User::getName, "张") // 模糊查询
+.endsWith(User::getName, "张") // 模糊查询
 .in(User::getId, ids) // IN 查询
 .isNull(User::getDeleteTime) // IS NULL
 .isNotNull(User::getUpdateTime); // IS NOT NULL
@@ -376,7 +378,7 @@ List<User> users = userDao.find(
 SelectChain<User> chain = SelectChain.of(userDao);
 chain.eq(User::getStatus, status, status != null);
 if (StringUtils.isNotBlank(name)) {
-    chain.like(User::getName, "%" + name + "%");
+    chain.like(User::getName, name);
 }
 ```
 

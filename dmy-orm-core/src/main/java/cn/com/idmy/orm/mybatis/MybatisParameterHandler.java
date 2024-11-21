@@ -1,6 +1,7 @@
 package cn.com.idmy.orm.mybatis;
 
 import cn.com.idmy.orm.OrmException;
+import cn.com.idmy.orm.core.MybatisSqlProvider;
 import cn.com.idmy.orm.core.TableManager;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.mapping.BoundSql;
@@ -29,7 +30,7 @@ class MybatisParameterHandler extends DefaultParameterHandler {
     public void setParameters(PreparedStatement ps) {
         try {
             var params = (Map<String, Object>) getParameterObject();
-            var sqlParams = (List<Object>) params.get(MybatisConsts.SQL_PARAMS);
+            var sqlParams = (List<Object>) params.get(MybatisSqlProvider.SQL_PARAMS);
             if (sqlParams == null) {
                 super.setParameters(ps);
             } else {
@@ -44,26 +45,34 @@ class MybatisParameterHandler extends DefaultParameterHandler {
 
     @SuppressWarnings({"rawtypes", "unchecked"})
     private void setParameter(PreparedStatement ps, int index, Object value, Map<String, Object> params) throws SQLException {
-        if (value == null) {
-            ps.setObject(index, null);
-        } else if (value.getClass().isArray()) {
-            var array = (Object[]) value;
-            for (var item : array) {
-                setParameter(ps, index++, item, params);
+        switch (value) {
+            case null -> ps.setObject(index, null);
+            case Object[] arr -> {
+                if (arr.length == 0) {
+                    throw new IllegalArgumentException("Empty array");
+                }
+                for (var item : arr) {
+                    setParameter(ps, index++, item, params);
+                }
             }
-        } else if (value instanceof Collection<?> collection) {
-            for (var item : collection) {
-                setParameter(ps, index++, item, params);
+            case Collection<?> ls -> {
+                if (ls.isEmpty()) {
+                    throw new IllegalArgumentException("Empty list");
+                }
+                for (var item : ls) {
+                    setParameter(ps, index++, item, params);
+                }
             }
-        } else {
-            TypeHandler typeHandler = getTypeHandler(value, params);
-            typeHandler.setParameter(ps, index, value, null);
+            default -> {
+                TypeHandler typeHandler = getTypeHandler(value, params);
+                typeHandler.setParameter(ps, index, value, null);
+            }
         }
     }
 
     private TypeHandler<?> getTypeHandler(Object value, Map<String, Object> params) {
         var valueType = value.getClass();
-        var entityClass = MybatisConsts.getEntityClass(params);
+        var entityClass = MybatisSqlProvider.getEntityClass(params);
         var customHandler = TableManager.getHandler(entityClass, valueType.getName());
         if (customHandler != null) {
             try {

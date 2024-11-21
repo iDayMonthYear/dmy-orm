@@ -1,6 +1,5 @@
-package cn.com.idmy.orm.mybatis;
+package cn.com.idmy.orm.core;
 
-import cn.com.idmy.orm.core.*;
 import jakarta.annotation.Nullable;
 import lombok.NonNull;
 import org.apache.ibatis.annotations.*;
@@ -12,7 +11,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import static cn.com.idmy.orm.mybatis.MybatisConsts.*;
+import static cn.com.idmy.orm.core.MybatisSqlProvider.*;
 
 public interface MybatisDao<T, ID> {
     @SuppressWarnings({"unchecked"})
@@ -47,34 +46,48 @@ public interface MybatisDao<T, ID> {
 
     @Nullable
     default T get(@NonNull ID id) {
-        return get(StringSelectChain.of(this).eq(TableManager.getIdName(entityClass()), id));
+        var chain = StringSelectChain.of(this);
+        chain.onlyOne = true;
+        chain.eq(TableManager.getIdName(entityClass()), id);
+        return get(chain);
     }
 
     @Nullable
     default <R> R get(@NonNull ColumnGetter<T, R> getter, @NonNull ID id) {
         var chain = (StringSelectChain<T>) StringSelectChain.of(this).select(getter);
         chain.sqlParamsSize(1);
+        chain.onlyOne = true;
         chain.eq(TableManager.getIdName(entityClass()), id);
         T t = get(chain);
-        return getter.get(t);
+        if (t == null) {
+            return null;
+        } else {
+            return getter.get(t);
+        }
     }
 
     @Nullable
     default <R> R get(@NonNull ColumnGetter<T, R> getter, @NonNull SelectChain<T> chain) {
-        if (chain.hasSelectColumn()) {
+        if (chain.hasSelectColumn) {
             throw new IllegalArgumentException("select ... from 中间不能有字段或者函数");
         }
         T t = get(chain.select(getter));
-        return getter.get(t);
+        if (t == null) {
+            return null;
+        } else {
+            return getter.get(t);
+        }
     }
 
     @SuppressWarnings({"unchecked"})
     @Nullable
     default T get(@NonNull SelectChain<T> chain, @NonNull ColumnGetter<T, ?>... getters) {
-        if (chain.hasSelectColumn()) {
+        if (chain.hasSelectColumn) {
             throw new IllegalArgumentException("select ... from 中间不能有字段或者函数");
+        } else {
+            chain.onlyOne = true;
+            return get(chain.select(getters));
         }
-        return get(chain.select(getters));
     }
 
     default List<T> all() {
@@ -104,7 +117,7 @@ public interface MybatisDao<T, ID> {
     }
 
     default <R> List<R> find(@NonNull ColumnGetter<T, R> getter, @NonNull SelectChain<T> chain) {
-        if (chain.hasSelectColumn()) {
+        if (chain.hasSelectColumn) {
             throw new IllegalArgumentException("select ... from 中间不能有字段或者函数");
         } else {
             var ts = find(chain.select(getter));
@@ -132,11 +145,12 @@ public interface MybatisDao<T, ID> {
     }
 
     default <R extends Number> R fn(@NonNull SqlFnName name, @NonNull ColumnGetter<T, R> getter, @NonNull SelectChain<T> chain) {
-        if (chain.hasSelectColumn()) {
+        if (chain.hasSelectColumn) {
             throw new IllegalArgumentException("select ... from 中间不能有字段或者函数");
         } else if (name == SqlFnName.IF_NULL) {
             throw new IllegalArgumentException("不支持ifnull");
         } else {
+            chain.onlyOne = true;
             T t = get(chain.select(() -> new SqlFn<>(name, getter)));
             return getter.get(t);
         }

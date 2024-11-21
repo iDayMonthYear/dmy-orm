@@ -2,6 +2,7 @@ package cn.com.idmy.orm.mybatis;
 
 import cn.com.idmy.orm.OrmException;
 import cn.com.idmy.orm.annotation.Table.Id.Type;
+import cn.com.idmy.orm.core.MybatisSqlProvider;
 import cn.com.idmy.orm.core.TableInfo;
 import cn.com.idmy.orm.core.TableInfo.TableIdInfo;
 import lombok.NoArgsConstructor;
@@ -49,7 +50,7 @@ public class MybatisIdGeneratorUtil {
                 .timeout(null)
                 .statementType(StatementType.PREPARED)
                 .keyGenerator(NoKeyGenerator.INSTANCE)
-                .keyProperty(MybatisConsts.ENTITY + "." + id.field().getName())
+                .keyProperty(MybatisSqlProvider.ENTITY + "." + id.field().getName())
                 .keyColumn(id.name())
                 .databaseId(ms.getDatabaseId())
                 .lang(ms.getLang())

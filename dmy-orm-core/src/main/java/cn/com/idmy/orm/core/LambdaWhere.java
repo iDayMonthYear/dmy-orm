@@ -1,18 +1,37 @@
 package cn.com.idmy.orm.core;
 
 import cn.com.idmy.orm.core.Node.Cond;
-import lombok.Getter;
 import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Collection;
 
 @Slf4j
-@Getter
 @Accessors(fluent = true, chain = false)
 public abstract class LambdaWhere<T, WHERE extends LambdaWhere<T, WHERE>> extends AbstractWhere<T, WHERE> {
     protected LambdaWhere(Class<T> entityClass) {
         super(entityClass);
+    }
+
+    WHERE addNode(Cond node) {
+        switch (node.expr()) {
+            case null -> {
+                return $this;
+            }
+            case Collection<?> ls -> {
+                if (ls.isEmpty()) {
+                    return $this;
+                }
+            }
+            case Object[] arr -> {
+                if (arr.length == 0) {
+                    return $this;
+                }
+            }
+            default -> {
+            }
+        }
+        return $this;
     }
 
     //region 等于
@@ -171,6 +190,24 @@ public abstract class LambdaWhere<T, WHERE extends LambdaWhere<T, WHERE>> extend
     }
     //endregion
 
+    //region not in
+    public WHERE notIn(ColumnGetter<T, ?> col, Object val) {
+        return addNode(new Cond(col, Op.IN, val));
+    }
+
+    public WHERE notIn(ColumnGetter<T, ?> col, Object... vals) {
+        return addNode(new Cond(col, Op.IN, vals));
+    }
+
+    public WHERE notIn(ColumnGetter<T, ?> col, Object val, boolean if0) {
+        return if0 ? notIn(col, val) : $this;
+    }
+
+    public WHERE notIn(ColumnGetter<T, ?> col, Collection<Object> vals, boolean if0) {
+        return if0 ? notIn(col, vals) : $this;
+    }
+    //endregion
+
     //region nulls
     public WHERE nulls(ColumnGetter<T, ?> col, Boolean bol) {
         if (bol == null) {
@@ -211,16 +248,31 @@ public abstract class LambdaWhere<T, WHERE extends LambdaWhere<T, WHERE>> extend
     public WHERE between(ColumnGetter<T, ?> col, Object[] pair, boolean if0) {
         return if0 ? between(col, pair) : $this;
     }
+
+    public WHERE between(ColumnGetter<T, ?> col, Object start, Object end) {
+        return addNode(new Cond(col, Op.BETWEEN, new Object[]{start, end}));
+    }
+
+    public WHERE between(ColumnGetter<T, ?> col, Object start, Object end, boolean if0) {
+        return if0 ? between(col, start, end) : $this;
+    }
     //endregion
 
-    //region between
+    //region not between
     public WHERE notBetween(ColumnGetter<T, ?> col, Object[] pair) {
         return addNode(new Cond(col, Op.NOT_BETWEEN, pair));
     }
 
     public WHERE notBetween(ColumnGetter<T, ?> col, Object[] pair, boolean if0) {
-        return if0 ? notBetween(col, pair) : $this;
+        return if0 ? between(col, pair) : $this;
+    }
+
+    public WHERE notBetween(ColumnGetter<T, ?> col, Object start, Object end) {
+        return addNode(new Cond(col, Op.NOT_BETWEEN, new Object[]{start, end}));
+    }
+
+    public WHERE notBetween(ColumnGetter<T, ?> col, Object a, Object b, boolean if0) {
+        return if0 ? between(col, a, b) : $this;
     }
     //endregion
-
 }

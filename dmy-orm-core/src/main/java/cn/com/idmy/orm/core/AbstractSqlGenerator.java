@@ -35,15 +35,24 @@ abstract class AbstractSqlGenerator {
         }
     }
 
-    private static String buildSqlExpr(String column, Object expr, List<Object> params) {
+    private static String buildSqlExpr(String column, Object expr, @Nullable Op op, List<Object> params) {
         StringBuilder sql = new StringBuilder();
         if (expr instanceof SqlOpExpr sqlOpExpr) {
             SqlOp sqlOp = sqlOpExpr.apply(new SqlOp(column));
             params.add(sqlOp.value());
             return sql.append(sqlOp.column()).append(BLANK).append(sqlOp.op()).append(BLANK).append(PLACEHOLDER).toString();
         } else {
+            if (op == Op.BETWEEN || op == Op.NOT_BETWEEN) {
+                Object[] arr = (Object[]) expr;
+                if (arr.length == 2) {
+                    sql.append("? and ?");
+                } else {
+                    throw new IllegalArgumentException("between参数必须为2个元素");
+                }
+            } else {
+                buildPlaceholder(expr, sql);
+            }
             params.add(expr);
-            buildPlaceholder(expr, sql);
         }
         return sql.toString();
     }
@@ -72,13 +81,13 @@ abstract class AbstractSqlGenerator {
 
     private static StringBuilder buildCond(Cond cond, StringBuilder sql, List<Object> params) {
         String column = buildColumn(cond.column());
-        String expr = buildSqlExpr(column, cond.expr(), params);
+        String expr = buildSqlExpr(column, cond.expr(), cond.op(), params);
         return sql.append(column).append(BLANK).append(cond.op().getSymbol()).append(BLANK).append(expr);
     }
 
     private static StringBuilder buildSet(Set set, StringBuilder sql, List<Object> params) {
         var column = buildColumn(set.column());
-        var expr = buildSqlExpr(column, set.expr(), params);
+        var expr = buildSqlExpr(column, set.expr(), null, params);
         return sql.append(column).append(BLANK).append(expr);
     }
 

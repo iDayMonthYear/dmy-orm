@@ -1,12 +1,7 @@
 package cn.com.idmy.orm.core;
 
 import cn.com.idmy.base.model.Pair;
-import cn.com.idmy.orm.core.Node.Distinct;
-import cn.com.idmy.orm.core.Node.GroupBy;
-import cn.com.idmy.orm.core.Node.OrderBy;
-import cn.com.idmy.orm.core.Node.SelectColumn;
-import cn.com.idmy.orm.mybatis.MybatisDao;
-import lombok.Getter;
+import cn.com.idmy.orm.core.Node.*;
 import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.hutool.core.lang.Assert;
@@ -15,10 +10,10 @@ import org.dromara.hutool.core.text.StrUtil;
 import java.util.List;
 
 @Slf4j
-@Getter
 @Accessors(fluent = true, chain = false)
 public class SelectChain<T> extends LambdaWhere<T, SelectChain<T>> {
-    protected boolean hasSelectColumn = false;
+    boolean hasSelectColumn = false;
+    boolean onlyOne = false;
 
     protected SelectChain(Class<T> entityClass) {
         super(entityClass);
@@ -93,6 +88,16 @@ public class SelectChain<T> extends LambdaWhere<T, SelectChain<T>> {
         for (int i = 0; i < orders.length; i = i + 2) {
             addNode(new OrderBy(orders[i], StrUtil.equalsIgnoreCase(orders[i + 1], "desc")));
         }
+        return this;
+    }
+
+    public SelectChain<T> limit(int limit) {
+        addNode(new Limit(limit));
+        return this;
+    }
+
+    public SelectChain<T> offset(int offset) {
+        addNode(new Offset(offset));
         return this;
     }
 

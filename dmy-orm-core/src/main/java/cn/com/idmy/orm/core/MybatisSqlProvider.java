@@ -1,16 +1,56 @@
-package cn.com.idmy.orm.mybatis;
+package cn.com.idmy.orm.core;
 
 import cn.com.idmy.orm.OrmException;
-import cn.com.idmy.orm.core.*;
 import org.dromara.hutool.core.reflect.FieldUtil;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 public class MybatisSqlProvider {
+    public static final String CHAIN = "$chain$";
+
+    public static final String SQL_PARAMS = "$sqlParams$";
+
+    public static final String ENTITY = "$entity$";
+    public static final String ENTITIES = "$entities$";
+
+    public static final String GET = "get";
+    public static final String FIND = "find";
+    public static final String DELETE = "delete";
+    public static final String UPDATE = "update";
+    public static final String COUNT = "count";
+    public static final String INSERT = "insert";
+    public static final String INSERTS = "inserts";
+
+    private static final String ENTITY_CLASS = "$$entityClass$";
+
+    public static void putEntityClass(Map<String, Object> params, Class<?> entityClass) {
+        params.put(ENTITY_CLASS, entityClass);
+    }
+
+    public static Class<?> getEntityClass(Map<String, Object> params) {
+        return (Class<?>) params.get(ENTITY_CLASS);
+    }
+
+    public static List<Object> findEntities(Map<String, Object> params) {
+        return (List<Object>) params.get(ENTITIES);
+    }
+
+    private static String buildCommonSql(Map<String, Object> params) {
+        var where = (AbstractWhere<?, ?>) params.get(CHAIN);
+        putEntityClass(params, where.entityClass());
+        var pair = where.sql();
+        params.put(SQL_PARAMS, pair.right);
+        return pair.left;
+    }
+
+
     public String get(Map<String, Object> params) {
-        var where = (SelectChain<?>) params.get(MybatisConsts.CHAIN);
-        where.limit(1);
+        var where = (SelectChain<?>) params.get(CHAIN);
+        if (!where.onlyOne) {
+            where.limit(1);
+        }
         return buildCommonSql(params);
     }
 
@@ -27,19 +67,19 @@ public class MybatisSqlProvider {
     }
 
     public String count(Map<String, Object> params) {
-        var where = (SelectChain<?>) params.get(MybatisConsts.CHAIN);
-        if (where.hasSelectColumn()) {
+        var where = (SelectChain<?>) params.get(CHAIN);
+        if (where.hasSelectColumn) {
             throw new IllegalArgumentException("select ... from 中间不能有字段或者函数");
         }
         where.select(SqlFn::count);
-        MybatisConsts.putEntityClass(params, where.entityClass());
+        putEntityClass(params, where.entityClass());
         var pair = where.sql();
-        params.put(MybatisConsts.SQL_PARAMS, pair.right);
+        params.put(SQL_PARAMS, pair.right);
         return pair.left;
     }
 
     public String insert(Map<String, Object> params) {
-        var entity = params.get(MybatisConsts.ENTITY);
+        var entity = params.get(ENTITY);
         var table = TableManager.getTableInfo(entity.getClass());
         var columns = table.columns();
 
@@ -62,13 +102,13 @@ public class MybatisSqlProvider {
             }
         }
 
-        params.put(MybatisConsts.SQL_PARAMS, sqlParams);
-        MybatisConsts.putEntityClass(params, entity.getClass());
+        params.put(SQL_PARAMS, sqlParams);
+        putEntityClass(params, entity.getClass());
         return sql.append(SqlConsts.BRACKET_RIGHT).append(values).append(SqlConsts.BRACKET_RIGHT).toString();
     }
 
     public String inserts(Map<String, Object> params) {
-        var entities = MybatisConsts.findEntities(params);
+        var entities = findEntities(params);
         if (entities.isEmpty()) {
             throw new OrmException("批量插入的实体集合不能为空");
         }
@@ -106,8 +146,8 @@ public class MybatisSqlProvider {
             }
             sql.append(SqlConsts.BRACKET_RIGHT);
         }
-        params.put(MybatisConsts.SQL_PARAMS, sqlParams);
-        MybatisConsts.putEntityClass(params, entities.getFirst().getClass());
+        params.put(SQL_PARAMS, sqlParams);
+        putEntityClass(params, entities.getFirst().getClass());
         return sql.toString();
     }
 
@@ -120,11 +160,4 @@ public class MybatisSqlProvider {
                 .append(SqlConsts.BRACKET_LEFT);
     }
 
-    private static String buildCommonSql(Map<String, Object> params) {
-        var where = (AbstractWhere<?, ?>) params.get(MybatisConsts.CHAIN);
-        MybatisConsts.putEntityClass(params, where.entityClass());
-        var pair = where.sql();
-        params.put(MybatisConsts.SQL_PARAMS, pair.right);
-        return pair.left;
-    }
 }

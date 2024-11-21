@@ -5,12 +5,12 @@ import cn.com.idmy.ts.server.dao.AppDao;
 import cn.com.idmy.ts.server.model.entity.App;
 import cn.com.idmy.ts.server.service.AppService;
 import lombok.RequiredArgsConstructor;
+import org.dromara.hutool.core.lang.Console;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 
 @RequiredArgsConstructor
 @Service
@@ -36,38 +36,40 @@ public class AppServiceImpl implements AppService {
 
     @Override
     public void testCrud() {
-        System.out.println("=== Testing CRUD operations ===");
-
-        // Test create
-        App newApp1 = App.builder()
-                .key("test-app")
-                .name("Test App")
-                .createdAt(LocalDateTime.now())
-                .updatedAt(LocalDateTime.now())
-                .build();
-        App newApp2 = App.builder()
-                .key("test-app")
-                .name("Test App")
-                .createdAt(LocalDateTime.now())
-                .updatedAt(LocalDateTime.now())
-                .build();
-        dao.inserts(List.of(newApp1, newApp2));
-
-        String str = dao.get(App::getName, 1222L);
-        System.err.println(str);
-
-        List<App> apps = dao.find(List.of(555L));
-        System.out.println(apps);
-
-        Long sum1 = dao.sum(App::getA, SelectChain.of(dao));
-        List<String> longs = dao.find(App::getKey, List.of(1L, 2L, 3L));
-        System.out.println(longs);
-        Map<Long, App> map = dao.map(1L, 2L, 3L);
-        System.out.println(map);
-        Map<String, App> map1 = dao.map(App::getKey, SelectChain.of(dao));
-        System.out.println(map1);
-        long count = dao.count(SelectChain.of(dao));
-        System.out.println(count);
+//
+//        // Test create
+//        App newApp1 = App.builder()
+//                .key("test-app")
+//                .name("Test App")
+//                .createdAt(LocalDateTime.now())
+//                .updatedAt(LocalDateTime.now())
+//                .build();
+//        App newApp2 = App.builder()
+//                .key("test-app")
+//                .name("Test App")
+//                .createdAt(LocalDateTime.now())
+//                .updatedAt(LocalDateTime.now())
+//                .build();
+//        dao.inserts(List.of(newApp1, newApp2));
+//
+//        String str = dao.get(App::getName, 1222L);
+//        System.err.println(str);
+//
+//        List<App> apps = dao.find(List.of(555L));
+//        System.out.println(apps);
+//
+//        Long sum1 = dao.sum(App::getA, SelectChain.of(dao));
+//        List<String> longs = dao.find(App::getKey, List.of(1L, 2L, 3L));
+//        System.out.println(longs);
+//        Map<Long, App> map = dao.map(1L, 2L, 3L);
+//        System.out.println(map);
+//        Map<String, App> map1 = dao.map(App::getKey, SelectChain.of(dao));
+//        System.out.println(map1);
+//        long count = dao.count(SelectChain.of(dao));
+//        System.out.println(count);
+//
+//        Console.error(dao.find(SelectChain.of(dao).endsWith(App::getName, "票")));
+        Console.error(dao.find(SelectChain.of(dao).between(App::getId, 1, 10)));
     }
 
     @Override

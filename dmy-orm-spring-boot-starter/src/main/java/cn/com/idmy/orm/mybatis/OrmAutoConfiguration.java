@@ -1,5 +1,6 @@
 package cn.com.idmy.orm.mybatis;
 
+import cn.com.idmy.orm.core.MybatisSqlProvider;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.mybatis.spring.SqlSessionFactoryBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
