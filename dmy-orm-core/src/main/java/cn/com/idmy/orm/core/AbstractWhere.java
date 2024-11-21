@@ -16,7 +16,7 @@ import java.util.List;
 public abstract class AbstractWhere<T, WHERE extends AbstractWhere<T, WHERE>> {
     protected final List<Node> nodes = new ArrayList<>();
     @SuppressWarnings({"unchecked"})
-    protected final WHERE typedThis = (WHERE) this;
+    protected final WHERE $this = (WHERE) this;
     protected Class<T> entityClass;
     @Setter
     protected int sqlParamsSize;
@@ -39,7 +39,7 @@ public abstract class AbstractWhere<T, WHERE extends AbstractWhere<T, WHERE>> {
 
     protected WHERE addNode(Node node) {
         nodes.add(node);
-        return typedThis;
+        return $this;
     }
 
     public WHERE or() {
