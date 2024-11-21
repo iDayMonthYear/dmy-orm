@@ -256,6 +256,74 @@ public class OrderIdGenerator implements IdGenerator {
 }
 ```
 
+
+
+### TypeHandler 的注册与使用
+`TypeHandler` 是 MyBatis 中用于处理 Java 类型与数据库类型之间转换的接口。在 DMY-ORM 中，`TableManager` 类提供了注册和获取 `TypeHandler` 的功能，以便在 ORM 操作中使用自定义的类型处理器。
+
+#### 注册 TypeHandler
+
+在 DMY-ORM 中，可以通过 `TableManager` 类的 `register` 方法注册自定义的 `TypeHandler`。该方法接受以下参数：
+
+- `entityClass`：实体类的 Class 对象。
+- `col`：一个 `ColumnGetter` 函数，用于获取字段名。
+- `handlerClass`：自定义的 `TypeHandler` 类。
+
+##### 示例代码
+
+```java
+TableManager.register(User.class, User::getStatus, UserStatusTypeHandler.class);
+```
+
+在上面的示例中，我们为 `User` 实体类的 `status` 字段注册了一个自定义的 `UserStatusTypeHandler`。
+
+##### 为什么怎么设计？
+
+`分开模型层与 TypeHandler 的好处`
+
+将实体类与 `TypeHandler` 分开可以避免模型层直接引入 MyBatis 依赖，从而提高代码的可维护性和可测试性。
+
+## 示例
+
+假设我们有一个用户实体类 `User`，如果我们将 `TypeHandler` 直接放在 `@Table.Column` 注解中，`User` 类可能会如下所示：
+
+```java
+@Table("users")
+public class User {
+    @Table.Id
+    private Long id;
+
+    @Table.Column(typeHandler = MyBatisTypeHandler.class)
+    private UserStatus status;
+}
+```
+
+在这个例子中，`User` 类直接依赖于 MyBatis 的 `TypeHandler`，这使得模型层与 MyBatis 紧密耦合。
+
+## 缺点
+
+1. **降低可重用性**：如果将 `User` 类用于其他上下文（如不同的 ORM 框架），则需要重写或修改 `User` 类，因为它依赖于 MyBatis。
+  
+2. **增加复杂性**：模型层的代码变得复杂，因为它需要处理与 MyBatis 相关的逻辑，导致代码的可读性和可维护性下降。
+
+3. **影响测试**：在单元测试中，测试 `User` 类时需要引入 MyBatis 的依赖，增加了测试的复杂性和时间。
+
+## 改进后的设计
+
+通过将 `TypeHandler` 设计为独立的组件，`User` 类可以保持简单，不再依赖于 MyBatis：
+
+```java
+@Table("users")
+public class User {
+    @Table.Id
+    private Long id;
+
+    // 不再直接依赖 MyBatis
+    private UserStatus status;
+}
+```
+
+在这种设计中，`User` 类只关注数据结构，而 `TypeHandler` 的注册和使用则在其他地方进行。这种方式使得模型层与服务层解耦，提高了代码的灵活性和可维护性。
 ## 配置说明
 
 ### application.yml
