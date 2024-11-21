@@ -140,6 +140,7 @@ SelectChain.of(userDao)
 .in(User::getId, ids) // IN 查询
 .isNull(User::getDeleteTime) // IS NULL
 .isNotNull(User::getUpdateTime); // IS NOT NULL
+.nulls(User::getUpdateTime, true); // true = IS NULL， false = IS NOT NULL， null = 条件不生效 方便前端传一个条件来筛选
 ```
 
 #### Map 转换

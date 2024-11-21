@@ -152,23 +152,13 @@ public abstract class LambdaWhere<T, WHERE extends LambdaWhere<T, WHERE>> extend
     //endregion
 
     //region nulls
-    public WHERE nulls(ColumnGetter<T, ?> col, boolean bol) {
-        if (bol) {
+    public WHERE nulls(ColumnGetter<T, ?> col, Boolean bol) {
+        if (bol == null) {
+            return $this;
+        } else if (bol) {
             return addNode(new Cond(col, Op.IS_NULL, null));
         } else {
             return addNode(new Cond(col, Op.IS_NOT_NULL, null));
-        }
-    }
-
-    public WHERE nulls(ColumnGetter<T, ?> col, boolean bol, boolean if0) {
-        if (if0) {
-            if (bol) {
-                return addNode(new Cond(col, Op.IS_NULL, null));
-            } else {
-                return addNode(new Cond(col, Op.IS_NOT_NULL, null));
-            }
-        } else {
-            return $this;
         }
     }
     //endregion
@@ -179,7 +169,7 @@ public abstract class LambdaWhere<T, WHERE extends LambdaWhere<T, WHERE>> extend
     }
 
     public WHERE isNull(ColumnGetter<T, ?> col, boolean if0) {
-        return nulls(col, true, if0);
+        return nulls(col, if0 ? true : null);
     }
     //endregion
 
@@ -189,7 +179,7 @@ public abstract class LambdaWhere<T, WHERE extends LambdaWhere<T, WHERE>> extend
     }
 
     public WHERE isNotNull(ColumnGetter<T, ?> col, boolean if0) {
-        return nulls(col, false, if0);
+        return nulls(col, if0 ? false : null);
     }
     //endregion
 
