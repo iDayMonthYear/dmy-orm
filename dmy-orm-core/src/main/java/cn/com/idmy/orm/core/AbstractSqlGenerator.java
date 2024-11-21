@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.dromara.hutool.core.collection.CollUtil;
 import org.dromara.hutool.core.func.LambdaUtil;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 
@@ -15,7 +16,7 @@ import static cn.com.idmy.orm.core.SqlFnName.COUNT;
 
 
 @Slf4j
-public abstract class AbstractSqlGenerator {
+abstract class AbstractSqlGenerator {
     protected static String buildColumn(Object col) {
         if (col instanceof ColumnGetter<?, ?> getter) {
             return STRESS_MARK + LambdaUtil.getFieldName(getter) + STRESS_MARK;
@@ -33,35 +34,31 @@ public abstract class AbstractSqlGenerator {
             return sql.append(sqlOp.column()).append(BLANK).append(sqlOp.op()).append(BLANK).append(PLACEHOLDER).toString();
         } else {
             params.add(expr);
-            placeholder(expr, sql);
+            buildPlaceholder(expr, sql);
         }
         return sql.toString();
     }
 
-    private static void placeholder(Object value, StringBuilder sql) {
-        if (value instanceof List<?> ls) {
-            int size = ls.size();
-            sql.append(BRACKET_LEFT);
-            for (int i = 0; i < size; i++) {
-                sql.append(PLACEHOLDER);
-                if (i != size - 1) {
-                    sql.append(DELIMITER);
-                }
-            }
-            sql.append(BRACKET_RIGHT);
-        } else if (value instanceof Object[] ls) {
-            int size = ls.length;
-            sql.append(BRACKET_LEFT);
-            for (int i = 0; i < size; i++) {
-                sql.append(PLACEHOLDER);
-                if (i != size - 1) {
-                    sql.append(DELIMITER);
-                }
-            }
-            sql.append(BRACKET_RIGHT);
+    private static void buildPlaceholder(Object value, StringBuilder sql) {
+        if (value instanceof Collection<?> ls) {
+            buildPlaceholder(sql, ls.size());
+        } else if (value.getClass().isArray()) {
+            var arr = (Object[]) value;
+            buildPlaceholder(sql, arr.length);
         } else {
             sql.append(PLACEHOLDER);
         }
+    }
+
+    private static void buildPlaceholder(StringBuilder sql, int size) {
+        sql.append(BRACKET_LEFT);
+        for (int i = 0; i < size; i++) {
+            sql.append(PLACEHOLDER);
+            if (i != size - 1) {
+                sql.append(DELIMITER);
+            }
+        }
+        sql.append(BRACKET_RIGHT);
     }
 
     private static StringBuilder buildCond(Cond cond, StringBuilder sql, List<Object> params) {
@@ -158,7 +155,7 @@ public abstract class AbstractSqlGenerator {
         if (CollUtil.isNotEmpty(wheres) && wheres.getLast() instanceof Or) {
             wheres.removeLast();
             if (log.isDebugEnabled()) {
-                log.warn("where条件最后存在or，已自动移除");
+                log.warn("where条件最后存在 or，已自动移除");
             }
         }
     }

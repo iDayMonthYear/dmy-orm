@@ -32,11 +32,8 @@ import static cn.com.idmy.orm.core.TableManager.getTableInfo;
 
 class MybatisConfiguration extends Configuration {
     public MybatisConfiguration() {
-        // 注册默认的类型处理器
         var registry = getTypeHandlerRegistry();
-        // 枚举类型处理器
         registry.setDefaultEnumTypeHandler(EnumTypeHandler.class);
-        // JSON类型处理器
         registry.register(JsonTypeHandler.class);
         registry.register(JsonObjectTypeHandler.class);
         registry.register(JsonArrayTypeHandler.class);
@@ -44,8 +41,8 @@ class MybatisConfiguration extends Configuration {
 
     @Override
     public ParameterHandler newParameterHandler(MappedStatement ms, Object param, BoundSql boundSql) {
-        var id = ms.getId();
-        if (!id.endsWith(SelectKeyGenerator.SELECT_KEY_SUFFIX)) {
+        var msId = ms.getId();
+        if (!msId.endsWith(SelectKeyGenerator.SELECT_KEY_SUFFIX)) {
             if (param instanceof Map<?, ?> map && map.containsKey(MybatisConsts.SQL_PARAMS)) {
                 var handler = new MybatisParameterHandler(ms, param, boundSql);
                 return (ParameterHandler) interceptorChain.pluginAll(handler);
@@ -56,8 +53,11 @@ class MybatisConfiguration extends Configuration {
 
     @Override
     public void addMappedStatement(MappedStatement ms) {
-        if (ms.getId().endsWith(MybatisConsts.INSERT) || ms.getId().endsWith(MybatisConsts.INSERTS) && ms.getKeyGenerator() == NoKeyGenerator.INSTANCE) {
-            ms = replaceEntityIdGenerator(ms);
+        if (ms.getKeyGenerator() == NoKeyGenerator.INSTANCE) {
+            String msId = ms.getId();
+            if (msId.endsWith(MybatisConsts.INSERT) || msId.endsWith(MybatisConsts.INSERTS)) {
+                ms = replaceEntityIdGenerator(ms);
+            }
         }
         super.addMappedStatement(ms);
     }
@@ -68,13 +68,13 @@ class MybatisConfiguration extends Configuration {
             return ms;
         }
 
-        var keyGenerator = MybatisIdGeneratorUtil.create(ms, tableInfo);
-        if (keyGenerator == NoKeyGenerator.INSTANCE) {
+        var idGenerator = MybatisIdGeneratorUtil.create(ms, tableInfo);
+        if (idGenerator == NoKeyGenerator.INSTANCE) {
             return ms;
         }
 
         if (ms.getId().endsWith(MybatisConsts.INSERTS)) {
-            keyGenerator = new EntitiesIdGenerator(keyGenerator);
+            idGenerator = new EntitiesIdGenerator(idGenerator);
         }
 
         return new MappedStatement.Builder(ms.getConfiguration(), ms.getId(), ms.getSqlSource(), ms.getSqlCommandType())
@@ -82,7 +82,7 @@ class MybatisConfiguration extends Configuration {
                 .fetchSize(ms.getFetchSize())
                 .timeout(ms.getTimeout())
                 .statementType(ms.getStatementType())
-                .keyGenerator(keyGenerator) // 替换主键生成器
+                .keyGenerator(idGenerator) // 替换主键生成器
                 .keyProperty(MybatisConsts.ENTITY + "." + tableInfo.id().field().getName())
                 .keyColumn(tableInfo.id().name())
                 .databaseId(databaseId)

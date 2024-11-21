@@ -17,7 +17,7 @@ import static cn.com.idmy.orm.core.SqlConsts.ORDER_BY;
 import static cn.com.idmy.orm.core.SqlConsts.SELECT;
 
 @Slf4j
-public class SelectSqlGenerator extends AbstractSqlGenerator {
+class SelectSqlGenerator extends AbstractSqlGenerator {
     public static Pair<String, List<Object>> gen(SelectChain<?> chain) {
         var nodes = chain.nodes();
         var selectColumns = new ArrayList<SelectColumn>(nodes.size());

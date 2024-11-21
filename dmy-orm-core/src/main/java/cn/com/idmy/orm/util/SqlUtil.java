@@ -1,7 +1,10 @@
 package cn.com.idmy.orm.util;
 
+import lombok.NoArgsConstructor;
+
 import java.util.regex.Pattern;
 
+@NoArgsConstructor(access = lombok.AccessLevel.PRIVATE)
 public class SqlUtil {
     private static final Pattern FIELD_PATTERN = Pattern.compile("[a-zA-Z0-9_]+");
 

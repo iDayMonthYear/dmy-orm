@@ -4,6 +4,7 @@ import cn.com.idmy.orm.OrmException;
 import cn.com.idmy.orm.annotation.Table.Id.Type;
 import cn.com.idmy.orm.core.TableInfo;
 import cn.com.idmy.orm.core.TableInfo.TableIdInfo;
+import lombok.NoArgsConstructor;
 import org.apache.ibatis.executor.keygen.Jdbc3KeyGenerator;
 import org.apache.ibatis.executor.keygen.KeyGenerator;
 import org.apache.ibatis.executor.keygen.NoKeyGenerator;
@@ -16,10 +17,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+@NoArgsConstructor(access = lombok.AccessLevel.PRIVATE)
 public class MybatisIdGeneratorUtil {
-    private MybatisIdGeneratorUtil() {
-    }
-
     public static KeyGenerator create(MappedStatement ms, TableInfo table) {
         var id = table.id();
         var type = id.type();
@@ -42,9 +41,9 @@ public class MybatisIdGeneratorUtil {
     private static SelectKeyGenerator getSelectKeyGenerator(MappedStatement ms, TableIdInfo id) {
         var sequence = id.value();
         var selectId = ms.getId() + SelectKeyGenerator.SELECT_KEY_SUFFIX;
-        var cfg = ms.getConfiguration();
-        var sqlSource = ms.getLang().createSqlSource(cfg, sequence.trim(), id.field().getType());
-        var mappedStatement = new MappedStatement.Builder(cfg, selectId, sqlSource, SqlCommandType.SELECT)
+        var config = ms.getConfiguration();
+        var sqlSource = ms.getLang().createSqlSource(config, sequence.trim(), id.field().getType());
+        var mappedStatement = new MappedStatement.Builder(config, selectId, sqlSource, SqlCommandType.SELECT)
                 .resource(ms.getResource())
                 .fetchSize(null)
                 .timeout(null)
@@ -56,13 +55,13 @@ public class MybatisIdGeneratorUtil {
                 .lang(ms.getLang())
                 .resultOrdered(false)
                 .resultSets(null)
-                .resultMaps(createIdResultMaps(cfg, selectId + "-Inline", id.field().getType(), new ArrayList<>()))
+                .resultMaps(createIdResultMaps(config, selectId + "-Inline", id.field().getType(), new ArrayList<>()))
                 .resultSetType(null)
                 .flushCacheRequired(false)
                 .useCache(false)
                 .cache(ms.getCache())
                 .build();
-        cfg.addMappedStatement(mappedStatement);
+        config.addMappedStatement(mappedStatement);
         return new SelectKeyGenerator(mappedStatement, id.before());
     }
 

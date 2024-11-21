@@ -15,8 +15,8 @@ import java.util.List;
 @Accessors(fluent = true, chain = false)
 public class UpdateChain<T> extends LambdaWhere<T, UpdateChain<T>> {
 
-    private UpdateChain(Class<T> table) {
-        super(table);
+    protected UpdateChain(Class<T> entityClass) {
+        super(entityClass);
     }
 
     public static <T> UpdateChain<T> of(MybatisDao<T, ?> dao) {

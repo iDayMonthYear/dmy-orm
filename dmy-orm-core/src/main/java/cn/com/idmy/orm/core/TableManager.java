@@ -5,6 +5,7 @@ import cn.com.idmy.orm.annotation.Table;
 import cn.com.idmy.orm.annotation.Table.Id;
 import cn.com.idmy.orm.core.TableInfo.TableColumnInfo;
 import cn.com.idmy.orm.core.TableInfo.TableIdInfo;
+import lombok.NoArgsConstructor;
 import org.apache.ibatis.mapping.MappedStatement;
 import org.apache.ibatis.type.TypeHandler;
 import org.apache.ibatis.util.MapUtil;
@@ -19,6 +20,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+@NoArgsConstructor(access = lombok.AccessLevel.PRIVATE)
 public class TableManager {
     private static final Map<Class<?>, TableInfo> mapperTableInfos = new ConcurrentHashMap<>();
     private static final Map<Class<?>, TableInfo> entityTableInfos = new ConcurrentHashMap<>();
@@ -31,7 +33,7 @@ public class TableManager {
     public static TableInfo getTableInfo(MappedStatement ms) {
         String mapperClassName = ms.getId().substring(0, ms.getId().lastIndexOf("."));
         try {
-            Class<?> mapperClass = Class.forName(mapperClassName);
+            var mapperClass = Class.forName(mapperClassName);
             return getTableInfoByMapperClass(mapperClass);
         } catch (ClassNotFoundException e) {
             throw new OrmException(e);
@@ -40,11 +42,10 @@ public class TableManager {
 
     public static TableInfo getTableInfoByMapperClass(Class<?> mapperClass) {
         return MapUtil.computeIfAbsent(mapperTableInfos, mapperClass, key -> {
-            Class<?> entityClass = ClassUtil.getTypeArgument(mapperClass);
+            var entityClass = ClassUtil.getTypeArgument(mapperClass);
             return getTableInfo(entityClass);
         });
     }
-
 
     private static TableInfo init(Class<?> entityClass) {
         final String tableName;
@@ -124,6 +125,7 @@ public class TableManager {
         return getTableInfo(entityClass).id().name();
     }
 
+    @SuppressWarnings("unchecked")
     public static <T> T getIdValue(Object entity) {
         TableInfo tableInfo = getTableInfo(entity.getClass());
         return (T) FieldUtil.getFieldValue(entity, tableInfo.id().name());

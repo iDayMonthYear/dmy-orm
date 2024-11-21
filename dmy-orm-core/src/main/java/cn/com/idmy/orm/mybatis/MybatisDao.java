@@ -200,7 +200,7 @@ public interface MybatisDao<T, ID> {
 
     default int delete(@NonNull Collection<ID> ids) {
         if (CollUtil.isEmpty(ids)) {
-            return -1;
+            return 0;
         } else {
             var chain = StringDeleteChain.of(this);
             chain.sqlParamsSize(1);

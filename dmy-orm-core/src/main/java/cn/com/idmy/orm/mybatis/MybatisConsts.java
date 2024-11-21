@@ -1,8 +1,11 @@
 package cn.com.idmy.orm.mybatis;
 
+import lombok.NoArgsConstructor;
+
 import java.util.List;
 import java.util.Map;
 
+@NoArgsConstructor(access = lombok.AccessLevel.PRIVATE)
 class MybatisConsts {
     static final String CHAIN = "$chain$";
     static final String SQL_PARAMS = "$sqlParams$";

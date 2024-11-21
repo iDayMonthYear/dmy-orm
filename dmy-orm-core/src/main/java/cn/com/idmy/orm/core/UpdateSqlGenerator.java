@@ -15,7 +15,7 @@ import static cn.com.idmy.orm.core.SqlConsts.SET;
 import static cn.com.idmy.orm.core.SqlConsts.UPDATE;
 
 @Slf4j
-public class UpdateSqlGenerator extends AbstractSqlGenerator {
+class UpdateSqlGenerator extends AbstractSqlGenerator {
     public static Pair<String, List<Object>> gen(UpdateChain<?> chain) {
         var nodes = chain.nodes();
         var sets = new ArrayList<Set>(nodes.size());
@@ -32,10 +32,10 @@ public class UpdateSqlGenerator extends AbstractSqlGenerator {
         var sql = new StringBuilder(UPDATE).append(SqlConsts.STRESS_MARK).append(TableManager.getTableName(chain.entityClass())).append(SqlConsts.STRESS_MARK).append(SET);
         var params = new ArrayList<>(chain.sqlParamsSize());
         if (!sets.isEmpty()) {
-            for (int i = 0, setsSize = sets.size(); i < setsSize; i++) {
+            for (int i = 0, size = sets.size(); i < size; i++) {
                 Set set = sets.get(i);
                 builder(set, sql, params);
-                if (i < setsSize - 1) {
+                if (i < size - 1) {
                     Type type = sets.get(i + 1).type();
                     if (type == Type.SET) {
                         sql.append(DELIMITER);

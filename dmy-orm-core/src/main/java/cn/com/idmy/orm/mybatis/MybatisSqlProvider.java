@@ -10,7 +10,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-
 public class MybatisSqlProvider {
 
     private static String buildCommonSql(Map<String, Object> params) {
