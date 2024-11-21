@@ -385,9 +385,10 @@ if (StringUtils.isNotBlank(name)) {
 ```java
 userDao.find(
    SelectChain.of(userDao)
-      .or()
       .eq(User::getStatus, UserStatus.ACTIVE)
+      .or()
       .eq(User::getStatus, UserStatus.PENDING)
+      .eq(User::getId, 1L)
 );
 ```
 
