@@ -8,8 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.ArrayList;
 import java.util.List;
 
-import static cn.com.idmy.orm.core.SqlConsts.DELETE;
-import static cn.com.idmy.orm.core.SqlConsts.FROM;
+import static cn.com.idmy.orm.core.SqlConsts.DELETE_FROM;
 
 @Slf4j
 class DeleteSqlGenerator extends AbstractSqlGenerator {
@@ -24,7 +23,7 @@ class DeleteSqlGenerator extends AbstractSqlGenerator {
             }
         }
         var params = new ArrayList<>(chain.sqlParamsSize());
-        var sql = new StringBuilder(DELETE).append(FROM).append(SqlConsts.STRESS_MARK).append(TableManager.getTableName(chain.entityClass())).append(SqlConsts.STRESS_MARK);
+        var sql = new StringBuilder(DELETE_FROM).append(SqlConsts.STRESS_MARK).append(TableManager.getTableName(chain.entityClass())).append(SqlConsts.STRESS_MARK);
         buildWhere(wheres, sql, params);
         return Pair.of(sql.toString(), params);
     }

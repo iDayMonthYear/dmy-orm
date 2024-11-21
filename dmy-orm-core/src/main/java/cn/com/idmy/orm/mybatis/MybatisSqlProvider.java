@@ -1,25 +1,15 @@
 package cn.com.idmy.orm.mybatis;
 
 import cn.com.idmy.orm.OrmException;
-import cn.com.idmy.orm.core.LambdaWhere;
+import cn.com.idmy.orm.core.AbstractWhere;
 import cn.com.idmy.orm.core.SqlConsts;
 import cn.com.idmy.orm.core.TableManager;
 import org.dromara.hutool.core.reflect.FieldUtil;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
 public class MybatisSqlProvider {
-
-    private static String buildCommonSql(Map<String, Object> params) {
-        var chain = (LambdaWhere<?, ?>) params.get(MybatisConsts.CHAIN);
-        var pair = chain.sql();
-        params.put(MybatisConsts.SQL_PARAMS, pair.right);
-        MybatisConsts.putEntityClass(params, chain.entityClass());
-        return pair.left;
-    }
-
     public String get(Map<String, Object> params) {
         return buildCommonSql(params);
     }
@@ -38,18 +28,14 @@ public class MybatisSqlProvider {
 
     public String insert(Map<String, Object> params) {
         var entity = params.get(MybatisConsts.ENTITY);
-        var entityClass = entity.getClass();
-        var tableInfo = TableManager.getTableInfo(entityClass);
-        var columns = tableInfo.columns();
+        var table = TableManager.getTableInfo(entity.getClass());
+        var columns = table.columns();
 
-        var sql = new StringBuilder(SqlConsts.INSERT_INTO)
-                .append(SqlConsts.STRESS_MARK).append(tableInfo.name()).append(SqlConsts.STRESS_MARK)
-                .append(SqlConsts.BRACKET_LEFT);
+        var sql = builderInsertHeader(table.name());
 
         var values = new StringBuilder(SqlConsts.VALUES).append(SqlConsts.BRACKET_LEFT);
 
-        List<Object> sqlParams = new ArrayList<>(columns.length);
-        params.put(MybatisConsts.SQL_PARAMS, sqlParams);
+        var sqlParams = new ArrayList<>(columns.length);
 
         for (int i = 0, size = columns.length; i < size; i++) {
             var column = columns[i];
@@ -64,7 +50,8 @@ public class MybatisSqlProvider {
             }
         }
 
-        MybatisConsts.putEntityClass(params, entityClass);
+        params.put(MybatisConsts.SQL_PARAMS, sqlParams);
+        MybatisConsts.putEntityClass(params, entity.getClass());
         return sql.append(SqlConsts.BRACKET_RIGHT).append(values).append(SqlConsts.BRACKET_RIGHT).toString();
     }
 
@@ -73,14 +60,9 @@ public class MybatisSqlProvider {
         if (entities.isEmpty()) {
             throw new OrmException("批量插入的实体集合不能为空");
         }
-
-        var entityClass = entities.iterator().next().getClass();
-        var tableInfo = TableManager.getTableInfo(entityClass);
-        var columns = tableInfo.columns();
-
-        var sql = new StringBuilder(SqlConsts.INSERT_INTO)
-                .append(SqlConsts.STRESS_MARK).append(tableInfo.name()).append(SqlConsts.STRESS_MARK)
-                .append(SqlConsts.BRACKET_LEFT);
+        var table = TableManager.getTableInfo(entities.getFirst().getClass());
+        var columns = table.columns();
+        var sql = builderInsertHeader(table.name());
 
         // 构建列名部分
         for (int i = 0, size = columns.length; i < size; i++) {
@@ -90,13 +72,11 @@ public class MybatisSqlProvider {
                 sql.append(SqlConsts.DELIMITER);
             }
         }
-
-        sql.append(SqlConsts.BRACKET_RIGHT).append(SqlConsts.VALUES);
-
-        List<Object> sqlParams = new ArrayList<>(columns.length);
-        params.put(MybatisConsts.SQL_PARAMS, sqlParams);
+        sql.append(SqlConsts.BRACKET_RIGHT);
 
         // 构建values部分
+        sql.append(SqlConsts.VALUES);
+        var sqlParams = new ArrayList<>(columns.length);
         var first = true;
         for (var entity : entities) {
             if (first) {
@@ -104,9 +84,8 @@ public class MybatisSqlProvider {
             } else {
                 sql.append(SqlConsts.DELIMITER);
             }
-
             sql.append(SqlConsts.BRACKET_LEFT);
-            for (int i = 0, size = columns.length; i < size; i++) {
+            for (int i = 0, size = columns.length - 1; i < size; i++) {
                 sql.append(SqlConsts.PLACEHOLDER);
                 sqlParams.add(FieldUtil.getFieldValue(entity, columns[i].name()));
                 if (i < size - 1) {
@@ -115,8 +94,25 @@ public class MybatisSqlProvider {
             }
             sql.append(SqlConsts.BRACKET_RIGHT);
         }
-
-        MybatisConsts.putEntityClass(params, entityClass);
+        params.put(MybatisConsts.SQL_PARAMS, sqlParams);
+        MybatisConsts.putEntityClass(params, entities.getFirst().getClass());
         return sql.toString();
+    }
+
+    private static StringBuilder builderInsertHeader(String name) {
+        return new StringBuilder(SqlConsts.INSERT_INTO)
+                .append(SqlConsts.STRESS_MARK)
+                .append(name)
+                .append(SqlConsts.STRESS_MARK)
+                .append(SqlConsts.BLANK)
+                .append(SqlConsts.BRACKET_LEFT);
+    }
+
+    private static String buildCommonSql(Map<String, Object> params) {
+        var where = (AbstractWhere<?, ?>) params.get(MybatisConsts.CHAIN);
+        var pair = where.sql();
+        params.put(MybatisConsts.SQL_PARAMS, pair.right);
+        MybatisConsts.putEntityClass(params, where.entityClass());
+        return pair.left;
     }
 }
