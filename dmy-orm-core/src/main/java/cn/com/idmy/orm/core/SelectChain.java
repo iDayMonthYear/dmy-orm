@@ -1,10 +1,7 @@
 package cn.com.idmy.orm.core;
 
 import cn.com.idmy.base.model.Pair;
-import cn.com.idmy.orm.core.Node.Distinct;
-import cn.com.idmy.orm.core.Node.GroupBy;
-import cn.com.idmy.orm.core.Node.OrderBy;
-import cn.com.idmy.orm.core.Node.SelectColumn;
+import cn.com.idmy.orm.core.Node.*;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
@@ -46,7 +43,7 @@ public class SelectChain<T> extends LambdaWhere<T, SelectChain<T>> {
     }
 
     void clearSelects() {
-        nodes = nodes.stream().filter(node -> !(node instanceof SelectColumn) && !(node instanceof Distinct)).collect(Collectors.toList());
+        nodes = nodes.stream().filter(node -> node.type() != Type.SELECT_COLUMN && node.type() != Type.DISTINCT).collect(Collectors.toList());
     }
 
     public SelectChain<T> select(SqlFnExpr<T> expr) {

@@ -23,6 +23,7 @@ public class MybatisSqlProvider {
 
     public static final String ENTITY = "$entity$";
     public static final String ENTITIES = "$entities$";
+    private static final String ENTITY_CLASS = "$$entityClass$";
 
     public static final String GET = "get";
     public static final String FIND = "find";
@@ -31,8 +32,6 @@ public class MybatisSqlProvider {
     public static final String COUNT = "count";
     public static final String INSERT = "insert";
     public static final String INSERTS = "inserts";
-
-    private static final String ENTITY_CLASS = "$$entityClass$";
 
     public static void putEntityClass(Map<String, Object> params, Class<?> entityClass) {
         params.put(ENTITY_CLASS, entityClass);
@@ -319,10 +318,10 @@ public class MybatisSqlProvider {
         }
     }
 
-    public static <T, ID, R> Page<T> page(MybatisDao<T, ID> dao, Page<R> pageIn, SelectChain<T> select) {
-        select.limit = pageIn.getPageSize();
-        select.offset = pageIn.getOffset();
-        select.orderBy(pageIn.getSorts());
+    public static <T, ID, R> Page<T> page(MybatisDao<T, ID> dao, Page<R> pageIn, SelectChain<T> chain) {
+        chain.limit = pageIn.getPageSize();
+        chain.offset = pageIn.getOffset();
+        chain.orderBy(pageIn.getSorts());
 
         var params = pageIn.getParams();
         if (params instanceof Param<?> param) {
@@ -330,17 +329,17 @@ public class MybatisSqlProvider {
             var idVal = param.getId();
             if (idVal != null) {
                 var idName = TableManager.getIdName(entityClass);
-                select.addNode(new Cond(idName, Op.EQ, idVal));
+                chain.addNode(new Cond(idName, Op.EQ, idVal));
             } else {
                 var idsVal = param.getIds();
                 if (CollUtil.isNotEmpty(idsVal)) {
                     var idName = TableManager.getIdName(entityClass);
-                    select.addNode(new Cond(idName, Op.IN, idsVal));
+                    chain.addNode(new Cond(idName, Op.IN, idsVal));
                 } else {
                     var notIdsVal = param.getIds();
                     if (CollUtil.isNotEmpty(idsVal)) {
                         var idName = TableManager.getIdName(entityClass);
-                        select.addNode(new Cond(idName, Op.NOT_IN, notIdsVal));
+                        chain.addNode(new Cond(idName, Op.NOT_IN, notIdsVal));
                     }
                 }
             }
@@ -348,18 +347,18 @@ public class MybatisSqlProvider {
             var createdAts = param.getCreatedAts();
             if (ArrayUtil.isNotEmpty(createdAts) && createdAts.length == 2) {
                 String createdAt = TableManager.getColumnName(entityClass, "createdAt");
-                select.addNode(new Cond(createdAt, Op.BETWEEN, createdAts));
+                chain.addNode(new Cond(createdAt, Op.BETWEEN, createdAts));
             }
             var updatedAts = param.getUpdatedAts();
             if (ArrayUtil.isNotEmpty(updatedAts) && updatedAts.length == 2) {
                 String updatedAt = TableManager.getColumnName(entityClass, "updatedAt");
-                select.addNode(new Cond(updatedAt, Op.BETWEEN, createdAts));
+                chain.addNode(new Cond(updatedAt, Op.BETWEEN, createdAts));
             }
         }
 
-        var rows = dao.find(select);
+        var rows = dao.find(chain);
         if (pageIn.getNeedTotal() == null || pageIn.getNeedTotal()) {
-            pageIn.setTotal(dao.count(select));
+            pageIn.setTotal(dao.count(chain));
         } else {
             pageIn.setTotal(rows.size());
         }
