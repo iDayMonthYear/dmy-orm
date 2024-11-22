@@ -16,7 +16,7 @@ import static cn.com.idmy.orm.core.SqlFnName.COUNT;
 
 
 @Slf4j
-abstract class AbstractSqlGenerator {
+abstract class SqlGenerator {
     protected static String buildColumn(Object col) {
         if (col instanceof ColumnGetter<?, ?> getter) {
             return STRESS_MARK + LambdaUtil.getFieldName(getter) + STRESS_MARK;

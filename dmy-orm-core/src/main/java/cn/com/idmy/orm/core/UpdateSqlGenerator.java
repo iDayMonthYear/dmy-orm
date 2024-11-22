@@ -15,7 +15,7 @@ import static cn.com.idmy.orm.core.SqlConsts.SET;
 import static cn.com.idmy.orm.core.SqlConsts.UPDATE;
 
 @Slf4j
-class UpdateSqlGenerator extends AbstractSqlGenerator {
+class UpdateSqlGenerator extends SqlGenerator {
     public static Pair<String, List<Object>> gen(Updates<?> chain) {
         var nodes = chain.nodes();
         var sets = new ArrayList<Set>(nodes.size());
