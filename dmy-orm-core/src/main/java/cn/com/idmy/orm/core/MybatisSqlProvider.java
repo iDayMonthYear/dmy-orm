@@ -1,15 +1,18 @@
 package cn.com.idmy.orm.core;
 
+import cn.com.idmy.base.model.Page;
 import cn.com.idmy.orm.OrmException;
+import jakarta.annotation.Nullable;
+import lombok.NonNull;
+import org.dromara.hutool.core.collection.CollStreamUtil;
 import org.dromara.hutool.core.reflect.FieldUtil;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+
+import static cn.com.idmy.orm.core.MybatisDao.DEFAULT_BATCH_SIZE;
 
 public class MybatisSqlProvider {
     public static final String CHAIN = "$chain$";
-
     public static final String SQL_PARAMS = "$sqlParams$";
 
     public static final String ENTITY = "$entity$";
@@ -44,7 +47,6 @@ public class MybatisSqlProvider {
         params.put(SQL_PARAMS, pair.right);
         return pair.left;
     }
-
 
     public String get(Map<String, Object> params) {
         var where = (SelectChain<?>) params.get(CHAIN);
@@ -160,4 +162,142 @@ public class MybatisSqlProvider {
                 .append(SqlConsts.BRACKET_LEFT);
     }
 
+    public static <T, ID> int inserts(MybatisDao<T, ID> dao, Collection<T> entities, int size) {
+        if (entities.isEmpty()) {
+            return 0;
+        }
+        if (size <= 0) {
+            size = DEFAULT_BATCH_SIZE;
+        }
+        var entityList = entities instanceof List ? (List<T>) entities : new ArrayList<>(entities);
+        int sum = 0;
+        int entitiesSize = entities.size();
+        int maxIndex = entitiesSize / size + (entitiesSize % size == 0 ? 0 : 1);
+        for (int i = 0; i < maxIndex; i++) {
+            sum += dao.inserts(entityList.subList(i * size, Math.min(i * size + size, entitiesSize)));
+        }
+        return sum;
+    }
+
+    @Nullable
+    public static <T, ID> T get(MybatisDao<T, ID> dao, ID id) {
+        var chain = StringSelectChain.of(dao);
+        chain.onlyOne = true;
+        chain.eq(TableManager.getIdName(dao.entityClass()), id);
+        return dao.get(chain);
+    }
+
+    @Nullable
+    public static <T, ID, R> R get(MybatisDao<T, ID> dao, ColumnGetter<T, R> getter, ID id) {
+        var chain = (StringSelectChain<T>) StringSelectChain.of(dao).select(getter);
+        chain.sqlParamsSize(1);
+        chain.onlyOne = true;
+        chain.eq(TableManager.getIdName(dao.entityClass()), id);
+        T t = dao.get(chain);
+        if (t == null) {
+            return null;
+        } else {
+            return getter.get(t);
+        }
+    }
+
+    public static <T, ID, R> R get(MybatisDao<T, ID> dao, ColumnGetter<T, R> getter, SelectChain<T> chain) {
+        if (chain.hasSelectColumn) {
+            throw new IllegalArgumentException("select ... from 中间不能有字段或者函数");
+        }
+        T t = dao.get(chain.select(getter));
+        if (t == null) {
+            return null;
+        } else {
+            return getter.get(t);
+        }
+    }
+
+    public static <T, ID> List<T> find(MybatisDao<T, ID> dao, Collection<ID> ids) {
+        if (ids.isEmpty()) {
+            return Collections.emptyList();
+        } else {
+            var chain = StringSelectChain.of(dao);
+            chain.sqlParamsSize(1);
+            chain.in(TableManager.getIdName(dao.entityClass()), ids);
+            return dao.find(chain);
+        }
+    }
+
+    public static <T, ID, R> List<R> find(MybatisDao<T, ID> dao, ColumnGetter<T, R> getter, Collection<ID> ids) {
+        if (ids.isEmpty()) {
+            return Collections.emptyList();
+        } else {
+            var chain = (StringSelectChain<T>) StringSelectChain.of(dao).select(getter);
+            chain.sqlParamsSize(1);
+            chain.in(TableManager.getIdName(dao.entityClass()), ids);
+            return dao.find(chain).stream().map(getter::get).toList();
+        }
+    }
+
+    @Nullable
+    public static <T, ID, R extends Number> R fn(MybatisDao<T, ID> dao, SqlFnName name, ColumnGetter<T, R> getter, SelectChain<T> chain) {
+        if (chain.hasSelectColumn) {
+            throw new IllegalArgumentException("select ... from 中间不能有字段或者函数");
+        } else if (name == SqlFnName.IF_NULL) {
+            throw new IllegalArgumentException("不支持ifnull");
+        } else {
+            chain.onlyOne = true;
+            T t = dao.get(chain.select(() -> new SqlFn<>(name, getter)));
+            if (t == null) {
+                return null;
+            } else {
+                return getter.get(t);
+            }
+        }
+    }
+
+    public static <T, ID> int delete(MybatisDao<T, ID> dao, ID id) {
+        var chain = StringDeleteChain.of(dao);
+        chain.sqlParamsSize(1);
+        chain.eq(TableManager.getIdName(dao.entityClass()), id);
+        return dao.delete(chain);
+    }
+
+    public static <T, ID> int delete(MybatisDao<T, ID> dao, Collection<ID> ids) {
+        if (ids.isEmpty()) {
+            return 0;
+        } else {
+            var chain = StringDeleteChain.of(dao);
+            chain.sqlParamsSize(1);
+            chain.in(TableManager.getIdName(dao.entityClass()), ids);
+            return dao.delete(chain);
+        }
+    }
+
+    public static <T, ID> Map<ID, T> map(MybatisDao<T, ID> dao, @NonNull ID[] ids) {
+        if (ids.length == 0) {
+            return Collections.emptyMap();
+        } else {
+            var chain = StringSelectChain.of(dao);
+            chain.sqlParamsSize(1);
+            chain.in(TableManager.getIdName(dao.entityClass()), (Object) ids);
+            var entities = dao.find(chain);
+            return CollStreamUtil.toIdentityMap(entities, TableManager::getIdValue);
+        }
+    }
+
+    public static <T, ID> Map<ID, T> map(MybatisDao<T, ID> dao, @NonNull Collection<ID> ids) {
+        if (ids.isEmpty()) {
+            return Collections.emptyMap();
+        } else {
+            var chain = StringSelectChain.of(dao);
+            chain.sqlParamsSize(1);
+            chain.in(TableManager.getIdName(dao.entityClass()), ids);
+            var entities = dao.find(chain);
+            return CollStreamUtil.toIdentityMap(entities, TableManager::getIdValue);
+        }
+    }
+
+    public static <T, ID, R> Page<T> page(MybatisDao<T, ID> dao, Page<R> pageIn, SelectChain<T> select) {
+        select.limit(pageIn.getPageSize());
+        select.offset(pageIn.getOffset());
+        List<T> rows = dao.find(select);
+        return Page.of(pageIn.getPageNo(), pageIn.getPageSize(), pageIn.getTotal(), rows);
+    }
 }

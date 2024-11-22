@@ -7,7 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Getter
 @Accessors(fluent = true, chain = false)
-public class StringDeleteChain<T> extends DeleteChain<T> implements StringWhere<T, StringDeleteChain<T>> {
+class StringDeleteChain<T> extends DeleteChain<T> implements StringWhere<T, StringDeleteChain<T>> {
 
     @Override
     public StringDeleteChain<T> addNode(Node node) {
