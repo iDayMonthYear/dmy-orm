@@ -20,7 +20,8 @@ class UpdateSqlGenerator extends SqlGenerator {
         var nodes = update.nodes;
         var sets = new ArrayList<Set>(nodes.size());
         var wheres = new ArrayList<Node>(nodes.size() - 1);
-        for (var node : nodes) {
+        for (int i = 0, size = nodes.size(); i < size; i++) {
+            var node = nodes.get(i);
             if (node instanceof Set set) {
                 sets.add(set);
             } else if (node instanceof Cond) {

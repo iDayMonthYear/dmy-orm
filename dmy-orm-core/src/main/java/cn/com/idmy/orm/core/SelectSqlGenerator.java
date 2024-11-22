@@ -27,8 +27,8 @@ class SelectSqlGenerator extends SqlGenerator {
         var groups = new ArrayList<GroupBy>(1);
         var orders = new ArrayList<OrderBy>(2);
         Distinct distinct = null;
-        for (Node node : nodes) {
-            switch (node) {
+        for (int i = 0, size = nodes.size(); i < size; i++) {
+            switch (nodes.get(i)) {
                 case Cond cond -> wheres.add(cond);
                 case SelectColumn selectColumn -> selectColumns.add(selectColumn);
                 case GroupBy groupBy -> groups.add(groupBy);

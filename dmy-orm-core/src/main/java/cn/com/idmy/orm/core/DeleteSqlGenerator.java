@@ -15,7 +15,8 @@ class DeleteSqlGenerator extends SqlGenerator {
     public static Pair<String, List<Object>> gen(Deletes<?> delete) {
         var nodes = delete.nodes;
         var wheres = new ArrayList<Node>(nodes.size());
-        for (var node : nodes) {
+        for (int i = 0, size = nodes.size(); i < size; i++) {
+            var node = nodes.get(i);
             if (node instanceof Cond) {
                 wheres.add(node);
             } else if (node instanceof Or) {
