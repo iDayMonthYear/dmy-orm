@@ -128,6 +128,7 @@ abstract class AbstractSqlGenerator {
             name = (String) column;
             //字符串类型可以是前端过来的。必须检查
             SqlUtil.checkColumn(name);
+            name = STRESS_MARK + name + STRESS_MARK;
         }
         sql.append(name).append(order.desc() ? DESC : EMPTY);
         return sql;

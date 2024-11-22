@@ -1,5 +1,6 @@
 package cn.com.idmy.ts.server.service;
 
+import cn.com.idmy.base.model.Page;
 import cn.com.idmy.ts.server.model.entity.App;
 
 import java.util.Collection;
@@ -12,7 +13,7 @@ public interface AppService  {
 
     List<App> find(Collection<Long> ids);
     
-    void testCrud();
+    Page<App> testCrud();
     
     void testBatchOperations();
     

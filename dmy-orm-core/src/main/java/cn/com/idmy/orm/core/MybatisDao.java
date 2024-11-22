@@ -80,12 +80,7 @@ public interface MybatisDao<T, ID> {
     @SuppressWarnings({"unchecked"})
     @Nullable
     default T get(@NonNull SelectChain<T> chain, @NonNull ColumnGetter<T, ?>... getters) {
-        if (chain.hasSelectColumn) {
-            throw new IllegalArgumentException("select ... from 中间不能有字段或者函数");
-        } else {
-            chain.onlyOne = true;
-            return get(chain.select(getters));
-        }
+        return MybatisSqlProvider.get(this, chain, getters);
     }
 
     default List<T> all() {
@@ -101,19 +96,11 @@ public interface MybatisDao<T, ID> {
     }
 
     default <R> List<R> find(@NonNull ColumnGetter<T, R> getter, @NonNull SelectChain<T> chain) {
-        if (chain.hasSelectColumn) {
-            throw new IllegalArgumentException("select ... from 中间不能有字段或者函数");
-        } else {
-            var ts = find(chain.select(getter));
-            return CollStreamUtil.toList(ts, getter::get);
-        }
+        return MybatisSqlProvider.find(this, getter, chain);
     }
 
     default boolean exists(@NonNull ID id) {
-        var chain = StringSelectChain.of(this);
-        chain.sqlParamsSize(1);
-        chain.eq(TableManager.getIdName(entityClass()), id);
-        return count(chain) > 0;
+        return MybatisSqlProvider.exists(this, id);
     }
 
     default boolean notExists(@NonNull ID id) {

@@ -31,9 +31,8 @@ class AppController {
 
 
     @PostMapping("/crud")
-    public String testCrud() {
-        appService.testCrud();
-        return "CRUD test completed";
+    public Object testCrud() {
+        return appService.testCrud();
     }
 
     @PostMapping("/batch")

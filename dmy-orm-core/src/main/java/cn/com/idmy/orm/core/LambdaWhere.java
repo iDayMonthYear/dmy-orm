@@ -31,6 +31,7 @@ public abstract class LambdaWhere<T, WHERE extends LambdaWhere<T, WHERE>> extend
             default -> {
             }
         }
+        super.addNode(node);
         return $this;
     }
 

@@ -4,6 +4,7 @@ import cn.com.idmy.base.model.Page;
 import cn.com.idmy.orm.OrmException;
 import jakarta.annotation.Nullable;
 import lombok.NonNull;
+import lombok.extern.slf4j.Slf4j;
 import org.dromara.hutool.core.collection.CollStreamUtil;
 import org.dromara.hutool.core.reflect.FieldUtil;
 
@@ -11,6 +12,7 @@ import java.util.*;
 
 import static cn.com.idmy.orm.core.MybatisDao.DEFAULT_BATCH_SIZE;
 
+@Slf4j
 public class MybatisSqlProvider {
     public static final String CHAIN = "$chain$";
     public static final String SQL_PARAMS = "$sqlParams$";
@@ -40,6 +42,13 @@ public class MybatisSqlProvider {
         return (List<Object>) params.get(ENTITIES);
     }
 
+    private static void clearSelects(SelectChain<?> chain) {
+        if (chain.hasSelectColumn) {
+            chain.clearSelects();
+            log.warn("select ... from 中间不能有字段或者函数");
+        }
+    }
+
     private static String buildCommonSql(Map<String, Object> params) {
         var where = (AbstractWhere<?, ?>) params.get(CHAIN);
         putEntityClass(params, where.entityClass());
@@ -49,10 +58,6 @@ public class MybatisSqlProvider {
     }
 
     public String get(Map<String, Object> params) {
-        var where = (SelectChain<?>) params.get(CHAIN);
-        if (!where.onlyOne) {
-            where.limit(1);
-        }
         return buildCommonSql(params);
     }
 
@@ -69,13 +74,13 @@ public class MybatisSqlProvider {
     }
 
     public String count(Map<String, Object> params) {
-        var where = (SelectChain<?>) params.get(CHAIN);
-        if (where.hasSelectColumn) {
-            throw new IllegalArgumentException("select ... from 中间不能有字段或者函数");
-        }
-        where.select(SqlFn::count);
-        putEntityClass(params, where.entityClass());
-        var pair = where.sql();
+        var chain = (SelectChain<?>) params.get(CHAIN);
+        clearSelects(chain);
+        chain.limit = null;
+        chain.offset = null;
+        chain.select(SqlFn::count);
+        putEntityClass(params, chain.entityClass());
+        var pair = chain.sql();
         params.put(SQL_PARAMS, pair.right);
         return pair.left;
     }
@@ -182,7 +187,7 @@ public class MybatisSqlProvider {
     @Nullable
     public static <T, ID> T get(MybatisDao<T, ID> dao, ID id) {
         var chain = StringSelectChain.of(dao);
-        chain.onlyOne = true;
+        chain.sqlParamsSize(1);
         chain.eq(TableManager.getIdName(dao.entityClass()), id);
         return dao.get(chain);
     }
@@ -191,7 +196,6 @@ public class MybatisSqlProvider {
     public static <T, ID, R> R get(MybatisDao<T, ID> dao, ColumnGetter<T, R> getter, ID id) {
         var chain = (StringSelectChain<T>) StringSelectChain.of(dao).select(getter);
         chain.sqlParamsSize(1);
-        chain.onlyOne = true;
         chain.eq(TableManager.getIdName(dao.entityClass()), id);
         T t = dao.get(chain);
         if (t == null) {
@@ -202,15 +206,26 @@ public class MybatisSqlProvider {
     }
 
     public static <T, ID, R> R get(MybatisDao<T, ID> dao, ColumnGetter<T, R> getter, SelectChain<T> chain) {
-        if (chain.hasSelectColumn) {
-            throw new IllegalArgumentException("select ... from 中间不能有字段或者函数");
-        }
+        clearSelects(chain);
+        chain.limit = 1;
         T t = dao.get(chain.select(getter));
         if (t == null) {
             return null;
         } else {
             return getter.get(t);
         }
+    }
+
+    public static <T, ID> T get(MybatisDao<T, ID> dao, SelectChain<T> chain, @NonNull ColumnGetter<T, ?>[] getters) {
+        clearSelects(chain);
+        chain.limit = 1;
+        return dao.get(chain.select(getters));
+    }
+
+    public static <T, ID, R> List<R> find(MybatisDao<T, ID> dao, ColumnGetter<T, R> getter, SelectChain<T> chain) {
+        clearSelects(chain);
+        var ts = dao.find(chain.select(getter));
+        return CollStreamUtil.toList(ts, getter::get);
     }
 
     public static <T, ID> List<T> find(MybatisDao<T, ID> dao, Collection<ID> ids) {
@@ -237,12 +252,11 @@ public class MybatisSqlProvider {
 
     @Nullable
     public static <T, ID, R extends Number> R fn(MybatisDao<T, ID> dao, SqlFnName name, ColumnGetter<T, R> getter, SelectChain<T> chain) {
-        if (chain.hasSelectColumn) {
-            throw new IllegalArgumentException("select ... from 中间不能有字段或者函数");
-        } else if (name == SqlFnName.IF_NULL) {
+        if (name == SqlFnName.IF_NULL) {
             throw new IllegalArgumentException("不支持ifnull");
         } else {
-            chain.onlyOne = true;
+            clearSelects(chain);
+            chain.limit = 1;
             T t = dao.get(chain.select(() -> new SqlFn<>(name, getter)));
             if (t == null) {
                 return null;
@@ -250,6 +264,13 @@ public class MybatisSqlProvider {
                 return getter.get(t);
             }
         }
+    }
+
+    public static <T, ID> boolean exists(MybatisDao<T, ID> dao, ID id) {
+        var chain = StringSelectChain.of(dao);
+        chain.sqlParamsSize(1);
+        chain.eq(TableManager.getIdName(dao.entityClass()), id);
+        return dao.count(chain) > 0;
     }
 
     public static <T, ID> int delete(MybatisDao<T, ID> dao, ID id) {
@@ -295,9 +316,15 @@ public class MybatisSqlProvider {
     }
 
     public static <T, ID, R> Page<T> page(MybatisDao<T, ID> dao, Page<R> pageIn, SelectChain<T> select) {
-        select.limit(pageIn.getPageSize());
-        select.offset(pageIn.getOffset());
+        select.limit = pageIn.getPageSize();
+        select.offset = pageIn.getOffset();
+        select.orderBy(pageIn.getSorts());
         List<T> rows = dao.find(select);
+        if (pageIn.getNeedTotal() == null || pageIn.getNeedTotal()) {
+            pageIn.setTotal(dao.count(select));
+        } else {
+            pageIn.setTotal(rows.size());
+        }
         return Page.of(pageIn.getPageNo(), pageIn.getPageSize(), pageIn.getTotal(), rows);
     }
 }

@@ -16,7 +16,7 @@ import java.util.List;
 @Accessors(fluent = true, chain = true)
 public abstract class AbstractWhere<T, WHERE extends AbstractWhere<T, WHERE>> {
     @Getter(value = AccessLevel.PROTECTED)
-    final List<Node> nodes = new ArrayList<>();
+    List<Node> nodes = new ArrayList<>();
 
     @SuppressWarnings({"unchecked"})
     protected final WHERE $this = (WHERE) this;

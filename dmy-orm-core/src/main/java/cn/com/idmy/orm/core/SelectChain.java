@@ -1,19 +1,31 @@
 package cn.com.idmy.orm.core;
 
 import cn.com.idmy.base.model.Pair;
-import cn.com.idmy.orm.core.Node.*;
+import cn.com.idmy.orm.core.Node.Distinct;
+import cn.com.idmy.orm.core.Node.GroupBy;
+import cn.com.idmy.orm.core.Node.OrderBy;
+import cn.com.idmy.orm.core.Node.SelectColumn;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
+import org.dromara.hutool.core.array.ArrayUtil;
 import org.dromara.hutool.core.lang.Assert;
 import org.dromara.hutool.core.text.StrUtil;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Accessors(fluent = true, chain = false)
 public class SelectChain<T> extends LambdaWhere<T, SelectChain<T>> {
     boolean hasSelectColumn = false;
-    boolean onlyOne = false;
+    @Getter
+    @Setter
+    protected Integer offset;
+    @Getter
+    @Setter
+    protected Integer limit;
 
     protected SelectChain(Class<T> entityClass) {
         super(entityClass);
@@ -33,6 +45,10 @@ public class SelectChain<T> extends LambdaWhere<T, SelectChain<T>> {
         return addNode(new Distinct(col));
     }
 
+    void clearSelects() {
+        nodes = nodes.stream().filter(node -> !(node instanceof SelectColumn) && !(node instanceof Distinct)).collect(Collectors.toList());
+    }
+
     public SelectChain<T> select(SqlFnExpr<T> expr) {
         hasSelectColumn = true;
         return addNode(new SelectColumn(expr));
@@ -45,7 +61,7 @@ public class SelectChain<T> extends LambdaWhere<T, SelectChain<T>> {
 
     @SafeVarargs
     public final SelectChain<T> select(ColumnGetter<T, ?>... cols) {
-        if (cols != null) {
+        if (ArrayUtil.isNotEmpty(cols)) {
             hasSelectColumn = true;
             for (ColumnGetter<T, ?> col : cols) {
                 addNode(new SelectColumn(col));
@@ -88,16 +104,6 @@ public class SelectChain<T> extends LambdaWhere<T, SelectChain<T>> {
         for (int i = 0; i < orders.length; i = i + 2) {
             addNode(new OrderBy(orders[i], StrUtil.equalsIgnoreCase(orders[i + 1], "desc")));
         }
-        return this;
-    }
-
-    public SelectChain<T> limit(int limit) {
-        addNode(new Limit(limit));
-        return this;
-    }
-
-    public SelectChain<T> offset(int offset) {
-        addNode(new Offset(offset));
         return this;
     }
 

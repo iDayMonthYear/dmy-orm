@@ -1,5 +1,6 @@
 package cn.com.idmy.ts.server.service.impl;
 
+import cn.com.idmy.base.model.Page;
 import cn.com.idmy.orm.core.SelectChain;
 import cn.com.idmy.ts.server.dao.AppDao;
 import cn.com.idmy.ts.server.model.entity.App;
@@ -35,7 +36,7 @@ public class AppServiceImpl implements AppService {
     }
 
     @Override
-    public void testCrud() {
+    public Page<App> testCrud() {
 //
 //        // Test create
 //        App newApp1 = App.builder()
@@ -69,7 +70,13 @@ public class AppServiceImpl implements AppService {
 //        System.out.println(count);
 //
 //        Console.error(dao.find(SelectChain.of(dao).endsWith(App::getName, "票")));
-        Console.error(dao.find(SelectChain.of(dao).between(App::getId, 1, 10)));
+//        Console.error(dao.find(SelectChain.of(dao).between(App::getId, 1, 10)));
+        Page<App> pageIn = Page.of(1, 2);
+        pageIn.setParams(new App());
+        pageIn.setSorts(new String[]{"key", "desc"});
+        Page<App> page = dao.page(pageIn, SelectChain.of(dao).between(App::getId, 1, 100));
+        Console.error(page);
+        return page;
     }
 
     @Override

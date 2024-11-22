@@ -141,26 +141,4 @@ public class Node {
             this.column = column;
         }
     }
-
-    @Getter
-    @Accessors(fluent = true)
-    static final class Limit extends Node {
-        private final int limit;
-
-        Limit(int limit) {
-            super(Type.LIMIT);
-            this.limit = limit;
-        }
-    }
-
-    @Getter
-    @Accessors(fluent = true)
-    static final class Offset extends Node {
-        private final int offset;
-
-        Offset(int offset) {
-            super(Type.OFFSET);
-            this.offset = offset;
-        }
-    }
 }
