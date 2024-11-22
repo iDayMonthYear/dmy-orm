@@ -1,5 +1,6 @@
 package cn.com.idmy.orm.core;
 
+import cn.com.idmy.orm.OrmException;
 import cn.com.idmy.orm.core.Node.*;
 import cn.com.idmy.orm.util.SqlUtil;
 import jakarta.annotation.Nullable;
@@ -47,7 +48,7 @@ abstract class SqlGenerator {
                 if (arr.length == 2) {
                     sql.append("? and ?");
                 } else {
-                    throw new IllegalArgumentException("between参数必须为2个元素");
+                    throw new OrmException("between参数必须为2个元素");
                 }
             } else {
                 buildPlaceholder(expr, sql);

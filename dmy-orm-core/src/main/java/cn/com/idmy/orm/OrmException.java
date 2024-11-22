@@ -1,6 +1,6 @@
 package cn.com.idmy.orm;
 
-public class OrmException extends RuntimeException {
+public class OrmException extends IllegalArgumentException {
     public OrmException(String e) {
         super(e);
     }

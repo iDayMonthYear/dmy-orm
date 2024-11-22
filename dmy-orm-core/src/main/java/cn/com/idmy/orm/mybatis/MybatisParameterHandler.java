@@ -49,7 +49,7 @@ class MybatisParameterHandler extends DefaultParameterHandler {
             case null -> ps.setObject(index, null);
             case Object[] arr -> {
                 if (arr.length == 0) {
-                    throw new IllegalArgumentException("Empty array");
+                    throw new OrmException("Empty array");
                 }
                 for (var item : arr) {
                     setParameter(ps, index++, item, params);
@@ -57,7 +57,7 @@ class MybatisParameterHandler extends DefaultParameterHandler {
             }
             case Collection<?> ls -> {
                 if (ls.isEmpty()) {
-                    throw new IllegalArgumentException("Empty list");
+                    throw new OrmException("Empty list");
                 }
                 for (var item : ls) {
                     setParameter(ps, index++, item, params);

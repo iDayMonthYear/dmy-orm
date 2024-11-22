@@ -1,5 +1,6 @@
 package cn.com.idmy.orm.util;
 
+import cn.com.idmy.orm.OrmException;
 import lombok.NoArgsConstructor;
 
 import java.util.regex.Pattern;
@@ -10,7 +11,7 @@ public class SqlUtil {
 
     public static void checkColumn(String field) {
         if (!FIELD_PATTERN.matcher(field).matches()) {
-            throw new IllegalArgumentException("非法列名：" + field);
+            throw new OrmException("非法列名：" + field);
         }
     }
 
