@@ -1,7 +1,7 @@
 package cn.com.idmy.ts.server.service.impl;
 
 import cn.com.idmy.base.model.Page;
-import cn.com.idmy.orm.core.SelectChain;
+import cn.com.idmy.orm.core.Selects;
 import cn.com.idmy.ts.server.dao.AppDao;
 import cn.com.idmy.ts.server.model.entity.App;
 import cn.com.idmy.ts.server.service.AppService;
@@ -20,7 +20,7 @@ public class AppServiceImpl implements AppService {
 
     @Override
     public List<App> all() {
-        SelectChain<App> chain = SelectChain.of(dao);
+        Selects<App> chain = Selects.of(dao);
         chain.in(App::getKey, "dmy-ts-admin", "saas-invoice-admin");
         return dao.find(chain);
     }
@@ -74,7 +74,7 @@ public class AppServiceImpl implements AppService {
         Page<App> pageIn = Page.of(1, 2);
         pageIn.setParams(new App());
         pageIn.setSorts(new String[]{"key", "desc"});
-        Page<App> page = dao.page(pageIn, SelectChain.of(dao).between(App::getId, 1, 100));
+        Page<App> page = dao.page(pageIn, Selects.of(dao).between(App::getId, 1, 100));
         Console.error(page);
         return page;
     }
@@ -88,7 +88,7 @@ public class AppServiceImpl implements AppService {
         System.out.println("Found " + apps.size() + " apps in batch query");
 
         // Test using SelectChain
-        SelectChain<App> chain = SelectChain.of(dao);
+        Selects<App> chain = Selects.of(dao);
         chain.in(App::getId, 1, 2);
         List<App> chainResult = dao.find(chain);
         System.out.println("Found " + chainResult.size() + " apps using SelectChain");
@@ -101,14 +101,14 @@ public class AppServiceImpl implements AppService {
         System.out.println("=== Testing query conditions ===");
 
         // Test different query conditions
-        SelectChain<App> chain = SelectChain.of(dao);
+        Selects<App> chain = Selects.of(dao);
 
         // Test like condition
         List<App> adminApps = dao.find(chain);
         System.out.println("Found " + adminApps.size() + " admin apps");
 
         // Test multiple conditions
-        chain = SelectChain.of(dao);
+        chain = Selects.of(dao);
         chain.in(App::getKey, "dmy-ts-admin")
                 .gt(App::getCreatedAt, LocalDateTime.now().minusDays(30));
         List<App> recentApps = dao.find(chain);

@@ -12,7 +12,7 @@ import static cn.com.idmy.orm.core.SqlConsts.DELETE_FROM;
 
 @Slf4j
 class DeleteSqlGenerator extends AbstractSqlGenerator {
-    public static Pair<String, List<Object>> gen(DeleteChain<?> chain) {
+    public static Pair<String, List<Object>> gen(Deletes<?> chain) {
         var nodes = chain.nodes();
         var wheres = new ArrayList<Node>(nodes.size());
         for (var node : nodes) {

@@ -13,7 +13,7 @@ public abstract class LambdaWhere<T, WHERE extends LambdaWhere<T, WHERE>> extend
         super(entityClass);
     }
 
-    WHERE addNode(Cond node) {
+    public WHERE addNode(Cond node) {
         switch (node.expr()) {
             case null -> {
                 return $this;

@@ -27,7 +27,7 @@ public class Node {
 
     @Getter
     @Accessors(fluent = true)
-    static final class Cond extends Node {
+    public static final class Cond extends Node {
         private final Object column;
         private final Op op;
         private final Object expr;

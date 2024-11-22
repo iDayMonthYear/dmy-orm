@@ -45,7 +45,7 @@ public class MybatisSqlProvider {
         return (List<Object>) params.get(ENTITIES);
     }
 
-    private static void clearSelects(SelectChain<?> chain) {
+    private static void clearSelects(Selects<?> chain) {
         if (chain.hasSelectColumn) {
             chain.clearSelects();
             log.warn("select ... from 中间不能有字段或者函数");
@@ -77,7 +77,7 @@ public class MybatisSqlProvider {
     }
 
     public String count(Map<String, Object> params) {
-        var chain = (SelectChain<?>) params.get(CHAIN);
+        var chain = (Selects<?>) params.get(CHAIN);
         clearSelects(chain);
         chain.limit = null;
         chain.offset = null;
@@ -189,18 +189,19 @@ public class MybatisSqlProvider {
 
     @Nullable
     public static <T, ID> T get(MybatisDao<T, ID> dao, ID id) {
-        var chain = StringSelectChain.of(dao);
-        chain.sqlParamsSize(1);
-        chain.eq(TableManager.getIdName(dao.entityClass()), id);
-        return dao.get(chain);
+        var select = Selects.of(dao);
+        select.sqlParamsSize(1);
+        select.addNode(new Cond(TableManager.getIdName(dao.entityClass()), Op.EQ, id));
+        return dao.get(select);
     }
 
     @Nullable
     public static <T, ID, R> R get(MybatisDao<T, ID> dao, ColumnGetter<T, R> getter, ID id) {
-        var chain = (StringSelectChain<T>) StringSelectChain.of(dao).select(getter);
-        chain.sqlParamsSize(1);
-        chain.eq(TableManager.getIdName(dao.entityClass()), id);
-        T t = dao.get(chain);
+        var select = Selects.of(dao);
+        select.select(getter);
+        select.sqlParamsSize(1);
+        select.addNode(new Cond(TableManager.getIdName(dao.entityClass()), Op.EQ, id));
+        T t = dao.get(select);
         if (t == null) {
             return null;
         } else {
@@ -208,7 +209,7 @@ public class MybatisSqlProvider {
         }
     }
 
-    public static <T, ID, R> R get(MybatisDao<T, ID> dao, ColumnGetter<T, R> getter, SelectChain<T> chain) {
+    public static <T, ID, R> R get(MybatisDao<T, ID> dao, ColumnGetter<T, R> getter, Selects<T> chain) {
         clearSelects(chain);
         chain.limit = 1;
         T t = dao.get(chain.select(getter));
@@ -219,13 +220,13 @@ public class MybatisSqlProvider {
         }
     }
 
-    public static <T, ID> T get(MybatisDao<T, ID> dao, SelectChain<T> chain, @NonNull ColumnGetter<T, ?>[] getters) {
+    public static <T, ID> T get(MybatisDao<T, ID> dao, Selects<T> chain, @NonNull ColumnGetter<T, ?>[] getters) {
         clearSelects(chain);
         chain.limit = 1;
         return dao.get(chain.select(getters));
     }
 
-    public static <T, ID, R> List<R> find(MybatisDao<T, ID> dao, ColumnGetter<T, R> getter, SelectChain<T> chain) {
+    public static <T, ID, R> List<R> find(MybatisDao<T, ID> dao, ColumnGetter<T, R> getter, Selects<T> chain) {
         clearSelects(chain);
         var ts = dao.find(chain.select(getter));
         return CollStreamUtil.toList(ts, getter::get);
@@ -235,10 +236,10 @@ public class MybatisSqlProvider {
         if (ids.isEmpty()) {
             return Collections.emptyList();
         } else {
-            var chain = StringSelectChain.of(dao);
-            chain.sqlParamsSize(1);
-            chain.in(TableManager.getIdName(dao.entityClass()), ids);
-            return dao.find(chain);
+            var select = Selects.of(dao);
+            select.sqlParamsSize(1);
+            select.addNode(new Cond(TableManager.getIdName(dao.entityClass()), Op.IN, ids));
+            return dao.find(select);
         }
     }
 
@@ -246,15 +247,15 @@ public class MybatisSqlProvider {
         if (ids.isEmpty()) {
             return Collections.emptyList();
         } else {
-            var chain = (StringSelectChain<T>) StringSelectChain.of(dao).select(getter);
-            chain.sqlParamsSize(1);
-            chain.in(TableManager.getIdName(dao.entityClass()), ids);
-            return dao.find(chain).stream().map(getter::get).toList();
+            var select = Selects.of(dao).select(getter);
+            select.sqlParamsSize(1);
+            select.addNode(new Cond(TableManager.getIdName(dao.entityClass()), Op.IN, ids));
+            return dao.find(select).stream().map(getter::get).toList();
         }
     }
 
     @Nullable
-    public static <T, ID, R extends Number> R fn(MybatisDao<T, ID> dao, SqlFnName name, ColumnGetter<T, R> getter, SelectChain<T> chain) {
+    public static <T, ID, R extends Number> R fn(MybatisDao<T, ID> dao, SqlFnName name, ColumnGetter<T, R> getter, Selects<T> chain) {
         if (name == SqlFnName.IF_NULL) {
             throw new IllegalArgumentException("不支持ifnull");
         } else {
@@ -270,27 +271,27 @@ public class MybatisSqlProvider {
     }
 
     public static <T, ID> boolean exists(MybatisDao<T, ID> dao, ID id) {
-        var chain = StringSelectChain.of(dao);
-        chain.sqlParamsSize(1);
-        chain.eq(TableManager.getIdName(dao.entityClass()), id);
-        return dao.count(chain) > 0;
+        var select = Selects.of(dao);
+        select.sqlParamsSize(1);
+        select.addNode(new Cond(TableManager.getIdName(dao.entityClass()), Op.EQ, id));
+        return dao.count(select) > 0;
     }
 
     public static <T, ID> int delete(MybatisDao<T, ID> dao, ID id) {
-        var chain = StringDeleteChain.of(dao);
-        chain.sqlParamsSize(1);
-        chain.eq(TableManager.getIdName(dao.entityClass()), id);
-        return dao.delete(chain);
+        var delete = Deletes.of(dao);
+        delete.sqlParamsSize(1);
+        delete.addNode(new Cond(TableManager.getIdName(dao.entityClass()), Op.EQ, id));
+        return dao.delete(delete);
     }
 
     public static <T, ID> int delete(MybatisDao<T, ID> dao, Collection<ID> ids) {
         if (ids.isEmpty()) {
             return 0;
         } else {
-            var chain = StringDeleteChain.of(dao);
-            chain.sqlParamsSize(1);
-            chain.in(TableManager.getIdName(dao.entityClass()), ids);
-            return dao.delete(chain);
+            var delete = Deletes.of(dao);
+            delete.sqlParamsSize(1);
+            delete.addNode(new Cond(TableManager.getIdName(dao.entityClass()), Op.IN, ids));
+            return dao.delete(delete);
         }
     }
 
@@ -298,10 +299,10 @@ public class MybatisSqlProvider {
         if (ids.length == 0) {
             return Collections.emptyMap();
         } else {
-            var chain = StringSelectChain.of(dao);
-            chain.sqlParamsSize(1);
-            chain.in(TableManager.getIdName(dao.entityClass()), (Object) ids);
-            var entities = dao.find(chain);
+            var select = Selects.of(dao);
+            select.sqlParamsSize(1);
+            select.addNode(new Cond(TableManager.getIdName(dao.entityClass()), Op.IN, ids));
+            var entities = dao.find(select);
             return CollStreamUtil.toIdentityMap(entities, TableManager::getIdValue);
         }
     }
@@ -310,15 +311,15 @@ public class MybatisSqlProvider {
         if (ids.isEmpty()) {
             return Collections.emptyMap();
         } else {
-            var chain = StringSelectChain.of(dao);
-            chain.sqlParamsSize(1);
-            chain.in(TableManager.getIdName(dao.entityClass()), ids);
-            var entities = dao.find(chain);
+            var select = Selects.of(dao);
+            select.sqlParamsSize(1);
+            select.addNode(new Cond(TableManager.getIdName(dao.entityClass()), Op.IN, ids));
+            var entities = dao.find(select);
             return CollStreamUtil.toIdentityMap(entities, TableManager::getIdValue);
         }
     }
 
-    public static <T, ID, R> Page<T> page(MybatisDao<T, ID> dao, Page<R> pageIn, SelectChain<T> chain) {
+    public static <T, ID, R> Page<T> page(MybatisDao<T, ID> dao, Page<R> pageIn, Selects<T> chain) {
         chain.limit = pageIn.getPageSize();
         chain.offset = pageIn.getOffset();
         chain.orderBy(pageIn.getSorts());

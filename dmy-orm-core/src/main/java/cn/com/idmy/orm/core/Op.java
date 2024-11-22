@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 
 @Getter
 @RequiredArgsConstructor
-enum Op {
+public enum Op {
     EQ("="),            // Equal
     NE("<>"),          // Not Equal
     LT("<"),           // Less Than

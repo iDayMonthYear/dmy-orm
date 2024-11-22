@@ -20,7 +20,7 @@ import static cn.com.idmy.orm.core.SqlConsts.SELECT;
 
 @Slf4j
 class SelectSqlGenerator extends AbstractSqlGenerator {
-    public static Pair<String, List<Object>> gen(SelectChain<?> chain) {
+    public static Pair<String, List<Object>> gen(Selects<?> chain) {
         var nodes = chain.nodes();
         var selectColumns = new ArrayList<SelectColumn>(nodes.size());
         var wheres = new ArrayList<Node>(nodes.size());

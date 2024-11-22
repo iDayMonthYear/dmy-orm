@@ -12,21 +12,21 @@ import java.util.List;
 @Slf4j
 @Getter
 @Accessors(fluent = true, chain = false)
-public class UpdateChain<T> extends LambdaWhere<T, UpdateChain<T>> {
+public class Updates<T> extends LambdaWhere<T, Updates<T>> {
 
-    protected UpdateChain(Class<T> entityClass) {
+    protected Updates(Class<T> entityClass) {
         super(entityClass);
     }
 
-    public static <T> UpdateChain<T> of(MybatisDao<T, ?> dao) {
-        return new UpdateChain<>(dao.entityClass());
+    public static <T> Updates<T> of(MybatisDao<T, ?> dao) {
+        return new Updates<>(dao.entityClass());
     }
 
-    public UpdateChain<T> set(ColumnGetter<T, ?> col, Object expr) {
+    public Updates<T> set(ColumnGetter<T, ?> col, Object expr) {
         return addNode(new Set(col,  expr));
     }
 
-    public UpdateChain<T> set(ColumnGetter<T, ?> col, SqlOpExpr expr) {
+    public Updates<T> set(ColumnGetter<T, ?> col, SqlOpExpr expr) {
         return addNode(new Set(col, expr));
     }
 

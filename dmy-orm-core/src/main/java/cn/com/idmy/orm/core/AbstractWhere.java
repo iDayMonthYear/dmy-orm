@@ -2,7 +2,6 @@ package cn.com.idmy.orm.core;
 
 import cn.com.idmy.base.model.Pair;
 import cn.com.idmy.orm.core.Node.Or;
-import jakarta.annotation.Nullable;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
@@ -44,7 +43,7 @@ public abstract class AbstractWhere<T, WHERE extends AbstractWhere<T, WHERE>> {
         }
     }
 
-    WHERE addNode(@Nullable Node node) {
+    WHERE addNode(Node node) {
         nodes.add(node);
         return $this;
     }
