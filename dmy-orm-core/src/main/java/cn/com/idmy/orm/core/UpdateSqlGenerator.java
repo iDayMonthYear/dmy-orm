@@ -19,7 +19,7 @@ class UpdateSqlGenerator extends AbstractSqlGenerator {
     public static Pair<String, List<Object>> gen(UpdateChain<?> chain) {
         var nodes = chain.nodes();
         var sets = new ArrayList<Set>(nodes.size());
-        var wheres = new ArrayList<Node>(nodes.size());
+        var wheres = new ArrayList<Node>(nodes.size() - 1);
         for (var node : nodes) {
             if (node instanceof Set set) {
                 sets.add(set);

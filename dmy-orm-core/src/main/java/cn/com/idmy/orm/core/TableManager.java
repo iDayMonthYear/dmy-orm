@@ -125,6 +125,12 @@ public class TableManager {
         return getTableInfo(entityClass).id().name();
     }
 
+    public static String getColumnName(Class<?> entityClass, String columnName) {
+        TableInfo tableInfo = getTableInfo(entityClass);
+        TableColumnInfo columnInfo = tableInfo.columnMap().get(columnName);
+        return columnInfo.name();
+    }
+
     @SuppressWarnings("unchecked")
     public static <T> T getIdValue(Object entity) {
         TableInfo tableInfo = getTableInfo(entity.getClass());
@@ -147,6 +153,7 @@ public class TableManager {
     public static void clearTypeHandler() {
         typeHandlers.clear();
     }
+
 
     private record TypeHandlerKey(Class<?> entityClass, String columnName) {
     }

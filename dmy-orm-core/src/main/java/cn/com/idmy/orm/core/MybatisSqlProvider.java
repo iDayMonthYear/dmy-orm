@@ -1,11 +1,15 @@
 package cn.com.idmy.orm.core;
 
 import cn.com.idmy.base.model.Page;
+import cn.com.idmy.base.model.Param;
 import cn.com.idmy.orm.OrmException;
+import cn.com.idmy.orm.core.Node.Cond;
 import jakarta.annotation.Nullable;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
+import org.dromara.hutool.core.array.ArrayUtil;
 import org.dromara.hutool.core.collection.CollStreamUtil;
+import org.dromara.hutool.core.collection.CollUtil;
 import org.dromara.hutool.core.reflect.FieldUtil;
 
 import java.util.*;
@@ -319,7 +323,41 @@ public class MybatisSqlProvider {
         select.limit = pageIn.getPageSize();
         select.offset = pageIn.getOffset();
         select.orderBy(pageIn.getSorts());
-        List<T> rows = dao.find(select);
+
+        var params = pageIn.getParams();
+        if (params instanceof Param<?> param) {
+            var entityClass = dao.entityClass();
+            var idVal = param.getId();
+            if (idVal != null) {
+                var idName = TableManager.getIdName(entityClass);
+                select.addNode(new Cond(idName, Op.EQ, idVal));
+            } else {
+                var idsVal = param.getIds();
+                if (CollUtil.isNotEmpty(idsVal)) {
+                    var idName = TableManager.getIdName(entityClass);
+                    select.addNode(new Cond(idName, Op.IN, idsVal));
+                } else {
+                    var notIdsVal = param.getIds();
+                    if (CollUtil.isNotEmpty(idsVal)) {
+                        var idName = TableManager.getIdName(entityClass);
+                        select.addNode(new Cond(idName, Op.NOT_IN, notIdsVal));
+                    }
+                }
+            }
+
+            var createdAts = param.getCreatedAts();
+            if (ArrayUtil.isNotEmpty(createdAts) && createdAts.length == 2) {
+                String createdAt = TableManager.getColumnName(entityClass, "createdAt");
+                select.addNode(new Cond(createdAt, Op.BETWEEN, createdAts));
+            }
+            var updatedAts = param.getUpdatedAts();
+            if (ArrayUtil.isNotEmpty(updatedAts) && updatedAts.length == 2) {
+                String updatedAt = TableManager.getColumnName(entityClass, "updatedAt");
+                select.addNode(new Cond(updatedAt, Op.BETWEEN, createdAts));
+            }
+        }
+
+        var rows = dao.find(select);
         if (pageIn.getNeedTotal() == null || pageIn.getNeedTotal()) {
             pageIn.setTotal(dao.count(select));
         } else {
