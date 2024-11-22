@@ -2,7 +2,7 @@ package cn.com.idmy.orm.mybatis;
 
 import cn.com.idmy.orm.OrmException;
 import cn.com.idmy.orm.core.MybatisSqlProvider;
-import cn.com.idmy.orm.core.TableManager;
+import cn.com.idmy.orm.core.Tables;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.mapping.BoundSql;
 import org.apache.ibatis.mapping.MappedStatement;
@@ -73,7 +73,7 @@ class MybatisParameterHandler extends DefaultParameterHandler {
     private TypeHandler<?> getTypeHandler(Object value, Map<String, Object> params) {
         var valueType = value.getClass();
         var entityClass = MybatisSqlProvider.getEntityClass(params);
-        var customHandler = TableManager.getHandler(entityClass, valueType.getName());
+        var customHandler = Tables.getHandler(entityClass, valueType.getName());
         if (customHandler != null) {
             try {
                 return customHandler.getDeclaredConstructor().newInstance();

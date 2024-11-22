@@ -23,7 +23,7 @@ class DeleteSqlGenerator extends AbstractSqlGenerator {
             }
         }
         var params = new ArrayList<>(chain.sqlParamsSize());
-        var sql = new StringBuilder(DELETE_FROM).append(SqlConsts.STRESS_MARK).append(TableManager.getTableName(chain.entityClass())).append(SqlConsts.STRESS_MARK);
+        var sql = new StringBuilder(DELETE_FROM).append(SqlConsts.STRESS_MARK).append(Tables.getTableName(chain.entityClass())).append(SqlConsts.STRESS_MARK);
         buildWhere(wheres, sql, params);
         return Pair.of(sql.toString(), params);
     }

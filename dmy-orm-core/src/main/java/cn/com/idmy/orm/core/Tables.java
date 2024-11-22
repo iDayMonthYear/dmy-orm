@@ -21,13 +21,13 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 @NoArgsConstructor(access = lombok.AccessLevel.PRIVATE)
-public class TableManager {
+public class Tables {
     private static final Map<Class<?>, TableInfo> mapperTableInfos = new ConcurrentHashMap<>();
     private static final Map<Class<?>, TableInfo> entityTableInfos = new ConcurrentHashMap<>();
     private static final Map<TypeHandlerKey, Class<? extends TypeHandler<?>>> typeHandlers = new ConcurrentHashMap<>();
 
     public static TableInfo getTableInfo(Class<?> entityClass) {
-        return entityTableInfos.computeIfAbsent(entityClass, TableManager::init);
+        return entityTableInfos.computeIfAbsent(entityClass, Tables::init);
     }
 
     public static TableInfo getTableInfo(MappedStatement ms) {

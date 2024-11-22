@@ -29,7 +29,7 @@ class UpdateSqlGenerator extends AbstractSqlGenerator {
                 skipAdjoinOr(node, wheres);
             }
         }
-        var sql = new StringBuilder(UPDATE).append(SqlConsts.STRESS_MARK).append(TableManager.getTableName(chain.entityClass())).append(SqlConsts.STRESS_MARK).append(SET);
+        var sql = new StringBuilder(UPDATE).append(SqlConsts.STRESS_MARK).append(Tables.getTableName(chain.entityClass())).append(SqlConsts.STRESS_MARK).append(SET);
         var params = new ArrayList<>(chain.sqlParamsSize());
         if (!sets.isEmpty()) {
             for (int i = 0, size = sets.size(); i < size; i++) {

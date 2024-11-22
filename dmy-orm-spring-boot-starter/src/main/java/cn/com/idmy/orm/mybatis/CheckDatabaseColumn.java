@@ -3,7 +3,7 @@ package cn.com.idmy.orm.mybatis;
 import cn.com.idmy.orm.annotation.Table;
 import cn.com.idmy.orm.core.MybatisDao;
 import cn.com.idmy.orm.core.TableInfo;
-import cn.com.idmy.orm.core.TableManager;
+import cn.com.idmy.orm.core.Tables;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
@@ -39,7 +39,7 @@ class CheckDatabaseColumn {
                 var mapperClass = ctx.getType(beanName);
                 var entityClass = ClassUtil.getTypeArgument(mapperClass);
                 if (entityClass.isAnnotationPresent(Table.class)) {
-                    var tableInfo = TableManager.getTableInfo(entityClass);
+                    var tableInfo = Tables.getTableInfo(entityClass);
                     checkDatabaseColumn(connection, entityClass, tableInfo);
                 } else {
                     assert mapperClass != null;

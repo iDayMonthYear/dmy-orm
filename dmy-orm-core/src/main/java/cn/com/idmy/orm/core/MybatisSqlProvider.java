@@ -90,7 +90,7 @@ public class MybatisSqlProvider {
 
     public String insert(Map<String, Object> params) {
         var entity = params.get(ENTITY);
-        var table = TableManager.getTableInfo(entity.getClass());
+        var table = Tables.getTableInfo(entity.getClass());
         var columns = table.columns();
 
         var sql = builderInsertHeader(table.name());
@@ -122,7 +122,7 @@ public class MybatisSqlProvider {
         if (entities.isEmpty()) {
             throw new OrmException("批量插入的实体集合不能为空");
         }
-        var table = TableManager.getTableInfo(entities.getFirst().getClass());
+        var table = Tables.getTableInfo(entities.getFirst().getClass());
         var columns = table.columns();
         var sql = builderInsertHeader(table.name());
 
@@ -191,7 +191,7 @@ public class MybatisSqlProvider {
     public static <T, ID> T get(MybatisDao<T, ID> dao, ID id) {
         var select = Selects.of(dao);
         select.sqlParamsSize(1);
-        select.addNode(new Cond(TableManager.getIdName(dao.entityClass()), Op.EQ, id));
+        select.addNode(new Cond(Tables.getIdName(dao.entityClass()), Op.EQ, id));
         return dao.get(select);
     }
 
@@ -200,7 +200,7 @@ public class MybatisSqlProvider {
         var select = Selects.of(dao);
         select.select(getter);
         select.sqlParamsSize(1);
-        select.addNode(new Cond(TableManager.getIdName(dao.entityClass()), Op.EQ, id));
+        select.addNode(new Cond(Tables.getIdName(dao.entityClass()), Op.EQ, id));
         T t = dao.get(select);
         if (t == null) {
             return null;
@@ -238,7 +238,7 @@ public class MybatisSqlProvider {
         } else {
             var select = Selects.of(dao);
             select.sqlParamsSize(1);
-            select.addNode(new Cond(TableManager.getIdName(dao.entityClass()), Op.IN, ids));
+            select.addNode(new Cond(Tables.getIdName(dao.entityClass()), Op.IN, ids));
             return dao.find(select);
         }
     }
@@ -249,7 +249,7 @@ public class MybatisSqlProvider {
         } else {
             var select = Selects.of(dao).select(getter);
             select.sqlParamsSize(1);
-            select.addNode(new Cond(TableManager.getIdName(dao.entityClass()), Op.IN, ids));
+            select.addNode(new Cond(Tables.getIdName(dao.entityClass()), Op.IN, ids));
             return dao.find(select).stream().map(getter::get).toList();
         }
     }
@@ -273,14 +273,14 @@ public class MybatisSqlProvider {
     public static <T, ID> boolean exists(MybatisDao<T, ID> dao, ID id) {
         var select = Selects.of(dao);
         select.sqlParamsSize(1);
-        select.addNode(new Cond(TableManager.getIdName(dao.entityClass()), Op.EQ, id));
+        select.addNode(new Cond(Tables.getIdName(dao.entityClass()), Op.EQ, id));
         return dao.count(select) > 0;
     }
 
     public static <T, ID> int delete(MybatisDao<T, ID> dao, ID id) {
         var delete = Deletes.of(dao);
         delete.sqlParamsSize(1);
-        delete.addNode(new Cond(TableManager.getIdName(dao.entityClass()), Op.EQ, id));
+        delete.addNode(new Cond(Tables.getIdName(dao.entityClass()), Op.EQ, id));
         return dao.delete(delete);
     }
 
@@ -290,7 +290,7 @@ public class MybatisSqlProvider {
         } else {
             var delete = Deletes.of(dao);
             delete.sqlParamsSize(1);
-            delete.addNode(new Cond(TableManager.getIdName(dao.entityClass()), Op.IN, ids));
+            delete.addNode(new Cond(Tables.getIdName(dao.entityClass()), Op.IN, ids));
             return dao.delete(delete);
         }
     }
@@ -301,9 +301,9 @@ public class MybatisSqlProvider {
         } else {
             var select = Selects.of(dao);
             select.sqlParamsSize(1);
-            select.addNode(new Cond(TableManager.getIdName(dao.entityClass()), Op.IN, ids));
+            select.addNode(new Cond(Tables.getIdName(dao.entityClass()), Op.IN, ids));
             var entities = dao.find(select);
-            return CollStreamUtil.toIdentityMap(entities, TableManager::getIdValue);
+            return CollStreamUtil.toIdentityMap(entities, Tables::getIdValue);
         }
     }
 
@@ -313,9 +313,9 @@ public class MybatisSqlProvider {
         } else {
             var select = Selects.of(dao);
             select.sqlParamsSize(1);
-            select.addNode(new Cond(TableManager.getIdName(dao.entityClass()), Op.IN, ids));
+            select.addNode(new Cond(Tables.getIdName(dao.entityClass()), Op.IN, ids));
             var entities = dao.find(select);
-            return CollStreamUtil.toIdentityMap(entities, TableManager::getIdValue);
+            return CollStreamUtil.toIdentityMap(entities, Tables::getIdValue);
         }
     }
 
@@ -329,17 +329,17 @@ public class MybatisSqlProvider {
             var entityClass = dao.entityClass();
             var idVal = param.getId();
             if (idVal != null) {
-                var idName = TableManager.getIdName(entityClass);
+                var idName = Tables.getIdName(entityClass);
                 select.addNode(new Cond(idName, Op.EQ, idVal));
             } else {
                 var idsVal = param.getIds();
                 if (CollUtil.isNotEmpty(idsVal)) {
-                    var idName = TableManager.getIdName(entityClass);
+                    var idName = Tables.getIdName(entityClass);
                     select.addNode(new Cond(idName, Op.IN, idsVal));
                 } else {
                     var notIdsVal = param.getIds();
                     if (CollUtil.isNotEmpty(idsVal)) {
-                        var idName = TableManager.getIdName(entityClass);
+                        var idName = Tables.getIdName(entityClass);
                         select.addNode(new Cond(idName, Op.NOT_IN, notIdsVal));
                     }
                 }
@@ -347,12 +347,12 @@ public class MybatisSqlProvider {
 
             var createdAts = param.getCreatedAts();
             if (ArrayUtil.isNotEmpty(createdAts) && createdAts.length == 2) {
-                String createdAt = TableManager.getColumnName(entityClass, "createdAt");
+                String createdAt = Tables.getColumnName(entityClass, "createdAt");
                 select.addNode(new Cond(createdAt, Op.BETWEEN, createdAts));
             }
             var updatedAts = param.getUpdatedAts();
             if (ArrayUtil.isNotEmpty(updatedAts) && updatedAts.length == 2) {
-                String updatedAt = TableManager.getColumnName(entityClass, "updatedAt");
+                String updatedAt = Tables.getColumnName(entityClass, "updatedAt");
                 select.addNode(new Cond(updatedAt, Op.BETWEEN, createdAts));
             }
         }

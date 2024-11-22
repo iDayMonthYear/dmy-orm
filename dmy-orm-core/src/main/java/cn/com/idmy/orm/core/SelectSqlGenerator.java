@@ -49,7 +49,7 @@ class SelectSqlGenerator extends AbstractSqlGenerator {
             }
         }
         buildSelectColumn(selectColumns, sql, params);
-        sql.append(FROM).append(SqlConsts.STRESS_MARK).append(TableManager.getTableName(chain.entityClass())).append(SqlConsts.STRESS_MARK);
+        sql.append(FROM).append(SqlConsts.STRESS_MARK).append(Tables.getTableName(chain.entityClass())).append(SqlConsts.STRESS_MARK);
         buildWhere(wheres, sql, params);
         buildGroupBy(groups, sql, params);
         buildOrderBy(orders, sql, params);

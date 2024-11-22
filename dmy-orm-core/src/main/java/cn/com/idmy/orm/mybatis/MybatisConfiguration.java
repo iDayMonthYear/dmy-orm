@@ -29,7 +29,7 @@ import org.apache.ibatis.session.Configuration;
 
 import java.util.Map;
 
-import static cn.com.idmy.orm.core.TableManager.getTableInfo;
+import static cn.com.idmy.orm.core.Tables.getTableInfo;
 
 class MybatisConfiguration extends Configuration {
     public MybatisConfiguration() {
