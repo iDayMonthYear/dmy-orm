@@ -125,6 +125,10 @@ public class Tables {
         return getTableInfo(entityClass).id().name();
     }
 
+    public static String getIdName(MybatisDao<?, ?> dao) {
+        return getTableInfo(dao.entityClass()).id().name();
+    }
+
     public static String getColumnName(Class<?> entityClass, String columnName) {
         TableInfo tableInfo = getTableInfo(entityClass);
         TableColumnInfo columnInfo = tableInfo.columnMap().get(columnName);

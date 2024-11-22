@@ -14,25 +14,19 @@ public abstract class Where<T, SUD extends Where<T, SUD>> extends Sud<T, SUD> {
     }
 
     public SUD addNode(Cond node) {
-        switch (node.expr()) {
-            case null -> {
+        var expr = node.expr;
+        if (expr == null) {
+            return $this;
+        } else if (expr instanceof Collection<?> ls) {
+            if (ls.isEmpty()) {
                 return $this;
             }
-            case Collection<?> ls -> {
-                if (ls.isEmpty()) {
-                    return $this;
-                }
-            }
-            case Object[] arr -> {
-                if (arr.length == 0) {
-                    return $this;
-                }
-            }
-            default -> {
+        } else if (expr instanceof Object[] arr) {
+            if (arr.length == 0) {
+                return $this;
             }
         }
-        super.addNode(node);
-        return $this;
+        return super.addNode(node);
     }
 
     //region 等于

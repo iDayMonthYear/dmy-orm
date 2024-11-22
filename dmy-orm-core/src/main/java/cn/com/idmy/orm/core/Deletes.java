@@ -16,7 +16,7 @@ public class Deletes<T> extends Where<T, Deletes<T>> {
         super(entityClass);
     }
 
-    public static <T> Deletes<T> of(MybatisDao<T, ?> dao) {
+    public static <T, ID> Deletes<T> of(MybatisDao<T, ID> dao) {
         return new Deletes<>(dao.entityClass());
     }
 

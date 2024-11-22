@@ -20,9 +20,9 @@ import static cn.com.idmy.orm.core.SqlConsts.SELECT;
 
 @Slf4j
 class SelectSqlGenerator extends SqlGenerator {
-    public static Pair<String, List<Object>> gen(Selects<?> chain) {
-        var nodes = chain.nodes();
-        var selectColumns = new ArrayList<SelectColumn>(nodes.size());
+    public static Pair<String, List<Object>> gen(Selects<?> select) {
+        var nodes = select.nodes;
+        var selectColumns = new ArrayList<SelectColumn>(1);
         var wheres = new ArrayList<Node>(nodes.size());
         var groups = new ArrayList<GroupBy>(1);
         var orders = new ArrayList<OrderBy>(2);
@@ -39,9 +39,8 @@ class SelectSqlGenerator extends SqlGenerator {
                 }
             }
         }
-
-        var params = new ArrayList<>(chain.sqlParamsSize());
         var sql = new StringBuilder(SELECT);
+        var params = new ArrayList<>(select.sqlParamsSize);
         if (distinct != null) {
             builder(distinct, sql, params);
             if (!selectColumns.isEmpty()) {
@@ -49,15 +48,15 @@ class SelectSqlGenerator extends SqlGenerator {
             }
         }
         buildSelectColumn(selectColumns, sql, params);
-        sql.append(FROM).append(SqlConsts.STRESS_MARK).append(Tables.getTableName(chain.entityClass())).append(SqlConsts.STRESS_MARK);
+        sql.append(FROM).append(SqlConsts.STRESS_MARK).append(Tables.getTableName(select.entityClass)).append(SqlConsts.STRESS_MARK);
         buildWhere(wheres, sql, params);
         buildGroupBy(groups, sql, params);
         buildOrderBy(orders, sql, params);
-        if (chain.limit != null) {
-            sql.append(LIMIT).append(chain.limit);
+        if (select.limit != null) {
+            sql.append(LIMIT).append(select.limit);
         }
-        if (chain.offset != null) {
-            sql.append(OFFSET).append(chain.offset);
+        if (select.offset != null) {
+            sql.append(OFFSET).append(select.offset);
         }
         return Pair.of(sql.toString(), params);
     }
@@ -77,7 +76,7 @@ class SelectSqlGenerator extends SqlGenerator {
                     set.add(column);
                 }
                 if (i < size - 1) {
-                    Type type = selectColumns.get(i + 1).type();
+                    Type type = selectColumns.get(i + 1).type;
                     if (type == Type.SELECT_COLUMN) {
                         sql.append(DELIMITER);
                     }
@@ -93,7 +92,7 @@ class SelectSqlGenerator extends SqlGenerator {
                 GroupBy group = groups.get(i);
                 builder(group, sql, params);
                 if (i < size - 1) {
-                    Type type = groups.get(i + 1).type();
+                    Type type = groups.get(i + 1).type;
                     if (type == Type.GROUP_BY) {
                         sql.append(DELIMITER);
                     }
@@ -109,7 +108,7 @@ class SelectSqlGenerator extends SqlGenerator {
                 OrderBy order = orders.get(i);
                 builder(order, sql, params);
                 if (i < size - 1) {
-                    Type type = orders.get(i + 1).type();
+                    Type type = orders.get(i + 1).type;
                     if (type == Type.ORDER_BY) {
                         sql.append(DELIMITER);
                     }

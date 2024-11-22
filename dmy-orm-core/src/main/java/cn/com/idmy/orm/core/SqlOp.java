@@ -15,31 +15,31 @@ public class SqlOp {
     private String op;
     private Object value;
 
-    public SqlOp plus(int value) {
+    public SqlOp plus(long value) {
         this.value = value;
         this.op = "+";
         return this;
     }
 
-    public SqlOp minus(int value) {
+    public SqlOp minus(long value) {
         this.value = value;
-        this.op = "+";
+        this.op = "-";
         return this;
     }
 
-    public SqlOp multiply(int value) {
+    public SqlOp multiply(long value) {
         this.value = value;
         this.op = "*";
         return this;
     }
 
-    public SqlOp divide(int value) {
+    public SqlOp divide(long value) {
         this.value = value;
         this.op = "/";
         return this;
     }
 
-    public SqlOp mod(int value) {
+    public SqlOp mod(long value) {
         this.value = value;
         this.op = "%";
         return this;
@@ -53,7 +53,7 @@ public class SqlOp {
 
     public SqlOp minus(BigDecimal value) {
         this.value = value;
-        this.op = "+";
+        this.op = "-";
         return this;
     }
 

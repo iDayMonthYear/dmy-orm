@@ -12,8 +12,8 @@ import static cn.com.idmy.orm.core.SqlConsts.DELETE_FROM;
 
 @Slf4j
 class DeleteSqlGenerator extends SqlGenerator {
-    public static Pair<String, List<Object>> gen(Deletes<?> chain) {
-        var nodes = chain.nodes();
+    public static Pair<String, List<Object>> gen(Deletes<?> delete) {
+        var nodes = delete.nodes;
         var wheres = new ArrayList<Node>(nodes.size());
         for (var node : nodes) {
             if (node instanceof Cond) {
@@ -22,8 +22,8 @@ class DeleteSqlGenerator extends SqlGenerator {
                 skipAdjoinOr(node, wheres);
             }
         }
-        var params = new ArrayList<>(chain.sqlParamsSize());
-        var sql = new StringBuilder(DELETE_FROM).append(SqlConsts.STRESS_MARK).append(Tables.getTableName(chain.entityClass())).append(SqlConsts.STRESS_MARK);
+        var sql = new StringBuilder(DELETE_FROM).append(SqlConsts.STRESS_MARK).append(Tables.getTableName(delete.entityClass)).append(SqlConsts.STRESS_MARK);
+        var params = new ArrayList<>(delete.sqlParamsSize);
         buildWhere(wheres, sql, params);
         return Pair.of(sql.toString(), params);
     }

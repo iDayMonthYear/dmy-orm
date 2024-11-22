@@ -18,12 +18,12 @@ public class Updates<T> extends Where<T, Updates<T>> {
         super(entityClass);
     }
 
-    public static <T> Updates<T> of(MybatisDao<T, ?> dao) {
+    public static <T, ID> Updates<T> of(MybatisDao<T, ID> dao) {
         return new Updates<>(dao.entityClass());
     }
 
-    public Updates<T> set(ColumnGetter<T, ?> col, Object expr) {
-        return addNode(new Set(col,  expr));
+    public Updates<T> set(ColumnGetter<T, ?> col, Object val) {
+        return addNode(new Set(col,  val));
     }
 
     public Updates<T> set(ColumnGetter<T, ?> col, SqlOpExpr expr) {

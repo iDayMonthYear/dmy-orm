@@ -14,11 +14,13 @@ import org.dromara.hutool.core.reflect.FieldUtil;
 
 import java.util.*;
 
+import static cn.com.idmy.base.constant.DefaultConsts.CREATED_AT;
+import static cn.com.idmy.base.constant.DefaultConsts.UPDATED_AT;
 import static cn.com.idmy.orm.core.MybatisDao.DEFAULT_BATCH_SIZE;
 
 @Slf4j
 public class MybatisSqlProvider {
-    public static final String CRUD = "$crud$";
+    public static final String SUD = "$sud$";
     public static final String SQL_PARAMS = "$sqlParams$";
 
     public static final String ENTITY = "$entity$";
@@ -53,7 +55,7 @@ public class MybatisSqlProvider {
     }
 
     private static String buildCommonSql(Map<String, Object> params) {
-        var where = (Sud<?, ?>) params.get(CRUD);
+        var where = (Sud<?, ?>) params.get(SUD);
         putEntityClass(params, where.entityClass());
         var pair = where.sql();
         params.put(SQL_PARAMS, pair.right);
@@ -77,7 +79,7 @@ public class MybatisSqlProvider {
     }
 
     public String count(Map<String, Object> params) {
-        var select = (Selects<?>) params.get(CRUD);
+        var select = (Selects<?>) params.get(SUD);
         clearSelectColumns(select);
         select.limit = null;
         select.offset = null;
@@ -191,45 +193,47 @@ public class MybatisSqlProvider {
     public static <T, ID> T get(MybatisDao<T, ID> dao, ID id) {
         var select = Selects.of(dao);
         select.sqlParamsSize(1);
-        select.addNode(new Cond(Tables.getIdName(dao.entityClass()), Op.EQ, id));
+        select.addNode(new Cond(Tables.getIdName(dao), Op.EQ, id));
         return dao.get(select);
     }
 
     @Nullable
-    public static <T, ID, R> R get(MybatisDao<T, ID> dao, ColumnGetter<T, R> getter, ID id) {
+    public static <T, ID, R> R get(MybatisDao<T, ID> dao, ColumnGetter<T, R> col, ID id) {
         var select = Selects.of(dao);
-        select.select(getter);
+        select.select(col);
         select.sqlParamsSize(1);
-        select.addNode(new Cond(Tables.getIdName(dao.entityClass()), Op.EQ, id));
+        select.addNode(new Cond(Tables.getIdName(dao), Op.EQ, id));
         T t = dao.get(select);
         if (t == null) {
             return null;
         } else {
-            return getter.get(t);
+            return col.get(t);
         }
     }
 
-    public static <T, ID, R> R get(MybatisDao<T, ID> dao, ColumnGetter<T, R> getter, Selects<T> select) {
+    @Nullable
+    public static <T, ID, R> R get(MybatisDao<T, ID> dao, ColumnGetter<T, R> col, Selects<T> select) {
         clearSelectColumns(select);
         select.limit = 1;
-        T t = dao.get(select.select(getter));
+        T t = dao.get(select.select(col));
         if (t == null) {
             return null;
         } else {
-            return getter.get(t);
+            return col.get(t);
         }
     }
 
-    public static <T, ID> T get(MybatisDao<T, ID> dao, Selects<T> select, @NonNull ColumnGetter<T, ?>[] getters) {
+    @Nullable
+    public static <T, ID> T get(MybatisDao<T, ID> dao, Selects<T> select, @NonNull ColumnGetter<T, ?>[] cols) {
         clearSelectColumns(select);
         select.limit = 1;
-        return dao.get(select.select(getters));
+        return dao.get(select.select(cols));
     }
 
-    public static <T, ID, R> List<R> find(MybatisDao<T, ID> dao, ColumnGetter<T, R> getter, Selects<T> select) {
+    public static <T, ID, R> List<R> find(MybatisDao<T, ID> dao, ColumnGetter<T, R> col, Selects<T> select) {
         clearSelectColumns(select);
-        var ts = dao.find(select.select(getter));
-        return CollStreamUtil.toList(ts, getter::get);
+        var ts = dao.find(select.select(col));
+        return CollStreamUtil.toList(ts, col::get);
     }
 
     public static <T, ID> List<T> find(MybatisDao<T, ID> dao, Collection<ID> ids) {
@@ -238,34 +242,34 @@ public class MybatisSqlProvider {
         } else {
             var select = Selects.of(dao);
             select.sqlParamsSize(1);
-            select.addNode(new Cond(Tables.getIdName(dao.entityClass()), Op.IN, ids));
+            select.addNode(new Cond(Tables.getIdName(dao), Op.IN, ids));
             return dao.find(select);
         }
     }
 
-    public static <T, ID, R> List<R> find(MybatisDao<T, ID> dao, ColumnGetter<T, R> getter, Collection<ID> ids) {
+    public static <T, ID, R> List<R> find(MybatisDao<T, ID> dao, ColumnGetter<T, R> col, Collection<ID> ids) {
         if (ids.isEmpty()) {
             return Collections.emptyList();
         } else {
-            var select = Selects.of(dao).select(getter);
+            var select = Selects.of(dao).select(col);
             select.sqlParamsSize(1);
-            select.addNode(new Cond(Tables.getIdName(dao.entityClass()), Op.IN, ids));
-            return dao.find(select).stream().map(getter::get).toList();
+            select.addNode(new Cond(Tables.getIdName(dao), Op.IN, ids));
+            return dao.find(select).stream().map(col::get).toList();
         }
     }
 
     @Nullable
-    public static <T, ID, R extends Number> R sqlFn(MybatisDao<T, ID> dao, SqlFnName name, ColumnGetter<T, R> getter, Selects<T> select) {
+    public static <T, ID, R extends Number> R sqlFn(MybatisDao<T, ID> dao, SqlFnName name, ColumnGetter<T, R> col, Selects<T> select) {
         if (name == SqlFnName.IF_NULL) {
             throw new IllegalArgumentException("不支持ifnull");
         } else {
             clearSelectColumns(select);
             select.limit = 1;
-            T t = dao.get(select.select(() -> new SqlFn<>(name, getter)));
+            T t = dao.get(select.select(() -> new SqlFn<>(name, col)));
             if (t == null) {
                 return null;
             } else {
-                return getter.get(t);
+                return col.get(t);
             }
         }
     }
@@ -273,14 +277,14 @@ public class MybatisSqlProvider {
     public static <T, ID> boolean exists(MybatisDao<T, ID> dao, ID id) {
         var select = Selects.of(dao);
         select.sqlParamsSize(1);
-        select.addNode(new Cond(Tables.getIdName(dao.entityClass()), Op.EQ, id));
+        select.addNode(new Cond(Tables.getIdName(dao), Op.EQ, id));
         return dao.count(select) > 0;
     }
 
     public static <T, ID> int delete(MybatisDao<T, ID> dao, ID id) {
         var delete = Deletes.of(dao);
         delete.sqlParamsSize(1);
-        delete.addNode(new Cond(Tables.getIdName(dao.entityClass()), Op.EQ, id));
+        delete.addNode(new Cond(Tables.getIdName(dao), Op.EQ, id));
         return dao.delete(delete);
     }
 
@@ -290,32 +294,33 @@ public class MybatisSqlProvider {
         } else {
             var delete = Deletes.of(dao);
             delete.sqlParamsSize(1);
-            delete.addNode(new Cond(Tables.getIdName(dao.entityClass()), Op.IN, ids));
+            delete.addNode(new Cond(Tables.getIdName(dao), Op.IN, ids));
             return dao.delete(delete);
         }
     }
+
 
     public static <T, ID> Map<ID, T> map(MybatisDao<T, ID> dao, @NonNull ID[] ids) {
         if (ids.length == 0) {
             return Collections.emptyMap();
         } else {
-            var select = Selects.of(dao);
-            select.sqlParamsSize(1);
-            select.addNode(new Cond(Tables.getIdName(dao.entityClass()), Op.IN, ids));
-            var entities = dao.find(select);
-            return CollStreamUtil.toIdentityMap(entities, Tables::getIdValue);
+            return getMap(dao, ids);
         }
+    }
+
+    private static <T, ID> Map<ID, T> getMap(MybatisDao<T, ID> dao, @NonNull Object ids) {
+        var select = Selects.of(dao);
+        select.sqlParamsSize(1);
+        select.addNode(new Cond(Tables.getIdName(dao), Op.IN, ids));
+        var entities = dao.find(select);
+        return CollStreamUtil.toIdentityMap(entities, Tables::getIdValue);
     }
 
     public static <T, ID> Map<ID, T> map(MybatisDao<T, ID> dao, @NonNull Collection<ID> ids) {
         if (ids.isEmpty()) {
             return Collections.emptyMap();
         } else {
-            var select = Selects.of(dao);
-            select.sqlParamsSize(1);
-            select.addNode(new Cond(Tables.getIdName(dao.entityClass()), Op.IN, ids));
-            var entities = dao.find(select);
-            return CollStreamUtil.toIdentityMap(entities, Tables::getIdValue);
+            return getMap(dao, ids);
         }
     }
 
@@ -327,36 +332,31 @@ public class MybatisSqlProvider {
         var params = pageIn.getParams();
         if (params instanceof Param<?> param) {
             var entityClass = dao.entityClass();
-            var idVal = param.getId();
-            if (idVal != null) {
-                var idName = Tables.getIdName(entityClass);
-                select.addNode(new Cond(idName, Op.EQ, idVal));
+            var id = param.getId();
+            if (id != null) {
+                select.addNode(new Cond(Tables.getIdName(entityClass), Op.EQ, id));
             } else {
-                var idsVal = param.getIds();
-                if (CollUtil.isNotEmpty(idsVal)) {
-                    var idName = Tables.getIdName(entityClass);
-                    select.addNode(new Cond(idName, Op.IN, idsVal));
+                var ids = param.getIds();
+                if (CollUtil.isNotEmpty(ids)) {
+                    select.addNode(new Cond(Tables.getIdName(entityClass), Op.IN, ids));
                 } else {
-                    var notIdsVal = param.getIds();
-                    if (CollUtil.isNotEmpty(idsVal)) {
-                        var idName = Tables.getIdName(entityClass);
-                        select.addNode(new Cond(idName, Op.NOT_IN, notIdsVal));
+                    var notIds = param.getIds();
+                    if (CollUtil.isNotEmpty(ids)) {
+                        select.addNode(new Cond(Tables.getIdName(entityClass), Op.NOT_IN, notIds));
                     }
                 }
             }
-
             var createdAts = param.getCreatedAts();
             if (ArrayUtil.isNotEmpty(createdAts) && createdAts.length == 2) {
-                String createdAt = Tables.getColumnName(entityClass, "createdAt");
+                String createdAt = Tables.getColumnName(entityClass, CREATED_AT);
                 select.addNode(new Cond(createdAt, Op.BETWEEN, createdAts));
             }
             var updatedAts = param.getUpdatedAts();
             if (ArrayUtil.isNotEmpty(updatedAts) && updatedAts.length == 2) {
-                String updatedAt = Tables.getColumnName(entityClass, "updatedAt");
+                String updatedAt = Tables.getColumnName(entityClass, UPDATED_AT);
                 select.addNode(new Cond(updatedAt, Op.BETWEEN, createdAts));
             }
         }
-
         var rows = dao.find(select);
         if (pageIn.getNeedTotal() == null || pageIn.getNeedTotal()) {
             pageIn.setTotal(dao.count(select));

@@ -80,19 +80,19 @@ abstract class SqlGenerator {
     }
 
     private static StringBuilder buildCond(Cond cond, StringBuilder sql, List<Object> params) {
-        String column = buildColumn(cond.column());
-        String expr = buildSqlExpr(column, cond.expr(), cond.op(), params);
-        return sql.append(column).append(BLANK).append(cond.op().getSymbol()).append(BLANK).append(expr);
+        var column = buildColumn(cond.column);
+        var expr = buildSqlExpr(column, cond.expr, cond.op, params);
+        return sql.append(column).append(BLANK).append(cond.op.getSymbol()).append(BLANK).append(expr);
     }
 
     private static StringBuilder buildSet(Set set, StringBuilder sql, List<Object> params) {
-        var column = buildColumn(set.column());
-        var expr = buildSqlExpr(column, set.expr(), null, params);
+        var column = buildColumn(set.column);
+        var expr = buildSqlExpr(column, set.expr, null, params);
         return sql.append(column).append(BLANK).append(expr);
     }
 
     private static String buildSelectColumn(SelectColumn selectColumn, StringBuilder sql, List<Object> params) {
-        var column = selectColumn.column();
+        var column = selectColumn.column;
         if (column instanceof ColumnGetter<?, ?> || column instanceof String) {
             var out = buildColumn(column);
             sql.append(out);
@@ -101,7 +101,7 @@ abstract class SqlGenerator {
             var expr = (SqlFnExpr<?>) column;
             var fn = expr.apply();
             var col = buildSqlFn(fn);
-            var alias = selectColumn.alias() == null ? null : LambdaUtil.getFieldName(selectColumn.alias());
+            var alias = selectColumn.alias == null ? null : LambdaUtil.getFieldName(selectColumn.alias);
             var colOrAlias = Objects.requireNonNullElse(alias, col.equals(ASTERISK) ? BLANK : col);
             var name = fn.name();
             if (name == SqlFnName.IF_NULL) {
@@ -115,12 +115,12 @@ abstract class SqlGenerator {
     }
 
     private static StringBuilder buildGroupBy(GroupBy group, StringBuilder sql) {
-        sql.append(buildColumn(group.column()));
+        sql.append(buildColumn(group.column));
         return sql;
     }
 
     private static StringBuilder buildOrderBy(OrderBy order, StringBuilder sql) {
-        Object column = order.column();
+        Object column = order.column;
         String name;
         if (column instanceof ColumnGetter<?, ?> getter) {
             name = buildColumn(getter);
@@ -130,12 +130,12 @@ abstract class SqlGenerator {
             SqlUtil.checkColumn(name);
             name = STRESS_MARK + name + STRESS_MARK;
         }
-        sql.append(name).append(order.desc() ? DESC : EMPTY);
+        sql.append(name).append(order.desc ? DESC : EMPTY);
         return sql;
     }
 
     private static StringBuilder buildDistinct(Distinct distinct, StringBuilder sql) {
-        var column = distinct.column();
+        var column = distinct.column;
         if (column == null) {
             sql.append(DISTINCT);
         } else {
@@ -160,7 +160,7 @@ abstract class SqlGenerator {
 
     protected static void skipAdjoinOr(Node node, List<Node> wheres) {
         if (CollUtil.isNotEmpty(wheres)) {
-            if (wheres.getLast().type() == Type.OR) {
+            if (wheres.getLast().type == Type.OR) {
                 if (log.isDebugEnabled()) {
                     log.warn("存在相邻的or，已自动移除");
                 }
@@ -187,8 +187,8 @@ abstract class SqlGenerator {
                 Node node = wheres.get(i);
                 builder(node, sql, params);
                 if (i < size - 1) {
-                    Type type = wheres.get(i + 1).type();
-                    if (type == Type.COND && node.type() != Type.OR) {
+                    Type type = wheres.get(i + 1).type;
+                    if (type == Type.COND && node.type != Type.OR) {
                         sql.append(AND);
                     }
                 }

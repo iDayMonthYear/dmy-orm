@@ -21,6 +21,11 @@ public interface MybatisDao<T, ID> {
         return (Class<T>) ClassUtil.getTypeArgument(getClass());
     }
 
+    @SuppressWarnings({"unchecked"})
+    default Class<ID> idClass() {
+        return (Class<ID>) ClassUtil.getTypeArgument(getClass(), 1);
+    }
+
     @InsertProvider(type = MybatisSqlProvider.class, method = INSERT)
     int insert(@NonNull @Param(ENTITY) T entity);
 
@@ -32,19 +37,19 @@ public interface MybatisDao<T, ID> {
 
     @Nullable
     @SelectProvider(type = MybatisSqlProvider.class, method = GET)
-    T get(@NonNull @Param(CRUD) Selects<T> select);
+    T get(@NonNull @Param(SUD) Selects<T> select);
 
     @SelectProvider(type = MybatisSqlProvider.class, method = FIND)
-    List<T> find(@NonNull @Param(CRUD) Selects<T> select);
+    List<T> find(@NonNull @Param(SUD) Selects<T> select);
 
     @UpdateProvider(type = MybatisSqlProvider.class, method = UPDATE)
-    int update(@NonNull @Param(CRUD) Updates<T> update);
+    int update(@NonNull @Param(SUD) Updates<T> update);
 
     @DeleteProvider(type = MybatisSqlProvider.class, method = DELETE)
-    int delete(@NonNull @Param(CRUD) Deletes<T> delete);
+    int delete(@NonNull @Param(SUD) Deletes<T> delete);
 
     @SelectProvider(type = MybatisSqlProvider.class, method = COUNT)
-    long count(@NonNull @Param(CRUD) Selects<T> select);
+    long count(@NonNull @Param(SUD) Selects<T> select);
 
     default int inserts(@NonNull Collection<T> entities, int size) {
         return MybatisSqlProvider.inserts(this, entities, size);

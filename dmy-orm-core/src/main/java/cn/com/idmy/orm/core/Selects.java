@@ -28,7 +28,7 @@ public class Selects<T> extends Where<T, Selects<T>> {
         super(entityClass);
     }
 
-    public static <T> Selects<T> of(MybatisDao<T, ?> dao) {
+    public static <T, ID> Selects<T> of(MybatisDao<T, ID> dao) {
         return new Selects<>(dao.entityClass());
     }
 
@@ -43,7 +43,7 @@ public class Selects<T> extends Where<T, Selects<T>> {
     }
 
     void clearSelectColumns() {
-        nodes = nodes.stream().filter(node -> node.type() != Type.SELECT_COLUMN && node.type() != Type.DISTINCT).collect(Collectors.toList());
+        nodes = nodes.stream().filter(node -> node.type != Type.SELECT_COLUMN && node.type != Type.DISTINCT).collect(Collectors.toList());
     }
 
     public Selects<T> select(SqlFnExpr<T> expr) {

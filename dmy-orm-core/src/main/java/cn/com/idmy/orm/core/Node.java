@@ -1,12 +1,8 @@
 package cn.com.idmy.orm.core;
 
 import jakarta.annotation.Nullable;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import lombok.experimental.Accessors;
 
-@Accessors(fluent = true)
-@Getter
 @RequiredArgsConstructor
 public class Node {
     enum Type {
@@ -18,19 +14,15 @@ public class Node {
         OR,
         AND,
         SELECT_COLUMN,
-        DISTINCT,
-        LIMIT,
-        OFFSET;
+        DISTINCT
     }
 
-    private final Type type;
+    final Type type;
 
-    @Getter
-    @Accessors(fluent = true)
     public static final class Cond extends Node {
-        private final Object column;
-        private final Op op;
-        private final Object expr;
+        final Object column;
+        final Op op;
+        final Object expr;
 
         Cond(ColumnGetter<?, ?> column, Op op, Object expr) {
             super(Type.COND);
@@ -47,18 +39,15 @@ public class Node {
         }
     }
 
-    @Getter
     static class Or extends Node {
         Or() {
             super(Type.OR);
         }
     }
 
-    @Getter
-    @Accessors(fluent = true)
     static final class Set extends Node {
-        private final ColumnGetter<?, ?> column;
-        private final Object expr;
+        final ColumnGetter<?, ?> column;
+        final Object expr;
 
         Set(ColumnGetter<?, ?> column, Object expr) {
             super(Type.SET);
@@ -67,10 +56,8 @@ public class Node {
         }
     }
 
-    @Getter
-    @Accessors(fluent = true)
     static final class GroupBy extends Node {
-        private final ColumnGetter<?, ?> column;
+        final ColumnGetter<?, ?> column;
 
         GroupBy(ColumnGetter<?, ?> column) {
             super(Type.GROUP_BY);
@@ -78,11 +65,9 @@ public class Node {
         }
     }
 
-    @Getter
-    @Accessors(fluent = true)
     static final class OrderBy extends Node {
-        private final Object column;
-        private final boolean desc;
+        final Object column;
+        final boolean desc;
 
         OrderBy(ColumnGetter<?, ?> column, boolean desc) {
             super(Type.ORDER_BY);
@@ -97,12 +82,10 @@ public class Node {
         }
     }
 
-    @Getter
-    @Accessors(fluent = true)
     static final class SelectColumn extends Node {
-        private final Object column; //ColumnGetter<?, ?> | SqlFnExpr
+        final Object column; //ColumnGetter<?, ?> | SqlFnExpr
         @Nullable
-        private ColumnGetter<?, ?> alias;
+        ColumnGetter<?, ?> alias;
 
         SelectColumn(ColumnGetter<?, ?> column) {
             super(Type.SELECT_COLUMN);
@@ -126,11 +109,9 @@ public class Node {
         }
     }
 
-    @Getter
-    @Accessors(fluent = true)
     static final class Distinct extends Node {
         @Nullable
-        private ColumnGetter<?, ?> column;
+        ColumnGetter<?, ?> column;
 
         Distinct() {
             super(Type.DISTINCT);
