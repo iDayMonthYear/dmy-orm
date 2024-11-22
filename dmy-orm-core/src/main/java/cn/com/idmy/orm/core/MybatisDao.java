@@ -32,19 +32,19 @@ public interface MybatisDao<T, ID> {
 
     @Nullable
     @SelectProvider(type = MybatisSqlProvider.class, method = GET)
-    T get(@NonNull @Param(CHAIN) Selects<T> select);
+    T get(@NonNull @Param(CRUD) Selects<T> select);
 
     @SelectProvider(type = MybatisSqlProvider.class, method = FIND)
-    List<T> find(@NonNull @Param(CHAIN) Selects<T> select);
+    List<T> find(@NonNull @Param(CRUD) Selects<T> select);
 
     @UpdateProvider(type = MybatisSqlProvider.class, method = UPDATE)
-    int update(@NonNull @Param(CHAIN) Updates<T> update);
+    int update(@NonNull @Param(CRUD) Updates<T> update);
 
     @DeleteProvider(type = MybatisSqlProvider.class, method = DELETE)
-    int delete(@NonNull @Param(CHAIN) Deletes<T> delete);
+    int delete(@NonNull @Param(CRUD) Deletes<T> delete);
 
     @SelectProvider(type = MybatisSqlProvider.class, method = COUNT)
-    long count(@NonNull @Param(CHAIN) Selects<T> select);
+    long count(@NonNull @Param(CRUD) Selects<T> select);
 
     default int inserts(@NonNull Collection<T> entities, int size) {
         return MybatisSqlProvider.inserts(this, entities, size);
@@ -58,8 +58,8 @@ public interface MybatisDao<T, ID> {
         return MybatisSqlProvider.delete(this, ids);
     }
 
-    default <IN> Page<T> page(@NonNull Page<IN> page, @NonNull Selects<T> select) {
-        return MybatisSqlProvider.page(this, page, select);
+    default <IN> Page<T> page(@NonNull Page<IN> pageIn, @NonNull Selects<T> select) {
+        return MybatisSqlProvider.page(this, pageIn, select);
     }
 
     @Nullable
@@ -68,19 +68,19 @@ public interface MybatisDao<T, ID> {
     }
 
     @Nullable
-    default <R> R get(@NonNull ColumnGetter<T, R> getter, @NonNull ID id) {
-        return MybatisSqlProvider.get(this, getter, id);
+    default <R> R get(@NonNull ColumnGetter<T, R> col, @NonNull ID id) {
+        return MybatisSqlProvider.get(this, col, id);
     }
 
     @Nullable
-    default <R> R get(@NonNull ColumnGetter<T, R> getter, @NonNull Selects<T> chain) {
-        return MybatisSqlProvider.get(this, getter, chain);
+    default <R> R get(@NonNull ColumnGetter<T, R> col, @NonNull Selects<T> select) {
+        return MybatisSqlProvider.get(this, col, select);
     }
 
     @SuppressWarnings({"unchecked"})
     @Nullable
-    default T get(@NonNull Selects<T> chain, @NonNull ColumnGetter<T, ?>... getters) {
-        return MybatisSqlProvider.get(this, chain, getters);
+    default T get(@NonNull Selects<T> chain, @NonNull ColumnGetter<T, ?>... cols) {
+        return MybatisSqlProvider.get(this, chain, cols);
     }
 
     default List<T> all() {
@@ -91,12 +91,12 @@ public interface MybatisDao<T, ID> {
         return MybatisSqlProvider.find(this, ids);
     }
 
-    default <R> List<R> find(@NonNull ColumnGetter<T, R> getter, @NonNull Collection<ID> ids) {
-        return MybatisSqlProvider.find(this, getter, ids);
+    default <R> List<R> find(@NonNull ColumnGetter<T, R> col, @NonNull Collection<ID> ids) {
+        return MybatisSqlProvider.find(this, col, ids);
     }
 
-    default <R> List<R> find(@NonNull ColumnGetter<T, R> getter, @NonNull Selects<T> chain) {
-        return MybatisSqlProvider.find(this, getter, chain);
+    default <R> List<R> find(@NonNull ColumnGetter<T, R> col, @NonNull Selects<T> chain) {
+        return MybatisSqlProvider.find(this, col, chain);
     }
 
     default boolean exists(@NonNull ID id) {
@@ -107,42 +107,42 @@ public interface MybatisDao<T, ID> {
         return !exists(id);
     }
 
-    default boolean exists(@NonNull Selects<T> chain) {
-        return count(chain) > 0;
+    default boolean exists(@NonNull Selects<T> select) {
+        return count(select) > 0;
     }
 
-    default boolean notExists(@NonNull Selects<T> chain) {
-        return !exists(chain);
-    }
-
-    @Nullable
-    default <R extends Number> R fn(@NonNull SqlFnName name, @NonNull ColumnGetter<T, R> getter, @NonNull Selects<T> chain) {
-        return MybatisSqlProvider.fn(this, name, getter, chain);
+    default boolean notExists(@NonNull Selects<T> select) {
+        return !exists(select);
     }
 
     @Nullable
-    default <R extends Number> R sum(@NonNull ColumnGetter<T, R> getter, @NonNull Selects<T> chain) {
-        return fn(SqlFnName.SUM, getter, chain);
+    default <R extends Number> R sqlFn(@NonNull SqlFnName name, @NonNull ColumnGetter<T, R> col, @NonNull Selects<T> select) {
+        return MybatisSqlProvider.sqlFn(this, name, col, select);
     }
 
     @Nullable
-    default <R extends Number> R avg(@NonNull ColumnGetter<T, R> getter, @NonNull Selects<T> chain) {
-        return fn(SqlFnName.AVG, getter, chain);
+    default <R extends Number> R sum(@NonNull ColumnGetter<T, R> col, @NonNull Selects<T> select) {
+        return sqlFn(SqlFnName.SUM, col, select);
     }
 
     @Nullable
-    default <R extends Number> R min(@NonNull ColumnGetter<T, R> getter, @NonNull Selects<T> chain) {
-        return fn(SqlFnName.MIN, getter, chain);
+    default <R extends Number> R avg(@NonNull ColumnGetter<T, R> col, @NonNull Selects<T> select) {
+        return sqlFn(SqlFnName.AVG, col, select);
     }
 
     @Nullable
-    default <R extends Number> R max(@NonNull ColumnGetter<T, R> getter, @NonNull Selects<T> chain) {
-        return fn(SqlFnName.MAX, getter, chain);
+    default <R extends Number> R min(@NonNull ColumnGetter<T, R> col, @NonNull Selects<T> select) {
+        return sqlFn(SqlFnName.MIN, col, select);
     }
 
     @Nullable
-    default <R extends Number> R abs(@NonNull ColumnGetter<T, R> getter, @NonNull Selects<T> chain) {
-        return fn(SqlFnName.ABS, getter, chain);
+    default <R extends Number> R max(@NonNull ColumnGetter<T, R> col, @NonNull Selects<T> select) {
+        return sqlFn(SqlFnName.MAX, col, select);
+    }
+
+    @Nullable
+    default <R extends Number> R abs(@NonNull ColumnGetter<T, R> col, @NonNull Selects<T> select) {
+        return sqlFn(SqlFnName.ABS, col, select);
     }
 
     @SuppressWarnings({"unchecked"})
@@ -154,7 +154,7 @@ public interface MybatisDao<T, ID> {
         return MybatisSqlProvider.map(this, ids);
     }
 
-    default <R> Map<R, T> map(@NonNull ColumnGetter<T, R> getter, @NonNull Selects<T> chain) {
-        return CollStreamUtil.toIdentityMap(find(chain), getter::get);
+    default <R> Map<R, T> map(@NonNull ColumnGetter<T, R> col, @NonNull Selects<T> chain) {
+        return CollStreamUtil.toIdentityMap(find(chain), col::get);
     }
 }

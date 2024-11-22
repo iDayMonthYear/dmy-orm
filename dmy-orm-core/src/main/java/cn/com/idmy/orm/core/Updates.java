@@ -12,7 +12,7 @@ import java.util.List;
 @Slf4j
 @Getter
 @Accessors(fluent = true, chain = false)
-public class Updates<T> extends LambdaWhere<T, Updates<T>> {
+public class Updates<T> extends Where<T, Updates<T>> {
 
     protected Updates(Class<T> entityClass) {
         super(entityClass);

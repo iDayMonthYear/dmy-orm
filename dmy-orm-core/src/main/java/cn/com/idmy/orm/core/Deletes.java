@@ -11,7 +11,7 @@ import java.util.List;
 @Getter
 @Accessors(fluent = true, chain = false)
 @Slf4j
-public class Deletes<T> extends LambdaWhere<T, Deletes<T>> {
+public class Deletes<T> extends Where<T, Deletes<T>> {
     protected Deletes(Class<T> entityClass) {
         super(entityClass);
     }

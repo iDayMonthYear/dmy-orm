@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Accessors(fluent = true, chain = false)
-public class Selects<T> extends LambdaWhere<T, Selects<T>> {
+public class Selects<T> extends Where<T, Selects<T>> {
     boolean hasSelectColumn = false;
     @Getter
     @Setter
@@ -42,7 +42,7 @@ public class Selects<T> extends LambdaWhere<T, Selects<T>> {
         return addNode(new Distinct(col));
     }
 
-    void clearSelects() {
+    void clearSelectColumns() {
         nodes = nodes.stream().filter(node -> node.type() != Type.SELECT_COLUMN && node.type() != Type.DISTINCT).collect(Collectors.toList());
     }
 

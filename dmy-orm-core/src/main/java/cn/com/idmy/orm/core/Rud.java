@@ -13,12 +13,12 @@ import java.util.List;
 
 @Slf4j
 @Accessors(fluent = true, chain = true)
-public abstract class AbstractWhere<T, WHERE extends AbstractWhere<T, WHERE>> {
+public abstract class Rud<T, RUD extends Rud<T, RUD>> {
     @Getter(value = AccessLevel.PROTECTED)
     List<Node> nodes = new ArrayList<>();
 
     @SuppressWarnings({"unchecked"})
-    protected final WHERE $this = (WHERE) this;
+    protected final RUD $this = (RUD) this;
 
     @Getter(value = AccessLevel.PROTECTED)
     protected Class<T> entityClass;
@@ -27,7 +27,7 @@ public abstract class AbstractWhere<T, WHERE extends AbstractWhere<T, WHERE>> {
     @Getter(value = AccessLevel.PROTECTED)
     protected int sqlParamsSize;
 
-    protected AbstractWhere(Class<T> entityClass) {
+    protected Rud(Class<T> entityClass) {
         this.entityClass = entityClass;
     }
 
@@ -43,12 +43,12 @@ public abstract class AbstractWhere<T, WHERE extends AbstractWhere<T, WHERE>> {
         }
     }
 
-    WHERE addNode(Node node) {
+    RUD addNode(Node node) {
         nodes.add(node);
         return $this;
     }
 
-    public WHERE or() {
+    public RUD or() {
         return addNode(new Or());
     }
 }
