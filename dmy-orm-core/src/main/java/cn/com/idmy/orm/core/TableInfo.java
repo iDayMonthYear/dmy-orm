@@ -1,6 +1,6 @@
 package cn.com.idmy.orm.core;
 
-import cn.com.idmy.orm.annotation.Table;
+import cn.com.idmy.orm.annotation.Table.Id.IdType;
 
 import java.lang.reflect.Field;
 import java.util.Map;
@@ -17,7 +17,7 @@ public record TableInfo(
             Field field,
             String name,
             String value,
-            Table.Id.Type type,
+            IdType idType,
             boolean before,
             String comment) {
     }

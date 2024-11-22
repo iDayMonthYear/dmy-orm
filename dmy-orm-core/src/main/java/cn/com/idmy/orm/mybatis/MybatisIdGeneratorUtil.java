@@ -1,7 +1,7 @@
 package cn.com.idmy.orm.mybatis;
 
 import cn.com.idmy.orm.OrmException;
-import cn.com.idmy.orm.annotation.Table.Id.Type;
+import cn.com.idmy.orm.annotation.Table.Id.IdType;
 import cn.com.idmy.orm.core.MybatisSqlProvider;
 import cn.com.idmy.orm.core.TableInfo;
 import cn.com.idmy.orm.core.TableInfo.TableIdInfo;
@@ -22,12 +22,12 @@ import java.util.List;
 public class MybatisIdGeneratorUtil {
     public static KeyGenerator create(MappedStatement ms, TableInfo table) {
         var id = table.id();
-        var type = id.type();
-        if (type == null || type == Type.NONE) {
+        var type = id.idType();
+        if (type == null || type == IdType.NONE) {
             return NoKeyGenerator.INSTANCE;
-        } else if (type == Type.AUTO) {
+        } else if (type == IdType.AUTO) {
             return Jdbc3KeyGenerator.INSTANCE;
-        } else if (type == Type.GENERATOR) {
+        } else if (type == IdType.GENERATOR) {
             return new CustomIdGenerator(ms.getConfiguration(), table);
         } else {
             var sequence = id.value();

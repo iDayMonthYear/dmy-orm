@@ -15,7 +15,7 @@ public @interface Table {
     @Retention(RetentionPolicy.RUNTIME)
     @Target({ElementType.FIELD})
     @interface Id {
-        Type type() default Type.AUTO;
+        IdType type() default IdType.AUTO;
 
         String value() default "";
 
@@ -25,7 +25,7 @@ public @interface Table {
 
         String comment() default "";
 
-        enum Type {
+        enum IdType {
             AUTO,
             GENERATOR,
             SEQUENCE,

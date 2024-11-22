@@ -62,6 +62,48 @@ public class MybatisSqlProvider {
         return pair.left;
     }
 
+    public static <T, ID> int insertOrUpdate(MybatisDao<T, ID> dao, T entity, boolean ignoreNull) {
+        ID id = (ID) FieldUtil.getFieldValue(entity, Tables.getIdName(dao));
+        if (id == null) {
+            return dao.insert(entity);
+        } else {
+            if (dao.exists(id)) {
+                return update(dao, entity, ignoreNull);
+            } else {
+                return dao.insert(entity);
+            }
+        }
+    }
+
+    public static <T, ID> int update(MybatisDao<T, ID> dao, T entity, boolean ignoreNull) {
+        var id = Tables.getId(entity.getClass());
+        var idValue = FieldUtil.getFieldValue(entity, id.field());
+        if (idValue == null) {
+            return 0;
+        }
+        var table = Tables.getTableInfo(entity.getClass());
+        var columns = table.columns();
+        var sql = new StringBuilder(SqlConsts.UPDATE).append(SqlConsts.STRESS_MARK).append(Tables.getTableName(entity.getClass())).append(SqlConsts.STRESS_MARK).append(SqlConsts.SET);
+        var sqlParams = new ArrayList<>();
+        for (int i = 0; i < columns.length; i++) {
+            var column = columns[i];
+            var value = FieldUtil.getFieldValue(entity, column.field());
+            if (!ignoreNull || value != null) {
+                sql.append(SqlConsts.STRESS_MARK).append(column.name()).append(SqlConsts.STRESS_MARK).append(SqlConsts.EQUALS_PLACEHOLDER);
+                sqlParams.add(value);
+                if (i < columns.length - 1) {
+                    sql.append(SqlConsts.DELIMITER);
+                }
+            }
+        }
+
+        // 添加 WHERE 子句
+        sql.append(SqlConsts.WHERE).append(SqlConsts.STRESS_MARK).append(id.name()).append(SqlConsts.STRESS_MARK).append(SqlConsts.EQUALS_PLACEHOLDER);
+        sqlParams.add(idValue);
+        // 执行更新操作
+        return dao.updateBySql(sql.toString(), sqlParams);
+    }
+
     public String get(Map<String, Object> params) {
         return buildCommonSql(params);
     }

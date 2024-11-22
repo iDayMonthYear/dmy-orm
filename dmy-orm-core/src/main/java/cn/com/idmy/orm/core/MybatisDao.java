@@ -51,8 +51,27 @@ public interface MybatisDao<T, ID> {
     @SelectProvider(type = MybatisSqlProvider.class, method = COUNT)
     long count(@NonNull @Param(SUD) Selects<T> select);
 
+    @UpdateProvider(value = MybatisSqlProvider.class, method = "updateBySql")
+    int updateBySql(@Param("sql") String sql, @Param("params") List<Object> params);
+
     default int inserts(@NonNull Collection<T> entities, int size) {
         return MybatisSqlProvider.inserts(this, entities, size);
+    }
+
+    default int insertOrUpdate(@NonNull T entity) {
+        return MybatisSqlProvider.insertOrUpdate(this, entity, true);
+    }
+
+    default int insertOrUpdate(@NonNull T entity, boolean ignoreNull) {
+        return MybatisSqlProvider.insertOrUpdate(this, entity, ignoreNull);
+    }
+
+    default int update(@NonNull T entity, boolean ignoreNull) {
+        return MybatisSqlProvider.update(this, entity, ignoreNull);
+    }
+
+    default int update(@NonNull T entity) {
+        return update(entity, true);
     }
 
     default int delete(@NonNull ID id) {
@@ -62,6 +81,7 @@ public interface MybatisDao<T, ID> {
     default int delete(@NonNull Collection<ID> ids) {
         return MybatisSqlProvider.delete(this, ids);
     }
+
 
     default <IN> Page<T> page(@NonNull Page<IN> pageIn, @NonNull Selects<T> select) {
         return MybatisSqlProvider.page(this, pageIn, select);

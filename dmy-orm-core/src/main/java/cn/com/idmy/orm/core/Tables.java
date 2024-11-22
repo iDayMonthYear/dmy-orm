@@ -121,12 +121,20 @@ public class Tables {
         return getTableInfo(entityClass).name();
     }
 
+    public static TableIdInfo getId(Class<?> entityClass) {
+        return getTableInfo(entityClass).id();
+    }
+
     public static String getIdName(Class<?> entityClass) {
         return getTableInfo(entityClass).id().name();
     }
 
     public static String getIdName(MybatisDao<?, ?> dao) {
         return getTableInfo(dao.entityClass()).id().name();
+    }
+
+    public static Field getIdField(Class<?> entityClass) {
+        return getTableInfo(entityClass).id().field();
     }
 
     public static String getColumnName(Class<?> entityClass, String columnName) {
