@@ -13,12 +13,12 @@ import java.util.List;
 
 @Slf4j
 @Accessors(fluent = true, chain = true)
-public abstract class Rud<T, RUD extends Rud<T, RUD>> {
+public abstract class Sud<T, SUD extends Sud<T, SUD>> {
     @Getter(value = AccessLevel.PROTECTED)
     List<Node> nodes = new ArrayList<>();
 
     @SuppressWarnings({"unchecked"})
-    protected final RUD $this = (RUD) this;
+    protected final SUD $this = (SUD) this;
 
     @Getter(value = AccessLevel.PROTECTED)
     protected Class<T> entityClass;
@@ -27,7 +27,7 @@ public abstract class Rud<T, RUD extends Rud<T, RUD>> {
     @Getter(value = AccessLevel.PROTECTED)
     protected int sqlParamsSize;
 
-    protected Rud(Class<T> entityClass) {
+    protected Sud(Class<T> entityClass) {
         this.entityClass = entityClass;
     }
 
@@ -43,12 +43,12 @@ public abstract class Rud<T, RUD extends Rud<T, RUD>> {
         }
     }
 
-    RUD addNode(Node node) {
+    SUD addNode(Node node) {
         nodes.add(node);
         return $this;
     }
 
-    public RUD or() {
+    public SUD or() {
         return addNode(new Or());
     }
 }
