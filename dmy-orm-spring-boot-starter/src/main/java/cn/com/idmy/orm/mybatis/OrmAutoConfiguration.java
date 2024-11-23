@@ -18,8 +18,8 @@ import javax.sql.DataSource;
 public class OrmAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
-    MybatisSqlProvider mybatisSqlProvider(SqlSessionFactory sessionFactory) {
-        return new MybatisSqlProvider(sessionFactory);
+    MybatisSqlProvider mybatisSqlProvider() {
+        return new MybatisSqlProvider();
     }
 
     @Bean

@@ -2,16 +2,19 @@ package cn.com.idmy.ts.server.service.impl;
 
 import cn.com.idmy.base.model.Page;
 import cn.com.idmy.orm.core.Selects;
+import cn.com.idmy.orm.core.Tables;
+import cn.com.idmy.orm.mybatis.handler.JsonTypeHandler;
 import cn.com.idmy.ts.server.dao.AppDao;
 import cn.com.idmy.ts.server.model.entity.App;
 import cn.com.idmy.ts.server.service.AppService;
 import lombok.RequiredArgsConstructor;
-import org.dromara.hutool.core.lang.Console;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RequiredArgsConstructor
 @Service
@@ -71,12 +74,16 @@ public class AppServiceImpl implements AppService {
 //
 //        Console.error(dao.find(SelectChain.of(dao).endsWith(App::getName, "票")));
 //        Console.error(dao.find(SelectChain.of(dao).between(App::getId, 1, 10)));
-        Page<App> pageIn = Page.of(1, 2);
-        pageIn.setParams(new App());
-        pageIn.setSorts(new String[]{"key", "desc"});
-        Page<App> page = dao.page(pageIn, Selects.of(dao).between(App::getId, 1, 100));
-        Console.error(page);
-        return page;
+//        Page<App> pageIn = Page.of(1, 2);
+//        pageIn.setParams(new App());
+//        pageIn.setSorts(new String[]{"key", "desc"});
+//        Page<App> page = dao.page(pageIn, Selects.of(dao).between(App::getId, 1, 100));
+//        Console.error(page);
+        Tables.register(App.class, App::getJson2, JsonTypeHandler.class);
+        Map<String, Object> map = new HashMap<>();
+        map.put("a", 1);
+        dao.update(App.builder().id(1L).json2(map).build());
+        return null;
     }
 
     @Override

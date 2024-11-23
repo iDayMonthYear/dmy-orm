@@ -26,6 +26,9 @@ public interface MybatisDao<T, ID> {
         return (Class<ID>) ClassUtil.getTypeArgument(getClass(), 1);
     }
 
+    @UpdateProvider(type = MybatisSqlProvider.class, method = "updateBySql")
+    int updateBySql(@Param(SUD) String sql, @Param(SQL_PARAMS) List<Object> params, @Param(ENTITY_CLASS) Class<T> entityClass);
+
     @InsertProvider(type = MybatisSqlProvider.class, method = INSERT)
     int insert(@NonNull @Param(ENTITY) T entity);
 
@@ -178,4 +181,6 @@ public interface MybatisDao<T, ID> {
     default <R> Map<R, T> map(@NonNull ColumnGetter<T, R> col, @NonNull Selects<T> chain) {
         return CollStreamUtil.toIdentityMap(find(chain), col::get);
     }
+
+
 }

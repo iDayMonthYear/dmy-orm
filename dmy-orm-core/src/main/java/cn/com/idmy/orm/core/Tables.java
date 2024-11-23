@@ -24,7 +24,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class Tables {
     private static final Map<Class<?>, TableInfo> mapperTableInfos = new ConcurrentHashMap<>();
     private static final Map<Class<?>, TableInfo> entityTableInfos = new ConcurrentHashMap<>();
-    private static final Map<TypeHandlerKey, Class<? extends TypeHandler<?>>> typeHandlers = new ConcurrentHashMap<>();
+    private static final Map<TypeHandlerKey, Class<? extends TypeHandler>> typeHandlers = new ConcurrentHashMap<>();
 
     public static TableInfo getTableInfo(Class<?> entityClass) {
         return entityTableInfos.computeIfAbsent(entityClass, Tables::init);
@@ -153,12 +153,12 @@ public class Tables {
         entityTableInfos.clear();
     }
 
-    public static <T, R> void register(Class<T> entityClass, ColumnGetter<T, R> col, Class<? extends TypeHandler<?>> handlerClass) {
+    public static <T, R> void register(Class<T> entityClass, ColumnGetter<T, R> col, Class<? extends TypeHandler> handlerClass) {
         var fieldName = LambdaUtil.getFieldName(col);
         typeHandlers.put(new TypeHandlerKey(entityClass, fieldName), handlerClass);
     }
 
-    public static Class<? extends TypeHandler<?>> getHandler(Class<?> entityClass, String columnName) {
+    public static Class<? extends TypeHandler> getHandler(Class<?> entityClass, String columnName) {
         return typeHandlers.get(new TypeHandlerKey(entityClass, columnName));
     }
 

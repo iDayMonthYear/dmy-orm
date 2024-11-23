@@ -8,8 +8,6 @@ import jakarta.annotation.Nullable;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.ibatis.session.SqlSession;
-import org.apache.ibatis.session.SqlSessionFactory;
 import org.dromara.hutool.core.array.ArrayUtil;
 import org.dromara.hutool.core.collection.CollStreamUtil;
 import org.dromara.hutool.core.collection.CollUtil;
@@ -29,7 +27,7 @@ public class MybatisSqlProvider {
 
     public static final String ENTITY = "$entity$";
     public static final String ENTITIES = "$entities$";
-    private static final String ENTITY_CLASS = "$$entityClass$";
+    public static final String ENTITY_CLASS = "$$entityClass$";
 
     public static final String GET = "get";
     public static final String FIND = "find";
@@ -38,18 +36,6 @@ public class MybatisSqlProvider {
     public static final String COUNT = "count";
     public static final String INSERT = "insert";
     public static final String INSERTS = "inserts";
-
-    private static SqlSessionFactory sqlSessionFactory;
-
-    public MybatisSqlProvider(SqlSessionFactory factory) {
-        sqlSessionFactory = factory;
-    }
-
-    private static int update(String sql, Object... params) {
-        try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
-            return sqlSession.update(sql, params);
-        }
-    }
 
     public static <T, ID> int insertOrUpdate(MybatisDao<T, ID> dao, T entity, boolean ignoreNull) {
         ID id = (ID) FieldUtil.getFieldValue(entity, Tables.getIdName(dao));
@@ -74,20 +60,22 @@ public class MybatisSqlProvider {
         var columns = table.columns();
         var sql = new StringBuilder(SqlConsts.UPDATE).append(SqlConsts.STRESS_MARK).append(Tables.getTableName(entity.getClass())).append(SqlConsts.STRESS_MARK).append(SqlConsts.SET);
         var sqlParams = new ArrayList<>();
+        int idx = 0;
         for (int i = 0; i < columns.length; i++) {
             var column = columns[i];
             var value = FieldUtil.getFieldValue(entity, column.field());
             if (!ignoreNull || value != null) {
+                idx++;
                 sql.append(SqlConsts.STRESS_MARK).append(column.name()).append(SqlConsts.STRESS_MARK).append(SqlConsts.EQUALS_PLACEHOLDER);
                 sqlParams.add(value);
-                if (i < columns.length - 1) {
+                if (i < idx - 1) {
                     sql.append(SqlConsts.DELIMITER);
                 }
             }
         }
         sql.append(SqlConsts.WHERE).append(SqlConsts.STRESS_MARK).append(id.name()).append(SqlConsts.STRESS_MARK).append(SqlConsts.EQUALS_PLACEHOLDER);
         sqlParams.add(idValue);
-        return update(sql.toString(), sqlParams.toArray());
+        return dao.updateBySql(sql.toString(), sqlParams, (Class<T>) entity.getClass());
     }
 
     private static StringBuilder builderInsertHeader(String name) {
@@ -418,5 +406,9 @@ public class MybatisSqlProvider {
         params.put(SQL_PARAMS, sqlParams);
         putEntityClass(params, entities.getFirst().getClass());
         return sql.toString();
+    }
+
+    public String updateBySql(Map<String, Object> params) {
+        return (String) params.get(SUD);
     }
 }
