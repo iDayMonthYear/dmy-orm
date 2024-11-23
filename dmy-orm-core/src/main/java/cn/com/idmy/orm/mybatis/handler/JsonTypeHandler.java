@@ -2,12 +2,12 @@ package cn.com.idmy.orm.mybatis.handler;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.TypeReference;
+import lombok.RequiredArgsConstructor;
 import org.apache.ibatis.type.BaseTypeHandler;
 import org.apache.ibatis.type.JdbcType;
 import org.apache.ibatis.type.MappedJdbcTypes;
 import org.apache.ibatis.type.MappedTypes;
 
-import java.lang.reflect.Type;
 import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -15,13 +15,10 @@ import java.sql.SQLException;
 
 @MappedTypes({Object.class})
 @MappedJdbcTypes({JdbcType.VARCHAR})
+@RequiredArgsConstructor
 public class JsonTypeHandler<T> extends BaseTypeHandler<T> {
-    private final Type type;
-    
-    public JsonTypeHandler(Class<T> type) {
-        this.type = TypeReference.get(type).getType();
-    }
-    
+    private final TypeReference<T> type;
+
     @Override
     public void setNonNullParameter(PreparedStatement ps, int i, T parameter, JdbcType jdbcType) throws SQLException {
         ps.setString(i, JSON.toJSONString(parameter));

@@ -24,7 +24,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class Tables {
     private static final Map<Class<?>, TableInfo> mapperTableInfos = new ConcurrentHashMap<>();
     private static final Map<Class<?>, TableInfo> entityTableInfos = new ConcurrentHashMap<>();
-    private static final Map<TypeHandlerKey, Class<? extends TypeHandler>> typeHandlers = new ConcurrentHashMap<>();
+    private static final Map<Field, TypeHandler> typeHandlers = new ConcurrentHashMap<>();
 
     public static TableInfo getTableInfo(Class<?> entityClass) {
         return entityTableInfos.computeIfAbsent(entityClass, Tables::init);
@@ -153,20 +153,27 @@ public class Tables {
         entityTableInfos.clear();
     }
 
-    public static <T, R> void register(Class<T> entityClass, ColumnGetter<T, R> col, Class<? extends TypeHandler> handlerClass) {
-        var fieldName = LambdaUtil.getFieldName(col);
-        typeHandlers.put(new TypeHandlerKey(entityClass, fieldName), handlerClass);
+    public static <T, R> void register(Class<T> entityClass, ColumnGetter<T, R> col, TypeHandler<?> handler)  {
+        String fieldName = LambdaUtil.getFieldName(col);
+        try {
+            // 获取字段对象
+            Field field = entityClass.getDeclaredField(fieldName);
+            field.setAccessible(true); // 确保可以访问私有字段
+            // 将字段和 TypeHandler 关联起来
+            typeHandlers.put(field, handler);
+        } catch (NoSuchFieldException e) {
+            throw new RuntimeException("Field not found: " + fieldName, e);
+        } catch (SecurityException e) {
+            throw new RuntimeException("Access denied to field: " + fieldName, e);
+        }
     }
 
-    public static Class<? extends TypeHandler> getHandler(Class<?> entityClass, String columnName) {
-        return typeHandlers.get(new TypeHandlerKey(entityClass, columnName));
+    public static TypeHandler<?> getHandler(Field field) {
+        return typeHandlers.get(field);
     }
 
     public static void clearTypeHandler() {
         typeHandlers.clear();
     }
 
-
-    private record TypeHandlerKey(Class<?> entityClass, String columnName) {
-    }
-} 
+}

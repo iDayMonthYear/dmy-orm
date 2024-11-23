@@ -2,7 +2,7 @@ package cn.com.idmy.orm.mybatis;
 
 import cn.com.idmy.orm.OrmException;
 import cn.com.idmy.orm.core.MybatisSqlProvider;
-import cn.com.idmy.orm.core.Tables;
+import cn.com.idmy.orm.mybatis.handler.TypeHandlerValue;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.mapping.BoundSql;
 import org.apache.ibatis.mapping.MappedStatement;
@@ -47,40 +47,32 @@ class MybatisParameterHandler extends DefaultParameterHandler {
     private void setParameter(PreparedStatement ps, int index, Object value, Map<String, Object> params) throws SQLException {
         switch (value) {
             case null -> ps.setObject(index, null);
-            case Object[] arr -> {
-                if (arr.length == 0) {
+            case Object[] to -> {
+                if (to.length == 0) {
                     throw new OrmException("Empty array");
                 }
-                for (var item : arr) {
+                for (var item : to) {
                     setParameter(ps, index++, item, params);
                 }
             }
-            case Collection<?> ls -> {
-                if (ls.isEmpty()) {
+            case Collection<?> to -> {
+                if (to.isEmpty()) {
                     throw new OrmException("Empty list");
                 }
-                for (var item : ls) {
+                for (var item : to) {
                     setParameter(ps, index++, item, params);
                 }
             }
+            case TypeHandlerValue to -> {
+                to.setParameter(ps, index);
+            }
             default -> {
-                TypeHandler typeHandler = getTypeHandler(value, params);
+                TypeHandler typeHandler = typeHandlerRegistry.getTypeHandler(value.getClass());
+                if (typeHandler == null) {
+                    typeHandler = typeHandlerRegistry.getUnknownTypeHandler();
+                }
                 typeHandler.setParameter(ps, index, value, null);
             }
         }
-    }
-
-    private TypeHandler<?> getTypeHandler(Object value, Map<String, Object> params) {
-        var valueType = value.getClass();
-        var entityClass = MybatisSqlProvider.getEntityClass(params);
-        var customHandler = Tables.getHandler(entityClass, valueType.getName());
-        if (customHandler != null) {
-            try {
-                return customHandler.getDeclaredConstructor().newInstance();
-            } catch (Exception e) {
-                log.warn("Failed to create custom type handler", e);
-            }
-        }
-        return typeHandlerRegistry.getTypeHandler(valueType);
     }
 }

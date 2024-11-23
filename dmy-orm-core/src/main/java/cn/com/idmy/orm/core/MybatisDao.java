@@ -11,7 +11,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-import static cn.com.idmy.orm.core.MybatisSqlProvider.*;
+import static cn.com.idmy.orm.core.MybatisDaoDelegate.*;
 
 public interface MybatisDao<T, ID> {
     int DEFAULT_BATCH_SIZE = 1000;
@@ -26,48 +26,48 @@ public interface MybatisDao<T, ID> {
         return (Class<ID>) ClassUtil.getTypeArgument(getClass(), 1);
     }
 
-    @UpdateProvider(type = MybatisSqlProvider.class, method = "updateBySql")
-    int updateBySql(@Param(SUD) String sql, @Param(SQL_PARAMS) List<Object> params, @Param(ENTITY_CLASS) Class<T> entityClass);
+    @UpdateProvider(type = MybatisDaoDelegate.class, method = updateBySql)
+    int updateBySql(@Param(SUD) String sql, @Param(SQL_PARAMS) List<Object> params);
 
-    @InsertProvider(type = MybatisSqlProvider.class, method = INSERT)
+    @InsertProvider(type = MybatisDaoDelegate.class, method = insert)
     int insert(@NonNull @Param(ENTITY) T entity);
 
     /**
      * 批量插入主键为自增时，不会回写到实体类。（需要查询回写，影响性能）
      */
-    @InsertProvider(type = MybatisSqlProvider.class, method = INSERTS)
+    @InsertProvider(type = MybatisDaoDelegate.class, method = inserts)
     int inserts(@NonNull @Param(ENTITIES) Collection<T> entities);
 
     @Nullable
-    @SelectProvider(type = MybatisSqlProvider.class, method = GET)
+    @SelectProvider(type = MybatisDaoDelegate.class, method = get)
     T get(@NonNull @Param(SUD) Selects<T> select);
 
-    @SelectProvider(type = MybatisSqlProvider.class, method = FIND)
+    @SelectProvider(type = MybatisDaoDelegate.class, method = find)
     List<T> find(@NonNull @Param(SUD) Selects<T> select);
 
-    @UpdateProvider(type = MybatisSqlProvider.class, method = UPDATE)
+    @UpdateProvider(type = MybatisDaoDelegate.class, method = update)
     int update(@NonNull @Param(SUD) Updates<T> update);
 
-    @DeleteProvider(type = MybatisSqlProvider.class, method = DELETE)
+    @DeleteProvider(type = MybatisDaoDelegate.class, method = delete)
     int delete(@NonNull @Param(SUD) Deletes<T> delete);
 
-    @SelectProvider(type = MybatisSqlProvider.class, method = COUNT)
+    @SelectProvider(type = MybatisDaoDelegate.class, method = count)
     long count(@NonNull @Param(SUD) Selects<T> select);
 
     default int inserts(@NonNull Collection<T> entities, int size) {
-        return MybatisSqlProvider.inserts(this, entities, size);
+        return MybatisDaoDelegate.inserts(this, entities, size);
     }
 
     default int insertOrUpdate(@NonNull T entity) {
-        return MybatisSqlProvider.insertOrUpdate(this, entity, true);
+        return MybatisDaoDelegate.insertOrUpdate(this, entity, true);
     }
 
     default int insertOrUpdate(@NonNull T entity, boolean ignoreNull) {
-        return MybatisSqlProvider.insertOrUpdate(this, entity, ignoreNull);
+        return MybatisDaoDelegate.insertOrUpdate(this, entity, ignoreNull);
     }
 
     default int update(@NonNull T entity, boolean ignoreNull) {
-        return MybatisSqlProvider.update(this, entity, ignoreNull);
+        return MybatisDaoDelegate.update(this, entity, ignoreNull);
     }
 
     default int update(@NonNull T entity) {
@@ -75,36 +75,36 @@ public interface MybatisDao<T, ID> {
     }
 
     default int delete(@NonNull ID id) {
-        return MybatisSqlProvider.delete(this, id);
+        return MybatisDaoDelegate.delete(this, id);
     }
 
     default int delete(@NonNull Collection<ID> ids) {
-        return MybatisSqlProvider.delete(this, ids);
+        return MybatisDaoDelegate.delete(this, ids);
     }
 
     default <IN> Page<T> page(@NonNull Page<IN> pageIn, @NonNull Selects<T> select) {
-        return MybatisSqlProvider.page(this, pageIn, select);
+        return MybatisDaoDelegate.page(this, pageIn, select);
     }
 
     @Nullable
     default T get(@NonNull ID id) {
-        return MybatisSqlProvider.get(this, id);
+        return MybatisDaoDelegate.get(this, id);
     }
 
     @Nullable
     default <R> R get(@NonNull ColumnGetter<T, R> col, @NonNull ID id) {
-        return MybatisSqlProvider.get(this, col, id);
+        return MybatisDaoDelegate.get(this, col, id);
     }
 
     @Nullable
     default <R> R get(@NonNull ColumnGetter<T, R> col, @NonNull Selects<T> select) {
-        return MybatisSqlProvider.get(this, col, select);
+        return MybatisDaoDelegate.get(this, col, select);
     }
 
     @SuppressWarnings({"unchecked"})
     @Nullable
     default T get(@NonNull Selects<T> chain, @NonNull ColumnGetter<T, ?>... cols) {
-        return MybatisSqlProvider.get(this, chain, cols);
+        return MybatisDaoDelegate.get(this, chain, cols);
     }
 
     default List<T> all() {
@@ -112,19 +112,19 @@ public interface MybatisDao<T, ID> {
     }
 
     default List<T> find(@NonNull Collection<ID> ids) {
-        return MybatisSqlProvider.find(this, ids);
+        return MybatisDaoDelegate.find(this, ids);
     }
 
     default <R> List<R> find(@NonNull ColumnGetter<T, R> col, @NonNull Collection<ID> ids) {
-        return MybatisSqlProvider.find(this, col, ids);
+        return MybatisDaoDelegate.find(this, col, ids);
     }
 
     default <R> List<R> find(@NonNull ColumnGetter<T, R> col, @NonNull Selects<T> chain) {
-        return MybatisSqlProvider.find(this, col, chain);
+        return MybatisDaoDelegate.find(this, col, chain);
     }
 
     default boolean exists(@NonNull ID id) {
-        return MybatisSqlProvider.exists(this, id);
+        return MybatisDaoDelegate.exists(this, id);
     }
 
     default boolean notExists(@NonNull ID id) {
@@ -141,7 +141,7 @@ public interface MybatisDao<T, ID> {
 
     @Nullable
     default <R extends Number> R sqlFn(@NonNull SqlFnName name, @NonNull ColumnGetter<T, R> col, @NonNull Selects<T> select) {
-        return MybatisSqlProvider.sqlFn(this, name, col, select);
+        return MybatisDaoDelegate.sqlFn(this, name, col, select);
     }
 
     @Nullable
@@ -171,16 +171,14 @@ public interface MybatisDao<T, ID> {
 
     @SuppressWarnings({"unchecked"})
     default Map<ID, T> map(@NonNull ID... ids) {
-        return MybatisSqlProvider.map(this, ids);
+        return MybatisDaoDelegate.map(this, ids);
     }
 
     default Map<ID, T> map(@NonNull Collection<ID> ids) {
-        return MybatisSqlProvider.map(this, ids);
+        return MybatisDaoDelegate.map(this, ids);
     }
 
     default <R> Map<R, T> map(@NonNull ColumnGetter<T, R> col, @NonNull Selects<T> chain) {
         return CollStreamUtil.toIdentityMap(find(chain), col::get);
     }
-
-
 }

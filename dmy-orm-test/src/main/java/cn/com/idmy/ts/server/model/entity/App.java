@@ -12,6 +12,7 @@ import java.time.LocalDateTime;
 import java.util.Map;
 
 @Data
+//@Accessors(fluent = true)
 @SuperBuilder
 @AllArgsConstructor
 @NoArgsConstructor
@@ -22,7 +23,7 @@ public class App  {
     protected String key;
     protected String name;
     protected JSONObject json;
-    protected Map<String, Object> json2;
+    protected Map<Integer, Long> json2;
     protected Long a;
     protected LocalDateTime createdAt;
     protected LocalDateTime updatedAt;
