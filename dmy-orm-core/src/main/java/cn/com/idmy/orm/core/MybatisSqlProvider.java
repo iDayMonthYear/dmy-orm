@@ -77,7 +77,7 @@ public class MybatisSqlProvider {
     }
 
     public String update(Map<String, Object> params, ProviderContext context) {
-        TableInfo tableInfo = Tables.getTableInfoByMapperClass(context.getMapperType());
+        TableInfo tableInfo = Tables.getTableByMapperClass(context.getMapperType());
         return buildCommonSql(params);
     }
 
@@ -108,7 +108,7 @@ public class MybatisSqlProvider {
 
     public String insert(Map<String, Object> params) {
         var entity = params.get(ENTITY);
-        var table = Tables.getTableInfo(entity.getClass());
+        var table = Tables.getTable(entity.getClass());
         var columns = table.columns();
 
         var sql = builderInsertHeader(table.name());
@@ -141,7 +141,7 @@ public class MybatisSqlProvider {
         if (entities.isEmpty()) {
             throw new OrmException("批量插入的实体集合不能为空");
         }
-        var table = Tables.getTableInfo(entities.getFirst().getClass());
+        var table = Tables.getTable(entities.getFirst().getClass());
         var columns = table.columns();
         var sql = builderInsertHeader(table.name());
 
@@ -182,7 +182,7 @@ public class MybatisSqlProvider {
     }
 
     public String updateBySql(Map<String, Object> params, ProviderContext context) {
-        TableInfo tableInfo = Tables.getTableInfoByMapperClass(context.getMapperType());
+        TableInfo tableInfo = Tables.getTableByMapperClass(context.getMapperType());
         putEntityClass(params, tableInfo.entityClass());
         return (String) params.get(SUD);
     }

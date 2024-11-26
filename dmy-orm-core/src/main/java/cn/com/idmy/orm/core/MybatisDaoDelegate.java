@@ -38,7 +38,7 @@ class MybatisDaoDelegate extends MybatisSqlProvider {
         if (idValue == null) {
             throw new OrmException("主键不能为空");
         }
-        var table = Tables.getTableInfo(entityClass);
+        var table = Tables.getTable(entityClass);
         var columns = table.columns();
         var sql = new StringBuilder(SqlConsts.UPDATE).append(SqlConsts.STRESS_MARK).append(Tables.getTableName(entityClass)).append(SqlConsts.STRESS_MARK).append(SqlConsts.SET);
         var sqlParams = new ArrayList<>();

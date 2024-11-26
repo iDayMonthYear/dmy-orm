@@ -39,7 +39,7 @@ class MybatisConfiguration extends Configuration {
 
     @Override
     public void addMappedStatement(MappedStatement ms) {
-        TableInfo tableInfo = Tables.getTableInfo(ms);
+        TableInfo tableInfo = Tables.getTable(ms);
         ms = replaceIdGenerator(ms, tableInfo);
         ms = addResultMap(ms, tableInfo);
         super.addMappedStatement(ms);

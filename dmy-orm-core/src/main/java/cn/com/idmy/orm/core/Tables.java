@@ -26,24 +26,24 @@ public class Tables {
     private static final Map<Class<?>, TableInfo> entityTableInfos = new ConcurrentHashMap<>();
     private static final Map<Field, TypeHandler> typeHandlers = new ConcurrentHashMap<>();
 
-    public static TableInfo getTableInfo(Class<?> entityClass) {
+    public static TableInfo getTable(Class<?> entityClass) {
         return entityTableInfos.computeIfAbsent(entityClass, Tables::init);
     }
 
-    public static TableInfo getTableInfo(MappedStatement ms) {
+    public static TableInfo getTable(MappedStatement ms) {
         String mapperClassName = ms.getId().substring(0, ms.getId().lastIndexOf("."));
         try {
             var mapperClass = Class.forName(mapperClassName);
-            return getTableInfoByMapperClass(mapperClass);
+            return getTableByMapperClass(mapperClass);
         } catch (ClassNotFoundException e) {
             throw new OrmException(e);
         }
     }
 
-    public static TableInfo getTableInfoByMapperClass(Class<?> mapperClass) {
+    public static TableInfo getTableByMapperClass(Class<?> mapperClass) {
         return MapUtil.computeIfAbsent(mapperTableInfos, mapperClass, key -> {
             var entityClass = ClassUtil.getTypeArgument(mapperClass);
-            return getTableInfo(entityClass);
+            return getTable(entityClass);
         });
     }
 
@@ -118,38 +118,38 @@ public class Tables {
     }
 
     public static String getTableName(Class<?> entityClass) {
-        return getTableInfo(entityClass).name();
+        return getTable(entityClass).name();
     }
 
     public static TableIdInfo getId(Class<?> entityClass) {
-        return getTableInfo(entityClass).id();
+        return getTable(entityClass).id();
     }
 
     public static String getIdName(Class<?> entityClass) {
-        return getTableInfo(entityClass).id().name();
+        return getTable(entityClass).id().name();
     }
 
     public static String getIdName(MybatisDao<?, ?> dao) {
-        return getTableInfo(dao.entityClass()).id().name();
+        return getTable(dao.entityClass()).id().name();
     }
 
     public static Field getIdField(Class<?> entityClass) {
-        return getTableInfo(entityClass).id().field();
+        return getTable(entityClass).id().field();
     }
 
     public static String getColumnName(Class<?> entityClass, String columnName) {
-        TableInfo tableInfo = getTableInfo(entityClass);
+        TableInfo tableInfo = getTable(entityClass);
         TableColumnInfo columnInfo = tableInfo.columnMap().get(columnName);
         return columnInfo.name();
     }
 
     @SuppressWarnings("unchecked")
     public static <T> T getIdValue(Object entity) {
-        TableInfo tableInfo = getTableInfo(entity.getClass());
+        TableInfo tableInfo = getTable(entity.getClass());
         return (T) FieldUtil.getFieldValue(entity, tableInfo.id().name());
     }
 
-    public static void clearTableInfo() {
+    public static void clearTable() {
         entityTableInfos.clear();
     }
 
@@ -175,5 +175,4 @@ public class Tables {
     public static void clearTypeHandler() {
         typeHandlers.clear();
     }
-
 }

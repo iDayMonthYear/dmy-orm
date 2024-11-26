@@ -39,7 +39,7 @@ class CheckDatabaseColumn {
                 var mapperClass = ctx.getType(beanName);
                 var entityClass = ClassUtil.getTypeArgument(mapperClass);
                 if (entityClass.isAnnotationPresent(Table.class)) {
-                    var tableInfo = Tables.getTableInfo(entityClass);
+                    var tableInfo = Tables.getTable(entityClass);
                     checkDatabaseColumn(connection, entityClass, tableInfo);
                 } else {
                     assert mapperClass != null;
