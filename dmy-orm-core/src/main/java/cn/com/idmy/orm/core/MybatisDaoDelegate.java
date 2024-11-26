@@ -17,7 +17,7 @@ import static cn.com.idmy.base.constant.DefaultConsts.CREATED_AT;
 import static cn.com.idmy.base.constant.DefaultConsts.UPDATED_AT;
 import static cn.com.idmy.orm.core.MybatisDao.DEFAULT_BATCH_SIZE;
 
-class MybatisDaoDelegate extends MybatisSqlProvider {
+class MybatisDaoDelegate {
     public static <T, ID> int insertOrUpdate(MybatisDao<T, ID> dao, T entity, boolean ignoreNull) {
         ID id = (ID) FieldUtil.getFieldValue(entity, Tables.getIdName(dao));
         if (id == null) {
@@ -49,7 +49,7 @@ class MybatisDaoDelegate extends MybatisSqlProvider {
             if (!ignoreNull || value != null) {
                 idx++;
                 sql.append(SqlConsts.STRESS_MARK).append(column.name()).append(SqlConsts.STRESS_MARK).append(SqlConsts.EQUALS_PLACEHOLDER);
-                sqlParams.add(hasTypeHandler(column.field(), value));
+                sqlParams.add(MybatisSqlProvider.hasTypeHandler(column.field(), value));
                 if (i < idx - 1) {
                     sql.append(SqlConsts.DELIMITER);
                 }
@@ -101,7 +101,7 @@ class MybatisDaoDelegate extends MybatisSqlProvider {
 
     @Nullable
     public static <T, ID, R> R get(MybatisDao<T, ID> dao, ColumnGetter<T, R> col, Selects<T> select) {
-        clearSelectColumns(select);
+        MybatisSqlProvider.clearSelectColumns(select);
         select.limit = 1;
         T t = dao.get(select.select(col));
         if (t == null) {
@@ -113,13 +113,13 @@ class MybatisDaoDelegate extends MybatisSqlProvider {
 
     @Nullable
     public static <T, ID> T get(MybatisDao<T, ID> dao, Selects<T> select, @NonNull ColumnGetter<T, ?>[] cols) {
-        clearSelectColumns(select);
+        MybatisSqlProvider.clearSelectColumns(select);
         select.limit = 1;
         return dao.get(select.select(cols));
     }
 
     public static <T, ID, R> List<R> find(MybatisDao<T, ID> dao, ColumnGetter<T, R> col, Selects<T> select) {
-        clearSelectColumns(select);
+        MybatisSqlProvider.clearSelectColumns(select);
         var ts = dao.find(select.select(col));
         return CollStreamUtil.toList(ts, col::get);
     }
@@ -151,7 +151,7 @@ class MybatisDaoDelegate extends MybatisSqlProvider {
         if (name == SqlFnName.IF_NULL) {
             throw new OrmException("不支持ifnull");
         } else {
-            clearSelectColumns(select);
+            MybatisSqlProvider.clearSelectColumns(select);
             select.limit = 1;
             T t = dao.get(select.select(() -> new SqlFn<>(name, col)));
             if (t == null) {

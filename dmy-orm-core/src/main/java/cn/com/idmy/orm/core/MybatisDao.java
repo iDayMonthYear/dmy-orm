@@ -11,7 +11,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-import static cn.com.idmy.orm.core.MybatisDaoDelegate.*;
+import static cn.com.idmy.orm.core.MybatisSqlProvider.*;
+
 
 public interface MybatisDao<T, ID> {
     int DEFAULT_BATCH_SIZE = 1000;
@@ -26,32 +27,32 @@ public interface MybatisDao<T, ID> {
         return (Class<ID>) ClassUtil.getTypeArgument(getClass(), 1);
     }
 
-    @UpdateProvider(type = MybatisDaoDelegate.class, method = updateBySql)
+    @UpdateProvider(type = MybatisSqlProvider.class, method = updateBySql)
     int updateBySql(@Param(SUD) String sql, @Param(SQL_PARAMS) List<Object> params);
 
-    @InsertProvider(type = MybatisDaoDelegate.class, method = insert)
+    @InsertProvider(type = MybatisSqlProvider.class, method = insert)
     int insert(@NonNull @Param(ENTITY) T entity);
 
     /**
      * 批量插入主键为自增时，不会回写到实体类。（需要查询回写，影响性能）
      */
-    @InsertProvider(type = MybatisDaoDelegate.class, method = inserts)
+    @InsertProvider(type = MybatisSqlProvider.class, method = inserts)
     int inserts(@NonNull @Param(ENTITIES) Collection<T> entities);
 
     @Nullable
-    @SelectProvider(type = MybatisDaoDelegate.class, method = get)
+    @SelectProvider(type = MybatisSqlProvider.class, method = get)
     T get(@NonNull @Param(SUD) Selects<T> select);
 
-    @SelectProvider(type = MybatisDaoDelegate.class, method = find)
+    @SelectProvider(type = MybatisSqlProvider.class, method = find)
     List<T> find(@NonNull @Param(SUD) Selects<T> select);
 
-    @UpdateProvider(type = MybatisDaoDelegate.class, method = update)
+    @UpdateProvider(type = MybatisSqlProvider.class, method = update)
     int update(@NonNull @Param(SUD) Updates<T> update);
 
-    @DeleteProvider(type = MybatisDaoDelegate.class, method = delete)
+    @DeleteProvider(type = MybatisSqlProvider.class, method = delete)
     int delete(@NonNull @Param(SUD) Deletes<T> delete);
 
-    @SelectProvider(type = MybatisDaoDelegate.class, method = count)
+    @SelectProvider(type = MybatisSqlProvider.class, method = count)
     long count(@NonNull @Param(SUD) Selects<T> select);
 
     default int inserts(@NonNull Collection<T> entities, int size) {

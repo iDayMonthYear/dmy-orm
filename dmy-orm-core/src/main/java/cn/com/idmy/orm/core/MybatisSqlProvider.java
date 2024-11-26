@@ -77,7 +77,7 @@ public class MybatisSqlProvider {
     }
 
     public String update(Map<String, Object> params, ProviderContext context) {
-        TableInfo tableInfo = Tables.getTableByMapperClass(context.getMapperType());
+        TableInfo table = Tables.getTableByMapperClass(context.getMapperType());
         return buildCommonSql(params);
     }
 
@@ -182,8 +182,8 @@ public class MybatisSqlProvider {
     }
 
     public String updateBySql(Map<String, Object> params, ProviderContext context) {
-        TableInfo tableInfo = Tables.getTableByMapperClass(context.getMapperType());
-        putEntityClass(params, tableInfo.entityClass());
+        TableInfo table = Tables.getTableByMapperClass(context.getMapperType());
+        putEntityClass(params, table.entityClass());
         return (String) params.get(SUD);
     }
 }
