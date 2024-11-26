@@ -11,8 +11,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-import static cn.com.idmy.orm.core.MybatisSqlProvider.*;
-
 
 public interface MybatisDao<T, ID> {
     int DEFAULT_BATCH_SIZE = 1000;
@@ -27,33 +25,33 @@ public interface MybatisDao<T, ID> {
         return (Class<ID>) ClassUtil.getTypeArgument(getClass(), 1);
     }
 
-    @UpdateProvider(type = MybatisSqlProvider.class, method = updateBySql)
-    int updateBySql(@Param(SUD) String sql, @Param(SQL_PARAMS) List<Object> params);
+    @UpdateProvider(type = MybatisSqlProvider.class, method = MybatisSqlProvider.updateBySql)
+    int updateBySql(@Param(MybatisSqlProvider.SUD) String sql, @Param(MybatisSqlProvider.SQL_PARAMS) List<Object> params);
 
-    @InsertProvider(type = MybatisSqlProvider.class, method = insert)
-    int insert(@NonNull @Param(ENTITY) T entity);
+    @InsertProvider(type = MybatisSqlProvider.class, method = MybatisSqlProvider.insert)
+    int insert(@NonNull @Param(MybatisSqlProvider.ENTITY) T entity);
 
     /**
      * 批量插入主键为自增时，不会回写到实体类。（需要查询回写，影响性能）
      */
-    @InsertProvider(type = MybatisSqlProvider.class, method = inserts)
-    int inserts(@NonNull @Param(ENTITIES) Collection<T> entities);
+    @InsertProvider(type = MybatisSqlProvider.class, method = MybatisSqlProvider.inserts)
+    int inserts(@NonNull @Param(MybatisSqlProvider.ENTITIES) Collection<T> entities);
 
     @Nullable
-    @SelectProvider(type = MybatisSqlProvider.class, method = get)
-    T get(@NonNull @Param(SUD) Selects<T> select);
+    @SelectProvider(type = MybatisSqlProvider.class, method = MybatisSqlProvider.get)
+    T get(@NonNull @Param(MybatisSqlProvider.SUD) Selects<T> select);
 
-    @SelectProvider(type = MybatisSqlProvider.class, method = find)
-    List<T> find(@NonNull @Param(SUD) Selects<T> select);
+    @SelectProvider(type = MybatisSqlProvider.class, method = MybatisSqlProvider.find)
+    List<T> find(@NonNull @Param(MybatisSqlProvider.SUD) Selects<T> select);
 
-    @UpdateProvider(type = MybatisSqlProvider.class, method = update)
-    int update(@NonNull @Param(SUD) Updates<T> update);
+    @UpdateProvider(type = MybatisSqlProvider.class, method = MybatisSqlProvider.update)
+    int update(@NonNull @Param(MybatisSqlProvider.SUD) Updates<T> update);
 
-    @DeleteProvider(type = MybatisSqlProvider.class, method = delete)
-    int delete(@NonNull @Param(SUD) Deletes<T> delete);
+    @DeleteProvider(type = MybatisSqlProvider.class, method = MybatisSqlProvider.delete)
+    int delete(@NonNull @Param(MybatisSqlProvider.SUD) Deletes<T> delete);
 
-    @SelectProvider(type = MybatisSqlProvider.class, method = count)
-    long count(@NonNull @Param(SUD) Selects<T> select);
+    @SelectProvider(type = MybatisSqlProvider.class, method = MybatisSqlProvider.count)
+    long count(@NonNull @Param(MybatisSqlProvider.SUD) Selects<T> select);
 
     default int inserts(@NonNull Collection<T> entities, int size) {
         return MybatisDaoDelegate.inserts(this, entities, size);
