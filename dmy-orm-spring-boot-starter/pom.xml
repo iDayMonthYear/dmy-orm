@@ -13,6 +13,10 @@
     <artifactId>dmy-orm-spring-boot-starter</artifactId>
     <dependencies>
         <dependency>
+            <groupId>cn.com.idmy</groupId>
+            <artifactId>dmy-base</artifactId>
+        </dependency>
+        <dependency>
             <groupId>cn.com.idmy.orm</groupId>
             <artifactId>dmy-orm-spring</artifactId>
             <version>${dmy-orm.version}</version>

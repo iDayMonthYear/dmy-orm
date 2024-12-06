@@ -17,32 +17,28 @@ import java.sql.SQLException;
 @MappedJdbcTypes({JdbcType.VARCHAR})
 @RequiredArgsConstructor
 public class JsonTypeHandler<T> extends BaseTypeHandler<T> {
-    private final String name;
     private final TypeReference<T> type;
 
     @Override
-    public void setNonNullParameter(PreparedStatement ps, int i, T parameter, JdbcType jdbcType) throws SQLException {
-        ps.setString(i, JSON.toJSONString(parameter));
+    public void setNonNullParameter(PreparedStatement ps, int idx, T param, JdbcType jdbcType) throws SQLException {
+        ps.setString(idx, JSON.toJSONString(param));
     }
 
     @Override
-    public T getNullableResult(ResultSet rs, String columnName) throws SQLException {
-        String json = rs.getString(columnName);
-        return rs.wasNull() ? null : parseJson(json);
+    public T getNullableResult(ResultSet rs, String name) throws SQLException {
+        return rs.wasNull() ? null : parseJson(rs.getString(name));
     }
 
     @Override
-    public T getNullableResult(ResultSet rs, int columnIndex) throws SQLException {
-        String json = rs.getString(columnIndex);
-        return rs.wasNull() ? null : parseJson(json);
+    public T getNullableResult(ResultSet rs, int idx) throws SQLException {
+        return rs.wasNull() ? null : parseJson(rs.getString(idx));
     }
 
     @Override
-    public T getNullableResult(CallableStatement cs, int columnIndex) throws SQLException {
-        String json = cs.getString(columnIndex);
-        return cs.wasNull() ? null : parseJson(json);
+    public T getNullableResult(CallableStatement cs, int idx) throws SQLException {
+        return cs.wasNull() ? null : parseJson(cs.getString(idx));
     }
-    
+
     private T parseJson(String json) {
         return JSON.parseObject(json, type);
     }

@@ -1,9 +1,9 @@
 package cn.com.idmy.orm.core;
 
+import cn.com.idmy.base.annotation.Table;
+import cn.com.idmy.base.annotation.Table.Id;
 import cn.com.idmy.orm.OrmConfig;
 import cn.com.idmy.orm.OrmException;
-import cn.com.idmy.orm.annotation.Table;
-import cn.com.idmy.orm.annotation.Table.Id;
 import cn.com.idmy.orm.core.TableInfo.TableColumnInfo;
 import cn.com.idmy.orm.core.TableInfo.TableIdInfo;
 import lombok.NoArgsConstructor;

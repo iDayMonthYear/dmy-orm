@@ -4,19 +4,15 @@ import cn.com.idmy.orm.OrmException;
 import cn.com.idmy.orm.core.Node.*;
 import cn.com.idmy.orm.core.TableInfo.TableColumnInfo;
 import cn.com.idmy.orm.mybatis.handler.TypeHandlerValue;
-import cn.com.idmy.orm.util.SqlUtil;
 import jakarta.annotation.Nullable;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.hutool.core.collection.CollUtil;
-import org.dromara.hutool.core.func.LambdaUtil;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Objects;
 
 import static cn.com.idmy.orm.core.SqlConsts.*;
-import static cn.com.idmy.orm.core.SqlFnName.COUNT;
 
 
 @Slf4j
@@ -30,28 +26,10 @@ abstract class SqlGenerator {
         return STRESS_MARK + str + STRESS_MARK;
     }
 
-    protected static String buildColumn(Object col) {
-        if (col instanceof ColumnGetter<?, ?> getter) {
-            return LambdaUtil.getFieldName(getter);
-        } else {
-            SqlUtil.checkColumn((String) col);
-            return (String) col;
-        }
-    }
-
-    protected static String buildSqlFn(SqlFn<?> fn) {
-        SqlFnName name = fn.name();
-        if (name == COUNT && fn.column() == null) {
-            return ASTERISK;
-        } else {
-            return warpKeyword(buildColumn(fn.column()));
-        }
-    }
-
-    protected String buildSqlExpr(String column, Object expr, @Nullable Op op) {
+    protected String buildSqlExpr(String col, Object expr, @Nullable Op op) {
         StringBuilder placeholder = new StringBuilder();
         if (expr instanceof SqlOpExpr sqlOpExpr) {
-            SqlOp sqlOp = sqlOpExpr.apply(new SqlOp(column));
+            SqlOp sqlOp = sqlOpExpr.apply(new SqlOp(col));
             params.add(sqlOp.value());
             return placeholder.append(warpKeyword(sqlOp.column())).append(BLANK).append(sqlOp.op()).append(BLANK).append(PLACEHOLDER).toString();
         } else {
@@ -93,19 +71,19 @@ abstract class SqlGenerator {
     }
 
     protected StringBuilder buildCond(Cond cond) {
-        var column = buildColumn(cond.column);
-        var expr = buildSqlExpr(column, cond.expr, cond.op);
-        return sql.append(warpKeyword(column)).append(BLANK).append(cond.op.getSymbol()).append(BLANK).append(expr);
+        var col = cond.column;
+        var expr = buildSqlExpr(col, cond.expr, cond.op);
+        return sql.append(warpKeyword(col)).append(BLANK).append(cond.op.getSymbol()).append(BLANK).append(expr);
     }
 
     protected StringBuilder buildSet(Set set) {
-        var column = buildColumn(set.column);
-        var expr = buildSqlExpr(column, set.expr, null);
+        var col = set.column;
+        var expr = buildSqlExpr(col, set.expr, null);
         TableInfo table = Tables.getTable(entityClass);
         if (table != null) {
             var map = table.columnMap();
             if (CollUtil.isNotEmpty(map)) {
-                TableColumnInfo info = map.get(column);
+                TableColumnInfo info = map.get(col);
                 var typeHandler = info.typeHandler();
                 if (typeHandler != null) {
                     Object o = params.removeLast();
@@ -113,55 +91,42 @@ abstract class SqlGenerator {
                 }
             }
         }
-        return sql.append(warpKeyword(column)).append(EQUAL).append(expr);
+        return sql.append(warpKeyword(col)).append(EQUAL).append(expr);
     }
 
     protected String buildSelectColumn(SelectColumn selectColumn) {
-        var column = selectColumn.column;
-        if (column instanceof ColumnGetter<?, ?> || column instanceof String) {
-            var out = buildColumn(column);
-            sql.append(warpKeyword(out));
-            return out;
-        } else {
-            var expr = (SqlFnExpr<?>) column;
+        String col = warpKeyword(selectColumn.column);
+        if (selectColumn.expr != null) {
+            var expr = selectColumn.expr;
             var fn = expr.apply();
-            var col = buildSqlFn(fn);
-            var alias = selectColumn.alias == null ? null : LambdaUtil.getFieldName(selectColumn.alias);
-            var colOrAlias = Objects.requireNonNullElse(alias, col.equals(ASTERISK) ? BLANK : col);
             var name = fn.name();
             if (name == SqlFnName.IF_NULL) {
                 params.add(fn.value());
-                sql.append(name.getName()).append(BRACKET_LEFT).append(col).append(DELIMITER).append(PLACEHOLDER).append(BRACKET_RIGHT).append(BLANK).append(colOrAlias);
+                sql.append(name.getName()).append(BRACKET_LEFT).append(col).append(DELIMITER).append(PLACEHOLDER).append(BRACKET_RIGHT).append(BLANK).append(col);
             } else {
-                sql.append(name.getName()).append(BRACKET_LEFT).append(col).append(BRACKET_RIGHT).append(BLANK).append(colOrAlias);
+                sql.append(name.getName()).append(BRACKET_LEFT).append(col).append(BRACKET_RIGHT).append(BLANK).append(col);
             }
-            return colOrAlias;
+        } else {
+            sql.append(col);
         }
+        return selectColumn.column;
     }
 
     protected StringBuilder buildGroupBy(GroupBy group) {
-        sql.append(warpKeyword(buildColumn(group.column)));
+        sql.append(warpKeyword(group.column));
         return sql;
     }
 
     protected StringBuilder buildOrderBy(OrderBy order) {
-        Object column = order.column;
-        String name;
-        if (column instanceof ColumnGetter<?, ?> getter) {
-            name = buildColumn(getter);
-        } else {
-            name = (String) column;
-            SqlUtil.checkColumn(name); //字符串类型可以是前端过来的。必须检查
-        }
-        return sql.append(warpKeyword(name)).append(order.desc ? DESC : EMPTY);
+        return sql.append(warpKeyword(order.column)).append(order.desc ? DESC : EMPTY);
     }
 
     protected StringBuilder buildDistinct(Distinct distinct) {
-        var column = distinct.column;
-        if (column == null) {
+        var col = distinct.column;
+        if (col == null) {
             return sql.append(DISTINCT);
         } else {
-            return sql.append(DISTINCT).append(BRACKET_LEFT).append(warpKeyword(buildColumn(column))).append(BRACKET_RIGHT);
+            return sql.append(DISTINCT).append(BRACKET_LEFT).append(warpKeyword(col)).append(BRACKET_RIGHT);
         }
     }
 
@@ -182,7 +147,7 @@ abstract class SqlGenerator {
     protected static void skipAdjoinOr(Node node, List<Node> wheres) {
         if (CollUtil.isNotEmpty(wheres)) {
             if (wheres.getLast().type == Type.OR) {
-                if (log.isDebugEnabled()) {
+                if (log.isWarnEnabled()) {
                     log.warn("存在相邻的or，已自动移除");
                 }
             } else {
@@ -194,7 +159,7 @@ abstract class SqlGenerator {
     protected static void removeLastOr(List<Node> wheres) {
         if (CollUtil.isNotEmpty(wheres) && wheres.getLast() instanceof Or) {
             wheres.removeLast();
-            if (log.isDebugEnabled()) {
+            if (log.isWarnEnabled()) {
                 log.warn("where条件最后存在 or，已自动移除");
             }
         }

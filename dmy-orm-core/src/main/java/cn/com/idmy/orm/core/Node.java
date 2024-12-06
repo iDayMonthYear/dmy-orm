@@ -1,11 +1,21 @@
 package cn.com.idmy.orm.core;
 
+import cn.com.idmy.orm.util.LambdaUtil;
+import cn.com.idmy.orm.util.SqlUtil;
 import jakarta.annotation.Nullable;
+import lombok.Data;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.Accessors;
 
+import static cn.com.idmy.orm.core.SqlConsts.ASTERISK;
+import static cn.com.idmy.orm.core.SqlFnName.COUNT;
+
+@Data
+@Accessors(fluent = true)
 @RequiredArgsConstructor
 public class Node {
-    enum Type {
+    public enum Type {
         COND,
         WHERE,
         ORDER_BY,
@@ -19,19 +29,25 @@ public class Node {
 
     final Type type;
 
-    public static final class Cond extends Node {
-        final Object column;
+    public interface Column {
+        String column();
+    }
+
+    @Accessors(fluent = true)
+    @Getter
+    public static class Cond extends Node implements Column {
+        final String column;
         final Op op;
         final Object expr;
 
-        Cond(ColumnGetter<?, ?> column, Op op, Object expr) {
+        public Cond(ColumnGetter<?, ?> column, Op op, Object expr) {
             super(Type.COND);
-            this.column = column;
+            this.column = LambdaUtil.getFieldName(column);
             this.op = op;
             this.expr = expr;
         }
 
-        Cond(String column, Op op, Object expr) {
+        public Cond(String column, Op op, Object expr) {
             super(Type.COND);
             this.column = column;
             this.op = op;
@@ -39,87 +55,110 @@ public class Node {
         }
     }
 
-    static class Or extends Node {
-        Or() {
+    public static class Or extends Node {
+        public Or() {
             super(Type.OR);
         }
     }
 
-    static final class Set extends Node {
-        final ColumnGetter<?, ?> column;
+    @Accessors(fluent = true)
+    @Getter
+    public static class Set extends Node implements Column {
+        final String column;
         final Object expr;
 
-        Set(ColumnGetter<?, ?> column, Object expr) {
+        public Set(String column, Object expr) {
             super(Type.SET);
             this.column = column;
             this.expr = expr;
         }
+
+        public Set(ColumnGetter<?, ?> column, Object expr) {
+            this(LambdaUtil.getFieldName(column), expr);
+        }
     }
 
-    static final class GroupBy extends Node {
-        final ColumnGetter<?, ?> column;
+    @Accessors(fluent = true)
+    @Getter
+    public static class GroupBy extends Node implements Column {
+        final String column;
 
-        GroupBy(ColumnGetter<?, ?> column) {
+        public GroupBy(String column) {
             super(Type.GROUP_BY);
             this.column = column;
         }
+
+        public GroupBy(ColumnGetter<?, ?> column) {
+            this(LambdaUtil.getFieldName(column));
+        }
     }
 
-    static final class OrderBy extends Node {
-        final Object column;
+    @Accessors(fluent = true)
+    @Getter
+    public static class OrderBy extends Node implements Column {
+        final String column;
         final boolean desc;
 
-        OrderBy(ColumnGetter<?, ?> column, boolean desc) {
+        public OrderBy(String column, boolean desc) {
             super(Type.ORDER_BY);
-            this.column = column;
+            this.column = SqlUtil.checkColumn(column);
             this.desc = desc;
         }
 
-        OrderBy(String column, boolean desc) {
-            super(Type.ORDER_BY);
-            this.column = column;
-            this.desc = desc;
+        public OrderBy(ColumnGetter<?, ?> column, boolean desc) {
+            this(LambdaUtil.getFieldName(column), desc);
         }
     }
 
-    static final class SelectColumn extends Node {
-        final Object column; //ColumnGetter<?, ?> | SqlFnExpr
+    @Accessors(fluent = true)
+    @Getter
+    public static class SelectColumn extends Node implements Column {
+        String column;
         @Nullable
-        ColumnGetter<?, ?> alias;
+        SqlFnExpr<?> expr;
 
-        SelectColumn(ColumnGetter<?, ?> column) {
+        public SelectColumn(String column) {
             super(Type.SELECT_COLUMN);
-            this.column = column;
+            this.column = SqlUtil.checkColumn(column);
         }
 
-        SelectColumn(String column) {
-            super(Type.SELECT_COLUMN);
-            this.column = column;
+        public SelectColumn(ColumnGetter<?, ?> column) {
+            this(LambdaUtil.getFieldName(column));
         }
 
-        SelectColumn(SqlFnExpr<?> expr) {
+        public SelectColumn(SqlFnExpr<?> expr) {
             super(Type.SELECT_COLUMN);
-            this.column = expr;
+            this.expr = expr;
+            var fn = expr.apply();
+            var name = fn.name();
+            if (name == COUNT && fn.column() == null) {
+                column = ASTERISK;
+            } else {
+                column = fn.column();
+            }
         }
 
-        SelectColumn(SqlFnExpr<?> expr, ColumnGetter<?, ?> alias) {
-            super(Type.SELECT_COLUMN);
-            this.column = expr;
-            this.alias = alias;
+        public SelectColumn(SqlFnExpr<?> expr, ColumnGetter<?, ?> alias) {
+            this(expr);
+            column = LambdaUtil.getFieldName(alias);
         }
     }
 
-    static final class Distinct extends Node {
+    @Accessors(fluent = true)
+    @Getter
+    public static class Distinct extends Node implements Column {
         @Nullable
-        ColumnGetter<?, ?> column;
+        String column;
 
-        Distinct() {
+        public Distinct() {
             super(Type.DISTINCT);
         }
 
-        Distinct(@Nullable ColumnGetter<?, ?> column) {
+        public Distinct(@Nullable ColumnGetter<?, ?> column) {
             this();
-            this.column = column;
+            if (column != null) {
+                this.column = LambdaUtil.getFieldName(column);
+            }
         }
     }
 }

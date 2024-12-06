@@ -19,28 +19,32 @@ public class OrmConfig {
     @RequiredArgsConstructor
     public enum NameStrategy {
         DEFAULT("默认"),
+        LOWER("小写"),
+        UPPER("大写"),
         LOWER_UNDERLINE("小写下划线"),
-        UPPER_UNDERLINE("小写下划线");
+        UPPER_UNDERLINE("大写下划线");
         private final String name;
     }
 
     private NameStrategy tableNameStrategy = NameStrategy.DEFAULT;
     private NameStrategy columnNameStrategy = NameStrategy.DEFAULT;
 
-    public String toTableName(String name) {
-        return switch (tableNameStrategy) {
+    private String nameStrategy(String name, NameStrategy strategy) {
+        return switch (strategy) {
             case DEFAULT -> name;
+            case LOWER -> name.toLowerCase();
+            case UPPER -> name.toUpperCase();
             case LOWER_UNDERLINE -> StrUtil.toUnderlineCase(name).toUpperCase();
             case UPPER_UNDERLINE -> StrUtil.toUnderlineCase(name).toLowerCase();
         };
     }
 
+    public String toTableName(String name) {
+        return nameStrategy(name, tableNameStrategy);
+    }
+
     public String toColumnName(String name) {
-        return switch (columnNameStrategy) {
-            case DEFAULT -> name;
-            case LOWER_UNDERLINE -> StrUtil.toUnderlineCase(name).toUpperCase();
-            case UPPER_UNDERLINE -> StrUtil.toUnderlineCase(name).toLowerCase();
-        };
+        return nameStrategy(name, columnNameStrategy);
     }
 
     public static <T, R> void register(Class<T> entityClass, ColumnGetter<T, R> col, TypeHandler<?> handler) {

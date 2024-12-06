@@ -1,6 +1,6 @@
 package cn.com.idmy.orm.core;
 
-import cn.com.idmy.orm.annotation.Table.Id.IdType;
+import cn.com.idmy.base.annotation.Table.Id.IdType;
 import jakarta.annotation.Nullable;
 import org.apache.ibatis.type.TypeHandler;
 

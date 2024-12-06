@@ -14,9 +14,8 @@
 
     <dependencies>
         <dependency>
-            <groupId>cn.com.idmy.orm</groupId>
-            <artifactId>dmy-orm-annotation</artifactId>
-            <version>${dmy-orm.version}</version>
+            <groupId>cn.com.idmy</groupId>
+            <artifactId>dmy-base</artifactId>
         </dependency>
         <dependency>
             <groupId>org.mybatis</groupId>

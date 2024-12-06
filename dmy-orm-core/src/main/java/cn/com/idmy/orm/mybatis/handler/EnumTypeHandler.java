@@ -1,6 +1,6 @@
 package cn.com.idmy.orm.mybatis.handler;
 
-import cn.com.idmy.orm.annotation.EnumValue;
+import cn.com.idmy.base.annotation.EnumValue;
 import jakarta.annotation.Nullable;
 import org.apache.ibatis.type.BaseTypeHandler;
 import org.apache.ibatis.type.JdbcType;
@@ -24,40 +24,37 @@ public class EnumTypeHandler<E extends Enum<E>> extends BaseTypeHandler<E> {
     }
 
     @Override
-    public void setNonNullParameter(PreparedStatement ps, int i, E parameter, JdbcType jdbcType) throws SQLException {
-        if (valueField != null) {
+    public void setNonNullParameter(PreparedStatement ps, int idx, E parameter, JdbcType jdbcType) throws SQLException {
+        if (valueField == null) {
+            ps.setString(idx, parameter.name());
+        } else {
             try {
-                ps.setObject(i, valueField.get(parameter));
+                ps.setObject(idx, valueField.get(parameter));
             } catch (IllegalAccessException e) {
                 throw new SQLException(e);
             }
-        } else {
-            ps.setString(i, parameter.name());
         }
     }
 
     @Override
-    public E getNullableResult(ResultSet rs, String columnName) throws SQLException {
-        Object value = rs.getObject(columnName);
-        return rs.wasNull() ? null : valueOf(value);
+    public E getNullableResult(ResultSet rs, String name) throws SQLException {
+        return rs.wasNull() ? null : valueOf(rs.getObject(name));
     }
 
     @Override
-    public E getNullableResult(ResultSet rs, int columnIndex) throws SQLException {
-        Object value = rs.getObject(columnIndex);
-        return rs.wasNull() ? null : valueOf(value);
+    public E getNullableResult(ResultSet rs, int idx) throws SQLException {
+        return rs.wasNull() ? null : valueOf(rs.getObject(idx));
     }
 
     @Override
-    public E getNullableResult(CallableStatement cs, int columnIndex) throws SQLException {
-        Object value = cs.getObject(columnIndex);
-        return cs.wasNull() ? null : valueOf(value);
+    public E getNullableResult(CallableStatement cs, int idx) throws SQLException {
+        return cs.wasNull() ? null : valueOf(cs.getObject(idx));
     }
 
     @Nullable
-    private Field getEnumValueField(Class<E> enumType) {
-        return enumValueFieldCache.computeIfAbsent(enumType, k -> {
-            for (Field field : enumType.getDeclaredFields()) {
+    private Field getEnumValueField(Class<E> type) {
+        return enumValueFieldCache.computeIfAbsent(type, $ -> {
+            for (Field field : type.getDeclaredFields()) {
                 if (field.isAnnotationPresent(EnumValue.class)) {
                     field.setAccessible(true);
                     return field;
@@ -68,7 +65,9 @@ public class EnumTypeHandler<E extends Enum<E>> extends BaseTypeHandler<E> {
     }
 
     private E valueOf(Object value) throws SQLException {
-        if (valueField != null) {
+        if (valueField == null) {
+            return Enum.valueOf(type, value.toString());
+        } else {
             for (E enumConstant : type.getEnumConstants()) {
                 try {
                     if (value.equals(valueField.get(enumConstant))) {
@@ -80,6 +79,5 @@ public class EnumTypeHandler<E extends Enum<E>> extends BaseTypeHandler<E> {
             }
             throw new SQLException("Cannot convert " + value + " to " + type.getSimpleName());
         }
-        return Enum.valueOf(type, value.toString());
     }
 }

@@ -1,7 +1,7 @@
 package cn.com.idmy.ts.server.model.entity;
 
-import cn.com.idmy.orm.annotation.Table;
-import cn.com.idmy.orm.annotation.Table.Id;
+import cn.com.idmy.base.annotation.Table;
+import cn.com.idmy.base.annotation.Table.Id;
 import com.alibaba.fastjson2.JSONObject;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -16,7 +16,7 @@ import java.util.Map;
 @SuperBuilder
 @AllArgsConstructor
 @NoArgsConstructor
-@Table
+@Table("app")
 public class App  {
     @Id
     protected Long id;

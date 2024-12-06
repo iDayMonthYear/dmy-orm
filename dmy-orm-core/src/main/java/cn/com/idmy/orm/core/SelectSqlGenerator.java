@@ -76,7 +76,7 @@ class SelectSqlGenerator extends SqlGenerator {
             for (int i = 0, size = selectColumns.size(); i < size; i++) {
                 var selectColumn = selectColumns.get(i);
                 var column = (String) builder(selectColumn);
-                if (log.isDebugEnabled()) {
+                if (log.isWarnEnabled()) {
                     if (set.contains(column)) {
                         log.error("select {} 列名重复会导致映射到实体类异常", column);
                     }
@@ -106,7 +106,7 @@ class SelectSqlGenerator extends SqlGenerator {
         }
     }
 
-    private  void buildOrderBy(List<OrderBy> orders) {
+    private void buildOrderBy(List<OrderBy> orders) {
         if (!orders.isEmpty()) {
             sql.append(ORDER_BY);
             for (int i = 0, size = orders.size(); i < size; i++) {

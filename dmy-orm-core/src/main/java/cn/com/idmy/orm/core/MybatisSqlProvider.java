@@ -49,7 +49,7 @@ public class MybatisSqlProvider {
     }
 
     private static String buildCommonSql(Map<String, Object> params) {
-        var where = (Sud<?, ?>) params.get(SUD);
+        var where = (Crud<?, ?>) params.get(SUD);
         putEntityClass(params, where.entityClass());
         var pair = where.sql();
         params.put(SQL_PARAMS, pair.right);

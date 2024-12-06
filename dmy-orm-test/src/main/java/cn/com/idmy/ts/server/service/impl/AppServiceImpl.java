@@ -81,9 +81,12 @@ public class AppServiceImpl implements AppService {
 //        dao.update(Updates.of(dao).set(App::getJson2, map).eq(App::getId, 1L));
 //        App app = dao.get(1L);
         Selects<App> select = Selects.of(dao)
-                .select(App::getId)
-                .select(() -> SqlFn.min(App::getId)).eq(App::getId, c -> c.plus(1));
+                .eq(App::getId, c -> c.plus(1));
         dao.find(select);
+//        Selects<App> select = Selects.of(dao)
+//                .select(App::getId)
+//                .select(() -> SqlFn.min(App::getId)).eq(App::getId, c -> c.plus(1));
+//        dao.find(select);
         return null;
     }
 

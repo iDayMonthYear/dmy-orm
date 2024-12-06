@@ -15,7 +15,6 @@
     <version>1.9.4</version>
 
     <modules>
-        <module>dmy-orm-annotation</module>
         <module>dmy-orm-core</module>
         <module>dmy-orm-spring</module>
         <module>dmy-orm-spring-boot-starter</module>

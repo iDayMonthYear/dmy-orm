@@ -1,7 +1,6 @@
 package cn.com.idmy.orm.mybatis;
 
-import cn.com.idmy.orm.OrmConfig;
-import cn.com.idmy.orm.annotation.Table;
+import cn.com.idmy.base.annotation.Table;
 import cn.com.idmy.orm.core.MybatisDao;
 import cn.com.idmy.orm.core.TableInfo;
 import cn.com.idmy.orm.core.Tables;

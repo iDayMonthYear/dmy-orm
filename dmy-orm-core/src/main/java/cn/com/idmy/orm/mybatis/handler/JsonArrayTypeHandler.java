@@ -12,28 +12,23 @@ import java.sql.SQLException;
 
 @MappedTypes(JSONArray.class)
 public class JsonArrayTypeHandler extends BaseTypeHandler<JSONArray> {
-    
     @Override
-    public void setNonNullParameter(PreparedStatement ps, int i, JSONArray parameter, JdbcType jdbcType) 
-        throws SQLException {
-        ps.setString(i, parameter.toString());
+    public void setNonNullParameter(PreparedStatement ps, int idx, JSONArray params, JdbcType jdbcType) throws SQLException {
+        ps.setString(idx, params.toString());
     }
 
     @Override
-    public JSONArray getNullableResult(ResultSet rs, String columnName) throws SQLException {
-        String json = rs.getString(columnName);
-        return rs.wasNull() ? null : JSONArray.parse(json);
+    public JSONArray getNullableResult(ResultSet rs, String name) throws SQLException {
+        return rs.wasNull() ? null : JSONArray.parse(rs.getString(name));
     }
 
     @Override
-    public JSONArray getNullableResult(ResultSet rs, int columnIndex) throws SQLException {
-        String json = rs.getString(columnIndex);
-        return rs.wasNull() ? null : JSONArray.parse(json);
+    public JSONArray getNullableResult(ResultSet rs, int idx) throws SQLException {
+        return rs.wasNull() ? null : JSONArray.parse(rs.getString(idx));
     }
 
     @Override
-    public JSONArray getNullableResult(CallableStatement cs, int columnIndex) throws SQLException {
-        String json = cs.getString(columnIndex);
-        return cs.wasNull() ? null : JSONArray.parse(json);
+    public JSONArray getNullableResult(CallableStatement cs, int idx) throws SQLException {
+        return cs.wasNull() ? null : JSONArray.parse(cs.getString(idx));
     }
 } 

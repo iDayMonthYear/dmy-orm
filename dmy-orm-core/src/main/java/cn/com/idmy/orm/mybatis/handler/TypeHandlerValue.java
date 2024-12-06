@@ -8,8 +8,8 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
-public record TypeHandlerValue(TypeHandler typeHandler, Object value) implements Serializable {
-    public void setParameter(PreparedStatement ps, int i) throws SQLException {
-        typeHandler.setParameter(ps, i, value, JdbcType.VARCHAR);
+public record TypeHandlerValue(TypeHandler handler, Object value) implements Serializable {
+    public void setParameter(PreparedStatement ps, int idx) throws SQLException {
+        handler.setParameter(ps, idx, value, JdbcType.VARCHAR);
     }
 }

@@ -23,7 +23,7 @@ public class Updates<T> extends Where<T, Updates<T>> {
     }
 
     public Updates<T> set(ColumnGetter<T, ?> col, Object val) {
-        return addNode(new Set(col,  val));
+        return addNode(new Set(col, val));
     }
 
     public Updates<T> set(ColumnGetter<T, ?> col, SqlOpExpr expr) {

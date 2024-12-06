@@ -9,9 +9,11 @@ import java.util.regex.Pattern;
 public class SqlUtil {
     private static final Pattern FIELD_PATTERN = Pattern.compile("[a-zA-Z0-9_]+");
 
-    public static void checkColumn(String field) {
-        if (!FIELD_PATTERN.matcher(field).matches()) {
-            throw new OrmException("非法列名：" + field);
+    public static String checkColumn(String col) {
+        if (FIELD_PATTERN.matcher(col).matches()) {
+            return col;
+        } else {
+            throw new OrmException("非法列名：" + col);
         }
     }
 

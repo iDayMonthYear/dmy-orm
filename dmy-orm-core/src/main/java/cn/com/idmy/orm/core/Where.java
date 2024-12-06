@@ -8,7 +8,7 @@ import java.util.Collection;
 
 @Slf4j
 @Accessors(fluent = true, chain = false)
-public abstract class Where<T, SUD extends Where<T, SUD>> extends Sud<T, SUD> {
+public abstract class Where<T, SUD extends Where<T, SUD>> extends Crud<T, SUD> {
     protected Where(Class<T> entityClass) {
         super(entityClass);
     }
