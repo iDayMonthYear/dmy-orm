@@ -48,6 +48,7 @@ public interface SqlConsts {
     String NULLS_FIRST = " nulls first";
     String NULLS_LAST = " nulls last";
 
+    String EQUAL = " = ";
     String EQUALS_PLACEHOLDER = " = ? ";
     String AND_PLACEHOLDER = BLANK + PLACEHOLDER + AND + PLACEHOLDER + BLANK;
 }

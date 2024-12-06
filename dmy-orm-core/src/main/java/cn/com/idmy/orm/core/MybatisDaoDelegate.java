@@ -49,7 +49,7 @@ class MybatisDaoDelegate {
             if (!ignoreNull || value != null) {
                 idx++;
                 sql.append(SqlConsts.STRESS_MARK).append(column.name()).append(SqlConsts.STRESS_MARK).append(SqlConsts.EQUALS_PLACEHOLDER);
-                sqlParams.add(MybatisSqlProvider.hasTypeHandler(column.field(), value));
+                sqlParams.add(MybatisSqlProvider.warpTypeHandlerValue(column, value));
                 if (i < idx - 1) {
                     sql.append(SqlConsts.DELIMITER);
                 }

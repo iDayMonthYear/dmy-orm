@@ -17,6 +17,7 @@ import java.sql.SQLException;
 @MappedJdbcTypes({JdbcType.VARCHAR})
 @RequiredArgsConstructor
 public class JsonTypeHandler<T> extends BaseTypeHandler<T> {
+    private final String name;
     private final TypeReference<T> type;
 
     @Override

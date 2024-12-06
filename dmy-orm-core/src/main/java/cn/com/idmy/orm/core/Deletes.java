@@ -22,6 +22,6 @@ public class Deletes<T> extends Where<T, Deletes<T>> {
 
     @Override
     public Pair<String, List<Object>> sql() {
-        return DeleteSqlGenerator.gen(this);
+        return new DeleteSqlGenerator(this).gen();
     }
 }

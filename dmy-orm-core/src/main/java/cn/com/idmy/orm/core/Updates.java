@@ -32,6 +32,6 @@ public class Updates<T> extends Where<T, Updates<T>> {
 
     @Override
     public Pair<String, List<Object>> sql() {
-        return UpdateSqlGenerator.gen(this);
+        return new UpdateSqlGenerator(this).gen();
     }
 }

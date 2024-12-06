@@ -1,5 +1,6 @@
 package cn.com.idmy.ts.server;
 
+import cn.com.idmy.orm.OrmConfig;
 import cn.com.idmy.orm.core.Tables;
 import cn.com.idmy.orm.mybatis.handler.JsonTypeHandler;
 import cn.com.idmy.ts.server.model.entity.App;
@@ -22,7 +23,7 @@ import java.util.Map;
 @MapperScan("cn.com.idmy.ts.server.dao")
 public class Application {
     public static void main(String[] args) {
-        Tables.register(App.class, App::getJson2, new JsonTypeHandler<>(new TypeReference<Map<Integer, Long>>() {
+        OrmConfig.register(App.class, App::getJson2, new JsonTypeHandler<>("test1", new TypeReference<Map<Integer, Long>>() {
         }));
 
         SpringApplication.run(Application.class, args);

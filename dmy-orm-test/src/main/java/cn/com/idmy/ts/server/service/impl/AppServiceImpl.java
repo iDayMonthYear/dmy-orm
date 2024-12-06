@@ -2,6 +2,7 @@ package cn.com.idmy.ts.server.service.impl;
 
 import cn.com.idmy.base.model.Page;
 import cn.com.idmy.orm.core.Selects;
+import cn.com.idmy.orm.core.SqlFn;
 import cn.com.idmy.ts.server.dao.AppDao;
 import cn.com.idmy.ts.server.model.entity.App;
 import cn.com.idmy.ts.server.service.AppService;
@@ -11,9 +12,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @RequiredArgsConstructor
 @Service
@@ -77,10 +76,14 @@ public class AppServiceImpl implements AppService {
 //        Page<App> page = dao.page(pageIn, Selects.of(dao).between(App::getId, 1, 100));
 //        Console.error(page);
 
-        Map<Integer, Long> map = new HashMap<>();
-        map.put(1, 2L);
-        dao.update(App.builder().id(1L).json2(map).build());
-        App app = dao.get(1L);
+//        Map<Integer, Long> map = new HashMap<>();
+//        map.put(1, 2L);
+//        dao.update(Updates.of(dao).set(App::getJson2, map).eq(App::getId, 1L));
+//        App app = dao.get(1L);
+        Selects<App> select = Selects.of(dao)
+                .select(App::getId)
+                .select(() -> SqlFn.min(App::getId)).eq(App::getId, c -> c.plus(1));
+        dao.find(select);
         return null;
     }
 

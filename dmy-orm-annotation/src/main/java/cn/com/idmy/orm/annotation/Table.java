@@ -43,12 +43,6 @@ public @interface Table {
 
         boolean large() default false;
 
-        boolean logicDelete() default false;
-
-        boolean version() default false;
-
-        boolean tenant() default false;
-
         String comment() default "";
     }
 }

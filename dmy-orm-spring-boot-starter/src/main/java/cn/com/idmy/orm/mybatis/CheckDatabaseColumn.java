@@ -1,5 +1,6 @@
 package cn.com.idmy.orm.mybatis;
 
+import cn.com.idmy.orm.OrmConfig;
 import cn.com.idmy.orm.annotation.Table;
 import cn.com.idmy.orm.core.MybatisDao;
 import cn.com.idmy.orm.core.TableInfo;
@@ -47,7 +48,9 @@ class CheckDatabaseColumn {
                 }
             }
         }
-        if (!errors.isEmpty()) {
+        if (errors.isEmpty()) {
+            Tables.clearTypeHandlers();
+        } else {
             errors.forEach(Console::error);
             System.exit(0);
         }

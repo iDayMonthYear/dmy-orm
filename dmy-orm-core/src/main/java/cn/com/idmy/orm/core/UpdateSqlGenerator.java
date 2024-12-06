@@ -16,7 +16,14 @@ import static cn.com.idmy.orm.core.SqlConsts.UPDATE;
 
 @Slf4j
 class UpdateSqlGenerator extends SqlGenerator {
-    public static Pair<String, List<Object>> gen(Updates<?> update) {
+    protected Updates<?> update;
+
+    protected UpdateSqlGenerator(Updates<?> update) {
+        super(update.entityClass);
+        this.update = update;
+    }
+
+    protected Pair<String, List<Object>> gen() {
         var nodes = update.nodes;
         var sets = new ArrayList<Set>(nodes.size());
         var wheres = new ArrayList<Node>(nodes.size() - 1);
@@ -30,21 +37,20 @@ class UpdateSqlGenerator extends SqlGenerator {
                 skipAdjoinOr(node, wheres);
             }
         }
-        var sql = new StringBuilder(UPDATE).append(SqlConsts.STRESS_MARK).append(Tables.getTableName(update.entityClass)).append(SqlConsts.STRESS_MARK).append(SET);
-        var params = new ArrayList<>(update.sqlParamsSize);
+        sql.append(UPDATE).append(SqlConsts.STRESS_MARK).append(Tables.getTableName(update.entityClass)).append(SqlConsts.STRESS_MARK).append(SET);
+        params = new ArrayList<>(update.sqlParamsSize);
         if (!sets.isEmpty()) {
             for (int i = 0, size = sets.size(); i < size; i++) {
                 Set set = sets.get(i);
-                builder(set, sql, params);
+                builder(set);
                 if (i < size - 1) {
-                    Type type = sets.get(i + 1).type;
-                    if (type == Type.SET) {
+                    if (sets.get(i + 1).type == Type.SET) {
                         sql.append(DELIMITER);
                     }
                 }
             }
         }
-        buildWhere(wheres, sql, params);
+        buildWhere(wheres);
         return Pair.of(sql.toString(), params);
     }
 }

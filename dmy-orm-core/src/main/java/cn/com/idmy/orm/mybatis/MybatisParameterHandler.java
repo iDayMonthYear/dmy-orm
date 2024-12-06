@@ -47,25 +47,23 @@ class MybatisParameterHandler extends DefaultParameterHandler {
     private void setParameter(PreparedStatement ps, int index, Object value, Map<String, Object> params) throws SQLException {
         switch (value) {
             case null -> ps.setObject(index, null);
-            case Object[] to -> {
-                if (to.length == 0) {
+            case Object[] val -> {
+                if (val.length == 0) {
                     throw new OrmException("Empty array");
                 }
-                for (var item : to) {
+                for (var item : val) {
                     setParameter(ps, index++, item, params);
                 }
             }
-            case Collection<?> to -> {
-                if (to.isEmpty()) {
+            case Collection<?> val -> {
+                if (val.isEmpty()) {
                     throw new OrmException("Empty list");
                 }
-                for (var item : to) {
+                for (var item : val) {
                     setParameter(ps, index++, item, params);
                 }
             }
-            case TypeHandlerValue to -> {
-                to.setParameter(ps, index);
-            }
+            case TypeHandlerValue val -> val.setParameter(ps, index);
             default -> {
                 TypeHandler typeHandler = typeHandlerRegistry.getTypeHandler(value.getClass());
                 if (typeHandler == null) {

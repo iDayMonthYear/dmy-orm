@@ -1,13 +1,14 @@
 package cn.com.idmy.orm.core;
 
 import cn.com.idmy.orm.OrmException;
+import cn.com.idmy.orm.core.TableInfo.TableColumnInfo;
 import cn.com.idmy.orm.mybatis.handler.TypeHandlerValue;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.builder.annotation.ProviderContext;
+import org.apache.ibatis.type.TypeHandler;
 import org.dromara.hutool.core.reflect.FieldUtil;
 
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -38,19 +39,18 @@ public class MybatisSqlProvider {
         }
     }
 
-    protected static Object hasTypeHandler(Field field, Object value) {
-        var handler = Tables.getHandler(field);
-        if (handler == null) {
+    protected static Object warpTypeHandlerValue(TableColumnInfo columnInfo, Object value) {
+        TypeHandler<?> typeHandler = columnInfo.typeHandler();
+        if (typeHandler == null) {
             return value;
         } else {
-            return new TypeHandlerValue(handler, value);
+            return new TypeHandlerValue(typeHandler, value);
         }
     }
 
     private static String buildCommonSql(Map<String, Object> params) {
         var where = (Sud<?, ?>) params.get(SUD);
         putEntityClass(params, where.entityClass());
-
         var pair = where.sql();
         params.put(SQL_PARAMS, pair.right);
         return pair.left;
@@ -77,7 +77,6 @@ public class MybatisSqlProvider {
     }
 
     public String update(Map<String, Object> params, ProviderContext context) {
-        TableInfo table = Tables.getTableByMapperClass(context.getMapperType());
         return buildCommonSql(params);
     }
 
@@ -123,7 +122,7 @@ public class MybatisSqlProvider {
             values.append(SqlConsts.PLACEHOLDER);
 
             var value = FieldUtil.getFieldValue(entity, column.field());
-            sqlParams.add(hasTypeHandler(column.field(), value));
+            sqlParams.add(warpTypeHandlerValue(column, value));
 
             if (i < size - 1) {
                 sql.append(SqlConsts.DELIMITER);
@@ -169,7 +168,7 @@ public class MybatisSqlProvider {
             for (int i = 0, size = columns.length; i < size; i++) {
                 sql.append(SqlConsts.PLACEHOLDER);
                 Object value = FieldUtil.getFieldValue(entity, columns[i].name());
-                sqlParams.add(hasTypeHandler(columns[i].field(), value));
+                sqlParams.add(warpTypeHandlerValue(columns[i], value));
                 if (i < size - 1) {
                     sql.append(SqlConsts.DELIMITER);
                 }

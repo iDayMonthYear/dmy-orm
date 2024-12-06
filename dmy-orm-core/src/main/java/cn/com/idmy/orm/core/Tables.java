@@ -1,5 +1,6 @@
 package cn.com.idmy.orm.core;
 
+import cn.com.idmy.orm.OrmConfig;
 import cn.com.idmy.orm.OrmException;
 import cn.com.idmy.orm.annotation.Table;
 import cn.com.idmy.orm.annotation.Table.Id;
@@ -24,7 +25,27 @@ import java.util.concurrent.ConcurrentHashMap;
 public class Tables {
     private static final Map<Class<?>, TableInfo> mapperTableInfos = new ConcurrentHashMap<>();
     private static final Map<Class<?>, TableInfo> entityTableInfos = new ConcurrentHashMap<>();
-    private static final Map<Field, TypeHandler> typeHandlers = new ConcurrentHashMap<>();
+    private static final Map<Field, TypeHandler<?>> typeHandlers = new ConcurrentHashMap<>();
+    private static final OrmConfig config = OrmConfig.config();
+
+    public static <T, R> void register(Class<T> entityClass, ColumnGetter<T, R> col, TypeHandler<?> handler) {
+        String fieldName = LambdaUtil.getFieldName(col);
+        try {
+            // 获取字段对象
+            Field field = entityClass.getDeclaredField(fieldName);
+            field.setAccessible(true); // 确保可以访问私有字段
+            // 将字段和 TypeHandler 关联起来
+            typeHandlers.put(field, handler);
+        } catch (NoSuchFieldException e) {
+            throw new RuntimeException("Field not found: " + fieldName, e);
+        } catch (SecurityException e) {
+            throw new RuntimeException("Access denied to field: " + fieldName, e);
+        }
+    }
+
+    public static void clearTypeHandlers() {
+        typeHandlers.clear();
+    }
 
     public static TableInfo getTable(Class<?> entityClass) {
         return entityTableInfos.computeIfAbsent(entityClass, Tables::init);
@@ -53,10 +74,14 @@ public class Tables {
         if (entityClass.isAnnotationPresent(Table.class)) {
             var table = entityClass.getAnnotation(Table.class);
             var value = table.value();
-            tableName = StrUtil.isBlank(value) ? entityClass.getSimpleName() : value;
+            if (StrUtil.isBlank(value)) {
+                tableName = config.toTableName(entityClass.getSimpleName());
+            } else {
+                tableName = value;
+            }
             tableComment = table.comment();
         } else {
-            tableName = entityClass.getSimpleName();
+            tableName = config.toTableName(entityClass.getSimpleName());
             tableComment = "";
         }
 
@@ -68,7 +93,12 @@ public class Tables {
             if (field.isAnnotationPresent(Table.Id.class)) {
                 if (idInfo == null) {
                     var id = field.getAnnotation(Id.class);
-                    var name = StrUtil.isBlank(id.name()) ? field.getName() : id.name();
+                    String name;
+                    if (StrUtil.isBlank(id.name())) {
+                        name = config.toColumnName(field.getName());
+                    } else {
+                        name = id.name();
+                    }
                     idInfo = new TableIdInfo(field, name, id.value(), id.type(), id.before(), id.comment());
                 } else {
                     throw new OrmException("实体类" + entityClass.getName() + "中存在多个主键");
@@ -77,34 +107,25 @@ public class Tables {
                 var column = field.getAnnotation(Table.Column.class);
                 String name;
                 boolean large;
-                boolean logicDelete;
-                boolean tenant;
-                boolean version;
                 String comment;
                 if (column == null) {
                     comment = null;
                     name = null;
                     large = false;
-                    logicDelete = false;
-                    tenant = false;
-                    version = false;
                 } else {
                     name = column.value();
                     large = column.large();
-                    logicDelete = column.logicDelete();
-                    tenant = column.tenant();
-                    version = column.version();
                     comment = column.comment();
                 }
-                name = StrUtil.isBlank(name) ? field.getName() : name;
+                if (StrUtil.isBlank(name)) {
+                    name = config.toColumnName(field.getName());
+                }
                 var columnInfo = new TableColumnInfo(
                         field,
                         name,
                         large,
-                        logicDelete,
-                        version,
-                        tenant,
-                        comment
+                        comment,
+                        typeHandlers.get(field)
                 );
                 columns.add(columnInfo);
                 columnMap.put(name, columnInfo);
@@ -133,46 +154,23 @@ public class Tables {
         return getTable(dao.entityClass()).id().name();
     }
 
-    public static Field getIdField(Class<?> entityClass) {
-        return getTable(entityClass).id().field();
-    }
-
-    public static String getColumnName(Class<?> entityClass, String columnName) {
-        TableInfo tableInfo = getTable(entityClass);
-        TableColumnInfo columnInfo = tableInfo.columnMap().get(columnName);
-        return columnInfo.name();
-    }
-
     @SuppressWarnings("unchecked")
     public static <T> T getIdValue(Object entity) {
         TableInfo tableInfo = getTable(entity.getClass());
         return (T) FieldUtil.getFieldValue(entity, tableInfo.id().name());
     }
 
-    public static void clearTable() {
+    public static Field getIdField(Class<?> entityClass) {
+        return getTable(entityClass).id().field();
+    }
+
+    public static String getColumnName(Class<?> entityClass, String columnName) {
+        var tableInfo = getTable(entityClass);
+        var columnInfo = tableInfo.columnMap().get(columnName);
+        return columnInfo.name();
+    }
+
+    public static void clearTables() {
         entityTableInfos.clear();
-    }
-
-    public static <T, R> void register(Class<T> entityClass, ColumnGetter<T, R> col, TypeHandler<?> handler)  {
-        String fieldName = LambdaUtil.getFieldName(col);
-        try {
-            // 获取字段对象
-            Field field = entityClass.getDeclaredField(fieldName);
-            field.setAccessible(true); // 确保可以访问私有字段
-            // 将字段和 TypeHandler 关联起来
-            typeHandlers.put(field, handler);
-        } catch (NoSuchFieldException e) {
-            throw new RuntimeException("Field not found: " + fieldName, e);
-        } catch (SecurityException e) {
-            throw new RuntimeException("Access denied to field: " + fieldName, e);
-        }
-    }
-
-    public static TypeHandler<?> getHandler(Field field) {
-        return typeHandlers.get(field);
-    }
-
-    public static void clearTypeHandler() {
-        typeHandlers.clear();
     }
 }

@@ -12,7 +12,13 @@ import static cn.com.idmy.orm.core.SqlConsts.DELETE_FROM;
 
 @Slf4j
 class DeleteSqlGenerator extends SqlGenerator {
-    public static Pair<String, List<Object>> gen(Deletes<?> delete) {
+    protected Deletes<?> delete;
+    protected DeleteSqlGenerator(Deletes<?> delete) {
+        super(delete.entityClass);
+        this.delete = delete;
+    }
+
+    protected Pair<String, List<Object>> gen() {
         var nodes = delete.nodes;
         var wheres = new ArrayList<Node>(nodes.size());
         for (int i = 0, size = nodes.size(); i < size; i++) {
@@ -23,9 +29,9 @@ class DeleteSqlGenerator extends SqlGenerator {
                 skipAdjoinOr(node, wheres);
             }
         }
-        var sql = new StringBuilder(DELETE_FROM).append(SqlConsts.STRESS_MARK).append(Tables.getTableName(delete.entityClass)).append(SqlConsts.STRESS_MARK);
-        var params = new ArrayList<>(delete.sqlParamsSize);
-        buildWhere(wheres, sql, params);
+        sql.append(DELETE_FROM).append(SqlConsts.STRESS_MARK).append(Tables.getTableName(delete.entityClass)).append(SqlConsts.STRESS_MARK);
+        params = new ArrayList<>(delete.sqlParamsSize);
+        buildWhere(wheres);
         return Pair.of(sql.toString(), params);
     }
 }

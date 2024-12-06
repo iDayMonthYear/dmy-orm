@@ -20,7 +20,14 @@ import static cn.com.idmy.orm.core.SqlConsts.SELECT;
 
 @Slf4j
 class SelectSqlGenerator extends SqlGenerator {
-    public static Pair<String, List<Object>> gen(Selects<?> select) {
+    protected Selects<?> select;
+
+    protected SelectSqlGenerator(Selects<?> select) {
+        super(select.entityClass);
+        this.select = select;
+    }
+
+    protected Pair<String, List<Object>> gen() {
         var nodes = select.nodes;
         var selectColumns = new ArrayList<SelectColumn>(1);
         var wheres = new ArrayList<Node>(nodes.size());
@@ -39,19 +46,19 @@ class SelectSqlGenerator extends SqlGenerator {
                 }
             }
         }
-        var sql = new StringBuilder(SELECT);
-        var params = new ArrayList<>(select.sqlParamsSize);
+        sql.append(SELECT);
+        params = new ArrayList<>(select.sqlParamsSize);
         if (distinct != null) {
-            builder(distinct, sql, params);
+            builder(distinct);
             if (!selectColumns.isEmpty()) {
                 sql.append(DELIMITER);
             }
         }
-        buildSelectColumn(selectColumns, sql, params);
+        buildSelectColumn(selectColumns);
         sql.append(FROM).append(SqlConsts.STRESS_MARK).append(Tables.getTableName(select.entityClass)).append(SqlConsts.STRESS_MARK);
-        buildWhere(wheres, sql, params);
-        buildGroupBy(groups, sql, params);
-        buildOrderBy(orders, sql, params);
+        buildWhere(wheres);
+        buildGroupBy(groups);
+        buildOrderBy(orders);
         if (select.limit != null) {
             sql.append(LIMIT).append(select.limit);
         }
@@ -61,14 +68,14 @@ class SelectSqlGenerator extends SqlGenerator {
         return Pair.of(sql.toString(), params);
     }
 
-    private static void buildSelectColumn(List<SelectColumn> selectColumns, StringBuilder sql, List<Object> params) {
+    protected void buildSelectColumn(List<SelectColumn> selectColumns) {
         if (selectColumns.isEmpty()) {
             sql.append(ASTERISK);
         } else {
             Set<String> set = new HashSet<>(selectColumns.size());
             for (int i = 0, size = selectColumns.size(); i < size; i++) {
                 var selectColumn = selectColumns.get(i);
-                var column = (String) builder(selectColumn, sql, params);
+                var column = (String) builder(selectColumn);
                 if (log.isDebugEnabled()) {
                     if (set.contains(column)) {
                         log.error("select {} 列名重复会导致映射到实体类异常", column);
@@ -76,8 +83,7 @@ class SelectSqlGenerator extends SqlGenerator {
                     set.add(column);
                 }
                 if (i < size - 1) {
-                    Type type = selectColumns.get(i + 1).type;
-                    if (type == Type.SELECT_COLUMN) {
+                    if (selectColumns.get(i + 1).type == Type.SELECT_COLUMN) {
                         sql.append(DELIMITER);
                     }
                 }
@@ -85,15 +91,14 @@ class SelectSqlGenerator extends SqlGenerator {
         }
     }
 
-    private static void buildGroupBy(List<GroupBy> groups, StringBuilder sql, List<Object> params) {
+    protected void buildGroupBy(List<GroupBy> groups) {
         if (!groups.isEmpty()) {
             sql.append(GROUP_BY);
             for (int i = 0, size = groups.size(); i < size; i++) {
                 GroupBy group = groups.get(i);
-                builder(group, sql, params);
+                builder(group);
                 if (i < size - 1) {
-                    Type type = groups.get(i + 1).type;
-                    if (type == Type.GROUP_BY) {
+                    if (groups.get(i + 1).type == Type.GROUP_BY) {
                         sql.append(DELIMITER);
                     }
                 }
@@ -101,15 +106,14 @@ class SelectSqlGenerator extends SqlGenerator {
         }
     }
 
-    private static void buildOrderBy(List<OrderBy> orders, StringBuilder sql, List<Object> params) {
+    private  void buildOrderBy(List<OrderBy> orders) {
         if (!orders.isEmpty()) {
             sql.append(ORDER_BY);
             for (int i = 0, size = orders.size(); i < size; i++) {
                 OrderBy order = orders.get(i);
-                builder(order, sql, params);
+                builder(order);
                 if (i < size - 1) {
-                    Type type = orders.get(i + 1).type;
-                    if (type == Type.ORDER_BY) {
+                    if (orders.get(i + 1).type == Type.ORDER_BY) {
                         sql.append(DELIMITER);
                     }
                 }

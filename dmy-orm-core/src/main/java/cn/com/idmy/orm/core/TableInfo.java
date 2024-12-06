@@ -1,6 +1,8 @@
 package cn.com.idmy.orm.core;
 
 import cn.com.idmy.orm.annotation.Table.Id.IdType;
+import jakarta.annotation.Nullable;
+import org.apache.ibatis.type.TypeHandler;
 
 import java.lang.reflect.Field;
 import java.util.Map;
@@ -26,9 +28,8 @@ public record TableInfo(
             Field field,
             String name,
             boolean large,
-            boolean logicDelete,
-            boolean version,
-            boolean tenant,
-            String comment) {
+            String comment,
+            @Nullable
+            TypeHandler<?> typeHandler) {
     }
 }

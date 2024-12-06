@@ -1,5 +1,6 @@
 package cn.com.idmy.orm.mybatis;
 
+import cn.com.idmy.orm.OrmConfig;
 import cn.com.idmy.orm.core.MybatisSqlProvider;
 import cn.com.idmy.orm.core.TableInfo;
 import cn.com.idmy.orm.core.Tables;
@@ -87,9 +88,8 @@ class MybatisConfiguration extends Configuration {
         // 添加普通列映射
         for (var column : table.columns()) {
             var builder = new ResultMapping.Builder(this, column.field().getName(), column.name(), column.field().getType());
-
             // 如果有TypeHandler，设置到ResultMapping中
-            var handler = Tables.getHandler(column.field());
+            var handler = column.typeHandler();
             if (handler != null) {
                 builder.typeHandler(handler);
             }

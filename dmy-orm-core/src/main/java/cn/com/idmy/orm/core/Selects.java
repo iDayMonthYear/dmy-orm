@@ -106,6 +106,6 @@ public class Selects<T> extends Where<T, Selects<T>> {
 
     @Override
     public Pair<String, List<Object>> sql() {
-        return SelectSqlGenerator.gen(this);
+        return new SelectSqlGenerator(this).gen();
     }
 }
