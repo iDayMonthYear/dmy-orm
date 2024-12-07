@@ -14,16 +14,21 @@ public abstract class Where<T, SUD extends Where<T, SUD>> extends Crud<T, SUD> {
     }
 
     public SUD addNode(Cond node) {
-        var expr = node.expr;
-        if (expr == null) {
-            return $this;
-        } else if (expr instanceof Collection<?> ls) {
-            if (ls.isEmpty()) {
+        switch (node.expr) {
+            case null -> {
                 return $this;
             }
-        } else if (expr instanceof Object[] arr) {
-            if (arr.length == 0) {
-                return $this;
+            case Collection<?> ls -> {
+                if (ls.isEmpty()) {
+                    return $this;
+                }
+            }
+            case Object[] arr -> {
+                if (arr.length == 0) {
+                    return $this;
+                }
+            }
+            default -> {
             }
         }
         return super.addNode(node);

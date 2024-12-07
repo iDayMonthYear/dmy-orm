@@ -1,34 +1,27 @@
 package cn.com.idmy.orm.core;
 
 import cn.com.idmy.base.model.Pair;
+import cn.com.idmy.orm.OrmException;
 import cn.com.idmy.orm.core.Node.*;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
-import static cn.com.idmy.orm.core.SqlConsts.ASTERISK;
-import static cn.com.idmy.orm.core.SqlConsts.DELIMITER;
-import static cn.com.idmy.orm.core.SqlConsts.FROM;
-import static cn.com.idmy.orm.core.SqlConsts.GROUP_BY;
-import static cn.com.idmy.orm.core.SqlConsts.LIMIT;
-import static cn.com.idmy.orm.core.SqlConsts.OFFSET;
-import static cn.com.idmy.orm.core.SqlConsts.ORDER_BY;
-import static cn.com.idmy.orm.core.SqlConsts.SELECT;
+import static cn.com.idmy.orm.core.SqlConsts.*;
 
 @Slf4j
 class SelectSqlGenerator extends SqlGenerator {
     protected Selects<?> select;
 
     protected SelectSqlGenerator(Selects<?> select) {
-        super(select.entityClass);
+        super(select);
         this.select = select;
     }
 
-    protected Pair<String, List<Object>> gen() {
-        var nodes = select.nodes;
+    @Override
+    protected Pair<String, List<Object>> generate() {
         var selectColumns = new ArrayList<SelectColumn>(1);
         var wheres = new ArrayList<Node>(nodes.size());
         var groups = new ArrayList<GroupBy>(1);
@@ -49,13 +42,13 @@ class SelectSqlGenerator extends SqlGenerator {
         sql.append(SELECT);
         params = new ArrayList<>(select.sqlParamsSize);
         if (distinct != null) {
-            builder(distinct);
+            buildDistinct(distinct);
             if (!selectColumns.isEmpty()) {
                 sql.append(DELIMITER);
             }
         }
         buildSelectColumn(selectColumns);
-        sql.append(FROM).append(SqlConsts.STRESS_MARK).append(Tables.getTableName(select.entityClass)).append(SqlConsts.STRESS_MARK);
+        sql.append(FROM).append(SqlConsts.STRESS_MARK).append(Tables.getTableName(entityClass)).append(SqlConsts.STRESS_MARK);
         buildWhere(wheres);
         buildGroupBy(groups);
         buildOrderBy(orders);
@@ -68,35 +61,64 @@ class SelectSqlGenerator extends SqlGenerator {
         return Pair.of(sql.toString(), params);
     }
 
-    protected void buildSelectColumn(List<SelectColumn> selectColumns) {
-        if (selectColumns.isEmpty()) {
+    protected void buildDistinct(Distinct distinct) {
+        var col = distinct.column;
+        if (col == null) {
+            sql.append(DISTINCT);
+        } else {
+            sql.append(DISTINCT).append(BRACKET_LEFT).append(warpKeyword(col)).append(BRACKET_RIGHT);
+        }
+    }
+
+    protected String buildSelectColumn(SelectColumn sc) {
+        String col = warpKeyword(sc.column);
+        if (sc.expr == null) {
+            sql.append(col);
+        } else {
+            var expr = sc.expr;
+            var fn = expr.apply();
+            var name = fn.name();
+            if (name == SqlFnName.IF_NULL) {
+                params.add(fn.value());
+                sql.append(name.getName()).append(BRACKET_LEFT).append(col).append(DELIMITER).append(PLACEHOLDER).append(BRACKET_RIGHT).append(BLANK).append(col);
+            } else {
+                sql.append(name.getName()).append(BRACKET_LEFT).append(col).append(BRACKET_RIGHT).append(BLANK).append(col);
+            }
+        }
+        return sc.column;
+    }
+
+    protected void buildSelectColumn(List<SelectColumn> scs) {
+        if (scs.isEmpty()) {
             sql.append(ASTERISK);
         } else {
-            Set<String> set = new HashSet<>(selectColumns.size());
-            for (int i = 0, size = selectColumns.size(); i < size; i++) {
-                var selectColumn = selectColumns.get(i);
-                var column = (String) builder(selectColumn);
-                if (log.isWarnEnabled()) {
-                    if (set.contains(column)) {
-                        log.error("select {} 列名重复会导致映射到实体类异常", column);
-                    }
-                    set.add(column);
-                }
-                if (i < size - 1) {
-                    if (selectColumns.get(i + 1).type == Type.SELECT_COLUMN) {
-                        sql.append(DELIMITER);
+            var set = new HashSet<>(scs.size());
+            for (int i = 0, size = scs.size(); i < size; i++) {
+                var sc = scs.get(i);
+                var col = buildSelectColumn(sc);
+                if (set.contains(col)) {
+                    throw new OrmException("select " + col + " 列名重复会导致映射到实体类异常");
+                } else {
+                    set.add(col);
+                    if (i < size - 1) {
+                        if (scs.get(i + 1).type == Type.SELECT_COLUMN) {
+                            sql.append(DELIMITER);
+                        }
                     }
                 }
             }
         }
     }
 
+    protected void buildGroupBy(GroupBy group) {
+        sql.append(warpKeyword(group.column));
+    }
+
     protected void buildGroupBy(List<GroupBy> groups) {
         if (!groups.isEmpty()) {
             sql.append(GROUP_BY);
             for (int i = 0, size = groups.size(); i < size; i++) {
-                GroupBy group = groups.get(i);
-                builder(group);
+                buildGroupBy(groups.get(i));
                 if (i < size - 1) {
                     if (groups.get(i + 1).type == Type.GROUP_BY) {
                         sql.append(DELIMITER);
@@ -106,12 +128,15 @@ class SelectSqlGenerator extends SqlGenerator {
         }
     }
 
+    protected void buildOrderBy(OrderBy order) {
+        sql.append(warpKeyword(order.column)).append(order.desc ? DESC : EMPTY);
+    }
+
     private void buildOrderBy(List<OrderBy> orders) {
         if (!orders.isEmpty()) {
             sql.append(ORDER_BY);
             for (int i = 0, size = orders.size(); i < size; i++) {
-                OrderBy order = orders.get(i);
-                builder(order);
+                buildOrderBy(orders.get(i));
                 if (i < size - 1) {
                     if (orders.get(i + 1).type == Type.ORDER_BY) {
                         sql.append(DELIMITER);

@@ -15,7 +15,7 @@ import java.util.Objects;
 
 @Slf4j
 @Accessors(fluent = true, chain = true)
-public abstract class Crud<T, CRUD extends Crud<T, CRUD>> {
+abstract class Crud<T, CRUD extends Crud<T, CRUD>> {
     @Getter(value = AccessLevel.PROTECTED)
     protected List<Node> nodes = new ArrayList<>();
 

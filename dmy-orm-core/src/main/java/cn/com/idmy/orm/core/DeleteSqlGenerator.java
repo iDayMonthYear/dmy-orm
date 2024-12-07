@@ -15,22 +15,21 @@ class DeleteSqlGenerator extends SqlGenerator {
     protected Deletes<?> delete;
 
     protected DeleteSqlGenerator(Deletes<?> delete) {
-        super(delete.entityClass);
+        super(delete);
         this.delete = delete;
     }
 
-    protected Pair<String, List<Object>> gen() {
-        var nodes = delete.nodes;
+    @Override
+    protected Pair<String, List<Object>> generate() {
         var wheres = new ArrayList<Node>(nodes.size());
-        for (int i = 0, size = nodes.size(); i < size; i++) {
-            var node = nodes.get(i);
+        for (var node : nodes) {
             if (node instanceof Cond) {
                 wheres.add(node);
             } else if (node instanceof Or) {
                 skipAdjoinOr(node, wheres);
             }
         }
-        sql.append(DELETE_FROM).append(SqlConsts.STRESS_MARK).append(Tables.getTableName(delete.entityClass)).append(SqlConsts.STRESS_MARK);
+        sql.append(DELETE_FROM).append(SqlConsts.STRESS_MARK).append(Tables.getTableName(entityClass)).append(SqlConsts.STRESS_MARK);
         params = new ArrayList<>(delete.sqlParamsSize);
         buildWhere(wheres);
         return Pair.of(sql.toString(), params);

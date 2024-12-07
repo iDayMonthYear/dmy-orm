@@ -8,9 +8,9 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.List;
 
 
+@Slf4j
 @Getter
 @Accessors(fluent = true, chain = false)
-@Slf4j
 public class Deletes<T> extends Where<T, Deletes<T>> {
     protected Deletes(Class<T> entityClass) {
         super(entityClass);
@@ -22,6 +22,6 @@ public class Deletes<T> extends Where<T, Deletes<T>> {
 
     @Override
     public Pair<String, List<Object>> sql() {
-        return new DeleteSqlGenerator(this).gen();
+        return new DeleteSqlGenerator(this).generate();
     }
 }

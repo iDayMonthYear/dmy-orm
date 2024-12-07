@@ -38,7 +38,7 @@
         <dependency>
             <groupId>cn.com.idmy.orm</groupId>
             <artifactId>dmy-orm-spring-boot-starter</artifactId>
-            <version>${dmy-orm.version}</version>
+            <version>${project.parent.version}</version>
         </dependency>
         <dependency>
             <groupId>cn.com.idmy.cloud</groupId>

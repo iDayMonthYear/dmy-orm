@@ -19,7 +19,7 @@
         <dependency>
             <groupId>cn.com.idmy.orm</groupId>
             <artifactId>dmy-orm-spring</artifactId>
-            <version>${dmy-orm.version}</version>
+            <version>${project.parent.version}</version>
         </dependency>
         <dependency>
             <groupId>org.mybatis</groupId>

@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @Accessors(fluent = true, chain = false)
 public class Selects<T> extends Where<T, Selects<T>> {
-    boolean hasSelectColumn = false;
+    boolean hasSelectColumn;
     @Getter
     @Setter
     protected Integer offset;
@@ -106,6 +106,6 @@ public class Selects<T> extends Where<T, Selects<T>> {
 
     @Override
     public Pair<String, List<Object>> sql() {
-        return new SelectSqlGenerator(this).gen();
+        return new SelectSqlGenerator(this).generate();
     }
 }

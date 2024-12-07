@@ -5,12 +5,15 @@ import cn.com.idmy.orm.core.Node.Cond;
 import cn.com.idmy.orm.core.Node.Or;
 import cn.com.idmy.orm.core.Node.Set;
 import cn.com.idmy.orm.core.Node.Type;
+import cn.com.idmy.orm.mybatis.handler.TypeHandlerValue;
 import lombok.extern.slf4j.Slf4j;
+import org.dromara.hutool.core.collection.CollUtil;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static cn.com.idmy.orm.core.SqlConsts.DELIMITER;
+import static cn.com.idmy.orm.core.SqlConsts.EQUAL;
 import static cn.com.idmy.orm.core.SqlConsts.SET;
 import static cn.com.idmy.orm.core.SqlConsts.UPDATE;
 
@@ -19,16 +22,15 @@ class UpdateSqlGenerator extends SqlGenerator {
     protected Updates<?> update;
 
     protected UpdateSqlGenerator(Updates<?> update) {
-        super(update.entityClass);
+        super(update);
         this.update = update;
     }
 
-    protected Pair<String, List<Object>> gen() {
-        var nodes = update.nodes;
+    @Override
+    protected Pair<String, List<Object>> generate() {
         var sets = new ArrayList<Set>(nodes.size());
         var wheres = new ArrayList<Node>(nodes.size() - 1);
-        for (int i = 0, size = nodes.size(); i < size; i++) {
-            var node = nodes.get(i);
+        for (var node : nodes) {
             if (node instanceof Set set) {
                 sets.add(set);
             } else if (node instanceof Cond) {
@@ -37,12 +39,11 @@ class UpdateSqlGenerator extends SqlGenerator {
                 skipAdjoinOr(node, wheres);
             }
         }
-        sql.append(UPDATE).append(SqlConsts.STRESS_MARK).append(Tables.getTableName(update.entityClass)).append(SqlConsts.STRESS_MARK).append(SET);
+        sql.append(UPDATE).append(SqlConsts.STRESS_MARK).append(Tables.getTableName(entityClass)).append(SqlConsts.STRESS_MARK).append(SET);
         params = new ArrayList<>(update.sqlParamsSize);
         if (!sets.isEmpty()) {
             for (int i = 0, size = sets.size(); i < size; i++) {
-                Set set = sets.get(i);
-                builder(set);
+                buildSet(sets.get(i));
                 if (i < size - 1) {
                     if (sets.get(i + 1).type == Type.SET) {
                         sql.append(DELIMITER);
@@ -52,5 +53,23 @@ class UpdateSqlGenerator extends SqlGenerator {
         }
         buildWhere(wheres);
         return Pair.of(sql.toString(), params);
+    }
+
+    protected void buildSet(Set set) {
+        var col = set.column;
+        var expr = buildSqlExpr(col, set.expr, null);
+        var table = Tables.getTable(entityClass);
+        if (table != null) {
+            var map = table.columnMap();
+            if (CollUtil.isNotEmpty(map)) {
+                var info = map.get(col);
+                var typeHandler = info.typeHandler();
+                if (typeHandler != null) {
+                    var val = params.removeLast();
+                    params.add(new TypeHandlerValue(typeHandler, val));
+                }
+            }
+        }
+        sql.append(warpKeyword(col)).append(EQUAL).append(expr);
     }
 }
