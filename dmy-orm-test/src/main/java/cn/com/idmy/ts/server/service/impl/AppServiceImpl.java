@@ -2,6 +2,7 @@ package cn.com.idmy.ts.server.service.impl;
 
 import cn.com.idmy.base.model.Page;
 import cn.com.idmy.orm.core.Selects;
+import cn.com.idmy.orm.core.SqlFn;
 import cn.com.idmy.ts.server.dao.AppDao;
 import cn.com.idmy.ts.server.model.entity.App;
 import cn.com.idmy.ts.server.service.AppService;
@@ -68,7 +69,7 @@ public class AppServiceImpl implements AppService {
 //        long count = dao.count(SelectChain.of(dao));
 //        System.out.println(count);
 //
-        Console.error(dao.find(Selects.of(dao).endsWith(App::getName, "票")));
+        Console.error(dao.find(Selects.of(dao).endsWith(App::name, "票")));
 //        Console.error(dao.find(Selects.of(dao).between(App::getId, 1, 10)));
 //        Page<App> pageIn = Page.of(1, 2);
 //        pageIn.setParams(new App());
@@ -83,10 +84,9 @@ public class AppServiceImpl implements AppService {
 //        Selects<App> select = Selects.of(dao)
 //                .eq(App::getId, c -> c.plus(1));
 //        dao.find(select);
-//        Selects<App> select = Selects.of(dao)
-//                .select(App::getId)
-//                .select(() -> SqlFn.min(App::getId)).eq(App::getId, c -> c.plus(1));
-//        dao.find(select);
+        Selects<App> select = Selects.of(dao)
+                .select(() -> SqlFn.min(App::id)).eq(App::id, c -> c.plus(1));
+        dao.find(select);
         List<App> apps = new ArrayList<>();
         apps.add(App.builder().id(null).key("1").build());
         apps.add(App.builder().key("2").build());
@@ -105,7 +105,7 @@ public class AppServiceImpl implements AppService {
 
         // Test using SelectChain
         Selects<App> chain = Selects.of(dao);
-        chain.in(App::getId, 1, 2);
+        chain.in(App::id, 1, 2);
         List<App> chainResult = dao.find(chain);
         System.out.println("Found " + chainResult.size() + " apps using SelectChain");
 
@@ -125,8 +125,8 @@ public class AppServiceImpl implements AppService {
 
         // Test multiple conditions
         chain = Selects.of(dao);
-        chain.in(App::getKey, "dmy-ts-admin")
-                .gt(App::getCreatedAt, LocalDateTime.now().minusDays(30));
+        chain.in(App::key, "dmy-ts-admin")
+                .gt(App::createdAt, LocalDateTime.now().minusDays(30));
         List<App> recentApps = dao.find(chain);
         System.out.println("Found " + recentApps.size() + " recent admin apps");
 

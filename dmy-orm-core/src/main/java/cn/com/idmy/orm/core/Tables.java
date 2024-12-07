@@ -5,13 +5,13 @@ import cn.com.idmy.orm.OrmConfig;
 import cn.com.idmy.orm.OrmException;
 import cn.com.idmy.orm.core.TableInfo.TableColumnInfo;
 import cn.com.idmy.orm.core.TableInfo.TableIdInfo;
+import cn.com.idmy.orm.util.LambdaUtil;
 import jakarta.annotation.Nullable;
 import lombok.NoArgsConstructor;
 import org.apache.ibatis.mapping.MappedStatement;
 import org.apache.ibatis.type.TypeHandler;
 import org.apache.ibatis.util.MapUtil;
 import org.dromara.hutool.core.collection.CollUtil;
-import org.dromara.hutool.core.func.LambdaUtil;
 import org.dromara.hutool.core.reflect.ClassUtil;
 import org.dromara.hutool.core.reflect.FieldUtil;
 import org.dromara.hutool.core.text.StrUtil;
@@ -29,7 +29,7 @@ public class Tables {
     private static final Map<Field, TypeHandler<?>> typeHandlers = new ConcurrentHashMap<>();
     private static final OrmConfig config = OrmConfig.config();
 
-    public static <T, R> void register(Class<T> entityClass, ColumnGetter<T, R> col, TypeHandler<?> handler) {
+    public static <T, R> void bindTypeHandler(TypeHandler<?> handler, Class<T> entityClass, ColumnGetter<T, R> col) {
         String fieldName = LambdaUtil.getFieldName(col);
         try {
             Field field = entityClass.getDeclaredField(fieldName);

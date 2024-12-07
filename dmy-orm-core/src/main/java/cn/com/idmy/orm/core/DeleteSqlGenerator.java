@@ -20,7 +20,7 @@ class DeleteSqlGenerator extends SqlGenerator {
     }
 
     @Override
-    protected Pair<String, List<Object>> generate() {
+    protected Pair<String, List<Object>> doGenerate() {
         var wheres = new ArrayList<Node>(nodes.size());
         for (var node : nodes) {
             if (node instanceof Cond) {

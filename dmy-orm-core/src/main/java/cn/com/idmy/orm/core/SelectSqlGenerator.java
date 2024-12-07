@@ -21,7 +21,7 @@ class SelectSqlGenerator extends SqlGenerator {
     }
 
     @Override
-    protected Pair<String, List<Object>> generate() {
+    protected Pair<String, List<Object>> doGenerate() {
         var selectColumns = new ArrayList<SelectColumn>(1);
         var wheres = new ArrayList<Node>(nodes.size());
         var groups = new ArrayList<GroupBy>(1);

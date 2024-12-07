@@ -27,7 +27,7 @@ class UpdateSqlGenerator extends SqlGenerator {
     }
 
     @Override
-    protected Pair<String, List<Object>> generate() {
+    protected Pair<String, List<Object>> doGenerate() {
         var sets = new ArrayList<Set>(nodes.size());
         var wheres = new ArrayList<Node>(nodes.size() - 1);
         for (var node : nodes) {

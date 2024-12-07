@@ -16,10 +16,14 @@ public class InsertSqlGenerator extends SqlGenerator {
     }
 
     @Override
-    protected Pair<String, List<Object>> generate() {
-        if (input instanceof List<?> ls) {
+    protected Pair<String, List<Object>> doGenerate() {
+        if (input instanceof Collection<?> ls) {
+            // 调用批量插入拦截器
+            CrudInterceptors.interceptInsert(ls);
             return buildInsert(ls);
         } else {
+            // 调用单个插入拦截器
+            CrudInterceptors.interceptInsert(input);
             return buildInsert(input);
         }
     }

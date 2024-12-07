@@ -6,13 +6,14 @@ import com.alibaba.fastjson2.JSONObject;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
 import lombok.experimental.SuperBuilder;
 
 import java.time.LocalDateTime;
 import java.util.Map;
 
 @Data
-//@Accessors(fluent = true)
+@Accessors(fluent = true)
 @SuperBuilder
 @AllArgsConstructor
 @NoArgsConstructor

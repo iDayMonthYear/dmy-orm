@@ -2,6 +2,8 @@ package cn.com.idmy.ts.server;
 
 import cn.com.idmy.orm.OrmConfig;
 import cn.com.idmy.orm.mybatis.handler.JsonTypeHandler;
+import cn.com.idmy.ts.server.config.AuditInterceptor;
+import cn.com.idmy.ts.server.config.QueryInterceptor;
 import cn.com.idmy.ts.server.model.entity.App;
 import com.alibaba.fastjson2.TypeReference;
 import org.mybatis.spring.annotation.MapperScan;
@@ -22,9 +24,10 @@ import java.util.Map;
 @MapperScan("cn.com.idmy.ts.server.dao")
 public class Application {
     public static void main(String[] args) {
-        OrmConfig.register(App.class, App::getJson2, new JsonTypeHandler<>(new TypeReference<Map<Integer, Long>>() {
-        }));
-
+        OrmConfig.register(new JsonTypeHandler<>(new TypeReference<Map<Integer, Long>>() {
+        }), App.class, App::json2);
+        OrmConfig.register(new QueryInterceptor());
+        OrmConfig.register(new AuditInterceptor());
         SpringApplication.run(Application.class, args);
     }
 }

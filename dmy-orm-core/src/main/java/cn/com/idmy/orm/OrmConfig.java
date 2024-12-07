@@ -1,6 +1,8 @@
 package cn.com.idmy.orm;
 
 import cn.com.idmy.orm.core.ColumnGetter;
+import cn.com.idmy.orm.core.CrudInterceptor;
+import cn.com.idmy.orm.core.CrudInterceptors;
 import cn.com.idmy.orm.core.Tables;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -47,7 +49,11 @@ public class OrmConfig {
         return nameStrategy(name, columnNameStrategy);
     }
 
-    public static <T, R> void register(Class<T> entityClass, ColumnGetter<T, R> col, TypeHandler<?> handler) {
-        Tables.register(entityClass, col, handler);
+    public static <T, R> void register(TypeHandler<?> handler, Class<T> entityClass, ColumnGetter<T, R> col) {
+        Tables.bindTypeHandler(handler, entityClass, col);
+    }
+
+    public static void register(CrudInterceptor interceptor) {
+        CrudInterceptors.addInterceptor(interceptor);
     }
 }

@@ -34,6 +34,8 @@ class MybatisDaoDelegate {
     }
 
     public static <T, ID> int update(MybatisDao<T, ID> dao, T entity, boolean ignoreNull) {
+        CrudInterceptors.interceptUpdate(entity);
+        
         var entityClass = entity.getClass();
         var id = Tables.getId(entityClass);
         var idValue = FieldUtil.getFieldValue(entity, id.field());

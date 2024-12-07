@@ -42,8 +42,6 @@ public abstract class SqlGenerator {
         tableName = Tables.getTableName(entityClass);
     }
 
-    protected abstract Pair<String, List<Object>> generate();
-
     protected String warpKeyword(String str) {
         return STRESS_MARK + str + STRESS_MARK;
     }
@@ -152,4 +150,18 @@ public abstract class SqlGenerator {
             return new TypeHandlerValue(th, val);
         }
     }
+
+    protected Pair<String, List<Object>> generate() {
+        // 根据具体类型调用对应的拦截方法
+        switch (this) {
+            case UpdateSqlGenerator ignored -> CrudInterceptors.interceptUpdate(entityClass, nodes);
+            case DeleteSqlGenerator ignored -> CrudInterceptors.interceptDelete(entityClass, nodes);
+            case SelectSqlGenerator ignored -> CrudInterceptors.interceptSelect(entityClass, nodes);
+            default -> {
+            }
+        }
+        return doGenerate();
+    }
+
+    protected abstract Pair<String, List<Object>> doGenerate();
 }
