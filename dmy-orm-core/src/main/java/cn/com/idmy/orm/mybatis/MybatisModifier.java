@@ -19,7 +19,7 @@ class MybatisModifier {
         var selectId = ms.getId() + SelectKeyGenerator.SELECT_KEY_SUFFIX;
         var config = ms.getConfiguration();
         var sqlSource = ms.getLang().createSqlSource(config, sequence.trim(), id.field().getType());
-        var mappedStatement = new MappedStatement.Builder(config, selectId, sqlSource, SqlCommandType.SELECT)
+        var newMs = new MappedStatement.Builder(config, selectId, sqlSource, SqlCommandType.SELECT)
                 .resource(ms.getResource())
                 .fetchSize(null)
                 .timeout(null)
@@ -37,8 +37,8 @@ class MybatisModifier {
                 .useCache(false)
                 .cache(ms.getCache())
                 .build();
-        config.addMappedStatement(mappedStatement);
-        return new SelectKeyGenerator(mappedStatement, id.before());
+        config.addMappedStatement(newMs);
+        return new SelectKeyGenerator(newMs, id.before());
     }
 
     private static List<ResultMap> createIdResultMaps(Configuration cfg, String sid, Class<?> type, List<ResultMapping> mappings) {
@@ -48,7 +48,7 @@ class MybatisModifier {
 
     static MappedStatement replaceIdGenerator(MappedStatement ms, TableInfo tableInfo) {
         if (ms.getKeyGenerator() == NoKeyGenerator.INSTANCE) {
-            String msId = ms.getId();
+            var msId = ms.getId();
             if (msId.endsWith(MybatisSqlProvider.insert) || msId.endsWith(MybatisSqlProvider.inserts)) {
                 return replaceIdGenerator0(ms, tableInfo);
             }
@@ -88,7 +88,7 @@ class MybatisModifier {
 
 
     static MappedStatement addResultMap(MappedStatement ms, TableInfo tableInfo) {
-        Configuration cfg = ms.getConfiguration();
+        var cfg = ms.getConfiguration();
         var resultMapId = tableInfo.entityClass().getName() + ".BaseResultMap";
         // 确保 ResultMap 已创建
         if (!cfg.hasResultMap(resultMapId)) {

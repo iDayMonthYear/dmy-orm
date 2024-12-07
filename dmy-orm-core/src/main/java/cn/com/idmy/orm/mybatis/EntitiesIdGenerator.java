@@ -16,20 +16,20 @@ public class EntitiesIdGenerator implements KeyGenerator {
 
     @Override
     @SuppressWarnings({"unchecked"})
-    public void processBefore(Executor executor, MappedStatement ms, Statement st, Object parameter) {
-        var params = (Map<String, Object>) parameter;
+    public void processBefore(Executor executor, MappedStatement ms, Statement st, Object param) {
+        var params = (Map<String, Object>) param;
         var entities = MybatisSqlProvider.findEntities(params);
         if (CollUtil.isNotEmpty(entities)) {
             for (var entity : entities) {
                 params.put(MybatisSqlProvider.ENTITY, entity);
                 MybatisSqlProvider.putEntityClass(params, entity.getClass());
-                keyGenerator.processBefore(executor, ms, st, parameter);
+                keyGenerator.processBefore(executor, ms, st, param);
             }
         }
     }
 
     @Override
-    public void processAfter(Executor executor, MappedStatement ms, Statement stmt, Object parameter) {
+    public void processAfter(Executor executor, MappedStatement ms, Statement st, Object param) {
         //批量插入不支持回写ID，意义不大影响性能。
     }
 }

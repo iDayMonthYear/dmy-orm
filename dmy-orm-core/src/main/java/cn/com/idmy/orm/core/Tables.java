@@ -33,15 +33,13 @@ public class Tables {
     public static <T, R> void register(Class<T> entityClass, ColumnGetter<T, R> col, TypeHandler<?> handler) {
         String fieldName = LambdaUtil.getFieldName(col);
         try {
-            // 获取字段对象
             Field field = entityClass.getDeclaredField(fieldName);
-            field.setAccessible(true); // 确保可以访问私有字段
-            // 将字段和 TypeHandler 关联起来
+            field.setAccessible(true);
             typeHandlers.put(field, handler);
         } catch (NoSuchFieldException e) {
-            throw new RuntimeException("Field not found: " + fieldName, e);
+            throw new OrmException("Field not found: " + fieldName, e);
         } catch (SecurityException e) {
-            throw new RuntimeException("Access denied to field: " + fieldName, e);
+            throw new OrmException("Access denied to field: " + fieldName, e);
         }
     }
 
@@ -54,20 +52,16 @@ public class Tables {
     }
 
     public static TableInfo getTable(MappedStatement ms) {
-        String mapperClassName = ms.getId().substring(0, ms.getId().lastIndexOf("."));
+        String className = ms.getId().substring(0, ms.getId().lastIndexOf("."));
         try {
-            var mapperClass = Class.forName(mapperClassName);
-            return getTableByMapperClass(mapperClass);
+            return getTableByMapperClass(Class.forName(className));
         } catch (ClassNotFoundException e) {
             throw new OrmException(e);
         }
     }
 
     public static TableInfo getTableByMapperClass(Class<?> mapperClass) {
-        return MapUtil.computeIfAbsent(mapperTableInfos, mapperClass, key -> {
-            var entityClass = ClassUtil.getTypeArgument(mapperClass);
-            return getTable(entityClass);
-        });
+        return MapUtil.computeIfAbsent(mapperTableInfos, mapperClass, key -> getTable(ClassUtil.getTypeArgument(mapperClass)));
     }
 
     private static TableInfo init(Class<?> entityClass) {
@@ -122,15 +116,15 @@ public class Tables {
                 if (StrUtil.isBlank(name)) {
                     name = config.toColumnName(field.getName());
                 }
-                var columnInfo = new TableColumnInfo(
+                var ci = new TableColumnInfo(
                         field,
                         name,
                         large,
                         comment,
                         typeHandlers.get(field)
                 );
-                columns.add(columnInfo);
-                columnMap.put(name, columnInfo);
+                columns.add(ci);
+                columnMap.put(name, ci);
             }
         }
         if (idInfo == null) {
@@ -173,16 +167,16 @@ public class Tables {
 
     @Nullable
     public static String getColumnName(Class<?> entityClass, String fieldName) {
-        var tableInfo = getTable(entityClass);
-        var map = tableInfo.columnMap();
+        var ti = getTable(entityClass);
+        var map = ti.columnMap();
         if (CollUtil.isEmpty(map)) {
             return null;
         }
-        var columnInfo = map.get(fieldName);
-        if (columnInfo == null) {
+        var ci = map.get(fieldName);
+        if (ci == null) {
             return null;
         } else {
-            return columnInfo.name();
+            return ci.name();
         }
     }
 

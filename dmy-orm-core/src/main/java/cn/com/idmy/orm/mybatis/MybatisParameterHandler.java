@@ -20,9 +20,9 @@ import java.util.Map;
 class MybatisParameterHandler extends DefaultParameterHandler {
     private final TypeHandlerRegistry typeHandlerRegistry;
 
-    public MybatisParameterHandler(MappedStatement mappedStatement, Object parameterObject, BoundSql boundSql) {
-        super(mappedStatement, parameterObject, boundSql);
-        this.typeHandlerRegistry = mappedStatement.getConfiguration().getTypeHandlerRegistry();
+    public MybatisParameterHandler(MappedStatement ms, Object param, BoundSql boundSql) {
+        super(ms, param, boundSql);
+        this.typeHandlerRegistry = ms.getConfiguration().getTypeHandlerRegistry();
     }
 
     @Override
@@ -43,15 +43,16 @@ class MybatisParameterHandler extends DefaultParameterHandler {
         }
     }
 
-    private void setParameter(PreparedStatement ps, int index, Object value, Map<String, Object> params) throws SQLException {
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    private void setParameter(PreparedStatement ps, int idx, Object value, Map<String, Object> params) throws SQLException {
         switch (value) {
-            case null -> ps.setObject(index, null);
+            case null -> ps.setObject(idx, null);
             case Object[] val -> {
                 if (val.length == 0) {
                     throw new OrmException("Empty array");
                 }
                 for (var item : val) {
-                    setParameter(ps, index++, item, params);
+                    setParameter(ps, idx++, item, params);
                 }
             }
             case Collection<?> val -> {
@@ -59,16 +60,16 @@ class MybatisParameterHandler extends DefaultParameterHandler {
                     throw new OrmException("Empty list");
                 }
                 for (var item : val) {
-                    setParameter(ps, index++, item, params);
+                    setParameter(ps, idx++, item, params);
                 }
             }
-            case TypeHandlerValue val -> val.setParameter(ps, index);
+            case TypeHandlerValue val -> val.setParameter(ps, idx);
             default -> {
-                TypeHandler typeHandler = typeHandlerRegistry.getTypeHandler(value.getClass());
-                if (typeHandler == null) {
-                    typeHandler = typeHandlerRegistry.getUnknownTypeHandler();
+                TypeHandler th = typeHandlerRegistry.getTypeHandler(value.getClass());
+                if (th == null) {
+                    th = typeHandlerRegistry.getUnknownTypeHandler();
                 }
-                typeHandler.setParameter(ps, index, value, null);
+                th.setParameter(ps, idx, value, null);
             }
         }
     }

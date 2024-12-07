@@ -1,7 +1,6 @@
 package cn.com.idmy.orm.mybatis;
 
 import cn.com.idmy.orm.core.MybatisSqlProvider;
-import cn.com.idmy.orm.core.TableInfo;
 import cn.com.idmy.orm.core.Tables;
 import cn.com.idmy.orm.mybatis.handler.EnumTypeHandler;
 import cn.com.idmy.orm.mybatis.handler.JsonArrayTypeHandler;
@@ -24,8 +23,7 @@ class MybatisConfiguration extends Configuration {
 
     @Override
     public ParameterHandler newParameterHandler(MappedStatement ms, Object param, BoundSql boundSql) {
-        var msId = ms.getId();
-        if (!msId.endsWith(SelectKeyGenerator.SELECT_KEY_SUFFIX)) {
+        if (!ms.getId().endsWith(SelectKeyGenerator.SELECT_KEY_SUFFIX)) {
             if (param instanceof Map<?, ?> map && map.containsKey(MybatisSqlProvider.SQL_PARAMS)) {
                 var handler = new MybatisParameterHandler(ms, param, boundSql);
                 return (ParameterHandler) interceptorChain.pluginAll(handler);
@@ -36,9 +34,9 @@ class MybatisConfiguration extends Configuration {
 
     @Override
     public void addMappedStatement(MappedStatement ms) {
-        TableInfo tableInfo = Tables.getTable(ms);
-        ms = MybatisModifier.replaceIdGenerator(ms, tableInfo);
-        ms = MybatisModifier.addResultMap(ms, tableInfo);
+        var ti = Tables.getTable(ms);
+        ms = MybatisModifier.replaceIdGenerator(ms, ti);
+        ms = MybatisModifier.addResultMap(ms, ti);
         super.addMappedStatement(ms);
     }
 }

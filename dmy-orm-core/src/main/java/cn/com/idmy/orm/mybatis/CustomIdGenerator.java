@@ -16,10 +16,10 @@ public class CustomIdGenerator implements KeyGenerator {
     protected final TableIdInfo idInfo;
     protected IdGenerator idGenerator;
 
-    public CustomIdGenerator(Configuration configuration, TableInfo tableInfo) {
-        this.configuration = configuration;
-        this.tableInfo = tableInfo;
-        this.idInfo = tableInfo.id();
+    public CustomIdGenerator(Configuration cfg, TableInfo info) {
+        this.configuration = cfg;
+        this.tableInfo = info;
+        this.idInfo = info.id();
     }
 
     @Override

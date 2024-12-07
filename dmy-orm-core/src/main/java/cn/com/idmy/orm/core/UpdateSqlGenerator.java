@@ -39,15 +39,15 @@ class UpdateSqlGenerator extends SqlGenerator {
                 skipAdjoinOr(node, wheres);
             }
         }
-        sql.append(UPDATE).append(SqlConsts.STRESS_MARK).append(Tables.getTableName(entityClass)).append(SqlConsts.STRESS_MARK).append(SET);
+
+        sql.append(UPDATE).append(SqlConsts.STRESS_MARK).append(tableName).append(SqlConsts.STRESS_MARK).append(SET);
         params = new ArrayList<>(update.sqlParamsSize);
+
         if (!sets.isEmpty()) {
             for (int i = 0, size = sets.size(); i < size; i++) {
                 buildSet(sets.get(i));
-                if (i < size - 1) {
-                    if (sets.get(i + 1).type == Type.SET) {
-                        sql.append(DELIMITER);
-                    }
+                if (i < size - 1 && sets.get(i + 1).type == Type.SET) {
+                    sql.append(DELIMITER);
                 }
             }
         }
@@ -58,16 +58,12 @@ class UpdateSqlGenerator extends SqlGenerator {
     protected void buildSet(Set set) {
         var col = set.column;
         var expr = buildSqlExpr(col, set.expr, null);
-        var table = Tables.getTable(entityClass);
-        if (table != null) {
-            var map = table.columnMap();
-            if (CollUtil.isNotEmpty(map)) {
-                var info = map.get(col);
-                var typeHandler = info.typeHandler();
-                if (typeHandler != null) {
-                    var val = params.removeLast();
-                    params.add(new TypeHandlerValue(typeHandler, val));
-                }
+        var map = Tables.getTable(entityClass).columnMap();
+        if (CollUtil.isNotEmpty(map)) {
+            var th = map.get(col).typeHandler();
+            if (th != null) {
+                var val = params.removeLast();
+                params.add(new TypeHandlerValue(th, val));
             }
         }
         sql.append(warpKeyword(col)).append(EQUAL).append(expr);

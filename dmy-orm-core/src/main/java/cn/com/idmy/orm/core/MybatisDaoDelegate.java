@@ -5,6 +5,7 @@ import cn.com.idmy.base.model.Param;
 import cn.com.idmy.orm.OrmException;
 import cn.com.idmy.orm.core.Node.Cond;
 import jakarta.annotation.Nullable;
+import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import org.dromara.hutool.core.array.ArrayUtil;
 import org.dromara.hutool.core.collection.CollStreamUtil;
@@ -17,6 +18,7 @@ import static cn.com.idmy.base.constant.DefaultConsts.CREATED_AT;
 import static cn.com.idmy.base.constant.DefaultConsts.UPDATED_AT;
 import static cn.com.idmy.orm.core.MybatisDao.DEFAULT_BATCH_SIZE;
 
+@NoArgsConstructor(access = lombok.AccessLevel.PRIVATE)
 class MybatisDaoDelegate {
     public static <T, ID> int insertOrUpdate(MybatisDao<T, ID> dao, T entity, boolean ignoreNull) {
         ID id = (ID) FieldUtil.getFieldValue(entity, Tables.getIdName(dao));
@@ -32,7 +34,7 @@ class MybatisDaoDelegate {
     }
 
     public static <T, ID> int update(MybatisDao<T, ID> dao, T entity, boolean ignoreNull) {
-        Class<?> entityClass = entity.getClass();
+        var entityClass = entity.getClass();
         var id = Tables.getId(entityClass);
         var idValue = FieldUtil.getFieldValue(entity, id.field());
         if (idValue == null) {
@@ -70,8 +72,8 @@ class MybatisDaoDelegate {
         var entityList = entities instanceof List ? (List<T>) entities : new ArrayList<>(entities);
         int sum = 0;
         int entitiesSize = entities.size();
-        int maxIndex = entitiesSize / size + (entitiesSize % size == 0 ? 0 : 1);
-        for (int i = 0; i < maxIndex; i++) {
+        int maxIdx = entitiesSize / size + (entitiesSize % size == 0 ? 0 : 1);
+        for (int i = 0; i < maxIdx; i++) {
             sum += dao.inserts(entityList.subList(i * size, Math.min(i * size + size, entitiesSize)));
         }
         return sum;
@@ -92,11 +94,7 @@ class MybatisDaoDelegate {
         select.sqlParamsSize(1);
         select.addNode(new Cond(Tables.getIdName(dao), Op.EQ, id));
         T t = dao.get(select);
-        if (t == null) {
-            return null;
-        } else {
-            return col.get(t);
-        }
+        return t == null ? null : col.get(t);
     }
 
     @Nullable
@@ -104,11 +102,7 @@ class MybatisDaoDelegate {
         MybatisSqlProvider.clearSelectColumns(select);
         select.limit = 1;
         T t = dao.get(select.select(col));
-        if (t == null) {
-            return null;
-        } else {
-            return col.get(t);
-        }
+        return t == null ? null : col.get(t);
     }
 
     @Nullable
@@ -154,11 +148,7 @@ class MybatisDaoDelegate {
             MybatisSqlProvider.clearSelectColumns(select);
             select.limit = 1;
             T t = dao.get(select.select(() -> new SqlFn<>(name, col)));
-            if (t == null) {
-                return null;
-            } else {
-                return col.get(t);
-            }
+            return t == null ? null : col.get(t);
         }
     }
 
@@ -188,11 +178,7 @@ class MybatisDaoDelegate {
     }
 
     public static <T, ID> Map<ID, T> map(MybatisDao<T, ID> dao, @NonNull ID[] ids) {
-        if (ids.length == 0) {
-            return Collections.emptyMap();
-        } else {
-            return getMap(dao, ids);
-        }
+        return ids.length == 0 ? Collections.emptyMap() : getMap(dao, ids);
     }
 
     private static <T, ID> Map<ID, T> getMap(MybatisDao<T, ID> dao, @NonNull Object ids) {
@@ -204,11 +190,7 @@ class MybatisDaoDelegate {
     }
 
     public static <T, ID> Map<ID, T> map(MybatisDao<T, ID> dao, @NonNull Collection<ID> ids) {
-        if (ids.isEmpty()) {
-            return Collections.emptyMap();
-        } else {
-            return getMap(dao, ids);
-        }
+        return ids.isEmpty() ? Collections.emptyMap() : getMap(dao, ids);
     }
 
     public static <T, ID, R> Page<T> page(MybatisDao<T, ID> dao, Page<R> pageIn, Selects<T> select) {
@@ -235,14 +217,14 @@ class MybatisDaoDelegate {
             }
             var createdAts = param.getCreatedAts();
             if (ArrayUtil.isNotEmpty(createdAts) && createdAts.length == 2) {
-                String createdAt = Tables.getColumnName(entityClass, CREATED_AT);
+                var createdAt = Tables.getColumnName(entityClass, CREATED_AT);
                 if (createdAt != null) {
                     select.addNode(new Cond(createdAt, Op.BETWEEN, createdAts));
                 }
             }
             var updatedAts = param.getUpdatedAts();
             if (ArrayUtil.isNotEmpty(updatedAts) && updatedAts.length == 2) {
-                String updatedAt = Tables.getColumnName(entityClass, UPDATED_AT);
+                var updatedAt = Tables.getColumnName(entityClass, UPDATED_AT);
                 if (updatedAt != null) {
                     select.addNode(new Cond(updatedAt, Op.BETWEEN, createdAts));
                 }

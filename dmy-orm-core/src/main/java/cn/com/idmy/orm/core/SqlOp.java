@@ -8,70 +8,70 @@ import lombok.experimental.Accessors;
 import java.math.BigDecimal;
 
 @Getter
-@Accessors(fluent = true, chain = false)
 @RequiredArgsConstructor
+@Accessors(fluent = true, chain = false)
 public class SqlOp {
     private final String column;
     private String op;
     private Object value;
 
-    public SqlOp plus(long value) {
-        this.value = value;
-        this.op = "+";
+    public SqlOp plus(long val) {
+        value = val;
+        op = "+";
         return this;
     }
 
-    public SqlOp minus(long value) {
-        this.value = value;
-        this.op = "-";
+    public SqlOp minus(long val) {
+        value = val;
+        op = "-";
         return this;
     }
 
-    public SqlOp multiply(long value) {
-        this.value = value;
-        this.op = "*";
+    public SqlOp multiply(long val) {
+        value = val;
+        op = "*";
         return this;
     }
 
-    public SqlOp divide(long value) {
-        this.value = value;
-        this.op = "/";
+    public SqlOp divide(long val) {
+        value = val;
+        op = "/";
         return this;
     }
 
-    public SqlOp mod(long value) {
-        this.value = value;
-        this.op = "%";
+    public SqlOp mod(long val) {
+        value = val;
+        op = "%";
         return this;
     }
 
-    public SqlOp plus(BigDecimal value) {
-        this.value = value;
-        this.op = "+";
+    public SqlOp plus(BigDecimal val) {
+        value = val;
+        op = "+";
         return this;
     }
 
-    public SqlOp minus(BigDecimal value) {
-        this.value = value;
-        this.op = "-";
+    public SqlOp minus(BigDecimal val) {
+        value = val;
+        op = "-";
         return this;
     }
 
-    public SqlOp multiply(BigDecimal value) {
-        this.value = value;
-        this.op = "*";
+    public SqlOp multiply(BigDecimal val) {
+        value = val;
+        op = "*";
         return this;
     }
 
-    public SqlOp divide(BigDecimal value) {
-        this.value = value;
-        this.op = "/";
+    public SqlOp divide(BigDecimal val) {
+        value = val;
+        op = "/";
         return this;
     }
 
-    public SqlOp mod(BigDecimal value) {
-        this.value = value;
-        this.op = "%";
+    public SqlOp mod(BigDecimal val) {
+        value = val;
+        op = "%";
         return this;
     }
 }

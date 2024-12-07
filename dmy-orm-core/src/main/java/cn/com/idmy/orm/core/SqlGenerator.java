@@ -6,6 +6,8 @@ import cn.com.idmy.orm.core.Node.Cond;
 import cn.com.idmy.orm.core.Node.Or;
 import cn.com.idmy.orm.core.Node.Type;
 import jakarta.annotation.Nullable;
+import lombok.Getter;
+import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.hutool.core.collection.CollUtil;
 
@@ -23,8 +25,11 @@ import static cn.com.idmy.orm.core.SqlConsts.WHERE;
 
 
 @Slf4j
-abstract class SqlGenerator {
+@Getter
+@Accessors(fluent = true)
+public abstract class SqlGenerator {
     protected final Class<?> entityClass;
+    protected final String tableName;
     protected final List<Node> nodes;
     protected final StringBuilder sql = new StringBuilder();
     protected List<Object> params;
@@ -32,6 +37,7 @@ abstract class SqlGenerator {
     public SqlGenerator(Where<?, ?> where) {
         this.entityClass = where.entityClass;
         this.nodes = where.nodes;
+        tableName = Tables.getTableName(entityClass);
     }
 
     protected abstract Pair<String, List<Object>> generate();
@@ -62,11 +68,11 @@ abstract class SqlGenerator {
         return placeholder.toString();
     }
 
-    protected static void buildPlaceholder(Object value, StringBuilder placeholder) {
-        if (value instanceof Collection<?> ls) {
+    protected static void buildPlaceholder(Object val, StringBuilder placeholder) {
+        if (val instanceof Collection<?> ls) {
             buildPlaceholder(placeholder, ls.size());
-        } else if (value.getClass().isArray()) {
-            var arr = (Object[]) value;
+        } else if (val.getClass().isArray()) {
+            var arr = (Object[]) val;
             buildPlaceholder(placeholder, arr.length);
         } else {
             placeholder.append(PLACEHOLDER);

@@ -39,16 +39,19 @@ class SelectSqlGenerator extends SqlGenerator {
                 }
             }
         }
+
         sql.append(SELECT);
         params = new ArrayList<>(select.sqlParamsSize);
+
         if (distinct != null) {
             buildDistinct(distinct);
             if (!selectColumns.isEmpty()) {
                 sql.append(DELIMITER);
             }
         }
+
         buildSelectColumn(selectColumns);
-        sql.append(FROM).append(SqlConsts.STRESS_MARK).append(Tables.getTableName(entityClass)).append(SqlConsts.STRESS_MARK);
+        sql.append(FROM).append(SqlConsts.STRESS_MARK).append(tableName).append(SqlConsts.STRESS_MARK);
         buildWhere(wheres);
         buildGroupBy(groups);
         buildOrderBy(orders);
@@ -71,7 +74,7 @@ class SelectSqlGenerator extends SqlGenerator {
     }
 
     protected String buildSelectColumn(SelectColumn sc) {
-        String col = warpKeyword(sc.column);
+        var col = warpKeyword(sc.column);
         if (sc.expr == null) {
             sql.append(col);
         } else {
@@ -79,8 +82,8 @@ class SelectSqlGenerator extends SqlGenerator {
             var fn = expr.apply();
             var name = fn.name();
             if (name == SqlFnName.IF_NULL) {
-                params.add(fn.value());
                 sql.append(name.getName()).append(BRACKET_LEFT).append(col).append(DELIMITER).append(PLACEHOLDER).append(BRACKET_RIGHT).append(BLANK).append(col);
+                params.add(fn.value());
             } else {
                 sql.append(name.getName()).append(BRACKET_LEFT).append(col).append(BRACKET_RIGHT).append(BLANK).append(col);
             }
@@ -100,10 +103,8 @@ class SelectSqlGenerator extends SqlGenerator {
                     throw new OrmException("select " + col + " 列名重复会导致映射到实体类异常");
                 } else {
                     set.add(col);
-                    if (i < size - 1) {
-                        if (scs.get(i + 1).type == Type.SELECT_COLUMN) {
-                            sql.append(DELIMITER);
-                        }
+                    if (i < size - 1 && scs.get(i + 1).type == Type.SELECT_COLUMN) {
+                        sql.append(DELIMITER);
                     }
                 }
             }
@@ -119,10 +120,8 @@ class SelectSqlGenerator extends SqlGenerator {
             sql.append(GROUP_BY);
             for (int i = 0, size = groups.size(); i < size; i++) {
                 buildGroupBy(groups.get(i));
-                if (i < size - 1) {
-                    if (groups.get(i + 1).type == Type.GROUP_BY) {
-                        sql.append(DELIMITER);
-                    }
+                if (i < size - 1 && groups.get(i + 1).type == Type.GROUP_BY) {
+                    sql.append(DELIMITER);
                 }
             }
         }
@@ -137,10 +136,8 @@ class SelectSqlGenerator extends SqlGenerator {
             sql.append(ORDER_BY);
             for (int i = 0, size = orders.size(); i < size; i++) {
                 buildOrderBy(orders.get(i));
-                if (i < size - 1) {
-                    if (orders.get(i + 1).type == Type.ORDER_BY) {
-                        sql.append(DELIMITER);
-                    }
+                if (i < size - 1 && orders.get(i + 1).type == Type.ORDER_BY) {
+                    sql.append(DELIMITER);
                 }
             }
         }

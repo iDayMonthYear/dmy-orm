@@ -29,8 +29,10 @@ class DeleteSqlGenerator extends SqlGenerator {
                 skipAdjoinOr(node, wheres);
             }
         }
-        sql.append(DELETE_FROM).append(SqlConsts.STRESS_MARK).append(Tables.getTableName(entityClass)).append(SqlConsts.STRESS_MARK);
+
+        sql.append(DELETE_FROM).append(SqlConsts.STRESS_MARK).append(tableName).append(SqlConsts.STRESS_MARK);
         params = new ArrayList<>(delete.sqlParamsSize);
+
         buildWhere(wheres);
         return Pair.of(sql.toString(), params);
     }

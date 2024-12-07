@@ -17,17 +17,17 @@ public class SqlUtil {
         }
     }
 
-    public static boolean toBoolean(int result) {
-        return result > 0 || result == -2;
+    public static boolean toBoolean(int val) {
+        return val > 0 || val == -2;
     }
 
-    public static boolean toBoolean(long result) {
-        return result > 0;
+    public static boolean toBoolean(long val) {
+        return val > 0;
     }
 
-    public static boolean toBoolean(int[] results) {
-        for (int result : results) {
-            if (toBoolean(result)) {
+    public static boolean toBoolean(int[] vals) {
+        for (int val : vals) {
+            if (toBoolean(val)) {
                 return true;
             }
         }

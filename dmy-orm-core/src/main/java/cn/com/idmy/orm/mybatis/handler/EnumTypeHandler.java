@@ -11,6 +11,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class EnumTypeHandler<E extends Enum<E>> extends BaseTypeHandler<E> {
@@ -24,12 +25,12 @@ public class EnumTypeHandler<E extends Enum<E>> extends BaseTypeHandler<E> {
     }
 
     @Override
-    public void setNonNullParameter(PreparedStatement ps, int idx, E parameter, JdbcType jdbcType) throws SQLException {
+    public void setNonNullParameter(PreparedStatement ps, int idx, E param, JdbcType jdbcType) throws SQLException {
         if (valueField == null) {
-            ps.setString(idx, parameter.name());
+            ps.setString(idx, param.name());
         } else {
             try {
-                ps.setObject(idx, valueField.get(parameter));
+                ps.setObject(idx, valueField.get(param));
             } catch (IllegalAccessException e) {
                 throw new SQLException(e);
             }
@@ -70,7 +71,7 @@ public class EnumTypeHandler<E extends Enum<E>> extends BaseTypeHandler<E> {
         } else {
             for (E enumConstant : type.getEnumConstants()) {
                 try {
-                    if (value.equals(valueField.get(enumConstant))) {
+                    if (Objects.equals(value, valueField.get(enumConstant))) {
                         return enumConstant;
                     }
                 } catch (IllegalAccessException e) {
