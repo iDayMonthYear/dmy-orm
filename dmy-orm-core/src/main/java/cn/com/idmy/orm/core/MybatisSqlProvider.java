@@ -1,12 +1,9 @@
 package cn.com.idmy.orm.core;
 
 import cn.com.idmy.orm.OrmException;
-import cn.com.idmy.orm.core.TableInfo.TableColumnInfo;
-import cn.com.idmy.orm.mybatis.handler.TypeHandlerValue;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.builder.annotation.ProviderContext;
-import org.apache.ibatis.type.TypeHandler;
 
 import java.util.Collection;
 import java.util.Map;
@@ -34,15 +31,6 @@ public class MybatisSqlProvider {
         if (select.hasSelectColumn) {
             select.clearSelectColumns();
             log.warn("select ... from 中间不能有字段或者函数");
-        }
-    }
-
-    protected static Object warpTypeHandlerValue(TableColumnInfo columnInfo, Object value) {
-        TypeHandler<?> typeHandler = columnInfo.typeHandler();
-        if (typeHandler == null) {
-            return value;
-        } else {
-            return new TypeHandlerValue(typeHandler, value);
         }
     }
 

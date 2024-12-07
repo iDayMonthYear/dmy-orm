@@ -140,12 +140,7 @@ public class Tables {
     }
 
     public static TableIdInfo getId(Class<?> entityClass) {
-        TableIdInfo id = getTable(entityClass).id();
-        if (id == null) {
-            throw new OrmException(entityClass.getSimpleName() + "没有@Id注解");
-        } else {
-            return id;
-        }
+        return getTable(entityClass).id();
     }
 
     public static String getIdName(Class<?> entityClass) {

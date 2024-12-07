@@ -4,14 +4,18 @@ import cn.com.idmy.base.model.Page;
 import cn.com.idmy.base.model.Param;
 import cn.com.idmy.orm.OrmException;
 import cn.com.idmy.orm.core.SqlNode.SqlCond;
+import cn.com.idmy.orm.core.TableInfo.TableColumnInfo;
+import cn.com.idmy.orm.mybatis.handler.TypeHandlerValue;
 import jakarta.annotation.Nullable;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
+import org.apache.ibatis.type.TypeHandler;
 import org.dromara.hutool.core.array.ArrayUtil;
 import org.dromara.hutool.core.collection.CollStreamUtil;
 import org.dromara.hutool.core.collection.CollUtil;
 import org.dromara.hutool.core.reflect.FieldUtil;
 
+import java.lang.reflect.Field;
 import java.util.*;
 
 import static cn.com.idmy.base.constant.DefaultConsts.CREATED_AT;
@@ -33,6 +37,15 @@ class MybatisDaoDelegate {
         }
     }
 
+    protected static Object warpTypeHandlerValue(TableColumnInfo columnInfo, Object value) {
+        TypeHandler<?> typeHandler = columnInfo.typeHandler();
+        if (typeHandler == null) {
+            return value;
+        } else {
+            return new TypeHandlerValue(typeHandler, value);
+        }
+    }
+
     public static <T, ID> int update(MybatisDao<T, ID> dao, T entity, boolean ignoreNull) {
         CrudInterceptors.interceptUpdate(entity);
         
@@ -47,13 +60,18 @@ class MybatisDaoDelegate {
         var sql = new StringBuilder(SqlConsts.UPDATE).append(SqlConsts.STRESS_MARK).append(Tables.getTableName(entityClass)).append(SqlConsts.STRESS_MARK).append(SqlConsts.SET);
         var sqlParams = new ArrayList<>();
         int idx = 0;
-        for (int i = 0; i < columns.length; i++) {
+        int size = columns.length - 1;
+        for (int i = 0; i < size; i++) {
             var column = columns[i];
-            var value = FieldUtil.getFieldValue(entity, column.field());
+            Field field = column.field();
+            if (field == id.field()) {
+                continue;
+            }
+            var value = FieldUtil.getFieldValue(entity, field);
             if (!ignoreNull || value != null) {
                 idx++;
                 sql.append(SqlConsts.STRESS_MARK).append(column.name()).append(SqlConsts.STRESS_MARK).append(SqlConsts.EQUALS_PLACEHOLDER);
-                sqlParams.add(MybatisSqlProvider.warpTypeHandlerValue(column, value));
+                sqlParams.add(warpTypeHandlerValue(column, value));
                 if (i < idx - 1) {
                     sql.append(SqlConsts.DELIMITER);
                 }
