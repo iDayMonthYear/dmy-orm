@@ -33,8 +33,8 @@ public class Node {
         String column();
     }
 
-    @Accessors(fluent = true)
     @Getter
+    @Accessors(fluent = true)
     public static class Cond extends Node implements Column {
         final String column;
         final Op op;
@@ -61,8 +61,8 @@ public class Node {
         }
     }
 
-    @Accessors(fluent = true)
     @Getter
+    @Accessors(fluent = true)
     public static class Set extends Node implements Column {
         final String column;
         final Object expr;
@@ -78,8 +78,8 @@ public class Node {
         }
     }
 
-    @Accessors(fluent = true)
     @Getter
+    @Accessors(fluent = true)
     public static class GroupBy extends Node implements Column {
         final String column;
 
@@ -93,8 +93,8 @@ public class Node {
         }
     }
 
-    @Accessors(fluent = true)
     @Getter
+    @Accessors(fluent = true)
     public static class OrderBy extends Node implements Column {
         final String column;
         final boolean desc;
@@ -110,8 +110,8 @@ public class Node {
         }
     }
 
-    @Accessors(fluent = true)
     @Getter
+    @Accessors(fluent = true)
     public static class SelectColumn extends Node implements Column {
         String column;
         @Nullable
@@ -144,8 +144,8 @@ public class Node {
         }
     }
 
-    @Accessors(fluent = true)
     @Getter
+    @Accessors(fluent = true)
     public static class Distinct extends Node implements Column {
         @Nullable
         String column;

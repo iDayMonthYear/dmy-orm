@@ -236,12 +236,16 @@ class MybatisDaoDelegate {
             var createdAts = param.getCreatedAts();
             if (ArrayUtil.isNotEmpty(createdAts) && createdAts.length == 2) {
                 String createdAt = Tables.getColumnName(entityClass, CREATED_AT);
-                select.addNode(new Cond(createdAt, Op.BETWEEN, createdAts));
+                if (createdAt != null) {
+                    select.addNode(new Cond(createdAt, Op.BETWEEN, createdAts));
+                }
             }
             var updatedAts = param.getUpdatedAts();
             if (ArrayUtil.isNotEmpty(updatedAts) && updatedAts.length == 2) {
                 String updatedAt = Tables.getColumnName(entityClass, UPDATED_AT);
-                select.addNode(new Cond(updatedAt, Op.BETWEEN, createdAts));
+                if (updatedAt != null) {
+                    select.addNode(new Cond(updatedAt, Op.BETWEEN, createdAts));
+                }
             }
         }
         var rows = dao.find(select);

@@ -6,10 +6,12 @@ import cn.com.idmy.orm.OrmConfig;
 import cn.com.idmy.orm.OrmException;
 import cn.com.idmy.orm.core.TableInfo.TableColumnInfo;
 import cn.com.idmy.orm.core.TableInfo.TableIdInfo;
+import jakarta.annotation.Nullable;
 import lombok.NoArgsConstructor;
 import org.apache.ibatis.mapping.MappedStatement;
 import org.apache.ibatis.type.TypeHandler;
 import org.apache.ibatis.util.MapUtil;
+import org.dromara.hutool.core.collection.CollUtil;
 import org.dromara.hutool.core.func.LambdaUtil;
 import org.dromara.hutool.core.reflect.ClassUtil;
 import org.dromara.hutool.core.reflect.FieldUtil;
@@ -85,11 +87,11 @@ public class Tables {
             tableComment = "";
         }
 
-        var declaredFields = entityClass.getDeclaredFields();
         TableIdInfo idInfo = null;
+        var declaredFields = entityClass.getDeclaredFields();
         var columns = new ArrayList<TableColumnInfo>();
         var columnMap = new HashMap<String, TableColumnInfo>();
-        for (Field field : declaredFields) {
+        for (var field : declaredFields) {
             if (field.isAnnotationPresent(Table.Id.class)) {
                 if (idInfo == null) {
                     var id = field.getAnnotation(Id.class);
@@ -143,15 +145,20 @@ public class Tables {
     }
 
     public static TableIdInfo getId(Class<?> entityClass) {
-        return getTable(entityClass).id();
+        TableIdInfo id = getTable(entityClass).id();
+        if (id == null) {
+            throw new OrmException(entityClass.getSimpleName() + "没有@Id注解");
+        } else {
+            return id;
+        }
     }
 
     public static String getIdName(Class<?> entityClass) {
-        return getTable(entityClass).id().name();
+        return getId(entityClass).name();
     }
 
     public static String getIdName(MybatisDao<?, ?> dao) {
-        return getTable(dao.entityClass()).id().name();
+        return getId(dao.entityClass()).name();
     }
 
     @SuppressWarnings("unchecked")
@@ -164,10 +171,19 @@ public class Tables {
         return getTable(entityClass).id().field();
     }
 
-    public static String getColumnName(Class<?> entityClass, String columnName) {
+    @Nullable
+    public static String getColumnName(Class<?> entityClass, String fieldName) {
         var tableInfo = getTable(entityClass);
-        var columnInfo = tableInfo.columnMap().get(columnName);
-        return columnInfo.name();
+        var map = tableInfo.columnMap();
+        if (CollUtil.isEmpty(map)) {
+            return null;
+        }
+        var columnInfo = map.get(fieldName);
+        if (columnInfo == null) {
+            return null;
+        } else {
+            return columnInfo.name();
+        }
     }
 
     public static void clearTables() {

@@ -43,7 +43,6 @@ class MybatisParameterHandler extends DefaultParameterHandler {
         }
     }
 
-    @SuppressWarnings({"rawtypes", "unchecked"})
     private void setParameter(PreparedStatement ps, int index, Object value, Map<String, Object> params) throws SQLException {
         switch (value) {
             case null -> ps.setObject(index, null);
