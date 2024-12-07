@@ -10,6 +10,7 @@ import org.dromara.hutool.core.lang.Console;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -79,13 +80,18 @@ public class AppServiceImpl implements AppService {
 //        map.put(1, 2L);
 //        dao.update(Updates.of(dao).set(App::getJson2, map).eq(App::getId, 1L));
 //        App app = dao.get(1L);
-        Selects<App> select = Selects.of(dao)
-                .eq(App::getId, c -> c.plus(1));
-        dao.find(select);
+//        Selects<App> select = Selects.of(dao)
+//                .eq(App::getId, c -> c.plus(1));
+//        dao.find(select);
 //        Selects<App> select = Selects.of(dao)
 //                .select(App::getId)
 //                .select(() -> SqlFn.min(App::getId)).eq(App::getId, c -> c.plus(1));
 //        dao.find(select);
+        List<App> apps = new ArrayList<>();
+        apps.add(App.builder().id(null).key("1").build());
+        apps.add(App.builder().key("2").build());
+
+        dao.insert(apps.getFirst());
         return null;
     }
 

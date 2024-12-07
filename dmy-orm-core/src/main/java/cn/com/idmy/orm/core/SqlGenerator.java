@@ -5,6 +5,8 @@ import cn.com.idmy.orm.OrmException;
 import cn.com.idmy.orm.core.Node.Cond;
 import cn.com.idmy.orm.core.Node.Or;
 import cn.com.idmy.orm.core.Node.Type;
+import cn.com.idmy.orm.core.TableInfo.TableColumnInfo;
+import cn.com.idmy.orm.mybatis.handler.TypeHandlerValue;
 import jakarta.annotation.Nullable;
 import lombok.Getter;
 import lombok.experimental.Accessors;
@@ -34,9 +36,9 @@ public abstract class SqlGenerator {
     protected final StringBuilder sql = new StringBuilder();
     protected List<Object> params;
 
-    public SqlGenerator(Where<?, ?> where) {
-        this.entityClass = where.entityClass;
-        this.nodes = where.nodes;
+    public SqlGenerator(Class<?> entityClass, List<Node> notes) {
+        this.entityClass = entityClass;
+        this.nodes = notes;
         tableName = Tables.getTableName(entityClass);
     }
 
@@ -139,6 +141,15 @@ public abstract class SqlGenerator {
                     }
                 }
             }
+        }
+    }
+
+    protected Object getTypeHandlerValue(TableColumnInfo ci, Object val) {
+        var th = ci.typeHandler();
+        if (th == null) {
+            return val;
+        } else {
+            return new TypeHandlerValue(th, val);
         }
     }
 }

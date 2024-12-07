@@ -16,7 +16,7 @@ class SelectSqlGenerator extends SqlGenerator {
     protected Selects<?> select;
 
     protected SelectSqlGenerator(Selects<?> select) {
-        super(select);
+        super(select.entityClass, select.nodes);
         this.select = select;
     }
 

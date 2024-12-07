@@ -1,7 +1,6 @@
 package cn.com.idmy.orm.core;
 
 import cn.com.idmy.base.annotation.Table;
-import cn.com.idmy.base.annotation.Table.Id;
 import cn.com.idmy.orm.OrmConfig;
 import cn.com.idmy.orm.OrmException;
 import cn.com.idmy.orm.core.TableInfo.TableColumnInfo;
@@ -88,7 +87,7 @@ public class Tables {
         for (var field : declaredFields) {
             if (field.isAnnotationPresent(Table.Id.class)) {
                 if (idInfo == null) {
-                    var id = field.getAnnotation(Id.class);
+                    var id = field.getAnnotation(Table.Id.class);
                     String name;
                     if (StrUtil.isBlank(id.name())) {
                         name = config.toColumnName(field.getName());
@@ -99,7 +98,9 @@ public class Tables {
                 } else {
                     throw new OrmException("实体类" + entityClass.getName() + "中存在多个主键");
                 }
-            } else if (!field.isAnnotationPresent(Table.Column.class) || !field.getAnnotation(Table.Column.class).ignore()) {
+            }
+
+            if (!field.isAnnotationPresent(Table.Column.class) || !field.getAnnotation(Table.Column.class).ignore()) {
                 var column = field.getAnnotation(Table.Column.class);
                 String name;
                 boolean large;

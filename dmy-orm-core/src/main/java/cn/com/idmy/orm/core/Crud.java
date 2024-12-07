@@ -1,7 +1,7 @@
 package cn.com.idmy.orm.core;
 
 import cn.com.idmy.base.model.Pair;
-import cn.com.idmy.orm.core.Node.Column;
+import cn.com.idmy.orm.core.Node.ColumnNode;
 import cn.com.idmy.orm.core.Node.Or;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -52,7 +52,7 @@ abstract class Crud<T, CRUD extends Crud<T, CRUD>> {
 
     protected boolean hasColumn(String column, Node.Type type) {
         return nodes.stream().anyMatch(n -> {
-            if (n instanceof Column col) {
+            if (n instanceof ColumnNode col) {
                 return Objects.equals(col.column(), column) && n.type() == type;
             } else {
                 return false;
@@ -61,7 +61,7 @@ abstract class Crud<T, CRUD extends Crud<T, CRUD>> {
     }
 
     protected List<Node> columns(String column) {
-        return nodes.stream().filter(n -> n instanceof Column col && Objects.equals(col.column(), column)).toList();
+        return nodes.stream().filter(n -> n instanceof ColumnNode col && Objects.equals(col.column(), column)).toList();
     }
 
     public CRUD or() {

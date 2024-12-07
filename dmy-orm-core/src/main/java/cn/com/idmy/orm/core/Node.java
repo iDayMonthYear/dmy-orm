@@ -29,13 +29,13 @@ public class Node {
 
     final Type type;
 
-    public interface Column {
+    public interface ColumnNode {
         String column();
     }
 
     @Getter
     @Accessors(fluent = true)
-    public static class Cond extends Node implements Column {
+    public static class Cond extends Node implements ColumnNode {
         final String column;
         final Op op;
         final Object expr;
@@ -63,7 +63,7 @@ public class Node {
 
     @Getter
     @Accessors(fluent = true)
-    public static class Set extends Node implements Column {
+    public static class Set extends Node implements ColumnNode {
         final String column;
         final Object expr;
 
@@ -80,7 +80,7 @@ public class Node {
 
     @Getter
     @Accessors(fluent = true)
-    public static class GroupBy extends Node implements Column {
+    public static class GroupBy extends Node implements ColumnNode {
         final String column;
 
         public GroupBy(String column) {
@@ -95,7 +95,7 @@ public class Node {
 
     @Getter
     @Accessors(fluent = true)
-    public static class OrderBy extends Node implements Column {
+    public static class OrderBy extends Node implements ColumnNode {
         final String column;
         final boolean desc;
 
@@ -112,7 +112,7 @@ public class Node {
 
     @Getter
     @Accessors(fluent = true)
-    public static class SelectColumn extends Node implements Column {
+    public static class SelectColumn extends Node implements ColumnNode {
         String column;
         @Nullable
         SqlFnExpr<?> expr;
@@ -146,7 +146,7 @@ public class Node {
 
     @Getter
     @Accessors(fluent = true)
-    public static class Distinct extends Node implements Column {
+    public static class Distinct extends Node implements ColumnNode {
         @Nullable
         String column;
 

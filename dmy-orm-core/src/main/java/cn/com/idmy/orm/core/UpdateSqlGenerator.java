@@ -22,7 +22,7 @@ class UpdateSqlGenerator extends SqlGenerator {
     protected Updates<?> update;
 
     protected UpdateSqlGenerator(Updates<?> update) {
-        super(update);
+        super(update.entityClass, update.nodes);
         this.update = update;
     }
 

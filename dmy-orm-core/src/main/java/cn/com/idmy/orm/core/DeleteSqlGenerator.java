@@ -15,7 +15,7 @@ class DeleteSqlGenerator extends SqlGenerator {
     protected Deletes<?> delete;
 
     protected DeleteSqlGenerator(Deletes<?> delete) {
-        super(delete);
+        super(delete.entityClass, delete.nodes);
         this.delete = delete;
     }
 

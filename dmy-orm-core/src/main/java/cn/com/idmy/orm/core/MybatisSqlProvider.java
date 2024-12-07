@@ -7,10 +7,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.builder.annotation.ProviderContext;
 import org.apache.ibatis.type.TypeHandler;
-import org.dromara.hutool.core.reflect.FieldUtil;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
 import java.util.Map;
 
 @Slf4j
@@ -64,8 +62,8 @@ public class MybatisSqlProvider {
         return (Class<?>) params.get(ENTITY_CLASS);
     }
 
-    public static List<Object> findEntities(Map<String, Object> params) {
-        return (List<Object>) params.get(ENTITIES);
+    public static Collection<Object> findEntities(Map<String, Object> params) {
+        return (Collection<Object>) params.get(ENTITIES);
     }
 
     public String get(Map<String, Object> params) {
@@ -96,43 +94,14 @@ public class MybatisSqlProvider {
         return pair.left;
     }
 
-    private StringBuilder builderInsertHeader(String name) {
-        return new StringBuilder(SqlConsts.INSERT_INTO)
-                .append(SqlConsts.STRESS_MARK)
-                .append(name)
-                .append(SqlConsts.STRESS_MARK)
-                .append(SqlConsts.BLANK)
-                .append(SqlConsts.BRACKET_LEFT);
-    }
-
     public String insert(Map<String, Object> params) {
         var entity = params.get(ENTITY);
-        var table = Tables.getTable(entity.getClass());
-        var columns = table.columns();
-
-        var sql = builderInsertHeader(table.name());
-
-        var values = new StringBuilder(SqlConsts.VALUES).append(SqlConsts.BRACKET_LEFT);
-
-        var sqlParams = new ArrayList<>(columns.length);
-
-        for (int i = 0, size = columns.length; i < size; i++) {
-            var column = columns[i];
-            sql.append(SqlConsts.STRESS_MARK).append(column.name()).append(SqlConsts.STRESS_MARK);
-            values.append(SqlConsts.PLACEHOLDER);
-
-            var value = FieldUtil.getFieldValue(entity, column.field());
-            sqlParams.add(warpTypeHandlerValue(column, value));
-
-            if (i < size - 1) {
-                sql.append(SqlConsts.DELIMITER);
-                values.append(SqlConsts.DELIMITER);
-            }
-        }
-
-        params.put(SQL_PARAMS, sqlParams);
-        putEntityClass(params, entity.getClass());
-        return sql.append(SqlConsts.BRACKET_RIGHT).append(values).append(SqlConsts.BRACKET_RIGHT).toString();
+        var entityClass = entity.getClass();
+        var generator = new InsertSqlGenerator(entityClass, entity);
+        var pair = generator.generate();
+        params.put(SQL_PARAMS, pair.right);
+        putEntityClass(params, entityClass);
+        return pair.left;
     }
 
     public String inserts(Map<String, Object> params) {
@@ -140,44 +109,12 @@ public class MybatisSqlProvider {
         if (entities.isEmpty()) {
             throw new OrmException("批量插入的实体集合不能为空");
         }
-        var table = Tables.getTable(entities.getFirst().getClass());
-        var columns = table.columns();
-        var sql = builderInsertHeader(table.name());
-
-        // 构建列名部分
-        for (int i = 0, size = columns.length; i < size; i++) {
-            var column = columns[i];
-            sql.append(SqlConsts.STRESS_MARK).append(column.name()).append(SqlConsts.STRESS_MARK);
-            if (i < size - 1) {
-                sql.append(SqlConsts.DELIMITER);
-            }
-        }
-        sql.append(SqlConsts.BRACKET_RIGHT);
-
-        // 构建values部分
-        sql.append(SqlConsts.VALUES);
-        var sqlParams = new ArrayList<>(columns.length);
-        var first = true;
-        for (var entity : entities) {
-            if (first) {
-                first = false;
-            } else {
-                sql.append(SqlConsts.DELIMITER);
-            }
-            sql.append(SqlConsts.BRACKET_LEFT);
-            for (int i = 0, size = columns.length; i < size; i++) {
-                sql.append(SqlConsts.PLACEHOLDER);
-                Object value = FieldUtil.getFieldValue(entity, columns[i].name());
-                sqlParams.add(warpTypeHandlerValue(columns[i], value));
-                if (i < size - 1) {
-                    sql.append(SqlConsts.DELIMITER);
-                }
-            }
-            sql.append(SqlConsts.BRACKET_RIGHT);
-        }
-        params.put(SQL_PARAMS, sqlParams);
-        putEntityClass(params, entities.getFirst().getClass());
-        return sql.toString();
+        var entityClass = entities.iterator().next().getClass();
+        var generator = new InsertSqlGenerator(entityClass, entities);
+        var pair = generator.generate();
+        params.put(SQL_PARAMS, pair.right);
+        putEntityClass(params, entityClass);
+        return pair.left;
     }
 
     public String updateBySql(Map<String, Object> params, ProviderContext context) {
