@@ -1,8 +1,9 @@
 package cn.com.idmy.orm.core;
 
 import cn.com.idmy.base.model.Pair;
-import cn.com.idmy.orm.core.Node.ColumnNode;
-import cn.com.idmy.orm.core.Node.Or;
+import cn.com.idmy.orm.core.SqlNode.SqlColumn;
+import cn.com.idmy.orm.core.SqlNode.SqlNodeType;
+import cn.com.idmy.orm.core.SqlNode.SqlOr;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
@@ -17,7 +18,7 @@ import java.util.Objects;
 @Accessors(fluent = true, chain = true)
 abstract class Crud<T, CRUD extends Crud<T, CRUD>> {
     @Getter(value = AccessLevel.PROTECTED)
-    protected List<Node> nodes = new ArrayList<>();
+    protected List<SqlNode> nodes = new ArrayList<>();
 
     @SuppressWarnings({"unchecked"})
     protected final CRUD $this = (CRUD) this;
@@ -45,14 +46,14 @@ abstract class Crud<T, CRUD extends Crud<T, CRUD>> {
         }
     }
 
-    protected CRUD addNode(Node node) {
+    protected CRUD addNode(SqlNode node) {
         nodes.add(node);
         return $this;
     }
 
-    protected boolean hasColumn(String column, Node.Type type) {
+    protected boolean hasColumn(String column, SqlNodeType type) {
         return nodes.stream().anyMatch(n -> {
-            if (n instanceof ColumnNode col) {
+            if (n instanceof SqlColumn col) {
                 return Objects.equals(col.column(), column) && n.type() == type;
             } else {
                 return false;
@@ -60,11 +61,11 @@ abstract class Crud<T, CRUD extends Crud<T, CRUD>> {
         });
     }
 
-    protected List<Node> columns(String column) {
-        return nodes.stream().filter(n -> n instanceof ColumnNode col && Objects.equals(col.column(), column)).toList();
+    protected List<SqlNode> columns(String column) {
+        return nodes.stream().filter(n -> n instanceof SqlColumn col && Objects.equals(col.column(), column)).toList();
     }
 
     public CRUD or() {
-        return addNode(new Or());
+        return addNode(new SqlOr());
     }
 }

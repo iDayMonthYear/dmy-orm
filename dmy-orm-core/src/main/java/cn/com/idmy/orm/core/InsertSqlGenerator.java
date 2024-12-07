@@ -20,20 +20,20 @@ public class InsertSqlGenerator extends SqlGenerator {
         if (input instanceof Collection<?> ls) {
             // 调用批量插入拦截器
             CrudInterceptors.interceptInsert(ls);
-            return buildInsert(ls);
+            return genInsert(ls);
         } else {
             // 调用单个插入拦截器
             CrudInterceptors.interceptInsert(input);
-            return buildInsert(input);
+            return genInsert(input);
         }
     }
 
-    private void builderInsertHeader() {
+    private void genInsertHeader() {
         sql.append(SqlConsts.INSERT_INTO).append(SqlConsts.STRESS_MARK).append(tableName).append(SqlConsts.STRESS_MARK).append(SqlConsts.BLANK).append(SqlConsts.BRACKET_LEFT);
     }
 
-    private Pair<String, List<Object>> buildInsert(Object entity) {
-        builderInsertHeader();
+    private Pair<String, List<Object>> genInsert(Object entity) {
+        genInsertHeader();
         var values = new StringBuilder(SqlConsts.VALUES).append(SqlConsts.BRACKET_LEFT);
         var table = Tables.getTable(entity.getClass());
         var columns = table.columns();
@@ -53,8 +53,8 @@ public class InsertSqlGenerator extends SqlGenerator {
     }
 
     // 新增批量插入方法
-    private Pair<String, List<Object>> buildInsert(Collection<?> entities) {
-        builderInsertHeader();
+    private Pair<String, List<Object>> genInsert(Collection<?> entities) {
+        genInsertHeader();
         var cols = Tables.getTable(entityClass).columns();
         int colSize = cols.length;
 

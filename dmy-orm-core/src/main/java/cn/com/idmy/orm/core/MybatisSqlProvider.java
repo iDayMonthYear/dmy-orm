@@ -46,7 +46,7 @@ public class MybatisSqlProvider {
         }
     }
 
-    private static String buildCommonSql(Map<String, Object> params) {
+    private static String genCommonSql(Map<String, Object> params) {
         var where = (Crud<?, ?>) params.get(SUD);
         putEntityClass(params, where.entityClass());
         var pair = where.sql();
@@ -67,19 +67,19 @@ public class MybatisSqlProvider {
     }
 
     public String get(Map<String, Object> params) {
-        return buildCommonSql(params);
+        return genCommonSql(params);
     }
 
     public String find(Map<String, Object> params) {
-        return buildCommonSql(params);
+        return genCommonSql(params);
     }
 
     public String update(Map<String, Object> params, ProviderContext context) {
-        return buildCommonSql(params);
+        return genCommonSql(params);
     }
 
     public String delete(Map<String, Object> params) {
-        return buildCommonSql(params);
+        return genCommonSql(params);
     }
 
     public String count(Map<String, Object> params) {

@@ -1,5 +1,6 @@
 package cn.com.idmy.orm.core;
 
+
 import java.util.*;
 
 /**
@@ -7,7 +8,7 @@ import java.util.*;
  */
 public class CrudInterceptors {
     // 按操作类型分组存储拦截器
-    private static final Map<CrudInterceptor.CrudType, List<CrudInterceptor>> typeInterceptors = new EnumMap<>(CrudInterceptor.CrudType.class);
+    private static final Map<CrudType, List<CrudInterceptor>> typeInterceptors = new EnumMap<>(CrudType.class);
 
     /**
      * 添加拦截器
@@ -23,7 +24,7 @@ public class CrudInterceptors {
      * 插入前拦截 - 单个实体
      */
     static void interceptInsert(Object entity) {
-        var interceptors = typeInterceptors.get(CrudInterceptor.CrudType.INSERT);
+        var interceptors = typeInterceptors.get(CrudType.INSERT);
         if (interceptors != null) {
             Class<?> entityClass = entity.getClass();
             for (var interceptor : interceptors) {
@@ -39,7 +40,7 @@ public class CrudInterceptors {
      */
     static void interceptInsert(Collection<?> entities) {
         if (!entities.isEmpty()) {
-            var interceptors = typeInterceptors.get(CrudInterceptor.CrudType.INSERT);
+            var interceptors = typeInterceptors.get(CrudType.INSERT);
             if (interceptors != null) {
                 Class<?> entityClass = entities.iterator().next().getClass();
                 for (var interceptor : interceptors) {
@@ -55,7 +56,7 @@ public class CrudInterceptors {
      * 更新前拦截 - 使用实体更新
      */
     static void interceptUpdate(Object entity) {
-        var interceptors = typeInterceptors.get(CrudInterceptor.CrudType.UPDATE);
+        var interceptors = typeInterceptors.get(CrudType.UPDATE);
         if (interceptors != null) {
             Class<?> entityClass = entity.getClass();
             for (var interceptor : interceptors) {
@@ -69,8 +70,8 @@ public class CrudInterceptors {
     /**
      * 更新前拦截 - 使用条件更新
      */
-    static void interceptUpdate(Class<?> entityClass, List<Node> nodes) {
-        var interceptors = typeInterceptors.get(CrudInterceptor.CrudType.UPDATE);
+    static void interceptUpdate(Class<?> entityClass, List<SqlNode> nodes) {
+        var interceptors = typeInterceptors.get(CrudType.UPDATE);
         if (interceptors != null) {
             for (var interceptor : interceptors) {
                 if (interceptor.support(entityClass)) {
@@ -83,8 +84,8 @@ public class CrudInterceptors {
     /**
      * 删除前拦截
      */
-    static void interceptDelete(Class<?> entityClass, List<Node> nodes) {
-        var interceptors = typeInterceptors.get(CrudInterceptor.CrudType.DELETE);
+    static void interceptDelete(Class<?> entityClass, List<SqlNode> nodes) {
+        var interceptors = typeInterceptors.get(CrudType.DELETE);
         if (interceptors != null) {
             for (var interceptor : interceptors) {
                 if (interceptor.support(entityClass)) {
@@ -97,8 +98,8 @@ public class CrudInterceptors {
     /**
      * 查询前拦截
      */
-    static void interceptSelect(Class<?> entityClass, List<Node> nodes) {
-        var interceptors = typeInterceptors.get(CrudInterceptor.CrudType.SELECT);
+    static void interceptSelect(Class<?> entityClass, List<SqlNode> nodes) {
+        var interceptors = typeInterceptors.get(CrudType.SELECT);
         if (interceptors != null) {
             for (var interceptor : interceptors) {
                 if (interceptor.support(entityClass)) {

@@ -2,9 +2,9 @@ package cn.com.idmy.orm.core;
 
 import cn.com.idmy.base.model.Pair;
 import cn.com.idmy.orm.OrmException;
-import cn.com.idmy.orm.core.Node.Cond;
-import cn.com.idmy.orm.core.Node.Or;
-import cn.com.idmy.orm.core.Node.Type;
+import cn.com.idmy.orm.core.SqlNode.SqlCond;
+import cn.com.idmy.orm.core.SqlNode.SqlNodeType;
+import cn.com.idmy.orm.core.SqlNode.SqlOr;
 import cn.com.idmy.orm.core.TableInfo.TableColumnInfo;
 import cn.com.idmy.orm.mybatis.handler.TypeHandlerValue;
 import jakarta.annotation.Nullable;
@@ -32,11 +32,11 @@ import static cn.com.idmy.orm.core.SqlConsts.WHERE;
 public abstract class SqlGenerator {
     protected final Class<?> entityClass;
     protected final String tableName;
-    protected final List<Node> nodes;
+    protected final List<SqlNode> nodes;
     protected final StringBuilder sql = new StringBuilder();
     protected List<Object> params;
 
-    public SqlGenerator(Class<?> entityClass, List<Node> notes) {
+    public SqlGenerator(Class<?> entityClass, List<SqlNode> notes) {
         this.entityClass = entityClass;
         this.nodes = notes;
         tableName = Tables.getTableName(entityClass);
@@ -46,7 +46,7 @@ public abstract class SqlGenerator {
         return STRESS_MARK + str + STRESS_MARK;
     }
 
-    protected String buildSqlExpr(String col, Object expr, @Nullable Op op) {
+    protected String genSqlExpr(String col, Object expr, @Nullable Op op) {
         var placeholder = new StringBuilder();
         if (expr instanceof SqlOpExpr e) {
             var sqlOp = e.apply(new SqlOp(col));
@@ -61,25 +61,25 @@ public abstract class SqlGenerator {
                     throw new OrmException("between 参数必须为2个元素");
                 }
             } else {
-                buildPlaceholder(expr, placeholder);
+                genPlaceholder(expr, placeholder);
             }
             params.add(expr);
         }
         return placeholder.toString();
     }
 
-    protected static void buildPlaceholder(Object val, StringBuilder placeholder) {
+    protected static void genPlaceholder(Object val, StringBuilder placeholder) {
         if (val instanceof Collection<?> ls) {
-            buildPlaceholder(placeholder, ls.size());
+            genPlaceholder(placeholder, ls.size());
         } else if (val.getClass().isArray()) {
             var arr = (Object[]) val;
-            buildPlaceholder(placeholder, arr.length);
+            genPlaceholder(placeholder, arr.length);
         } else {
             placeholder.append(PLACEHOLDER);
         }
     }
 
-    protected static void buildPlaceholder(StringBuilder placeholder, int size) {
+    protected static void genPlaceholder(StringBuilder placeholder, int size) {
         placeholder.append(BRACKET_LEFT);
         for (int i = 0; i < size; i++) {
             placeholder.append(PLACEHOLDER);
@@ -90,23 +90,23 @@ public abstract class SqlGenerator {
         placeholder.append(BRACKET_RIGHT);
     }
 
-    protected void buildCond(Cond cond) {
+    protected void genCond(SqlCond cond) {
         var col = cond.column;
-        var expr = buildSqlExpr(col, cond.expr, cond.op);
+        var expr = genSqlExpr(col, cond.expr, cond.op);
         sql.append(warpKeyword(col)).append(BLANK).append(cond.op.getSymbol()).append(BLANK).append(expr);
     }
 
-    protected void builderCondOr(Node node) {
-        if (node instanceof Or) {
+    protected void genCondOr(SqlNode node) {
+        if (node instanceof SqlOr) {
             sql.append(SqlConsts.OR);
-        } else if (node instanceof Cond cond) {
-            buildCond(cond);
+        } else if (node instanceof SqlCond cond) {
+            genCond(cond);
         }
     }
 
-    protected static void skipAdjoinOr(Node node, List<Node> wheres) {
+    protected static void skipAdjoinOr(SqlNode node, List<SqlNode> wheres) {
         if (CollUtil.isNotEmpty(wheres)) {
-            if (wheres.getLast().type == Type.OR) {
+            if (wheres.getLast().type == SqlNodeType.OR) {
                 if (log.isWarnEnabled()) {
                     log.warn("存在相邻的or，已自动移除");
                 }
@@ -116,8 +116,8 @@ public abstract class SqlGenerator {
         }
     }
 
-    protected static void removeLastOr(List<Node> wheres) {
-        if (CollUtil.isNotEmpty(wheres) && wheres.getLast() instanceof Or) {
+    protected static void removeLastOr(List<SqlNode> wheres) {
+        if (CollUtil.isNotEmpty(wheres) && wheres.getLast() instanceof SqlOr) {
             wheres.removeLast();
             if (log.isWarnEnabled()) {
                 log.warn("where条件最后存在 or，已自动移除");
@@ -125,16 +125,15 @@ public abstract class SqlGenerator {
         }
     }
 
-    protected void buildWhere(List<Node> wheres) {
+    protected void genWhere(List<SqlNode> wheres) {
         if (!wheres.isEmpty()) {
             removeLastOr(wheres);
             sql.append(WHERE);
             for (int i = 0, size = wheres.size(); i < size; i++) {
                 var node = wheres.get(i);
-                builderCondOr(node);
+                genCondOr(node);
                 if (i < size - 1) {
-                    Type type = wheres.get(i + 1).type;
-                    if (type == Type.COND && node.type != Type.OR) {
+                    if (wheres.get(i + 1).type == SqlNodeType.COND && node.type != SqlNodeType.OR) {
                         sql.append(AND);
                     }
                 }

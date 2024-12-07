@@ -29,7 +29,7 @@ public class Tables {
     private static final Map<Field, TypeHandler<?>> typeHandlers = new ConcurrentHashMap<>();
     private static final OrmConfig config = OrmConfig.config();
 
-    public static <T, R> void bindTypeHandler(TypeHandler<?> handler, Class<T> entityClass, ColumnGetter<T, R> col) {
+    public static <T, R> void bindTypeHandler(Class<T> entityClass, ColumnGetter<T, R> col, TypeHandler<?> handler) {
         String fieldName = LambdaUtil.getFieldName(col);
         try {
             Field field = entityClass.getDeclaredField(fieldName);

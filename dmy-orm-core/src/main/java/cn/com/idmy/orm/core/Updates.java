@@ -1,7 +1,7 @@
 package cn.com.idmy.orm.core;
 
 import cn.com.idmy.base.model.Pair;
-import cn.com.idmy.orm.core.Node.Set;
+import cn.com.idmy.orm.core.SqlNode.SqlSet;
 import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
 
@@ -20,11 +20,11 @@ public class Updates<T> extends Where<T, Updates<T>> {
     }
 
     public Updates<T> set(ColumnGetter<T, ?> col, Object val) {
-        return addNode(new Set(col, val));
+        return addNode(new SqlSet(col, val));
     }
 
     public Updates<T> set(ColumnGetter<T, ?> col, SqlOpExpr expr) {
-        return addNode(new Set(col, expr));
+        return addNode(new SqlSet(col, expr));
     }
 
     @Override

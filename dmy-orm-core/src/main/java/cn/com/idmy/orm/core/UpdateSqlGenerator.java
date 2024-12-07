@@ -1,10 +1,10 @@
 package cn.com.idmy.orm.core;
 
 import cn.com.idmy.base.model.Pair;
-import cn.com.idmy.orm.core.Node.Cond;
-import cn.com.idmy.orm.core.Node.Or;
-import cn.com.idmy.orm.core.Node.Set;
-import cn.com.idmy.orm.core.Node.Type;
+import cn.com.idmy.orm.core.SqlNode.SqlCond;
+import cn.com.idmy.orm.core.SqlNode.SqlNodeType;
+import cn.com.idmy.orm.core.SqlNode.SqlOr;
+import cn.com.idmy.orm.core.SqlNode.SqlSet;
 import cn.com.idmy.orm.mybatis.handler.TypeHandlerValue;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.hutool.core.collection.CollUtil;
@@ -28,14 +28,14 @@ class UpdateSqlGenerator extends SqlGenerator {
 
     @Override
     protected Pair<String, List<Object>> doGenerate() {
-        var sets = new ArrayList<Set>(nodes.size());
-        var wheres = new ArrayList<Node>(nodes.size() - 1);
+        var sets = new ArrayList<SqlSet>(nodes.size());
+        var wheres = new ArrayList<SqlNode>(nodes.size() - 1);
         for (var node : nodes) {
-            if (node instanceof Set set) {
+            if (node instanceof SqlSet set) {
                 sets.add(set);
-            } else if (node instanceof Cond) {
+            } else if (node instanceof SqlCond) {
                 wheres.add(node);
-            } else if (node instanceof Or) {
+            } else if (node instanceof SqlOr) {
                 skipAdjoinOr(node, wheres);
             }
         }
@@ -45,19 +45,19 @@ class UpdateSqlGenerator extends SqlGenerator {
 
         if (!sets.isEmpty()) {
             for (int i = 0, size = sets.size(); i < size; i++) {
-                buildSet(sets.get(i));
-                if (i < size - 1 && sets.get(i + 1).type == Type.SET) {
+                genSet(sets.get(i));
+                if (i < size - 1 && sets.get(i + 1).type == SqlNodeType.SET) {
                     sql.append(DELIMITER);
                 }
             }
         }
-        buildWhere(wheres);
+        genWhere(wheres);
         return Pair.of(sql.toString(), params);
     }
 
-    protected void buildSet(Set set) {
+    protected void genSet(SqlSet set) {
         var col = set.column;
-        var expr = buildSqlExpr(col, set.expr, null);
+        var expr = genSqlExpr(col, set.expr, null);
         var map = Tables.getTable(entityClass).columnMap();
         if (CollUtil.isNotEmpty(map)) {
             var th = map.get(col).typeHandler();

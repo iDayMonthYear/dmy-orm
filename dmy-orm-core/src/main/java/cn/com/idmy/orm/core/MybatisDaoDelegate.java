@@ -3,7 +3,7 @@ package cn.com.idmy.orm.core;
 import cn.com.idmy.base.model.Page;
 import cn.com.idmy.base.model.Param;
 import cn.com.idmy.orm.OrmException;
-import cn.com.idmy.orm.core.Node.Cond;
+import cn.com.idmy.orm.core.SqlNode.SqlCond;
 import jakarta.annotation.Nullable;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
@@ -85,7 +85,7 @@ class MybatisDaoDelegate {
     public static <T, ID> T get(MybatisDao<T, ID> dao, ID id) {
         var select = Selects.of(dao);
         select.sqlParamsSize(1);
-        select.addNode(new Cond(Tables.getIdName(dao), Op.EQ, id));
+        select.addNode(new SqlCond(Tables.getIdName(dao), Op.EQ, id));
         return dao.get(select);
     }
 
@@ -94,7 +94,7 @@ class MybatisDaoDelegate {
         var select = Selects.of(dao);
         select.select(col);
         select.sqlParamsSize(1);
-        select.addNode(new Cond(Tables.getIdName(dao), Op.EQ, id));
+        select.addNode(new SqlCond(Tables.getIdName(dao), Op.EQ, id));
         T t = dao.get(select);
         return t == null ? null : col.get(t);
     }
@@ -126,7 +126,7 @@ class MybatisDaoDelegate {
         } else {
             var select = Selects.of(dao);
             select.sqlParamsSize(1);
-            select.addNode(new Cond(Tables.getIdName(dao), Op.IN, ids));
+            select.addNode(new SqlCond(Tables.getIdName(dao), Op.IN, ids));
             return dao.find(select);
         }
     }
@@ -137,7 +137,7 @@ class MybatisDaoDelegate {
         } else {
             var select = Selects.of(dao).select(col);
             select.sqlParamsSize(1);
-            select.addNode(new Cond(Tables.getIdName(dao), Op.IN, ids));
+            select.addNode(new SqlCond(Tables.getIdName(dao), Op.IN, ids));
             return dao.find(select).stream().map(col::get).toList();
         }
     }
@@ -157,14 +157,14 @@ class MybatisDaoDelegate {
     public static <T, ID> boolean exists(MybatisDao<T, ID> dao, ID id) {
         var select = Selects.of(dao);
         select.sqlParamsSize(1);
-        select.addNode(new Cond(Tables.getIdName(dao), Op.EQ, id));
+        select.addNode(new SqlCond(Tables.getIdName(dao), Op.EQ, id));
         return dao.count(select) > 0;
     }
 
     public static <T, ID> int delete(MybatisDao<T, ID> dao, ID id) {
         var delete = Deletes.of(dao);
         delete.sqlParamsSize(1);
-        delete.addNode(new Cond(Tables.getIdName(dao), Op.EQ, id));
+        delete.addNode(new SqlCond(Tables.getIdName(dao), Op.EQ, id));
         return dao.delete(delete);
     }
 
@@ -174,7 +174,7 @@ class MybatisDaoDelegate {
         } else {
             var delete = Deletes.of(dao);
             delete.sqlParamsSize(1);
-            delete.addNode(new Cond(Tables.getIdName(dao), Op.IN, ids));
+            delete.addNode(new SqlCond(Tables.getIdName(dao), Op.IN, ids));
             return dao.delete(delete);
         }
     }
@@ -186,7 +186,7 @@ class MybatisDaoDelegate {
     private static <T, ID> Map<ID, T> getMap(MybatisDao<T, ID> dao, @NonNull Object ids) {
         var select = Selects.of(dao);
         select.sqlParamsSize(1);
-        select.addNode(new Cond(Tables.getIdName(dao), Op.IN, ids));
+        select.addNode(new SqlCond(Tables.getIdName(dao), Op.IN, ids));
         var entities = dao.find(select);
         return CollStreamUtil.toIdentityMap(entities, Tables::getIdValue);
     }
@@ -205,15 +205,15 @@ class MybatisDaoDelegate {
             var entityClass = dao.entityClass();
             var id = param.getId();
             if (id != null) {
-                select.addNode(new Cond(Tables.getIdName(entityClass), Op.EQ, id));
+                select.addNode(new SqlCond(Tables.getIdName(entityClass), Op.EQ, id));
             } else {
                 var ids = param.getIds();
                 if (CollUtil.isNotEmpty(ids)) {
-                    select.addNode(new Cond(Tables.getIdName(entityClass), Op.IN, ids));
+                    select.addNode(new SqlCond(Tables.getIdName(entityClass), Op.IN, ids));
                 } else {
                     var notIds = param.getIds();
                     if (CollUtil.isNotEmpty(ids)) {
-                        select.addNode(new Cond(Tables.getIdName(entityClass), Op.NOT_IN, notIds));
+                        select.addNode(new SqlCond(Tables.getIdName(entityClass), Op.NOT_IN, notIds));
                     }
                 }
             }
@@ -221,14 +221,14 @@ class MybatisDaoDelegate {
             if (ArrayUtil.isNotEmpty(createdAts) && createdAts.length == 2) {
                 var createdAt = Tables.getColumnName(entityClass, CREATED_AT);
                 if (createdAt != null) {
-                    select.addNode(new Cond(createdAt, Op.BETWEEN, createdAts));
+                    select.addNode(new SqlCond(createdAt, Op.BETWEEN, createdAts));
                 }
             }
             var updatedAts = param.getUpdatedAts();
             if (ArrayUtil.isNotEmpty(updatedAts) && updatedAts.length == 2) {
                 var updatedAt = Tables.getColumnName(entityClass, UPDATED_AT);
                 if (updatedAt != null) {
-                    select.addNode(new Cond(updatedAt, Op.BETWEEN, createdAts));
+                    select.addNode(new SqlCond(updatedAt, Op.BETWEEN, createdAts));
                 }
             }
         }

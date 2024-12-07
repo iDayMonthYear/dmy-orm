@@ -14,8 +14,8 @@ import static cn.com.idmy.orm.core.SqlFnName.COUNT;
 @Data
 @Accessors(fluent = true)
 @RequiredArgsConstructor
-public class Node {
-    public enum Type {
+public class SqlNode {
+    public enum SqlNodeType {
         COND,
         WHERE,
         ORDER_BY,
@@ -27,107 +27,107 @@ public class Node {
         DISTINCT
     }
 
-    final Type type;
+    final SqlNodeType type;
 
-    public interface ColumnNode {
+    public interface SqlColumn {
         String column();
     }
 
     @Getter
     @Accessors(fluent = true)
-    public static class Cond extends Node implements ColumnNode {
+    public static class SqlCond extends SqlNode implements SqlColumn {
         final String column;
         final Op op;
         final Object expr;
 
-        public Cond(ColumnGetter<?, ?> column, Op op, Object expr) {
-            super(Type.COND);
+        public SqlCond(ColumnGetter<?, ?> column, Op op, Object expr) {
+            super(SqlNodeType.COND);
             this.column = LambdaUtil.getFieldName(column);
             this.op = op;
             this.expr = expr;
         }
 
-        public Cond(String column, Op op, Object expr) {
-            super(Type.COND);
+        public SqlCond(String column, Op op, Object expr) {
+            super(SqlNodeType.COND);
             this.column = column;
             this.op = op;
             this.expr = expr;
         }
     }
 
-    public static class Or extends Node {
-        public Or() {
-            super(Type.OR);
+    public static class SqlOr extends SqlNode {
+        public SqlOr() {
+            super(SqlNodeType.OR);
         }
     }
 
     @Getter
     @Accessors(fluent = true)
-    public static class Set extends Node implements ColumnNode {
+    public static class SqlSet extends SqlNode implements SqlColumn {
         final String column;
         final Object expr;
 
-        public Set(String column, Object expr) {
-            super(Type.SET);
+        public SqlSet(String column, Object expr) {
+            super(SqlNodeType.SET);
             this.column = column;
             this.expr = expr;
         }
 
-        public Set(ColumnGetter<?, ?> column, Object expr) {
+        public SqlSet(ColumnGetter<?, ?> column, Object expr) {
             this(LambdaUtil.getFieldName(column), expr);
         }
     }
 
     @Getter
     @Accessors(fluent = true)
-    public static class GroupBy extends Node implements ColumnNode {
+    public static class SqlGroupBy extends SqlNode implements SqlColumn {
         final String column;
 
-        public GroupBy(String column) {
-            super(Type.GROUP_BY);
+        public SqlGroupBy(String column) {
+            super(SqlNodeType.GROUP_BY);
             this.column = column;
         }
 
-        public GroupBy(ColumnGetter<?, ?> column) {
+        public SqlGroupBy(ColumnGetter<?, ?> column) {
             this(LambdaUtil.getFieldName(column));
         }
     }
 
     @Getter
     @Accessors(fluent = true)
-    public static class OrderBy extends Node implements ColumnNode {
+    public static class SqlOrderBy extends SqlNode implements SqlColumn {
         final String column;
         final boolean desc;
 
-        public OrderBy(String column, boolean desc) {
-            super(Type.ORDER_BY);
+        public SqlOrderBy(String column, boolean desc) {
+            super(SqlNodeType.ORDER_BY);
             this.column = SqlUtil.checkColumn(column);
             this.desc = desc;
         }
 
-        public OrderBy(ColumnGetter<?, ?> column, boolean desc) {
+        public SqlOrderBy(ColumnGetter<?, ?> column, boolean desc) {
             this(LambdaUtil.getFieldName(column), desc);
         }
     }
 
     @Getter
     @Accessors(fluent = true)
-    public static class SelectColumn extends Node implements ColumnNode {
+    public static class SqlSelectColumn extends SqlNode implements SqlColumn {
         String column;
         @Nullable
         SqlFnExpr<?> expr;
 
-        public SelectColumn(String column) {
-            super(Type.SELECT_COLUMN);
+        public SqlSelectColumn(String column) {
+            super(SqlNodeType.SELECT_COLUMN);
             this.column = SqlUtil.checkColumn(column);
         }
 
-        public SelectColumn(ColumnGetter<?, ?> column) {
+        public SqlSelectColumn(ColumnGetter<?, ?> column) {
             this(LambdaUtil.getFieldName(column));
         }
 
-        public SelectColumn(SqlFnExpr<?> expr) {
-            super(Type.SELECT_COLUMN);
+        public SqlSelectColumn(SqlFnExpr<?> expr) {
+            super(SqlNodeType.SELECT_COLUMN);
             this.expr = expr;
             var fn = expr.apply();
             var name = fn.name();
@@ -138,7 +138,7 @@ public class Node {
             }
         }
 
-        public SelectColumn(SqlFnExpr<?> expr, ColumnGetter<?, ?> alias) {
+        public SqlSelectColumn(SqlFnExpr<?> expr, ColumnGetter<?, ?> alias) {
             this(expr);
             column = LambdaUtil.getFieldName(alias);
         }
@@ -146,15 +146,15 @@ public class Node {
 
     @Getter
     @Accessors(fluent = true)
-    public static class Distinct extends Node implements ColumnNode {
+    public static class SqlDistinct extends SqlNode implements SqlColumn {
         @Nullable
         String column;
 
-        public Distinct() {
-            super(Type.DISTINCT);
+        public SqlDistinct() {
+            super(SqlNodeType.DISTINCT);
         }
 
-        public Distinct(@Nullable ColumnGetter<?, ?> column) {
+        public SqlDistinct(@Nullable ColumnGetter<?, ?> column) {
             this();
             if (column != null) {
                 this.column = LambdaUtil.getFieldName(column);

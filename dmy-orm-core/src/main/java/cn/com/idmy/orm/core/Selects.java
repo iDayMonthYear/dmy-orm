@@ -1,7 +1,7 @@
 package cn.com.idmy.orm.core;
 
 import cn.com.idmy.base.model.Pair;
-import cn.com.idmy.orm.core.Node.*;
+import cn.com.idmy.orm.core.SqlNode.*;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
@@ -34,26 +34,26 @@ public class Selects<T> extends Where<T, Selects<T>> {
 
     public Selects<T> distinct() {
         hasSelectColumn = true;
-        return addNode(new Distinct());
+        return addNode(new SqlDistinct());
     }
 
     public Selects<T> distinct(ColumnGetter<T, ?> col) {
         hasSelectColumn = true;
-        return addNode(new Distinct(col));
+        return addNode(new SqlDistinct(col));
     }
 
     void clearSelectColumns() {
-        nodes = nodes.stream().filter(node -> node.type != Type.SELECT_COLUMN && node.type != Type.DISTINCT).collect(Collectors.toList());
+        nodes = nodes.stream().filter(node -> node.type != SqlNodeType.SELECT_COLUMN && node.type != SqlNodeType.DISTINCT).collect(Collectors.toList());
     }
 
     public Selects<T> select(SqlFnExpr<T> expr) {
         hasSelectColumn = true;
-        return addNode(new SelectColumn(expr));
+        return addNode(new SqlSelectColumn(expr));
     }
 
     public Selects<T> select(SqlFnExpr<T> expr, ColumnGetter<T, ?> alias) {
         hasSelectColumn = true;
-        return addNode(new SelectColumn(expr, alias));
+        return addNode(new SqlSelectColumn(expr, alias));
     }
 
     @SafeVarargs
@@ -61,45 +61,45 @@ public class Selects<T> extends Where<T, Selects<T>> {
         if (ArrayUtil.isNotEmpty(cols)) {
             hasSelectColumn = true;
             for (ColumnGetter<T, ?> col : cols) {
-                addNode(new SelectColumn(col));
+                addNode(new SqlSelectColumn(col));
             }
         }
         return this;
     }
 
     public Selects<T> groupBy(ColumnGetter<T, ?> col) {
-        return addNode(new GroupBy(col));
+        return addNode(new SqlGroupBy(col));
     }
 
     @SafeVarargs
     public final Selects<T> groupBy(ColumnGetter<T, ?> col, ColumnGetter<T, ?>... cols) {
-        addNode(new GroupBy(col));
+        addNode(new SqlGroupBy(col));
         for (ColumnGetter<T, ?> c : cols) {
-            addNode(new GroupBy(c));
+            addNode(new SqlGroupBy(c));
         }
         return this;
     }
 
     public Selects<T> orderBy(ColumnGetter<T, ?> col) {
-        return addNode(new OrderBy(col, false));
+        return addNode(new SqlOrderBy(col, false));
     }
 
     public Selects<T> orderBy(ColumnGetter<T, ?> col, boolean desc) {
-        return addNode(new OrderBy(col, desc));
+        return addNode(new SqlOrderBy(col, desc));
     }
 
     public Selects<T> orderBy(ColumnGetter<T, ?> col1, boolean desc1, ColumnGetter<T, ?> col2, boolean desc2) {
-        return addNode(new OrderBy(col1, desc1)).addNode(new OrderBy(col2, desc2));
+        return addNode(new SqlOrderBy(col1, desc1)).addNode(new SqlOrderBy(col2, desc2));
     }
 
     public Selects<T> orderBy(ColumnGetter<T, ?> col1, boolean desc1, ColumnGetter<T, ?> col2, boolean desc2, ColumnGetter<T, ?> col3, boolean desc3) {
-        return addNode(new OrderBy(col1, desc1)).addNode(new OrderBy(col2, desc2)).addNode(new OrderBy(col3, desc3));
+        return addNode(new SqlOrderBy(col1, desc1)).addNode(new SqlOrderBy(col2, desc2)).addNode(new SqlOrderBy(col3, desc3));
     }
 
     public Selects<T> orderBy(String[] orders) {
         Assert.isTrue(orders.length % 2 == 0, "排序列名不成对，必须为：['name', 'asc', 'gender', 'desc']");
         for (int i = 0; i < orders.length; i = i + 2) {
-            addNode(new OrderBy(orders[i], StrUtil.equalsIgnoreCase(orders[i + 1], "desc")));
+            addNode(new SqlOrderBy(orders[i], StrUtil.equalsIgnoreCase(orders[i + 1], "desc")));
         }
         return this;
     }

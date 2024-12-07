@@ -1,8 +1,8 @@
 package cn.com.idmy.orm.core;
 
 import cn.com.idmy.base.model.Pair;
-import cn.com.idmy.orm.core.Node.Cond;
-import cn.com.idmy.orm.core.Node.Or;
+import cn.com.idmy.orm.core.SqlNode.SqlCond;
+import cn.com.idmy.orm.core.SqlNode.SqlOr;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
@@ -21,11 +21,11 @@ class DeleteSqlGenerator extends SqlGenerator {
 
     @Override
     protected Pair<String, List<Object>> doGenerate() {
-        var wheres = new ArrayList<Node>(nodes.size());
+        var wheres = new ArrayList<SqlNode>(nodes.size());
         for (var node : nodes) {
-            if (node instanceof Cond) {
+            if (node instanceof SqlCond) {
                 wheres.add(node);
-            } else if (node instanceof Or) {
+            } else if (node instanceof SqlOr) {
                 skipAdjoinOr(node, wheres);
             }
         }
@@ -33,7 +33,7 @@ class DeleteSqlGenerator extends SqlGenerator {
         sql.append(DELETE_FROM).append(SqlConsts.STRESS_MARK).append(tableName).append(SqlConsts.STRESS_MARK);
         params = new ArrayList<>(delete.sqlParamsSize);
 
-        buildWhere(wheres);
+        genWhere(wheres);
         return Pair.of(sql.toString(), params);
     }
 }

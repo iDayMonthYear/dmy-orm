@@ -1,6 +1,6 @@
 package cn.com.idmy.orm.core;
 
-import cn.com.idmy.orm.core.Node.Cond;
+import cn.com.idmy.orm.core.SqlNode.SqlCond;
 import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
 
@@ -13,7 +13,7 @@ public abstract class Where<T, SUD extends Where<T, SUD>> extends Crud<T, SUD> {
         super(entityClass);
     }
 
-    public SUD addNode(Cond node) {
+    public SUD addNode(SqlCond node) {
         switch (node.expr) {
             case null -> {
                 return $this;
@@ -36,11 +36,11 @@ public abstract class Where<T, SUD extends Where<T, SUD>> extends Crud<T, SUD> {
 
     //region 等于
     public SUD eq(ColumnGetter<T, ?> col, Object val) {
-        return addNode(new Cond(col, Op.EQ, val));
+        return addNode(new SqlCond(col, Op.EQ, val));
     }
 
     public SUD eq(ColumnGetter<T, ?> col, SqlOpExpr expr) {
-        return addNode(new Cond(col, Op.EQ, expr));
+        return addNode(new SqlCond(col, Op.EQ, expr));
     }
 
     public SUD eq(ColumnGetter<T, ?> col, Object val, boolean if0) {
@@ -54,11 +54,11 @@ public abstract class Where<T, SUD extends Where<T, SUD>> extends Crud<T, SUD> {
 
     //region 不等于
     public SUD ne(ColumnGetter<T, ?> col, Object val) {
-        return addNode(new Cond(col, Op.NE, val));
+        return addNode(new SqlCond(col, Op.NE, val));
     }
 
     public SUD ne(ColumnGetter<T, ?> col, SqlOpExpr expr) {
-        return addNode(new Cond(col, Op.NE, expr));
+        return addNode(new SqlCond(col, Op.NE, expr));
     }
 
     public SUD ne(ColumnGetter<T, ?> col, Object val, boolean if0) {
@@ -72,11 +72,11 @@ public abstract class Where<T, SUD extends Where<T, SUD>> extends Crud<T, SUD> {
 
     //region 大于 >
     public SUD gt(ColumnGetter<T, ?> col, Object val) {
-        return addNode(new Cond(col, Op.GT, val));
+        return addNode(new SqlCond(col, Op.GT, val));
     }
 
     public SUD gt(ColumnGetter<T, ?> col, SqlOpExpr expr) {
-        return addNode(new Cond(col, Op.GT, expr));
+        return addNode(new SqlCond(col, Op.GT, expr));
     }
 
     public SUD gt(ColumnGetter<T, ?> col, Object val, boolean if0) {
@@ -90,11 +90,11 @@ public abstract class Where<T, SUD extends Where<T, SUD>> extends Crud<T, SUD> {
 
     //region 大于等于 >=
     public SUD ge(ColumnGetter<T, ?> col, Object val) {
-        return addNode(new Cond(col, Op.GE, val));
+        return addNode(new SqlCond(col, Op.GE, val));
     }
 
     public SUD ge(ColumnGetter<T, ?> col, SqlOpExpr expr) {
-        return addNode(new Cond(col, Op.GE, expr));
+        return addNode(new SqlCond(col, Op.GE, expr));
     }
 
     public SUD ge(ColumnGetter<T, ?> col, Object val, boolean if0) {
@@ -108,11 +108,11 @@ public abstract class Where<T, SUD extends Where<T, SUD>> extends Crud<T, SUD> {
 
     //region 小于 <
     public SUD lt(ColumnGetter<T, ?> col, Object val) {
-        return addNode(new Cond(col, Op.LT, val));
+        return addNode(new SqlCond(col, Op.LT, val));
     }
 
     public SUD lt(ColumnGetter<T, ?> col, SqlOpExpr expr) {
-        return addNode(new Cond(col, Op.LT, expr));
+        return addNode(new SqlCond(col, Op.LT, expr));
     }
 
     public SUD lt(ColumnGetter<T, ?> col, Object val, boolean if0) {
@@ -126,11 +126,11 @@ public abstract class Where<T, SUD extends Where<T, SUD>> extends Crud<T, SUD> {
 
     //region 小于等于 <=
     public SUD le(ColumnGetter<T, ?> col, Object val) {
-        return addNode(new Cond(col, Op.LE, val));
+        return addNode(new SqlCond(col, Op.LE, val));
     }
 
     public SUD le(ColumnGetter<T, ?> col, SqlOpExpr expr) {
-        return addNode(new Cond(col, Op.LE, expr));
+        return addNode(new SqlCond(col, Op.LE, expr));
     }
 
     public SUD le(ColumnGetter<T, ?> col, Object val, boolean if0) {
@@ -144,7 +144,7 @@ public abstract class Where<T, SUD extends Where<T, SUD>> extends Crud<T, SUD> {
 
     //region like
     public SUD like(ColumnGetter<T, ?> col, String val) {
-        return addNode(new Cond(col, Op.LIKE, "%" + val + "%"));
+        return addNode(new SqlCond(col, Op.LIKE, "%" + val + "%"));
     }
 
     public SUD like(ColumnGetter<T, ?> col, String val, boolean if0) {
@@ -154,7 +154,7 @@ public abstract class Where<T, SUD extends Where<T, SUD>> extends Crud<T, SUD> {
 
     //region startsWith
     public SUD startsWith(ColumnGetter<T, ?> col, String val) {
-        return addNode(new Cond(col, Op.LIKE, val + "%"));
+        return addNode(new SqlCond(col, Op.LIKE, val + "%"));
     }
 
     public SUD startsWith(ColumnGetter<T, ?> col, String val, boolean if0) {
@@ -164,7 +164,7 @@ public abstract class Where<T, SUD extends Where<T, SUD>> extends Crud<T, SUD> {
 
     //region endsWith
     public SUD endsWith(ColumnGetter<T, ?> col, String val) {
-        return addNode(new Cond(col, Op.LIKE, "%" + val));
+        return addNode(new SqlCond(col, Op.LIKE, "%" + val));
     }
 
     public SUD endsWith(ColumnGetter<T, ?> col, String val, boolean if0) {
@@ -174,11 +174,11 @@ public abstract class Where<T, SUD extends Where<T, SUD>> extends Crud<T, SUD> {
 
     //region in
     public SUD in(ColumnGetter<T, ?> col, Object val) {
-        return addNode(new Cond(col, Op.IN, val));
+        return addNode(new SqlCond(col, Op.IN, val));
     }
 
     public SUD in(ColumnGetter<T, ?> col, Object... vals) {
-        return addNode(new Cond(col, Op.IN, vals));
+        return addNode(new SqlCond(col, Op.IN, vals));
     }
 
     public SUD in(ColumnGetter<T, ?> col, Object val, boolean if0) {
@@ -192,11 +192,11 @@ public abstract class Where<T, SUD extends Where<T, SUD>> extends Crud<T, SUD> {
 
     //region not in
     public SUD notIn(ColumnGetter<T, ?> col, Object val) {
-        return addNode(new Cond(col, Op.IN, val));
+        return addNode(new SqlCond(col, Op.IN, val));
     }
 
     public SUD notIn(ColumnGetter<T, ?> col, Object... vals) {
-        return addNode(new Cond(col, Op.IN, vals));
+        return addNode(new SqlCond(col, Op.IN, vals));
     }
 
     public SUD notIn(ColumnGetter<T, ?> col, Object val, boolean if0) {
@@ -213,9 +213,9 @@ public abstract class Where<T, SUD extends Where<T, SUD>> extends Crud<T, SUD> {
         if (bol == null) {
             return $this;
         } else if (bol) {
-            return addNode(new Cond(col, Op.IS_NULL, null));
+            return addNode(new SqlCond(col, Op.IS_NULL, null));
         } else {
-            return addNode(new Cond(col, Op.IS_NOT_NULL, null));
+            return addNode(new SqlCond(col, Op.IS_NOT_NULL, null));
         }
     }
     //endregion
@@ -242,7 +242,7 @@ public abstract class Where<T, SUD extends Where<T, SUD>> extends Crud<T, SUD> {
 
     //region between
     public SUD between(ColumnGetter<T, ?> col, Object[] pair) {
-        return addNode(new Cond(col, Op.BETWEEN, pair));
+        return addNode(new SqlCond(col, Op.BETWEEN, pair));
     }
 
     public SUD between(ColumnGetter<T, ?> col, Object[] pair, boolean if0) {
@@ -250,7 +250,7 @@ public abstract class Where<T, SUD extends Where<T, SUD>> extends Crud<T, SUD> {
     }
 
     public SUD between(ColumnGetter<T, ?> col, Object start, Object end) {
-        return addNode(new Cond(col, Op.BETWEEN, new Object[]{start, end}));
+        return addNode(new SqlCond(col, Op.BETWEEN, new Object[]{start, end}));
     }
 
     public SUD between(ColumnGetter<T, ?> col, Object start, Object end, boolean if0) {
@@ -260,7 +260,7 @@ public abstract class Where<T, SUD extends Where<T, SUD>> extends Crud<T, SUD> {
 
     //region not between
     public SUD notBetween(ColumnGetter<T, ?> col, Object[] pair) {
-        return addNode(new Cond(col, Op.NOT_BETWEEN, pair));
+        return addNode(new SqlCond(col, Op.NOT_BETWEEN, pair));
     }
 
     public SUD notBetween(ColumnGetter<T, ?> col, Object[] pair, boolean if0) {
@@ -268,7 +268,7 @@ public abstract class Where<T, SUD extends Where<T, SUD>> extends Crud<T, SUD> {
     }
 
     public SUD notBetween(ColumnGetter<T, ?> col, Object start, Object end) {
-        return addNode(new Cond(col, Op.NOT_BETWEEN, new Object[]{start, end}));
+        return addNode(new SqlCond(col, Op.NOT_BETWEEN, new Object[]{start, end}));
     }
 
     public SUD notBetween(ColumnGetter<T, ?> col, Object a, Object b, boolean if0) {

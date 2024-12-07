@@ -24,8 +24,8 @@ import java.util.Map;
 @MapperScan("cn.com.idmy.ts.server.dao")
 public class Application {
     public static void main(String[] args) {
-        OrmConfig.register(new JsonTypeHandler<>(new TypeReference<Map<Integer, Long>>() {
-        }), App.class, App::json2);
+        OrmConfig.register(App.class, App::json2, new JsonTypeHandler<>(new TypeReference<Map<Integer, Long>>() {
+        }));
         OrmConfig.register(new QueryInterceptor());
         OrmConfig.register(new AuditInterceptor());
         SpringApplication.run(Application.class, args);

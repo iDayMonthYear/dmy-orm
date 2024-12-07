@@ -1,6 +1,7 @@
 package cn.com.idmy.ts.server.config;
 
 import cn.com.idmy.orm.core.CrudInterceptor;
+import cn.com.idmy.orm.core.CrudType;
 import cn.com.idmy.ts.server.model.entity.App;
 
 import java.time.LocalDateTime;

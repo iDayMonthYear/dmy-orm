@@ -49,8 +49,8 @@ public class OrmConfig {
         return nameStrategy(name, columnNameStrategy);
     }
 
-    public static <T, R> void register(TypeHandler<?> handler, Class<T> entityClass, ColumnGetter<T, R> col) {
-        Tables.bindTypeHandler(handler, entityClass, col);
+    public static <T, R> void register(Class<T> entityClass, ColumnGetter<T, R> col, TypeHandler<?> handler) {
+        Tables.bindTypeHandler(entityClass, col, handler);
     }
 
     public static void register(CrudInterceptor interceptor) {
