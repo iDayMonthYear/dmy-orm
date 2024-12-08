@@ -1,7 +1,7 @@
 package cn.com.idmy.orm.util;
 
 import cn.com.idmy.orm.OrmException;
-import cn.com.idmy.orm.core.ColumnGetter;
+import cn.com.idmy.orm.core.FieldGetter;
 import lombok.NoArgsConstructor;
 import org.apache.ibatis.util.MapUtil;
 
@@ -14,8 +14,9 @@ import java.util.concurrent.ConcurrentHashMap;
 @NoArgsConstructor(access = lombok.AccessLevel.PRIVATE)
 public class LambdaUtil {
     private static final Map<Class<?>, String> fieldNameMap = new ConcurrentHashMap<>();
+    private static final Map<Class<?>, Class<?>> implClassMap = new ConcurrentHashMap<>();
 
-    public static <IN, OUT> String getFieldName(ColumnGetter<IN, OUT> getter) {
+    public static <IN, OUT> String getFieldName(FieldGetter<IN, OUT> getter) {
         return MapUtil.computeIfAbsent(fieldNameMap, getter.getClass(), $ -> {
             var lambda = getSerializedLambda(getter);
             if (lambda.getCapturedArgCount() == 1) {
@@ -25,7 +26,7 @@ public class LambdaUtil {
                 } catch (Exception ignored) {
                 }
             }
-            return methodToFieldName(lambda.getImplMethodName());
+            return methodToField(lambda.getImplMethodName());
         });
     }
 
@@ -39,16 +40,33 @@ public class LambdaUtil {
         }
     }
 
-    public static String methodToFieldName(String name) {
-        if (name.startsWith("is")) {
-            name = name.substring(2);
-        } else if (name.startsWith("get") || name.startsWith("set")) {
-            name = name.substring(3);
+    public static String methodToField(String method) {
+        if (method.startsWith("is")) {
+            method = method.substring(2);
+        } else if (method.startsWith("get") || method.startsWith("set")) {
+            method = method.substring(3);
         }
-        if (name.isEmpty()) {
-            return name;
+        if (method.isEmpty()) {
+            return method;
         } else {
-            return name.substring(0, 1).toLowerCase(Locale.ENGLISH).concat(name.substring(1));
+            return method.substring(0, 1).toLowerCase(Locale.ENGLISH).concat(method.substring(1));
         }
+    }
+
+    public static <IN, OUT> Class<?> getImplClass(FieldGetter<IN, OUT> getter) {
+        return MapUtil.computeIfAbsent(implClassMap, getter.getClass(), $ -> getImplClass(getSerializedLambda(getter), getter.getClass().getClassLoader()));
+    }
+
+    public static Class<?> getImplClass(SerializedLambda lambda, ClassLoader classLoader) {
+        try {
+            return Class.forName(getImplClassName(lambda).replace("/", "."), true, classLoader);
+        } catch (ClassNotFoundException e) {
+            throw new OrmException(e);
+        }
+    }
+
+    public static String getImplClassName(SerializedLambda lambda) {
+        String type = lambda.getInstantiatedMethodType();
+        return type.substring(2, type.indexOf(";"));
     }
 }

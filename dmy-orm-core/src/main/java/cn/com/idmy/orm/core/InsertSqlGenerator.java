@@ -73,7 +73,7 @@ public class InsertSqlGenerator extends SqlGenerator {
             for (int i = 0; i < colSize; i++) {
                 var col = cols[i];
                 var val = FieldUtil.getFieldValue(entity, col.field());
-                params.add(val == null ? null : getTypeHandlerValue(col, val));
+                params.add(getTypeHandlerValue(col, val));
                 sql.append(SqlConsts.PLACEHOLDER).append(SqlConsts.DELIMITER);
             }
             sql.setLength(sql.length() - SqlConsts.DELIMITER.length()); // 删除最后一个分隔符

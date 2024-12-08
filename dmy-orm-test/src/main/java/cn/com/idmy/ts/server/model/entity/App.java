@@ -1,6 +1,7 @@
 package cn.com.idmy.ts.server.model.entity;
 
 import cn.com.idmy.base.annotation.Table;
+import cn.com.idmy.base.annotation.Table.Column;
 import cn.com.idmy.base.annotation.Table.Id;
 import com.alibaba.fastjson2.JSONObject;
 import lombok.AllArgsConstructor;
@@ -21,6 +22,7 @@ import java.util.Map;
 public class App  {
     @Id
     protected Long id;
+    @Column("t_key")
     protected String key;
     protected String name;
     protected JSONObject json;

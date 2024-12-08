@@ -19,13 +19,6 @@ public class AuditInterceptor implements CrudInterceptor {
     }
 
     @Override
-    public void beforeUpdate(Object entity) {
-        if (entity instanceof App app) {
-            app.updatedAt(LocalDateTime.now());
-        }
-    }
-
-    @Override
     public Set<CrudType> getInterceptTypes() {
         return EnumSet.of(CrudType.INSERT, CrudType.UPDATE);
     }

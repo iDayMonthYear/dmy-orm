@@ -1,6 +1,5 @@
 package cn.com.idmy.orm.core;
 
-import cn.com.idmy.orm.util.LambdaUtil;
 import cn.com.idmy.orm.util.SqlUtil;
 import jakarta.annotation.Nullable;
 import lombok.Data;
@@ -40,13 +39,6 @@ public class SqlNode {
         final Op op;
         final Object expr;
 
-        public SqlCond(ColumnGetter<?, ?> column, Op op, Object expr) {
-            super(SqlNodeType.COND);
-            this.column = LambdaUtil.getFieldName(column);
-            this.op = op;
-            this.expr = expr;
-        }
-
         public SqlCond(String column, Op op, Object expr) {
             super(SqlNodeType.COND);
             this.column = column;
@@ -72,10 +64,6 @@ public class SqlNode {
             this.column = column;
             this.expr = expr;
         }
-
-        public SqlSet(ColumnGetter<?, ?> column, Object expr) {
-            this(LambdaUtil.getFieldName(column), expr);
-        }
     }
 
     @Getter
@@ -86,10 +74,6 @@ public class SqlNode {
         public SqlGroupBy(String column) {
             super(SqlNodeType.GROUP_BY);
             this.column = column;
-        }
-
-        public SqlGroupBy(ColumnGetter<?, ?> column) {
-            this(LambdaUtil.getFieldName(column));
         }
     }
 
@@ -103,10 +87,6 @@ public class SqlNode {
             super(SqlNodeType.ORDER_BY);
             this.column = SqlUtil.checkColumn(column);
             this.desc = desc;
-        }
-
-        public SqlOrderBy(ColumnGetter<?, ?> column, boolean desc) {
-            this(LambdaUtil.getFieldName(column), desc);
         }
     }
 
@@ -122,10 +102,6 @@ public class SqlNode {
             this.column = SqlUtil.checkColumn(column);
         }
 
-        public SqlSelectColumn(ColumnGetter<?, ?> column) {
-            this(LambdaUtil.getFieldName(column));
-        }
-
         public SqlSelectColumn(SqlFnExpr<?> expr) {
             super(SqlNodeType.SELECT_COLUMN);
             this.expr = expr;
@@ -138,9 +114,9 @@ public class SqlNode {
             }
         }
 
-        public SqlSelectColumn(SqlFnExpr<?> expr, ColumnGetter<?, ?> alias) {
+        public SqlSelectColumn(SqlFnExpr<?> expr, String alias) {
             this(expr);
-            column = LambdaUtil.getFieldName(alias);
+            column = alias;
         }
     }
 
@@ -154,10 +130,10 @@ public class SqlNode {
             super(SqlNodeType.DISTINCT);
         }
 
-        public SqlDistinct(@Nullable ColumnGetter<?, ?> column) {
+        public SqlDistinct(@Nullable String column) {
             this();
             if (column != null) {
-                this.column = LambdaUtil.getFieldName(column);
+                this.column = column;
             }
         }
     }

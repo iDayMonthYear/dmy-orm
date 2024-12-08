@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.List;
 
 
+
 @Slf4j
 @Accessors(fluent = true, chain = false)
 public class Updates<T> extends Where<T, Updates<T>> {
@@ -19,12 +20,12 @@ public class Updates<T> extends Where<T, Updates<T>> {
         return new Updates<>(dao.entityClass());
     }
 
-    public Updates<T> set(ColumnGetter<T, ?> col, Object val) {
-        return addNode(new SqlSet(col, val));
+    public Updates<T> set(FieldGetter<T, ?> field, Object val) {
+        return addNode(new SqlSet(Tables.getColumnName(entityClass, field), val));
     }
 
-    public Updates<T> set(ColumnGetter<T, ?> col, SqlOpExpr expr) {
-        return addNode(new SqlSet(col, expr));
+    public Updates<T> set(FieldGetter<T, ?> field, SqlOpExpr expr) {
+        return addNode(new SqlSet(Tables.getColumnName(entityClass, field), expr));
     }
 
     @Override

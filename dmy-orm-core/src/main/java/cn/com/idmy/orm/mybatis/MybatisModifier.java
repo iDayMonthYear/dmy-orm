@@ -2,7 +2,7 @@ package cn.com.idmy.orm.mybatis;
 
 import cn.com.idmy.orm.core.MybatisSqlProvider;
 import cn.com.idmy.orm.core.TableInfo;
-import cn.com.idmy.orm.core.TableInfo.TableIdInfo;
+import cn.com.idmy.orm.core.TableInfo.TableId;
 import org.apache.ibatis.executor.keygen.NoKeyGenerator;
 import org.apache.ibatis.executor.keygen.SelectKeyGenerator;
 import org.apache.ibatis.mapping.*;
@@ -14,7 +14,7 @@ import java.util.Collections;
 import java.util.List;
 
 class MybatisModifier {
-    static SelectKeyGenerator getSelectKeyGenerator(MappedStatement ms, TableIdInfo id) {
+    static SelectKeyGenerator getSelectKeyGenerator(MappedStatement ms, TableId id) {
         var sequence = id.value();
         var selectId = ms.getId() + SelectKeyGenerator.SELECT_KEY_SUFFIX;
         var config = ms.getConfiguration();

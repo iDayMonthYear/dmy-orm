@@ -13,49 +13,49 @@ public class SqlFn<T> {
     @Nullable
     private final Object value;
 
-    public SqlFn(SqlFnName name, ColumnGetter<T, ?> column, Object value) {
+    public SqlFn(SqlFnName name, FieldGetter<T, ?> field, Object value) {
         this.name = name;
-        this.column = LambdaUtil.getFieldName(column);
+        this.column = Tables.getColumnName(LambdaUtil.getImplClass(field), field);
         this.value = value;
     }
 
-    public SqlFn(SqlFnName name, ColumnGetter<T, ?> column) {
-        this(name, column, null);
+    public SqlFn(SqlFnName name, FieldGetter<T, ?> field) {
+        this(name, field, null);
     }
 
     public static <T> SqlFn<T> count() {
         return new SqlFn<>(SqlFnName.COUNT, null);
     }
 
-    public static <T> SqlFn<T> count(ColumnGetter<T, ?> column) {
-        return new SqlFn<>(SqlFnName.COUNT, column);
+    public static <T> SqlFn<T> count(FieldGetter<T, ?> field) {
+        return new SqlFn<>(SqlFnName.COUNT, field);
     }
 
-    public static <T> SqlFn<T> sum(ColumnGetter<T, ?> column) {
-        return new SqlFn<>(SqlFnName.SUM, column);
+    public static <T> SqlFn<T> sum(FieldGetter<T, ?> field) {
+        return new SqlFn<>(SqlFnName.SUM, field);
     }
 
-    public static <T> SqlFn<T> max(ColumnGetter<T, ?> column) {
-        return new SqlFn<>(SqlFnName.MAX, column);
+    public static <T> SqlFn<T> max(FieldGetter<T, ?> field) {
+        return new SqlFn<>(SqlFnName.MAX, field);
     }
 
-    public static <T> SqlFn<T> min(ColumnGetter<T, ?> column) {
-        return new SqlFn<>(SqlFnName.MIN, column);
+    public static <T> SqlFn<T> min(FieldGetter<T, ?> field) {
+        return new SqlFn<>(SqlFnName.MIN, field);
     }
 
-    public static <T> SqlFn<T> avg(ColumnGetter<T, ?> column) {
-        return new SqlFn<>(SqlFnName.AVG, column);
+    public static <T> SqlFn<T> avg(FieldGetter<T, ?> field) {
+        return new SqlFn<>(SqlFnName.AVG, field);
     }
 
-    public static <T> SqlFn<T> abs(ColumnGetter<T, ?> column) {
-        return new SqlFn<>(SqlFnName.ABS, column);
+    public static <T> SqlFn<T> abs(FieldGetter<T, ?> field) {
+        return new SqlFn<>(SqlFnName.ABS, field);
     }
 
-    public static <T> SqlFn<T> length(ColumnGetter<T, ?> column) {
-        return new SqlFn<>(SqlFnName.LENGTH, column);
+    public static <T> SqlFn<T> length(FieldGetter<T, ?> field) {
+        return new SqlFn<>(SqlFnName.LENGTH, field);
     }
 
-    public static <T> SqlFn<T> ifNull(ColumnGetter<T, ?> column, Object value) {
-        return new SqlFn<>(SqlFnName.IF_NULL, column, value);
+    public static <T> SqlFn<T> ifNull(FieldGetter<T, ?> field, Object value) {
+        return new SqlFn<>(SqlFnName.IF_NULL, field, value);
     }
 }

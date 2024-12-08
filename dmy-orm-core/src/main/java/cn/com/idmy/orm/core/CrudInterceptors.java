@@ -10,6 +10,8 @@ public class CrudInterceptors {
     // 按操作类型分组存储拦截器
     private static final Map<CrudType, List<CrudInterceptor>> typeInterceptors = new EnumMap<>(CrudType.class);
 
+
+
     /**
      * 添加拦截器
      */
@@ -26,7 +28,7 @@ public class CrudInterceptors {
     static void interceptInsert(Object entity) {
         var interceptors = typeInterceptors.get(CrudType.INSERT);
         if (interceptors != null) {
-            Class<?> entityClass = entity.getClass();
+            var entityClass = entity.getClass();
             for (var interceptor : interceptors) {
                 if (interceptor.support(entityClass)) {
                     interceptor.beforeInsert(entity);
@@ -42,26 +44,11 @@ public class CrudInterceptors {
         if (!entities.isEmpty()) {
             var interceptors = typeInterceptors.get(CrudType.INSERT);
             if (interceptors != null) {
-                Class<?> entityClass = entities.iterator().next().getClass();
+                var entityClass = entities.iterator().next().getClass();
                 for (var interceptor : interceptors) {
                     if (interceptor.support(entityClass)) {
                         interceptor.beforeInsert(entities);
                     }
-                }
-            }
-        }
-    }
-
-    /**
-     * 更新前拦截 - 使用实体更新
-     */
-    static void interceptUpdate(Object entity) {
-        var interceptors = typeInterceptors.get(CrudType.UPDATE);
-        if (interceptors != null) {
-            Class<?> entityClass = entity.getClass();
-            for (var interceptor : interceptors) {
-                if (interceptor.support(entityClass)) {
-                    interceptor.beforeUpdate(entity);
                 }
             }
         }

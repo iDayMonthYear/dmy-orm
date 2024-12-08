@@ -3,8 +3,8 @@ package cn.com.idmy.orm.core;
 import cn.com.idmy.base.annotation.Table;
 import cn.com.idmy.orm.OrmConfig;
 import cn.com.idmy.orm.OrmException;
-import cn.com.idmy.orm.core.TableInfo.TableColumnInfo;
-import cn.com.idmy.orm.core.TableInfo.TableIdInfo;
+import cn.com.idmy.orm.core.TableInfo.TableColumn;
+import cn.com.idmy.orm.core.TableInfo.TableId;
 import cn.com.idmy.orm.util.LambdaUtil;
 import jakarta.annotation.Nullable;
 import lombok.NoArgsConstructor;
@@ -29,7 +29,7 @@ public class Tables {
     private static final Map<Field, TypeHandler<?>> typeHandlers = new ConcurrentHashMap<>();
     private static final OrmConfig config = OrmConfig.config();
 
-    public static <T, R> void bindTypeHandler(Class<T> entityClass, ColumnGetter<T, R> col, TypeHandler<?> handler) {
+    public static <T, R> void bindTypeHandler(Class<T> entityClass, FieldGetter<T, R> col, TypeHandler<?> handler) {
         String fieldName = LambdaUtil.getFieldName(col);
         try {
             Field field = entityClass.getDeclaredField(fieldName);
@@ -80,10 +80,10 @@ public class Tables {
             tableComment = "";
         }
 
-        TableIdInfo idInfo = null;
+        TableId idInfo = null;
         var declaredFields = entityClass.getDeclaredFields();
-        var columns = new ArrayList<TableColumnInfo>();
-        var columnMap = new HashMap<String, TableColumnInfo>();
+        var columns = new ArrayList<TableColumn>();
+        var columnMap = new HashMap<String, TableColumn>();
         for (var field : declaredFields) {
             if (field.isAnnotationPresent(Table.Id.class)) {
                 if (idInfo == null) {
@@ -94,7 +94,7 @@ public class Tables {
                     } else {
                         name = id.name();
                     }
-                    idInfo = new TableIdInfo(field, name, id.value(), id.type(), id.before(), id.comment());
+                    idInfo = new TableId(field, name, id.type(), id.value(), id.before(), id.comment());
                 } else {
                     throw new OrmException("实体类" + entityClass.getName() + "中存在多个主键");
                 }
@@ -117,7 +117,7 @@ public class Tables {
                 if (StrUtil.isBlank(name)) {
                     name = config.toColumnName(field.getName());
                 }
-                var ci = new TableColumnInfo(
+                var ci = new TableColumn(
                         field,
                         name,
                         large,
@@ -131,7 +131,7 @@ public class Tables {
         if (idInfo == null) {
             throw new OrmException("实体类" + entityClass.getName() + "中不存在主键");
         } else {
-            return new TableInfo(entityClass, tableName, idInfo, tableComment, columns.toArray(new TableColumnInfo[0]), columnMap);
+            return new TableInfo(entityClass, tableName, idInfo, tableComment, columns.toArray(new TableColumn[0]), columnMap);
         }
     }
 
@@ -139,7 +139,7 @@ public class Tables {
         return getTable(entityClass).name();
     }
 
-    public static TableIdInfo getId(Class<?> entityClass) {
+    public static TableId getId(Class<?> entityClass) {
         return getTable(entityClass).id();
     }
 
@@ -173,6 +173,16 @@ public class Tables {
             return null;
         } else {
             return ci.name();
+        }
+    }
+
+    public static <T> String getColumnName(Class<?> entityClass, FieldGetter<T, ?> field) {
+        String fieldName = LambdaUtil.getFieldName(field);
+        String columnName = getColumnName(entityClass, fieldName);
+        if (StrUtil.isBlank(columnName)) {
+            throw new OrmException("实体类" + entityClass.getName() + "中不存在字段" + fieldName);
+        } else {
+            return columnName;
         }
     }
 

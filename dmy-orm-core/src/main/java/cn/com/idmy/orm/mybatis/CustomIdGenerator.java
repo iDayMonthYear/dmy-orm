@@ -2,7 +2,7 @@ package cn.com.idmy.orm.mybatis;
 
 
 import cn.com.idmy.orm.core.TableInfo;
-import cn.com.idmy.orm.core.TableInfo.TableIdInfo;
+import cn.com.idmy.orm.core.TableInfo.TableId;
 import org.apache.ibatis.executor.Executor;
 import org.apache.ibatis.executor.keygen.KeyGenerator;
 import org.apache.ibatis.mapping.MappedStatement;
@@ -12,14 +12,14 @@ import java.sql.Statement;
 
 public class CustomIdGenerator implements KeyGenerator {
     protected final Configuration configuration;
-    protected final TableInfo tableInfo;
-    protected final TableIdInfo idInfo;
+    protected final TableInfo table;
+    protected final TableId id;
     protected IdGenerator idGenerator;
 
-    public CustomIdGenerator(Configuration cfg, TableInfo info) {
+    public CustomIdGenerator(Configuration cfg, TableInfo table) {
         this.configuration = cfg;
-        this.tableInfo = info;
-        this.idInfo = info.id();
+        this.table = table;
+        this.id = table.id();
     }
 
     @Override

@@ -22,12 +22,6 @@ public interface CrudInterceptor {
     }
 
     /**
-     * 更新前拦截 - 使用实体更新
-     */
-    default void beforeUpdate(Object entity) {
-    }
-
-    /**
      * 更新前拦截 - 使用条件更新
      */
     default void beforeUpdate(Class<?> entityClass, List<SqlNode> nodes) {

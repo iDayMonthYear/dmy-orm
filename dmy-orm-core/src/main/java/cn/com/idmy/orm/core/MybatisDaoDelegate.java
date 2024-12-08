@@ -1,10 +1,12 @@
 package cn.com.idmy.orm.core;
 
 import cn.com.idmy.base.model.Page;
+import cn.com.idmy.base.model.Pair;
 import cn.com.idmy.base.model.Param;
 import cn.com.idmy.orm.OrmException;
 import cn.com.idmy.orm.core.SqlNode.SqlCond;
-import cn.com.idmy.orm.core.TableInfo.TableColumnInfo;
+import cn.com.idmy.orm.core.SqlNode.SqlSet;
+import cn.com.idmy.orm.core.TableInfo.TableColumn;
 import cn.com.idmy.orm.mybatis.handler.TypeHandlerValue;
 import jakarta.annotation.Nullable;
 import lombok.NoArgsConstructor;
@@ -15,7 +17,6 @@ import org.dromara.hutool.core.collection.CollStreamUtil;
 import org.dromara.hutool.core.collection.CollUtil;
 import org.dromara.hutool.core.reflect.FieldUtil;
 
-import java.lang.reflect.Field;
 import java.util.*;
 
 import static cn.com.idmy.base.constant.DefaultConsts.CREATED_AT;
@@ -37,7 +38,7 @@ class MybatisDaoDelegate {
         }
     }
 
-    protected static Object warpTypeHandlerValue(TableColumnInfo columnInfo, Object value) {
+    protected static Object warpTypeHandlerValue(TableColumn columnInfo, Object value) {
         TypeHandler<?> typeHandler = columnInfo.typeHandler();
         if (typeHandler == null) {
             return value;
@@ -47,39 +48,27 @@ class MybatisDaoDelegate {
     }
 
     public static <T, ID> int update(MybatisDao<T, ID> dao, T entity, boolean ignoreNull) {
-        CrudInterceptors.interceptUpdate(entity);
-        
         var entityClass = entity.getClass();
         var id = Tables.getId(entityClass);
-        var idValue = FieldUtil.getFieldValue(entity, id.field());
+        var idField = id.field();
+        var idValue = FieldUtil.getFieldValue(entity, idField);
         if (idValue == null) {
             throw new OrmException("主键不能为空");
         }
-        var table = Tables.getTable(entityClass);
-        var columns = table.columns();
-        var sql = new StringBuilder(SqlConsts.UPDATE).append(SqlConsts.STRESS_MARK).append(Tables.getTableName(entityClass)).append(SqlConsts.STRESS_MARK).append(SqlConsts.SET);
-        var sqlParams = new ArrayList<>();
-        int idx = 0;
-        int size = columns.length - 1;
+        var updates = Updates.of(dao).addNode(new SqlCond(id.name(), Op.EQ, idValue));
+        var columns = Tables.getTable(entityClass).columns();
+        int size = columns.length;
         for (int i = 0; i < size; i++) {
-            var column = columns[i];
-            Field field = column.field();
-            if (field == id.field()) {
-                continue;
-            }
-            var value = FieldUtil.getFieldValue(entity, field);
-            if (!ignoreNull || value != null) {
-                idx++;
-                sql.append(SqlConsts.STRESS_MARK).append(column.name()).append(SqlConsts.STRESS_MARK).append(SqlConsts.EQUALS_PLACEHOLDER);
-                sqlParams.add(warpTypeHandlerValue(column, value));
-                if (i < idx - 1) {
-                    sql.append(SqlConsts.DELIMITER);
+            var field = columns[i].field();
+            if (field != idField) {
+                var value = FieldUtil.getFieldValue(entity, field);
+                if (!ignoreNull || value != null) {
+                    updates.addNode(new SqlSet(columns[i].name(), value));
                 }
             }
         }
-        sql.append(SqlConsts.WHERE).append(SqlConsts.STRESS_MARK).append(id.name()).append(SqlConsts.STRESS_MARK).append(SqlConsts.EQUALS_PLACEHOLDER);
-        sqlParams.add(idValue);
-        return dao.updateBySql(sql.toString(), sqlParams);
+        Pair<String, List<Object>> sql = updates.sql();
+        return dao.updateBySql(sql.left, sql.right);
     }
 
     public static <T, ID> int inserts(MybatisDao<T, ID> dao, Collection<T> entities, int size) {
@@ -108,7 +97,7 @@ class MybatisDaoDelegate {
     }
 
     @Nullable
-    public static <T, ID, R> R get(MybatisDao<T, ID> dao, ColumnGetter<T, R> col, ID id) {
+    public static <T, ID, R> R get(MybatisDao<T, ID> dao, FieldGetter<T, R> col, ID id) {
         var select = Selects.of(dao);
         select.select(col);
         select.sqlParamsSize(1);
@@ -118,7 +107,7 @@ class MybatisDaoDelegate {
     }
 
     @Nullable
-    public static <T, ID, R> R get(MybatisDao<T, ID> dao, ColumnGetter<T, R> col, Selects<T> select) {
+    public static <T, ID, R> R get(MybatisDao<T, ID> dao, FieldGetter<T, R> col, Selects<T> select) {
         MybatisSqlProvider.clearSelectColumns(select);
         select.limit = 1;
         T t = dao.get(select.select(col));
@@ -126,13 +115,13 @@ class MybatisDaoDelegate {
     }
 
     @Nullable
-    public static <T, ID> T get(MybatisDao<T, ID> dao, Selects<T> select, @NonNull ColumnGetter<T, ?>[] cols) {
+    public static <T, ID> T get(MybatisDao<T, ID> dao, Selects<T> select, @NonNull FieldGetter<T, ?>[] cols) {
         MybatisSqlProvider.clearSelectColumns(select);
         select.limit = 1;
         return dao.get(select.select(cols));
     }
 
-    public static <T, ID, R> List<R> find(MybatisDao<T, ID> dao, ColumnGetter<T, R> col, Selects<T> select) {
+    public static <T, ID, R> List<R> find(MybatisDao<T, ID> dao, FieldGetter<T, R> col, Selects<T> select) {
         MybatisSqlProvider.clearSelectColumns(select);
         var ts = dao.find(select.select(col));
         return CollStreamUtil.toList(ts, col::get);
@@ -149,7 +138,7 @@ class MybatisDaoDelegate {
         }
     }
 
-    public static <T, ID, R> List<R> find(MybatisDao<T, ID> dao, ColumnGetter<T, R> col, Collection<ID> ids) {
+    public static <T, ID, R> List<R> find(MybatisDao<T, ID> dao, FieldGetter<T, R> col, Collection<ID> ids) {
         if (ids.isEmpty()) {
             return Collections.emptyList();
         } else {
@@ -161,7 +150,7 @@ class MybatisDaoDelegate {
     }
 
     @Nullable
-    public static <T, ID, R extends Number> R sqlFn(MybatisDao<T, ID> dao, SqlFnName name, ColumnGetter<T, R> col, Selects<T> select) {
+    public static <T, ID, R extends Number> R sqlFn(MybatisDao<T, ID> dao, SqlFnName name, FieldGetter<T, R> col, Selects<T> select) {
         if (name == SqlFnName.IF_NULL) {
             throw new OrmException("不支持ifnull");
         } else {

@@ -91,18 +91,18 @@ public interface MybatisDao<T, ID> {
     }
 
     @Nullable
-    default <R> R get(@NonNull ColumnGetter<T, R> col, @NonNull ID id) {
+    default <R> R get(@NonNull FieldGetter<T, R> col, @NonNull ID id) {
         return MybatisDaoDelegate.get(this, col, id);
     }
 
     @Nullable
-    default <R> R get(@NonNull ColumnGetter<T, R> col, @NonNull Selects<T> select) {
+    default <R> R get(@NonNull FieldGetter<T, R> col, @NonNull Selects<T> select) {
         return MybatisDaoDelegate.get(this, col, select);
     }
 
     @SuppressWarnings({"unchecked"})
     @Nullable
-    default T get(@NonNull Selects<T> chain, @NonNull ColumnGetter<T, ?>... cols) {
+    default T get(@NonNull Selects<T> chain, @NonNull FieldGetter<T, ?>... cols) {
         return MybatisDaoDelegate.get(this, chain, cols);
     }
 
@@ -114,11 +114,11 @@ public interface MybatisDao<T, ID> {
         return MybatisDaoDelegate.find(this, ids);
     }
 
-    default <R> List<R> find(@NonNull ColumnGetter<T, R> col, @NonNull Collection<ID> ids) {
+    default <R> List<R> find(@NonNull FieldGetter<T, R> col, @NonNull Collection<ID> ids) {
         return MybatisDaoDelegate.find(this, col, ids);
     }
 
-    default <R> List<R> find(@NonNull ColumnGetter<T, R> col, @NonNull Selects<T> chain) {
+    default <R> List<R> find(@NonNull FieldGetter<T, R> col, @NonNull Selects<T> chain) {
         return MybatisDaoDelegate.find(this, col, chain);
     }
 
@@ -139,32 +139,32 @@ public interface MybatisDao<T, ID> {
     }
 
     @Nullable
-    default <R extends Number> R sqlFn(@NonNull SqlFnName name, @NonNull ColumnGetter<T, R> col, @NonNull Selects<T> select) {
+    default <R extends Number> R sqlFn(@NonNull SqlFnName name, @NonNull FieldGetter<T, R> col, @NonNull Selects<T> select) {
         return MybatisDaoDelegate.sqlFn(this, name, col, select);
     }
 
     @Nullable
-    default <R extends Number> R sum(@NonNull ColumnGetter<T, R> col, @NonNull Selects<T> select) {
+    default <R extends Number> R sum(@NonNull FieldGetter<T, R> col, @NonNull Selects<T> select) {
         return sqlFn(SqlFnName.SUM, col, select);
     }
 
     @Nullable
-    default <R extends Number> R avg(@NonNull ColumnGetter<T, R> col, @NonNull Selects<T> select) {
+    default <R extends Number> R avg(@NonNull FieldGetter<T, R> col, @NonNull Selects<T> select) {
         return sqlFn(SqlFnName.AVG, col, select);
     }
 
     @Nullable
-    default <R extends Number> R min(@NonNull ColumnGetter<T, R> col, @NonNull Selects<T> select) {
+    default <R extends Number> R min(@NonNull FieldGetter<T, R> col, @NonNull Selects<T> select) {
         return sqlFn(SqlFnName.MIN, col, select);
     }
 
     @Nullable
-    default <R extends Number> R max(@NonNull ColumnGetter<T, R> col, @NonNull Selects<T> select) {
+    default <R extends Number> R max(@NonNull FieldGetter<T, R> col, @NonNull Selects<T> select) {
         return sqlFn(SqlFnName.MAX, col, select);
     }
 
     @Nullable
-    default <R extends Number> R abs(@NonNull ColumnGetter<T, R> col, @NonNull Selects<T> select) {
+    default <R extends Number> R abs(@NonNull FieldGetter<T, R> col, @NonNull Selects<T> select) {
         return sqlFn(SqlFnName.ABS, col, select);
     }
 
@@ -177,7 +177,7 @@ public interface MybatisDao<T, ID> {
         return MybatisDaoDelegate.map(this, ids);
     }
 
-    default <R> Map<R, T> map(@NonNull ColumnGetter<T, R> col, @NonNull Selects<T> chain) {
+    default <R> Map<R, T> map(@NonNull FieldGetter<T, R> col, @NonNull Selects<T> chain) {
         return CollStreamUtil.toIdentityMap(find(chain), col::get);
     }
 }

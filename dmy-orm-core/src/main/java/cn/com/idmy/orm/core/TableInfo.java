@@ -10,21 +10,21 @@ import java.util.Map;
 public record TableInfo(
         Class<?> entityClass,
         String name,
-        TableIdInfo id,
+        TableId id,
         String comment,
-        TableColumnInfo[] columns,
-        Map<String, TableColumnInfo> columnMap) {
+        TableColumn[] columns,
+        Map<String, TableColumn> columnMap) {
 
-    public record TableIdInfo(
+    public record TableId(
             Field field,
             String name,
-            String value,
             IdType idType,
+            String value,
             boolean before,
             String comment) {
     }
 
-    public record TableColumnInfo(
+    public record TableColumn(
             Field field,
             String name,
             boolean large,

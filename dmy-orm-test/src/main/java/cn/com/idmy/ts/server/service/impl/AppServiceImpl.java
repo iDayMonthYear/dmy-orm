@@ -92,6 +92,7 @@ public class AppServiceImpl implements AppService {
         apps.add(App.builder().key("2").build());
 
         dao.insert(apps.getFirst());
+        dao.update(App.builder().id(3344L).key(System.currentTimeMillis() + "").build());
         return null;
     }
 
