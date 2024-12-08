@@ -1,11 +1,13 @@
 package cn.com.idmy.orm;
 
+import cn.com.idmy.base.annotation.Table.Id.IdType;
 import cn.com.idmy.orm.core.CrudInterceptor;
 import cn.com.idmy.orm.core.CrudInterceptors;
 import cn.com.idmy.orm.core.FieldGetter;
 import cn.com.idmy.orm.core.Tables;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import lombok.experimental.Accessors;
 import org.apache.ibatis.type.TypeHandler;
 import org.dromara.hutool.core.text.StrUtil;
@@ -28,6 +30,8 @@ public class OrmConfig {
         private final String name;
     }
 
+    @Setter
+    private IdType defaultIdType = IdType.AUTO;
     private NameStrategy tableNameStrategy = NameStrategy.DEFAULT;
     private NameStrategy columnNameStrategy = NameStrategy.DEFAULT;
 

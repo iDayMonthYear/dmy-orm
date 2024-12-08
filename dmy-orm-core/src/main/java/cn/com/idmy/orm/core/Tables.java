@@ -1,6 +1,7 @@
 package cn.com.idmy.orm.core;
 
 import cn.com.idmy.base.annotation.Table;
+import cn.com.idmy.base.annotation.Table.Id.IdType;
 import cn.com.idmy.orm.OrmConfig;
 import cn.com.idmy.orm.OrmException;
 import cn.com.idmy.orm.core.TableInfo.TableColumn;
@@ -94,7 +95,11 @@ public class Tables {
                     } else {
                         name = id.name();
                     }
-                    tableId = new TableId(field, name, id.type(), id.value(), id.before(), id.comment());
+                    IdType idType = id.type();
+                    if (idType == IdType.DEFAULT) {
+                        idType = config.defaultIdType();
+                    }
+                    tableId = new TableId(field, name, idType, id.value(), id.before(), id.comment());
                 } else {
                     throw new OrmException("实体类" + entityClass.getName() + "中存在多个主键");
                 }
