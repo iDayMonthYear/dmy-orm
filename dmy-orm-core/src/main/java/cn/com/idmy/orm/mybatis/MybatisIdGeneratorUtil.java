@@ -13,20 +13,20 @@ import org.dromara.hutool.core.text.StrUtil;
 @NoArgsConstructor(access = lombok.AccessLevel.PRIVATE)
 public class MybatisIdGeneratorUtil {
     public static KeyGenerator create(MappedStatement ms, TableInfo table) {
-        var id = table.id();
-        var type = id.idType();
-        if (type == null || type == IdType.NONE) {
+        var tableId = table.id();
+        var idType = tableId.idType();
+        if (idType == null || idType == IdType.NONE) {
             return NoKeyGenerator.INSTANCE;
-        } else if (type == IdType.AUTO) {
+        } else if (idType == IdType.AUTO) {
             return Jdbc3KeyGenerator.INSTANCE;
-        } else if (type == IdType.GENERATOR) {
+        } else if (idType == IdType.GENERATOR) {
             return new CustomIdGenerator(ms.getConfiguration(), table);
         } else {
-            var sequence = id.value();
+            var sequence = tableId.value();
             if (StrUtil.isBlank(sequence)) {
-                throw new OrmException(StrUtil.format("Please config sequence by @Table.Id(value=\"...\") for field: {} in class: {}", id.name(), table.entityClass().getSimpleName()));
+                throw new OrmException(StrUtil.format("Please config sequence by @Table.Id(value=\"...\") for field: {} in class: {}", tableId.name(), table.entityClass().getSimpleName()));
             } else {
-                return MybatisModifier.getSelectKeyGenerator(ms, id);
+                return MybatisModifier.getSelectKeyGenerator(ms, tableId);
             }
         }
     }

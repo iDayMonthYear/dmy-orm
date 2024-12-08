@@ -30,9 +30,9 @@ public class Tables {
     private static final OrmConfig config = OrmConfig.config();
 
     public static <T, R> void bindTypeHandler(Class<T> entityClass, FieldGetter<T, R> col, TypeHandler<?> handler) {
-        String fieldName = LambdaUtil.getFieldName(col);
+        var fieldName = LambdaUtil.getFieldName(col);
         try {
-            Field field = entityClass.getDeclaredField(fieldName);
+            var field = entityClass.getDeclaredField(fieldName);
             field.setAccessible(true);
             typeHandlers.put(field, handler);
         } catch (NoSuchFieldException e) {
@@ -153,8 +153,8 @@ public class Tables {
 
     @SuppressWarnings("unchecked")
     public static <T> T getIdValue(Object entity) {
-        TableInfo tableInfo = getTable(entity.getClass());
-        return (T) FieldUtil.getFieldValue(entity, tableInfo.id().name());
+        var table = getTable(entity.getClass());
+        return (T) FieldUtil.getFieldValue(entity, table.id().name());
     }
 
     public static Field getIdField(Class<?> entityClass) {
@@ -168,11 +168,11 @@ public class Tables {
         if (CollUtil.isEmpty(columnMap)) {
             return null;
         }
-        var ci = columnMap.get(fieldName);
-        if (ci == null) {
+        var column = columnMap.get(fieldName);
+        if (column == null) {
             return null;
         } else {
-            return ci.name();
+            return column.name();
         }
     }
 

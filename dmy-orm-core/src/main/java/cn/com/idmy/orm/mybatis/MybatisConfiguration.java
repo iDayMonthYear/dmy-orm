@@ -34,9 +34,9 @@ class MybatisConfiguration extends Configuration {
 
     @Override
     public void addMappedStatement(MappedStatement ms) {
-        var ti = Tables.getTable(ms);
-        ms = MybatisModifier.replaceIdGenerator(ms, ti);
-        ms = MybatisModifier.addResultMap(ms, ti);
+        var table = Tables.getTable(ms);
+        ms = MybatisModifier.replaceIdGenerator(ms, table);
+        ms = MybatisModifier.addResultMap(ms, table);
         super.addMappedStatement(ms);
     }
 }
