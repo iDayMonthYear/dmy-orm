@@ -19,7 +19,7 @@ public class AuditInterceptor implements CrudInterceptor {
     }
 
     @Override
-    public Set<CrudType> getInterceptTypes() {
+    public Set<CrudType> interceptTypes() {
         return EnumSet.of(CrudType.INSERT, CrudType.UPDATE);
     }
 }

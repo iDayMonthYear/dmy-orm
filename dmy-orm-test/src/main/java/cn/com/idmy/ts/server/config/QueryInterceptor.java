@@ -18,7 +18,7 @@ public class QueryInterceptor implements CrudInterceptor {
     }
 
     @Override
-    public Set<CrudType> getInterceptTypes() {
+    public Set<CrudType> interceptTypes() {
         return EnumSet.of(CrudType.SELECT);
     }
 }

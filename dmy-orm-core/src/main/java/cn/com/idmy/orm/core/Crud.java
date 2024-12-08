@@ -6,7 +6,6 @@ import cn.com.idmy.orm.core.SqlNode.SqlNodeType;
 import cn.com.idmy.orm.core.SqlNode.SqlOr;
 import lombok.AccessLevel;
 import lombok.Getter;
-import lombok.Setter;
 import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
 
@@ -26,8 +25,6 @@ abstract class Crud<T, CRUD extends Crud<T, CRUD>> {
     @Getter(value = AccessLevel.PROTECTED)
     protected Class<T> entityClass;
 
-    @Setter(value = AccessLevel.PROTECTED)
-    @Getter(value = AccessLevel.PROTECTED)
     protected int sqlParamsSize;
 
     protected Crud(Class<T> entityClass) {

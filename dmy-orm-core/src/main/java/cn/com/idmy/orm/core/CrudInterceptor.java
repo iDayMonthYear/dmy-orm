@@ -49,5 +49,5 @@ public interface CrudInterceptor {
     /**
      * 获取拦截器关心的操作类型
      */
-    Set<CrudType> getInterceptTypes();
+    Set<CrudType> interceptTypes();
 }

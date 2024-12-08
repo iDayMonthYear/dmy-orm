@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
 
+import static cn.com.idmy.orm.core.Tables.getColumnName;
 
 
 @Slf4j
@@ -21,11 +22,11 @@ public class Updates<T> extends Where<T, Updates<T>> {
     }
 
     public Updates<T> set(FieldGetter<T, ?> field, Object val) {
-        return addNode(new SqlSet(Tables.getColumnName(entityClass, field), val));
+        return addNode(new SqlSet(getColumnName(entityClass, field), val));
     }
 
     public Updates<T> set(FieldGetter<T, ?> field, SqlOpExpr expr) {
-        return addNode(new SqlSet(Tables.getColumnName(entityClass, field), expr));
+        return addNode(new SqlSet(getColumnName(entityClass, field), expr));
     }
 
     @Override

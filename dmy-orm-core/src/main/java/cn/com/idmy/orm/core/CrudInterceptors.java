@@ -17,7 +17,7 @@ public class CrudInterceptors {
      */
     public static void addInterceptor(CrudInterceptor interceptor) {
         // 根据拦截器关心的操作类型分组存储
-        for (var type : interceptor.getInterceptTypes()) {
+        for (var type : interceptor.interceptTypes()) {
             typeInterceptors.computeIfAbsent(type, k -> new ArrayList<>()).add(interceptor);
         }
     }
