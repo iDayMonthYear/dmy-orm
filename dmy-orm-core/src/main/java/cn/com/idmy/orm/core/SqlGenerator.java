@@ -71,8 +71,7 @@ public abstract class SqlGenerator {
     protected static void genPlaceholder(Object val, StringBuilder placeholder) {
         if (val instanceof Collection<?> ls) {
             genPlaceholder(placeholder, ls.size());
-        } else if (val.getClass().isArray()) {
-            var arr = (Object[]) val;
+        } else if (val instanceof Object[] arr) {
             genPlaceholder(placeholder, arr.length);
         } else {
             placeholder.append(PLACEHOLDER);

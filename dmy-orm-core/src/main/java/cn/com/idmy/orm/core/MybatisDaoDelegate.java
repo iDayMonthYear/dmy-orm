@@ -1,17 +1,13 @@
 package cn.com.idmy.orm.core;
 
 import cn.com.idmy.base.model.Page;
-import cn.com.idmy.base.model.Pair;
 import cn.com.idmy.base.model.Param;
 import cn.com.idmy.orm.OrmException;
 import cn.com.idmy.orm.core.SqlNode.SqlCond;
 import cn.com.idmy.orm.core.SqlNode.SqlSet;
-import cn.com.idmy.orm.core.TableInfo.TableColumn;
-import cn.com.idmy.orm.mybatis.handler.TypeHandlerValue;
 import jakarta.annotation.Nullable;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
-import org.apache.ibatis.type.TypeHandler;
 import org.dromara.hutool.core.array.ArrayUtil;
 import org.dromara.hutool.core.collection.CollStreamUtil;
 import org.dromara.hutool.core.collection.CollUtil;
@@ -26,11 +22,12 @@ import static cn.com.idmy.orm.core.MybatisDao.DEFAULT_BATCH_SIZE;
 @NoArgsConstructor(access = lombok.AccessLevel.PRIVATE)
 class MybatisDaoDelegate {
     public static <T, ID> int insertOrUpdate(MybatisDao<T, ID> dao, T entity, boolean ignoreNull) {
-        ID id = (ID) FieldUtil.getFieldValue(entity, Tables.getIdName(dao));
-        if (id == null) {
+        var idField = Tables.getIdField(entity.getClass());
+        var idVal = FieldUtil.getFieldValue(entity, idField);
+        if (idVal == null) {
             return dao.insert(entity);
         } else {
-            if (dao.exists(id)) {
+            if (dao.exists((ID) idVal)) {
                 return update(dao, entity, ignoreNull);
             } else {
                 return dao.insert(entity);
@@ -38,36 +35,28 @@ class MybatisDaoDelegate {
         }
     }
 
-    protected static Object warpTypeHandlerValue(TableColumn columnInfo, Object value) {
-        TypeHandler<?> typeHandler = columnInfo.typeHandler();
-        if (typeHandler == null) {
-            return value;
-        } else {
-            return new TypeHandlerValue(typeHandler, value);
-        }
-    }
-
     public static <T, ID> int update(MybatisDao<T, ID> dao, T entity, boolean ignoreNull) {
-        var entityClass = entity.getClass();
-        var id = Tables.getId(entityClass);
+        var table = Tables.getTable(entity.getClass());
+        var id = table.id();
         var idField = id.field();
         var idValue = FieldUtil.getFieldValue(entity, idField);
         if (idValue == null) {
             throw new OrmException("主键不能为空");
         }
         var updates = Updates.of(dao).addNode(new SqlCond(id.name(), Op.EQ, idValue));
-        var columns = Tables.getTable(entityClass).columns();
+        var columns = table.columns();
         int size = columns.length;
         for (int i = 0; i < size; i++) {
-            var field = columns[i].field();
+            var column = columns[i];
+            var field = column.field();
             if (field != idField) {
                 var value = FieldUtil.getFieldValue(entity, field);
                 if (!ignoreNull || value != null) {
-                    updates.addNode(new SqlSet(columns[i].name(), value));
+                    updates.addNode(new SqlSet(column.name(), value));
                 }
             }
         }
-        Pair<String, List<Object>> sql = updates.sql();
+        var sql = updates.sql();
         return dao.updateBySql(sql.left, sql.right);
     }
 

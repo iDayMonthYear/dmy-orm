@@ -74,10 +74,9 @@ public class Selects<T> extends Where<T, Selects<T>> {
     }
 
     @SafeVarargs
-    public final Selects<T> groupBy(FieldGetter<T, ?> field, FieldGetter<T, ?>... fields) {
-        addNode(new SqlGroupBy(getColumnName(entityClass, field)));
-        for (FieldGetter<T, ?> f : fields) {
-            addNode(new SqlGroupBy(getColumnName(entityClass, f)));
+    public final Selects<T> groupBy(FieldGetter<T, ?>... fields) {
+        for (FieldGetter<T, ?> field : fields) {
+            addNode(new SqlGroupBy(getColumnName(entityClass, field)));
         }
         return this;
     }

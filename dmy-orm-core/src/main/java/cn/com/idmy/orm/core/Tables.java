@@ -80,13 +80,13 @@ public class Tables {
             tableComment = "";
         }
 
-        TableId idInfo = null;
-        var declaredFields = entityClass.getDeclaredFields();
+        TableId tableId = null;
+        var fields = entityClass.getDeclaredFields();
         var columns = new ArrayList<TableColumn>();
         var columnMap = new HashMap<String, TableColumn>();
-        for (var field : declaredFields) {
+        for (var field : fields) {
             if (field.isAnnotationPresent(Table.Id.class)) {
-                if (idInfo == null) {
+                if (tableId == null) {
                     var id = field.getAnnotation(Table.Id.class);
                     String name;
                     if (StrUtil.isBlank(id.name())) {
@@ -94,7 +94,7 @@ public class Tables {
                     } else {
                         name = id.name();
                     }
-                    idInfo = new TableId(field, name, id.type(), id.value(), id.before(), id.comment());
+                    tableId = new TableId(field, name, id.type(), id.value(), id.before(), id.comment());
                 } else {
                     throw new OrmException("实体类" + entityClass.getName() + "中存在多个主键");
                 }
@@ -117,21 +117,21 @@ public class Tables {
                 if (StrUtil.isBlank(name)) {
                     name = config.toColumnName(field.getName());
                 }
-                var ci = new TableColumn(
+                var tableColumn = new TableColumn(
                         field,
                         name,
                         large,
                         comment,
                         typeHandlers.get(field)
                 );
-                columns.add(ci);
-                columnMap.put(name, ci);
+                columns.add(tableColumn);
+                columnMap.put(name, tableColumn);
             }
         }
-        if (idInfo == null) {
+        if (tableId == null) {
             throw new OrmException("实体类" + entityClass.getName() + "中不存在主键");
         } else {
-            return new TableInfo(entityClass, tableName, idInfo, tableComment, columns.toArray(new TableColumn[0]), columnMap);
+            return new TableInfo(entityClass, tableName, tableId, tableComment, columns.toArray(new TableColumn[0]), columnMap);
         }
     }
 
@@ -163,12 +163,12 @@ public class Tables {
 
     @Nullable
     public static String getColumnName(Class<?> entityClass, String fieldName) {
-        var ti = getTable(entityClass);
-        var map = ti.columnMap();
-        if (CollUtil.isEmpty(map)) {
+        var table = getTable(entityClass);
+        var columnMap = table.columnMap();
+        if (CollUtil.isEmpty(columnMap)) {
             return null;
         }
-        var ci = map.get(fieldName);
+        var ci = columnMap.get(fieldName);
         if (ci == null) {
             return null;
         } else {
@@ -177,8 +177,8 @@ public class Tables {
     }
 
     public static <T> String getColumnName(Class<?> entityClass, FieldGetter<T, ?> field) {
-        String fieldName = LambdaUtil.getFieldName(field);
-        String columnName = getColumnName(entityClass, fieldName);
+        var fieldName = LambdaUtil.getFieldName(field);
+        var columnName = getColumnName(entityClass, fieldName);
         if (StrUtil.isBlank(columnName)) {
             throw new OrmException("实体类" + entityClass.getName() + "中不存在字段" + fieldName);
         } else {
