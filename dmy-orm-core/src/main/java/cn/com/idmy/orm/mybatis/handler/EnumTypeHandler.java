@@ -15,7 +15,7 @@ import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class EnumTypeHandler<E extends Enum<E>> extends BaseTypeHandler<E> {
-    private static final Map<Class<?>, Field> enumValueFieldCache = new ConcurrentHashMap<>();
+    private static final Map<Class<?>, Field> enumValueFieldCache = new ConcurrentHashMap<>(1);
     private final Class<E> type;
     private final Field valueField;
 

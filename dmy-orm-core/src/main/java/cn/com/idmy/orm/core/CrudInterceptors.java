@@ -10,8 +10,6 @@ public class CrudInterceptors {
     // 按操作类型分组存储拦截器
     private static final Map<CrudType, List<CrudInterceptor>> typeInterceptors = new EnumMap<>(CrudType.class);
 
-
-
     /**
      * 添加拦截器
      */

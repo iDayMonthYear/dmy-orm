@@ -25,12 +25,11 @@ import static cn.com.idmy.orm.core.Tables.getIdName;
 @NoArgsConstructor(access = lombok.AccessLevel.PRIVATE)
 class MybatisDaoDelegate {
     public static <T, ID> int insertOrUpdate(MybatisDao<T, ID> dao, T entity, boolean ignoreNull) {
-        var idField = Tables.getIdField(entity.getClass());
-        var idVal = FieldUtil.getFieldValue(entity, idField);
+        ID idVal = Tables.getIdValue(entity);
         if (idVal == null) {
             return dao.insert(entity);
         } else {
-            if (dao.exists((ID) idVal)) {
+            if (dao.exists(idVal)) {
                 return update(dao, entity, ignoreNull);
             } else {
                 return dao.insert(entity);

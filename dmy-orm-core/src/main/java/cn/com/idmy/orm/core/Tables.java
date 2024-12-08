@@ -154,7 +154,7 @@ public class Tables {
     @SuppressWarnings("unchecked")
     public static <T> T getIdValue(Object entity) {
         var table = getTable(entity.getClass());
-        return (T) FieldUtil.getFieldValue(entity, table.id().name());
+        return (T) FieldUtil.getFieldValue(entity, table.id().field());
     }
 
     public static Field getIdField(Class<?> entityClass) {

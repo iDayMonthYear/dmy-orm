@@ -5,8 +5,6 @@ import cn.com.idmy.orm.OrmException;
 import cn.com.idmy.orm.core.SqlNode.SqlCond;
 import cn.com.idmy.orm.core.SqlNode.SqlNodeType;
 import cn.com.idmy.orm.core.SqlNode.SqlOr;
-import cn.com.idmy.orm.core.TableInfo.TableColumn;
-import cn.com.idmy.orm.mybatis.handler.TypeHandlerValue;
 import jakarta.annotation.Nullable;
 import lombok.Getter;
 import lombok.experimental.Accessors;
@@ -137,15 +135,6 @@ public abstract class SqlGenerator {
                     }
                 }
             }
-        }
-    }
-
-    protected Object getTypeHandlerValue(TableColumn ci, Object val) {
-        var th = ci.typeHandler();
-        if (th == null || val == null) {
-            return val;
-        } else {
-            return new TypeHandlerValue(th, val);
         }
     }
 

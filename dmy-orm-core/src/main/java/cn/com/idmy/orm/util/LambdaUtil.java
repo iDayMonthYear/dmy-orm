@@ -14,7 +14,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @NoArgsConstructor(access = lombok.AccessLevel.PRIVATE)
 public class LambdaUtil {
     private static final Map<Class<?>, String> fieldNameMap = new ConcurrentHashMap<>();
-    private static final Map<Class<?>, Class<?>> implClassMap = new ConcurrentHashMap<>();
+    private static final Map<Class<?>, Class<?>> implClassMap = new ConcurrentHashMap<>(1);
 
     public static <IN, OUT> String getFieldName(FieldGetter<IN, OUT> getter) {
         return MapUtil.computeIfAbsent(fieldNameMap, getter.getClass(), $ -> {

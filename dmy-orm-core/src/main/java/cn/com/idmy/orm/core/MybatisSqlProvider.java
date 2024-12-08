@@ -36,7 +36,7 @@ public class MybatisSqlProvider {
 
     private static String genCommonSql(Map<String, Object> params) {
         var where = (Crud<?, ?>) params.get(SUD);
-        putEntityClass(params, where.entityClass());
+        putEntityClass(params, where.entityClass);
         var pair = where.sql();
         params.put(SQL_PARAMS, pair.right);
         return pair.left;
@@ -76,7 +76,7 @@ public class MybatisSqlProvider {
         select.limit = null;
         select.offset = null;
         select.select(SqlFn::count);
-        putEntityClass(params, select.entityClass());
+        putEntityClass(params, select.entityClass);
         var pair = select.sql();
         params.put(SQL_PARAMS, pair.right);
         return pair.left;

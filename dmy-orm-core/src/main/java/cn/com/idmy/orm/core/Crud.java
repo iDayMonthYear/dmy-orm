@@ -4,8 +4,6 @@ import cn.com.idmy.base.model.Pair;
 import cn.com.idmy.orm.core.SqlNode.SqlColumn;
 import cn.com.idmy.orm.core.SqlNode.SqlNodeType;
 import cn.com.idmy.orm.core.SqlNode.SqlOr;
-import lombok.AccessLevel;
-import lombok.Getter;
 import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
 
@@ -16,15 +14,10 @@ import java.util.Objects;
 @Slf4j
 @Accessors(fluent = true, chain = true)
 abstract class Crud<T, CRUD extends Crud<T, CRUD>> {
-    @Getter(value = AccessLevel.PROTECTED)
     protected List<SqlNode> nodes = new ArrayList<>();
-
     @SuppressWarnings({"unchecked"})
     protected final CRUD $this = (CRUD) this;
-
-    @Getter(value = AccessLevel.PROTECTED)
     protected Class<T> entityClass;
-
     protected int sqlParamsSize;
 
     protected Crud(Class<T> entityClass) {
@@ -38,8 +31,7 @@ abstract class Crud<T, CRUD extends Crud<T, CRUD>> {
         try {
             return sql().left;
         } catch (Exception e) {
-            log.warn("SQL生成失败：{}", e.getMessage());
-            return "异常";
+            return "异常：" + e.getMessage();
         }
     }
 

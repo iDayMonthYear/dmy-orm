@@ -1,6 +1,8 @@
 package cn.com.idmy.orm.core;
 
 import cn.com.idmy.base.model.Pair;
+import cn.com.idmy.orm.core.TableInfo.TableColumn;
+import cn.com.idmy.orm.mybatis.handler.TypeHandlerValue;
 import org.dromara.hutool.core.reflect.FieldUtil;
 
 import java.util.ArrayList;
@@ -25,6 +27,15 @@ public class InsertSqlGenerator extends SqlGenerator {
             // 调用单个插入拦截器
             CrudInterceptors.interceptInsert(input);
             return genInsert(input);
+        }
+    }
+
+    protected Object getTypeHandlerValue(TableColumn column, Object val) {
+        var th = column.typeHandler();
+        if (th == null || val == null) {
+            return val;
+        } else {
+            return new TypeHandlerValue(th, val);
         }
     }
 
@@ -57,7 +68,6 @@ public class InsertSqlGenerator extends SqlGenerator {
         genInsertHeader();
         var cols = Tables.getTable(entityClass).columns();
         int colSize = cols.length;
-
         // 构建列名部分
         for (int i = 0; i < colSize; i++) {
             sql.append(SqlConsts.STRESS_MARK).append(cols[i].name()).append(SqlConsts.STRESS_MARK).append(SqlConsts.DELIMITER);
