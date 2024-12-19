@@ -9,10 +9,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-public class InsertSqlGenerator extends SqlGenerator {
+public class CreateSqlGenerator extends SqlGenerator {
     private final Object input;
 
-    public InsertSqlGenerator(Class<?> entityClass, Object input) {
+    public CreateSqlGenerator(Class<?> entityClass, Object input) {
         super(entityClass, null);
         this.input = input;
     }
@@ -21,11 +21,11 @@ public class InsertSqlGenerator extends SqlGenerator {
     protected Pair<String, List<Object>> doGenerate() {
         if (input instanceof Collection<?> ls) {
             // 调用批量插入拦截器
-            CrudInterceptors.interceptInsert(ls);
+            CrudInterceptors.interceptCreate(ls);
             return genInsert(ls);
         } else {
             // 调用单个插入拦截器
-            CrudInterceptors.interceptInsert(input);
+            CrudInterceptors.interceptCreate(input);
             return genInsert(input);
         }
     }

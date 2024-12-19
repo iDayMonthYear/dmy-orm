@@ -2,11 +2,11 @@ package cn.com.idmy.orm.core;
 
 import cn.com.idmy.base.annotation.Table;
 import cn.com.idmy.base.annotation.Table.Id.IdType;
+import cn.com.idmy.base.util.LambdaUtil;
 import cn.com.idmy.orm.OrmConfig;
 import cn.com.idmy.orm.OrmException;
 import cn.com.idmy.orm.core.TableInfo.TableColumn;
 import cn.com.idmy.orm.core.TableInfo.TableId;
-import cn.com.idmy.orm.util.LambdaUtil;
 import jakarta.annotation.Nullable;
 import lombok.NoArgsConstructor;
 import org.apache.ibatis.mapping.MappedStatement;

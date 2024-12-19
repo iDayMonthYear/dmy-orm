@@ -12,9 +12,9 @@ import static cn.com.idmy.orm.core.SqlConsts.DELETE_FROM;
 
 @Slf4j
 class DeleteSqlGenerator extends SqlGenerator {
-    protected Deletes<?> delete;
+    protected Delete<?> delete;
 
-    protected DeleteSqlGenerator(Deletes<?> delete) {
+    protected DeleteSqlGenerator(Delete<?> delete) {
         super(delete.entityClass, delete.nodes);
         this.delete = delete;
     }

@@ -11,13 +11,13 @@ import java.util.List;
 @Slf4j
 @Getter
 @Accessors(fluent = true, chain = false)
-public class Deletes<T> extends Where<T, Deletes<T>> {
-    protected Deletes(Class<T> entityClass) {
+public class Delete<T> extends Where<T, Delete<T>> {
+    protected Delete(Class<T> entityClass) {
         super(entityClass);
     }
 
-    public static <T, ID> Deletes<T> of(MybatisDao<T, ID> dao) {
-        return new Deletes<>(dao.entityClass());
+    public static <T, ID> Delete<T> of(MybatisDao<T, ID> dao) {
+        return new Delete<>(dao.entityClass());
     }
 
     @Override

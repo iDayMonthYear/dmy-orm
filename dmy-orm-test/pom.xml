@@ -15,7 +15,6 @@
     <version>1.0.0</version>
 
     <properties>
-        <junit-jupiter.version>5.10.1</junit-jupiter.version>
     </properties>
 
     <dependencies>
@@ -36,7 +35,6 @@
             <groupId>cn.com.idmy</groupId>
             <artifactId>dmy-base</artifactId>
         </dependency>
-
         <dependency>
             <groupId>cn.com.idmy.orm</groupId>
             <artifactId>dmy-orm-spring-boot-starter</artifactId>
@@ -51,34 +49,11 @@
                     <artifactId>dmy-cloud-service</artifactId>
                 </exclusion>
             </exclusions>
+            <version>1.0.0</version>
         </dependency>
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-test</artifactId>
-            <scope>test</scope>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.junit.vintage</groupId>
-                    <artifactId>junit-vintage-engine</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-api</artifactId>
-            <version>${junit-jupiter.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-engine</artifactId>
-            <version>${junit-jupiter.version}</version>
-            <scope>test</scope>
         </dependency>
     </dependencies>
     <build>

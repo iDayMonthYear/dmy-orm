@@ -19,9 +19,9 @@ import static cn.com.idmy.orm.core.SqlConsts.UPDATE;
 
 @Slf4j
 class UpdateSqlGenerator extends SqlGenerator {
-    protected Updates<?> update;
+    protected Update<?> update;
 
-    protected UpdateSqlGenerator(Updates<?> update) {
+    protected UpdateSqlGenerator(Update<?> update) {
         super(update.entityClass, update.nodes);
         this.update = update;
     }

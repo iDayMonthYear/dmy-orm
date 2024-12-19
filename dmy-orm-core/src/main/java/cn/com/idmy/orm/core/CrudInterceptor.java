@@ -9,16 +9,16 @@ import java.util.Set;
  */
 public interface CrudInterceptor {
     /**
-     * 插入前拦截 - 单个实体
+     * 创建前拦截 - 单个实体
      */
-    default void beforeInsert(Object entity) {
+    default void beforeCreate(Object entity) {
     }
 
     /**
-     * 插入前拦截 - 实体集合
+     * 创建前拦截 - 实体集合
      */
-    default void beforeInsert(Collection<?> entities) {
-        entities.forEach(this::beforeInsert);
+    default void beforeCreate(Collection<?> entities) {
+        entities.forEach(this::beforeCreate);
     }
 
     /**
@@ -36,7 +36,7 @@ public interface CrudInterceptor {
     /**
      * 查询前拦截
      */
-    default void beforeSelect(Class<?> entityClass, List<SqlNode> nodes) {
+    default void beforeQuery(Class<?> entityClass, List<SqlNode> nodes) {
     }
 
     /**

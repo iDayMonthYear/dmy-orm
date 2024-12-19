@@ -31,43 +31,43 @@ public interface MybatisDao<T, ID> {
     }
 
     @UpdateProvider(type = MybatisSqlProvider.class, method = MybatisSqlProvider.updateBySql)
-    int updateBySql(@Param(MybatisSqlProvider.SUD) String sql, @Param(MybatisSqlProvider.SQL_PARAMS) List<Object> params);
+    int updateBySql(@Param(MybatisSqlProvider.CRUD) String sql, @Param(MybatisSqlProvider.SQL_PARAMS) List<Object> params);
 
-    @InsertProvider(type = MybatisSqlProvider.class, method = MybatisSqlProvider.insert)
-    int insert(@NonNull @Param(MybatisSqlProvider.ENTITY) T entity);
+    @InsertProvider(type = MybatisSqlProvider.class, method = MybatisSqlProvider.create)
+    int create(@NonNull @Param(MybatisSqlProvider.ENTITY) T entity);
 
     /**
      * 批量插入主键为自增时，不会回写到实体类。（需要查询回写，影响性能）
      */
-    @InsertProvider(type = MybatisSqlProvider.class, method = MybatisSqlProvider.inserts)
-    int inserts(@NonNull @Param(MybatisSqlProvider.ENTITIES) Collection<T> entities);
+    @InsertProvider(type = MybatisSqlProvider.class, method = MybatisSqlProvider.creates)
+    int creates(@NonNull @Param(MybatisSqlProvider.ENTITIES) Collection<T> entities);
 
     @Nullable
     @SelectProvider(type = MybatisSqlProvider.class, method = MybatisSqlProvider.get)
-    T get(@NonNull @Param(MybatisSqlProvider.SUD) Selects<T> select);
+    T get(@NonNull @Param(MybatisSqlProvider.CRUD) Query<T> query);
 
     @SelectProvider(type = MybatisSqlProvider.class, method = MybatisSqlProvider.find)
-    List<T> find(@NonNull @Param(MybatisSqlProvider.SUD) Selects<T> select);
+    List<T> find(@NonNull @Param(MybatisSqlProvider.CRUD) Query<T> query);
 
     @UpdateProvider(type = MybatisSqlProvider.class, method = MybatisSqlProvider.update)
-    int update(@NonNull @Param(MybatisSqlProvider.SUD) Updates<T> update);
+    int update(@NonNull @Param(MybatisSqlProvider.CRUD) Update<T> update);
 
     @DeleteProvider(type = MybatisSqlProvider.class, method = MybatisSqlProvider.delete)
-    int delete(@NonNull @Param(MybatisSqlProvider.SUD) Deletes<T> delete);
+    int delete(@NonNull @Param(MybatisSqlProvider.CRUD) Delete<T> delete);
 
     @SelectProvider(type = MybatisSqlProvider.class, method = MybatisSqlProvider.count)
-    long count(@NonNull @Param(MybatisSqlProvider.SUD) Selects<T> select);
+    long count(@NonNull @Param(MybatisSqlProvider.CRUD) Query<T> query);
 
-    default int inserts(@NonNull Collection<T> entities, int size) {
-        return MybatisDaoDelegate.inserts(this, entities, size);
+    default int creates(@NonNull Collection<T> entities, int size) {
+        return MybatisDaoDelegate.creates(this, entities, size);
     }
 
-    default int insertOrUpdate(@NonNull T entity) {
-        return MybatisDaoDelegate.insertOrUpdate(this, entity, true);
+    default int createOrUpdate(@NonNull T entity) {
+        return MybatisDaoDelegate.createOrUpdate(this, entity, true);
     }
 
-    default int insertOrUpdate(@NonNull T entity, boolean ignoreNull) {
-        return MybatisDaoDelegate.insertOrUpdate(this, entity, ignoreNull);
+    default int createOrUpdate(@NonNull T entity, boolean ignoreNull) {
+        return MybatisDaoDelegate.createOrUpdate(this, entity, ignoreNull);
     }
 
     default int update(@NonNull T entity, boolean ignoreNull) {
@@ -86,7 +86,7 @@ public interface MybatisDao<T, ID> {
         return MybatisDaoDelegate.delete(this, ids);
     }
 
-    default <IN> Page<T> page(@NonNull Page<IN> page, @NonNull Selects<T> select) {
+    default <IN> Page<T> page(@NonNull Page<IN> page, @NonNull Query<T> select) {
         return MybatisDaoDelegate.page(this, page, select);
     }
 
@@ -109,18 +109,18 @@ public interface MybatisDao<T, ID> {
     }
 
     @Nullable
-    default <R> R get(@NonNull FieldGetter<T, R> field, @NonNull Selects<T> select) {
+    default <R> R get(@NonNull FieldGetter<T, R> field, @NonNull Query<T> select) {
         return MybatisDaoDelegate.get(this, field, select);
     }
 
     @SuppressWarnings({"unchecked"})
     @Nullable
-    default T get(@NonNull Selects<T> select, @NonNull FieldGetter<T, ?>... fields) {
+    default T get(@NonNull Query<T> select, @NonNull FieldGetter<T, ?>... fields) {
         return MybatisDaoDelegate.get(this, select, fields);
     }
 
     default List<T> all() {
-        return find(Selects.of(this));
+        return find(Query.of(this));
     }
 
     default List<T> find(@NonNull Collection<ID> ids) {
@@ -131,7 +131,7 @@ public interface MybatisDao<T, ID> {
         return MybatisDaoDelegate.find(this, field, ids);
     }
 
-    default <R> List<R> find(@NonNull FieldGetter<T, R> field, @NonNull Selects<T> select) {
+    default <R> List<R> find(@NonNull FieldGetter<T, R> field, @NonNull Query<T> select) {
         return MybatisDaoDelegate.find(this, field, select);
     }
 
@@ -143,42 +143,42 @@ public interface MybatisDao<T, ID> {
         return !exists(id);
     }
 
-    default boolean exists(@NonNull Selects<T> select) {
+    default boolean exists(@NonNull Query<T> select) {
         return count(select) > 0;
     }
 
-    default boolean notExists(@NonNull Selects<T> select) {
+    default boolean notExists(@NonNull Query<T> select) {
         return !exists(select);
     }
 
     @Nullable
-    default <R extends Number> R sqlFn(@NonNull SqlFnName name, @NonNull FieldGetter<T, R> field, @NonNull Selects<T> select) {
-        return MybatisDaoDelegate.sqlFn(this, name, field, select);
+    default <R extends Number> R sqlFn(@NonNull SqlFnName name, @NonNull FieldGetter<T, R> field, @NonNull Query<T> query) {
+        return MybatisDaoDelegate.sqlFn(this, name, field, query);
     }
 
     @Nullable
-    default <R extends Number> R sum(@NonNull FieldGetter<T, R> field, @NonNull Selects<T> select) {
-        return sqlFn(SqlFnName.SUM, field, select);
+    default <R extends Number> R sum(@NonNull FieldGetter<T, R> field, @NonNull Query<T> query) {
+        return sqlFn(SqlFnName.SUM, field, query);
     }
 
     @Nullable
-    default <R extends Number> R avg(@NonNull FieldGetter<T, R> field, @NonNull Selects<T> select) {
-        return sqlFn(SqlFnName.AVG, field, select);
+    default <R extends Number> R avg(@NonNull FieldGetter<T, R> field, @NonNull Query<T> query) {
+        return sqlFn(SqlFnName.AVG, field, query);
     }
 
     @Nullable
-    default <R extends Number> R min(@NonNull FieldGetter<T, R> field, @NonNull Selects<T> select) {
-        return sqlFn(SqlFnName.MIN, field, select);
+    default <R extends Number> R min(@NonNull FieldGetter<T, R> field, @NonNull Query<T> query) {
+        return sqlFn(SqlFnName.MIN, field, query);
     }
 
     @Nullable
-    default <R extends Number> R max(@NonNull FieldGetter<T, R> field, @NonNull Selects<T> select) {
-        return sqlFn(SqlFnName.MAX, field, select);
+    default <R extends Number> R max(@NonNull FieldGetter<T, R> field, @NonNull Query<T> query) {
+        return sqlFn(SqlFnName.MAX, field, query);
     }
 
     @Nullable
-    default <R extends Number> R abs(@NonNull FieldGetter<T, R> field, @NonNull Selects<T> select) {
-        return sqlFn(SqlFnName.ABS, field, select);
+    default <R extends Number> R abs(@NonNull FieldGetter<T, R> field, @NonNull Query<T> query) {
+        return sqlFn(SqlFnName.ABS, field, query);
     }
 
     @SuppressWarnings({"unchecked"})
@@ -190,7 +190,7 @@ public interface MybatisDao<T, ID> {
         return MybatisDaoDelegate.map(this, ids);
     }
 
-    default <R> Map<R, T> map(@NonNull FieldGetter<T, R> field, @NonNull Selects<T> select) {
-        return CollStreamUtil.toIdentityMap(find(select), field::get);
+    default <R> Map<R, T> map(@NonNull FieldGetter<T, R> field, @NonNull Query<T> query) {
+        return CollStreamUtil.toIdentityMap(find(query), field::get);
     }
 }

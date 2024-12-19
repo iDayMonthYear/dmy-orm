@@ -11,7 +11,7 @@ import java.util.Set;
 // 关心插入和更新的拦截器
 public class AuditInterceptor implements CrudInterceptor {
     @Override
-    public void beforeInsert(Object entity) {
+    public void beforeCreate(Object entity) {
         if (entity instanceof App app) {
             app.createdAt(LocalDateTime.now());
             app.updatedAt(LocalDateTime.now());

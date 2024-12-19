@@ -12,12 +12,12 @@ import java.util.List;
 import static cn.com.idmy.orm.core.SqlConsts.*;
 
 @Slf4j
-class SelectSqlGenerator extends SqlGenerator {
-    protected Selects<?> select;
+class QuerySqlGenerator extends SqlGenerator {
+    protected Query<?> query;
 
-    protected SelectSqlGenerator(Selects<?> select) {
-        super(select.entityClass, select.nodes);
-        this.select = select;
+    protected QuerySqlGenerator(Query<?> query) {
+        super(query.entityClass, query.nodes);
+        this.query = query;
     }
 
     @Override
@@ -41,7 +41,7 @@ class SelectSqlGenerator extends SqlGenerator {
         }
 
         sql.append(SELECT);
-        params = new ArrayList<>(select.sqlParamsSize);
+        params = new ArrayList<>(query.sqlParamsSize);
 
         if (distinct != null) {
             genDistinct(distinct);
@@ -55,11 +55,11 @@ class SelectSqlGenerator extends SqlGenerator {
         genWhere(wheres);
         genGroupBy(groups);
         genOrderBy(orders);
-        if (select.limit != null) {
-            sql.append(LIMIT).append(select.limit);
+        if (query.limit != null) {
+            sql.append(LIMIT).append(query.limit);
         }
-        if (select.offset != null) {
-            sql.append(OFFSET).append(select.offset);
+        if (query.offset != null) {
+            sql.append(OFFSET).append(query.offset);
         }
         return Pair.of(sql.toString(), params);
     }

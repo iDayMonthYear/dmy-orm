@@ -49,7 +49,7 @@ class MybatisModifier {
     static MappedStatement replaceIdGenerator(MappedStatement ms, TableInfo tableInfo) {
         if (ms.getKeyGenerator() == NoKeyGenerator.INSTANCE) {
             var msId = ms.getId();
-            if (msId.endsWith(MybatisSqlProvider.insert) || msId.endsWith(MybatisSqlProvider.inserts)) {
+            if (msId.endsWith(MybatisSqlProvider.create) || msId.endsWith(MybatisSqlProvider.creates)) {
                 return replaceIdGenerator0(ms, tableInfo);
             }
         }
@@ -62,7 +62,7 @@ class MybatisModifier {
             return ms;
         }
 
-        if (ms.getId().endsWith(MybatisSqlProvider.inserts)) {
+        if (ms.getId().endsWith(MybatisSqlProvider.creates)) {
             generator = new EntitiesIdGenerator(generator);
         }
 

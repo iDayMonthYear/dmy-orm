@@ -1,6 +1,6 @@
 package cn.com.idmy.orm.core;
 
-import cn.com.idmy.orm.util.SqlUtil;
+import cn.com.idmy.base.util.SqlUtil;
 import jakarta.annotation.Nullable;
 import lombok.Data;
 import lombok.Getter;

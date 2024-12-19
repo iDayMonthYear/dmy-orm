@@ -12,20 +12,20 @@ import static cn.com.idmy.orm.core.Tables.getColumnName;
 
 @Slf4j
 @Accessors(fluent = true, chain = false)
-public class Updates<T> extends Where<T, Updates<T>> {
-    protected Updates(Class<T> entityClass) {
+public class Update<T> extends Where<T, Update<T>> {
+    protected Update(Class<T> entityClass) {
         super(entityClass);
     }
 
-    public static <T, ID> Updates<T> of(MybatisDao<T, ID> dao) {
-        return new Updates<>(dao.entityClass());
+    public static <T, ID> Update<T> of(MybatisDao<T, ID> dao) {
+        return new Update<>(dao.entityClass());
     }
 
-    public Updates<T> set(FieldGetter<T, ?> field, Object val) {
+    public Update<T> set(FieldGetter<T, ?> field, Object val) {
         return addNode(new SqlSet(getColumnName(entityClass, field), val));
     }
 
-    public Updates<T> set(FieldGetter<T, ?> field, SqlOpExpr expr) {
+    public Update<T> set(FieldGetter<T, ?> field, SqlOpExpr expr) {
         return addNode(new SqlSet(getColumnName(entityClass, field), expr));
     }
 

@@ -143,7 +143,7 @@ public abstract class SqlGenerator {
         switch (this) {
             case UpdateSqlGenerator ignored -> CrudInterceptors.interceptUpdate(entityClass, nodes);
             case DeleteSqlGenerator ignored -> CrudInterceptors.interceptDelete(entityClass, nodes);
-            case SelectSqlGenerator ignored -> CrudInterceptors.interceptSelect(entityClass, nodes);
+            case QuerySqlGenerator ignored -> CrudInterceptors.interceptQuery(entityClass, nodes);
             default -> {
             }
         }

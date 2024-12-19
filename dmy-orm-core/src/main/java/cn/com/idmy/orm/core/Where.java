@@ -1,8 +1,10 @@
 package cn.com.idmy.orm.core;
 
 import cn.com.idmy.orm.core.SqlNode.SqlCond;
+import jakarta.annotation.Nullable;
 import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
+import org.dromara.hutool.core.text.StrUtil;
 
 import java.util.Collection;
 
@@ -37,7 +39,7 @@ public abstract class Where<T, SUD extends Where<T, SUD>> extends Crud<T, SUD> {
     }
 
     //region 等于
-    public SUD eq(FieldGetter<T, ?> field, Object val) {
+    public SUD eq(FieldGetter<T, ?> field, @Nullable Object val) {
         return addNode(new SqlCond(getColumnName(entityClass, field), Op.EQ, val));
     }
 
@@ -45,7 +47,7 @@ public abstract class Where<T, SUD extends Where<T, SUD>> extends Crud<T, SUD> {
         return addNode(new SqlCond(getColumnName(entityClass, field), Op.EQ, expr));
     }
 
-    public SUD eq(FieldGetter<T, ?> field, Object val, boolean if0) {
+    public SUD eq(FieldGetter<T, ?> field, @Nullable Object val, boolean if0) {
         return if0 ? eq(field, val) : $this;
     }
 
@@ -55,7 +57,7 @@ public abstract class Where<T, SUD extends Where<T, SUD>> extends Crud<T, SUD> {
     //endregion
 
     //region 不等于
-    public SUD ne(FieldGetter<T, ?> field, Object val) {
+    public SUD ne(FieldGetter<T, ?> field, @Nullable Object val) {
         return addNode(new SqlCond(getColumnName(entityClass, field), Op.NE, val));
     }
 
@@ -63,7 +65,7 @@ public abstract class Where<T, SUD extends Where<T, SUD>> extends Crud<T, SUD> {
         return addNode(new SqlCond(getColumnName(entityClass, field), Op.NE, expr));
     }
 
-    public SUD ne(FieldGetter<T, ?> field, Object val, boolean if0) {
+    public SUD ne(FieldGetter<T, ?> field, @Nullable Object val, boolean if0) {
         return if0 ? ne(field, val) : $this;
     }
 
@@ -73,7 +75,7 @@ public abstract class Where<T, SUD extends Where<T, SUD>> extends Crud<T, SUD> {
     //endregion
 
     //region 大于 >
-    public SUD gt(FieldGetter<T, ?> field, Object val) {
+    public SUD gt(FieldGetter<T, ?> field, @Nullable Object val) {
         return addNode(new SqlCond(getColumnName(entityClass, field), Op.GT, val));
     }
 
@@ -81,7 +83,7 @@ public abstract class Where<T, SUD extends Where<T, SUD>> extends Crud<T, SUD> {
         return addNode(new SqlCond(getColumnName(entityClass, field), Op.GT, expr));
     }
 
-    public SUD gt(FieldGetter<T, ?> field, Object val, boolean if0) {
+    public SUD gt(FieldGetter<T, ?> field, @Nullable Object val, boolean if0) {
         return if0 ? gt(field, val) : $this;
     }
 
@@ -91,7 +93,7 @@ public abstract class Where<T, SUD extends Where<T, SUD>> extends Crud<T, SUD> {
     //endregion
 
     //region 大于等于 >=
-    public SUD ge(FieldGetter<T, ?> field, Object val) {
+    public SUD ge(FieldGetter<T, ?> field, @Nullable Object val) {
         return addNode(new SqlCond(getColumnName(entityClass, field), Op.GE, val));
     }
 
@@ -99,7 +101,7 @@ public abstract class Where<T, SUD extends Where<T, SUD>> extends Crud<T, SUD> {
         return addNode(new SqlCond(getColumnName(entityClass, field), Op.GE, expr));
     }
 
-    public SUD ge(FieldGetter<T, ?> field, Object val, boolean if0) {
+    public SUD ge(FieldGetter<T, ?> field, @Nullable Object val, boolean if0) {
         return if0 ? ge(field, val) : $this;
     }
 
@@ -109,7 +111,7 @@ public abstract class Where<T, SUD extends Where<T, SUD>> extends Crud<T, SUD> {
     //endregion
 
     //region 小于 <
-    public SUD lt(FieldGetter<T, ?> field, Object val) {
+    public SUD lt(FieldGetter<T, ?> field, @Nullable Object val) {
         return addNode(new SqlCond(getColumnName(entityClass, field), Op.LT, val));
     }
 
@@ -117,7 +119,7 @@ public abstract class Where<T, SUD extends Where<T, SUD>> extends Crud<T, SUD> {
         return addNode(new SqlCond(getColumnName(entityClass, field), Op.LT, expr));
     }
 
-    public SUD lt(FieldGetter<T, ?> field, Object val, boolean if0) {
+    public SUD lt(FieldGetter<T, ?> field, @Nullable Object val, boolean if0) {
         return if0 ? lt(field, val) : $this;
     }
 
@@ -127,7 +129,7 @@ public abstract class Where<T, SUD extends Where<T, SUD>> extends Crud<T, SUD> {
     //endregion
 
     //region 小于等于 <=
-    public SUD le(FieldGetter<T, ?> field, Object val) {
+    public SUD le(FieldGetter<T, ?> field, @Nullable Object val) {
         return addNode(new SqlCond(getColumnName(entityClass, field), Op.LE, val));
     }
 
@@ -135,7 +137,7 @@ public abstract class Where<T, SUD extends Where<T, SUD>> extends Crud<T, SUD> {
         return addNode(new SqlCond(getColumnName(entityClass, field), Op.LE, expr));
     }
 
-    public SUD le(FieldGetter<T, ?> field, Object val, boolean if0) {
+    public SUD le(FieldGetter<T, ?> field, @Nullable Object val, boolean if0) {
         return if0 ? le(field, val) : $this;
     }
 
@@ -145,21 +147,29 @@ public abstract class Where<T, SUD extends Where<T, SUD>> extends Crud<T, SUD> {
     //endregion
 
     //region like
-    public SUD like(FieldGetter<T, ?> field, String val) {
-        return addNode(new SqlCond(getColumnName(entityClass, field), Op.LIKE, "%" + val + "%"));
+    public SUD like(FieldGetter<T, ?> field, @Nullable String val) {
+        if (StrUtil.isBlank(val)) {
+            return $this;
+        } else {
+            return addNode(new SqlCond(getColumnName(entityClass, field), Op.LIKE, "%" + val + "%"));
+        }
     }
 
-    public SUD like(FieldGetter<T, ?> field, String val, boolean if0) {
+    public SUD like(FieldGetter<T, ?> field, @Nullable String val, boolean if0) {
         return if0 ? like(field, val) : $this;
     }
     //endregion
 
     //region startsWith
-    public SUD startsWith(FieldGetter<T, ?> field, String val) {
-        return addNode(new SqlCond(getColumnName(entityClass, field), Op.LIKE, val + "%"));
+    public SUD startsWith(FieldGetter<T, ?> field, @Nullable String val) {
+        if (StrUtil.isBlank(val)) {
+            return $this;
+        } else {
+            return addNode(new SqlCond(getColumnName(entityClass, field), Op.LIKE, val + "%"));
+        }
     }
 
-    public SUD startsWith(FieldGetter<T, ?> field, String val, boolean if0) {
+    public SUD startsWith(FieldGetter<T, ?> field, @Nullable String val, boolean if0) {
         return if0 ? startsWith(field, val) : $this;
     }
     //endregion
@@ -175,49 +185,49 @@ public abstract class Where<T, SUD extends Where<T, SUD>> extends Crud<T, SUD> {
     //endregion
 
     //region in
-    public SUD in(FieldGetter<T, ?> field, Object val) {
+    public SUD in(FieldGetter<T, ?> field, @Nullable Object val) {
         return addNode(new SqlCond(getColumnName(entityClass, field), Op.IN, val));
     }
 
-    public SUD in(FieldGetter<T, ?> field, Object... vals) {
+    public SUD in(FieldGetter<T, ?> field, @Nullable Object... vals) {
         return addNode(new SqlCond(getColumnName(entityClass, field), Op.IN, vals));
     }
 
-    public SUD in(FieldGetter<T, ?> field, Object val, boolean if0) {
+    public SUD in(FieldGetter<T, ?> field, @Nullable Object val, boolean if0) {
         return if0 ? in(field, val) : $this;
     }
 
-    public SUD in(FieldGetter<T, ?> field, Collection<Object> vals, boolean if0) {
+    public SUD in(FieldGetter<T, ?> field, @Nullable Collection<Object> vals, boolean if0) {
         return if0 ? in(field, vals) : $this;
     }
     //endregion
 
     //region not in
-    public SUD notIn(FieldGetter<T, ?> field, Object val) {
+    public SUD notIn(FieldGetter<T, ?> field, @Nullable Object val) {
         return addNode(new SqlCond(getColumnName(entityClass, field), Op.IN, val));
     }
 
-    public SUD notIn(FieldGetter<T, ?> field, Object... vals) {
+    public SUD notIn(FieldGetter<T, ?> field, @Nullable Object... vals) {
         return addNode(new SqlCond(getColumnName(entityClass, field), Op.IN, vals));
     }
 
-    public SUD notIn(FieldGetter<T, ?> field, Object val, boolean if0) {
+    public SUD notIn(FieldGetter<T, ?> field, @Nullable Object val, boolean if0) {
         return if0 ? notIn(field, val) : $this;
     }
 
-    public SUD notIn(FieldGetter<T, ?> field, Collection<Object> vals, boolean if0) {
+    public SUD notIn(FieldGetter<T, ?> field, @Nullable Collection<Object> vals, boolean if0) {
         return if0 ? notIn(field, vals) : $this;
     }
     //endregion
 
     //region nulls
-    public SUD nulls(FieldGetter<T, ?> field, Boolean bol) {
+    public SUD nulls(FieldGetter<T, ?> field, @Nullable Boolean bol) {
         if (bol == null) {
             return $this;
         } else if (bol) {
-            return addNode(new SqlCond(getColumnName(entityClass, field), Op.IS_NULL, null));
+            return addNode(new SqlCond(getColumnName(entityClass, field), Op.IS_NULL, new Object()));
         } else {
-            return addNode(new SqlCond(getColumnName(entityClass, field), Op.IS_NOT_NULL, null));
+            return addNode(new SqlCond(getColumnName(entityClass, field), Op.IS_NOT_NULL, new Object()));
         }
     }
     //endregion
@@ -243,38 +253,46 @@ public abstract class Where<T, SUD extends Where<T, SUD>> extends Crud<T, SUD> {
     //endregion
 
     //region between
-    public SUD between(FieldGetter<T, ?> field, Object[] pair) {
+    public SUD between(FieldGetter<T, ?> field, @Nullable Object[] pair) {
         return addNode(new SqlCond(getColumnName(entityClass, field), Op.BETWEEN, pair));
     }
 
-    public SUD between(FieldGetter<T, ?> field, Object[] pair, boolean if0) {
+    public SUD between(FieldGetter<T, ?> field, @Nullable Object[] pair, boolean if0) {
         return if0 ? between(field, pair) : $this;
     }
 
-    public SUD between(FieldGetter<T, ?> field, Object start, Object end) {
-        return addNode(new SqlCond(getColumnName(entityClass, field), Op.BETWEEN, new Object[]{start, end}));
+    public SUD between(FieldGetter<T, ?> field, @Nullable Object start, @Nullable Object end) {
+        if (start == null || end == null) {
+            return $this;
+        } else {
+            return addNode(new SqlCond(getColumnName(entityClass, field), Op.BETWEEN, new Object[]{start, end}));
+        }
     }
 
-    public SUD between(FieldGetter<T, ?> field, Object start, Object end, boolean if0) {
+    public SUD between(FieldGetter<T, ?> field, @Nullable Object start, @Nullable Object end, boolean if0) {
         return if0 ? between(field, start, end) : $this;
     }
     //endregion
 
     //region not between
-    public SUD notBetween(FieldGetter<T, ?> field, Object[] pair) {
+    public SUD notBetween(FieldGetter<T, ?> field, @Nullable Object[] pair) {
         return addNode(new SqlCond(getColumnName(entityClass, field), Op.NOT_BETWEEN, pair));
     }
 
-    public SUD notBetween(FieldGetter<T, ?> field, Object[] pair, boolean if0) {
+    public SUD notBetween(FieldGetter<T, ?> field, @Nullable Object[] pair, boolean if0) {
         return if0 ? between(field, pair) : $this;
     }
 
-    public SUD notBetween(FieldGetter<T, ?> field, Object start, Object end) {
-        return addNode(new SqlCond(getColumnName(entityClass, field), Op.NOT_BETWEEN, new Object[]{start, end}));
+    public SUD notBetween(FieldGetter<T, ?> field, @Nullable Object start, @Nullable Object end) {
+        if (start == null || end == null) {
+            return $this;
+        } else {
+            return addNode(new SqlCond(getColumnName(entityClass, field), Op.NOT_BETWEEN, new Object[]{start, end}));
+        }
     }
 
-    public SUD notBetween(FieldGetter<T, ?> field, Object a, Object b, boolean if0) {
-        return if0 ? between(field, a, b) : $this;
+    public SUD notBetween(FieldGetter<T, ?> field, @Nullable Object start, @Nullable Object end, boolean if0) {
+        return if0 ? between(field, start, end) : $this;
     }
     //endregion
 }

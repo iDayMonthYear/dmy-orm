@@ -8,31 +8,26 @@ import cn.com.idmy.orm.core.SqlNode.SqlSet;
 import jakarta.annotation.Nullable;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
-import org.dromara.hutool.core.array.ArrayUtil;
 import org.dromara.hutool.core.collection.CollStreamUtil;
-import org.dromara.hutool.core.collection.CollUtil;
 import org.dromara.hutool.core.reflect.FieldUtil;
 
 import java.util.*;
 
-import static cn.com.idmy.base.constant.DefaultConsts.CREATED_AT;
-import static cn.com.idmy.base.constant.DefaultConsts.UPDATED_AT;
 import static cn.com.idmy.orm.core.MybatisDao.DEFAULT_BATCH_SIZE;
 import static cn.com.idmy.orm.core.MybatisSqlProvider.clearSelectColumns;
-import static cn.com.idmy.orm.core.Tables.getColumnName;
 import static cn.com.idmy.orm.core.Tables.getIdName;
 
 @NoArgsConstructor(access = lombok.AccessLevel.PRIVATE)
 class MybatisDaoDelegate {
-    public static <T, ID> int insertOrUpdate(MybatisDao<T, ID> dao, T entity, boolean ignoreNull) {
+    public static <T, ID> int createOrUpdate(MybatisDao<T, ID> dao, T entity, boolean ignoreNull) {
         ID idVal = Tables.getIdValue(entity);
         if (idVal == null) {
-            return dao.insert(entity);
+            return dao.create(entity);
         } else {
             if (dao.exists(idVal)) {
                 return update(dao, entity, ignoreNull);
             } else {
-                return dao.insert(entity);
+                return dao.create(entity);
             }
         }
     }
@@ -45,7 +40,7 @@ class MybatisDaoDelegate {
         if (idValue == null) {
             throw new OrmException("主键不能为空");
         }
-        var updates = Updates.of(dao).addNode(new SqlCond(id.name(), Op.EQ, idValue));
+        var updates = Update.of(dao).addNode(new SqlCond(id.name(), Op.EQ, idValue));
         var columns = table.columns();
         int size = columns.length;
         for (int i = 0; i < size; i++) {
@@ -62,9 +57,9 @@ class MybatisDaoDelegate {
         return dao.updateBySql(sql.left, sql.right);
     }
 
-    public static <T, ID> int inserts(MybatisDao<T, ID> dao, Collection<T> entities, int size) {
+    public static <T, ID> int creates(MybatisDao<T, ID> dao, Collection<T> entities, int size) {
         if (entities.isEmpty()) {
-            throw new OrmException("批量插入的实体集合不能为空");
+            throw new OrmException("批量创建的实体集合不能为空");
         }
         if (size <= 0) {
             size = DEFAULT_BATCH_SIZE;
@@ -74,47 +69,47 @@ class MybatisDaoDelegate {
         int entitiesSize = entities.size();
         int maxIdx = entitiesSize / size + (entitiesSize % size == 0 ? 0 : 1);
         for (int i = 0; i < maxIdx; i++) {
-            sum += dao.inserts(entityList.subList(i * size, Math.min(i * size + size, entitiesSize)));
+            sum += dao.creates(entityList.subList(i * size, Math.min(i * size + size, entitiesSize)));
         }
         return sum;
     }
 
     @Nullable
     public static <T, ID> T get(MybatisDao<T, ID> dao, ID id) {
-        var crud = Selects.of(dao);
-        crud.sqlParamsSize = 1;
-        crud.addNode(new SqlCond(getIdName(dao), Op.EQ, id));
-        return dao.get(crud);
+        var query = Query.of(dao);
+        query.sqlParamsSize = 1;
+        query.addNode(new SqlCond(getIdName(dao), Op.EQ, id));
+        return dao.get(query);
     }
 
     @Nullable
     public static <T, ID, R> R get(MybatisDao<T, ID> dao, FieldGetter<T, R> field, ID id) {
-        var crud = Selects.of(dao);
-        crud.select(field);
-        crud.sqlParamsSize = 1;
-        crud.addNode(new SqlCond(getIdName(dao), Op.EQ, id));
-        T t = dao.get(crud);
+        var query = Query.of(dao);
+        query.select(field);
+        query.sqlParamsSize = 1;
+        query.addNode(new SqlCond(getIdName(dao), Op.EQ, id));
+        T t = dao.get(query);
         return t == null ? null : field.get(t);
     }
 
     @Nullable
-    public static <T, ID, R> R get(MybatisDao<T, ID> dao, FieldGetter<T, R> field, Selects<T> crud) {
-        clearSelectColumns(crud);
-        crud.limit = 1;
-        T t = dao.get(crud.select(field));
+    public static <T, ID, R> R get(MybatisDao<T, ID> dao, FieldGetter<T, R> field, Query<T> query) {
+        clearSelectColumns(query);
+        query.limit = 1;
+        T t = dao.get(query.select(field));
         return t == null ? null : field.get(t);
     }
 
     @Nullable
-    public static <T, ID> T get(MybatisDao<T, ID> dao, Selects<T> crud, @NonNull FieldGetter<T, ?>[] cols) {
-        clearSelectColumns(crud);
-        crud.limit = 1;
-        return dao.get(crud.select(cols));
+    public static <T, ID> T get(MybatisDao<T, ID> dao, Query<T> query, @NonNull FieldGetter<T, ?>[] cols) {
+        clearSelectColumns(query);
+        query.limit = 1;
+        return dao.get(query.select(cols));
     }
 
-    public static <T, ID, R> List<R> find(MybatisDao<T, ID> dao, FieldGetter<T, R> field, Selects<T> crud) {
-        clearSelectColumns(crud);
-        var ts = dao.find(crud.select(field));
+    public static <T, ID, R> List<R> find(MybatisDao<T, ID> dao, FieldGetter<T, R> field, Query<T> query) {
+        clearSelectColumns(query);
+        var ts = dao.find(query.select(field));
         return CollStreamUtil.toList(ts, field::get);
     }
 
@@ -122,10 +117,10 @@ class MybatisDaoDelegate {
         if (ids.isEmpty()) {
             return Collections.emptyList();
         } else {
-            var crud = Selects.of(dao);
-            crud.sqlParamsSize = 1;
-            crud.addNode(new SqlCond(getIdName(dao), Op.IN, ids));
-            return dao.find(crud);
+            var query = Query.of(dao);
+            query.sqlParamsSize = 1;
+            query.addNode(new SqlCond(getIdName(dao), Op.IN, ids));
+            return dao.find(query);
         }
     }
 
@@ -133,47 +128,47 @@ class MybatisDaoDelegate {
         if (ids.isEmpty()) {
             return Collections.emptyList();
         } else {
-            var crud = Selects.of(dao).select(field);
-            crud.sqlParamsSize = 1;
-            crud.addNode(new SqlCond(getIdName(dao), Op.IN, ids));
-            return dao.find(crud).stream().map(field::get).toList();
+            var select = Query.of(dao).select(field);
+            select.sqlParamsSize = 1;
+            select.addNode(new SqlCond(getIdName(dao), Op.IN, ids));
+            return dao.find(select).stream().map(field::get).toList();
         }
     }
 
     @Nullable
-    public static <T, ID, R extends Number> R sqlFn(MybatisDao<T, ID> dao, SqlFnName name, FieldGetter<T, R> field, Selects<T> crud) {
+    public static <T, ID, R extends Number> R sqlFn(MybatisDao<T, ID> dao, SqlFnName name, FieldGetter<T, R> field, Query<T> query) {
         if (name == SqlFnName.IF_NULL) {
             throw new OrmException("不支持ifnull");
         } else {
-            clearSelectColumns(crud);
-            crud.limit = 1;
-            T t = dao.get(crud.select(() -> new SqlFn<>(name, field)));
+            clearSelectColumns(query);
+            query.limit = 1;
+            T t = dao.get(query.select(() -> new SqlFn<>(name, field)));
             return t == null ? null : field.get(t);
         }
     }
 
     public static <T, ID> boolean exists(MybatisDao<T, ID> dao, ID id) {
-        var crud = Selects.of(dao);
-        crud.sqlParamsSize = 1;
-        crud.addNode(new SqlCond(getIdName(dao), Op.EQ, id));
-        return dao.count(crud) > 0;
+        var query = Query.of(dao);
+        query.sqlParamsSize = 1;
+        query.addNode(new SqlCond(getIdName(dao), Op.EQ, id));
+        return dao.count(query) > 0;
     }
 
     public static <T, ID> int delete(MybatisDao<T, ID> dao, ID id) {
-        var crud = Deletes.of(dao);
-        crud.sqlParamsSize = 1;
-        crud.addNode(new SqlCond(getIdName(dao), Op.EQ, id));
-        return dao.delete(crud);
+        var delete = Delete.of(dao);
+        delete.sqlParamsSize = 1;
+        delete.addNode(new SqlCond(getIdName(dao), Op.EQ, id));
+        return dao.delete(delete);
     }
 
     public static <T, ID> int delete(MybatisDao<T, ID> dao, Collection<ID> ids) {
         if (ids.isEmpty()) {
             throw new OrmException("批量删除的id集合不能为空");
         } else {
-            var crud = Deletes.of(dao);
-            crud.sqlParamsSize = 1;
-            crud.addNode(new SqlCond(getIdName(dao), Op.IN, ids));
-            return dao.delete(crud);
+            var delete = Delete.of(dao);
+            delete.sqlParamsSize = 1;
+            delete.addNode(new SqlCond(getIdName(dao), Op.IN, ids));
+            return dao.delete(delete);
         }
     }
 
@@ -182,10 +177,10 @@ class MybatisDaoDelegate {
     }
 
     private static <T, ID> Map<ID, T> getMap(MybatisDao<T, ID> dao, @NonNull Object ids) {
-        var crud = Selects.of(dao);
-        crud.sqlParamsSize = 1;
-        crud.addNode(new SqlCond(getIdName(dao), Op.IN, ids));
-        var entities = dao.find(crud);
+        var query = Query.of(dao);
+        query.sqlParamsSize = 1;
+        query.addNode(new SqlCond(getIdName(dao), Op.IN, ids));
+        var entities = dao.find(query);
         return CollStreamUtil.toIdentityMap(entities, Tables::getIdValue);
     }
 
@@ -193,46 +188,18 @@ class MybatisDaoDelegate {
         return ids.isEmpty() ? Collections.emptyMap() : getMap(dao, ids);
     }
 
-    public static <T, ID, R> Page<T> page(MybatisDao<T, ID> dao, Page<R> page, Selects<T> crud) {
-        crud.limit = page.getPageSize();
-        crud.offset = page.getOffset();
-        crud.orderBy(page.getSorts());
+    public static <T, ID, R> Page<T> page(MybatisDao<T, ID> dao, Page<R> page, Query<T> query) {
+        query.limit = page.getPageSize();
+        query.offset = page.getOffset();
+        query.orderBy(page.getSorts());
 
         var params = page.getParams();
         if (params instanceof Param<?> param) {
-            var entityClass = dao.entityClass();
-            var id = param.getId();
-            if (id != null) {
-                crud.addNode(new SqlCond(getIdName(entityClass), Op.EQ, id));
-            } else {
-                var ids = param.getIds();
-                if (CollUtil.isNotEmpty(ids)) {
-                    crud.addNode(new SqlCond(getIdName(entityClass), Op.IN, ids));
-                } else {
-                    var notIds = param.getIds();
-                    if (CollUtil.isNotEmpty(notIds)) {
-                        crud.addNode(new SqlCond(getIdName(entityClass), Op.NOT_IN, notIds));
-                    }
-                }
-            }
-            var createdAts = param.getCreatedAts();
-            if (ArrayUtil.isNotEmpty(createdAts) && createdAts.length == 2) {
-                var createdAt = getColumnName(entityClass, CREATED_AT);
-                if (createdAt != null) {
-                    crud.addNode(new SqlCond(createdAt, Op.BETWEEN, createdAts));
-                }
-            }
-            var updatedAts = param.getUpdatedAts();
-            if (ArrayUtil.isNotEmpty(updatedAts) && updatedAts.length == 2) {
-                var updatedAt = getColumnName(entityClass, UPDATED_AT);
-                if (updatedAt != null) {
-                    crud.addNode(new SqlCond(updatedAt, Op.BETWEEN, createdAts));
-                }
-            }
+            query.param(param);
         }
-        var rows = dao.find(crud);
+        var rows = dao.find(query);
         if (page.getNeedTotal() == null || page.getNeedTotal()) {
-            page.setTotal(dao.count(crud));
+            page.setTotal(dao.count(query));
         } else {
             page.setTotal(rows.size());
         }

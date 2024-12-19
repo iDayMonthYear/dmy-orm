@@ -1,6 +1,6 @@
 package cn.com.idmy.orm.core;
 
-import cn.com.idmy.orm.util.LambdaUtil;
+import cn.com.idmy.base.util.LambdaUtil;
 import jakarta.annotation.Nullable;
 import lombok.Getter;
 import lombok.experimental.Accessors;

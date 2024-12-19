@@ -13,7 +13,7 @@ import java.util.Set;
 // 只关心查询操作的拦截器
 public class QueryInterceptor implements CrudInterceptor {
     @Override
-    public void beforeSelect(Class<?> entityClass, List<SqlNode> nodes) {
+    public void beforeQuery(Class<?> entityClass, List<SqlNode> nodes) {
         nodes.add(new SqlCond("key", Op.EQ, 1));
     }
 
