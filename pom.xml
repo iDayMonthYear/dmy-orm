@@ -12,7 +12,7 @@
     <groupId>cn.com.idmy.orm</groupId>
     <artifactId>dmy-orm</artifactId>
     <packaging>pom</packaging>
-    <version>1.9.4</version>
+    <version>1.0.0</version>
 
     <modules>
         <module>dmy-orm-core</module>

@@ -27,7 +27,7 @@ public class AppServiceImpl implements AppService {
 
     @Override
     public App get(Long id) {
-        return dao.get(id);
+        return dao.getNullable(id);
     }
 
     @Override

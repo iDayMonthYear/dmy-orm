@@ -1,6 +1,7 @@
 package cn.com.idmy.orm.core;
 
 import cn.com.idmy.base.model.Page;
+import cn.com.idmy.base.util.Assert;
 import jakarta.annotation.Nullable;
 import lombok.NonNull;
 import org.apache.ibatis.annotations.*;
@@ -23,6 +24,10 @@ public interface MybatisDao<T, ID> {
     @SuppressWarnings({"unchecked"})
     default Class<ID> idClass() {
         return (Class<ID>) ClassUtil.getTypeArgument(getClass(), 1);
+    }
+
+    default TableInfo table() {
+        return Tables.getTable(entityClass());
     }
 
     @UpdateProvider(type = MybatisSqlProvider.class, method = MybatisSqlProvider.updateBySql)
@@ -86,8 +91,16 @@ public interface MybatisDao<T, ID> {
     }
 
     @Nullable
-    default T get(@NonNull ID id) {
+    default T getNullable(@NonNull ID id) {
         return MybatisDaoDelegate.get(this, id);
+    }
+
+    default T get(ID id) {
+        return Assert.notNull(getNullable(id), "根据主键「{}」找不到「{}」数据", table().comment(), id);
+    }
+
+    default List<T> find(Collection<ID> ids, String msg, Object... params) {
+        return Assert.notEmpty(find(ids), msg, params);
     }
 
     @Nullable

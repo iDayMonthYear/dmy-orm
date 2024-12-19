@@ -6,16 +6,19 @@
     <parent>
         <groupId>cn.com.idmy.orm</groupId>
         <artifactId>dmy-orm</artifactId>
-        <version>1.9.4</version>
+        <version>1.0.0</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
     <artifactId>dmy-orm-spring</artifactId>
+    <packaging>jar</packaging>
+    <version>1.0.0</version>
+
     <dependencies>
         <dependency>
             <groupId>cn.com.idmy.orm</groupId>
             <artifactId>dmy-orm-core</artifactId>
-            <version>${project.parent.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.mybatis</groupId>
