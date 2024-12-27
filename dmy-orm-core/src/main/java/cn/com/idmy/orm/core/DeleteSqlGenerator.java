@@ -4,6 +4,7 @@ import cn.com.idmy.base.model.Pair;
 import cn.com.idmy.orm.core.SqlNode.SqlCond;
 import cn.com.idmy.orm.core.SqlNode.SqlOr;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,15 +13,16 @@ import static cn.com.idmy.orm.core.SqlConsts.DELETE_FROM;
 
 @Slf4j
 class DeleteSqlGenerator extends SqlGenerator {
+    @NotNull
     protected Delete<?> delete;
 
-    protected DeleteSqlGenerator(Delete<?> delete) {
+    protected DeleteSqlGenerator(@NotNull Delete<?> delete) {
         super(delete.entityClass, delete.nodes);
         this.delete = delete;
     }
 
     @Override
-    protected Pair<String, List<Object>> doGenerate() {
+    protected @NotNull Pair<String, List<Object>> doGenerate() {
         var wheres = new ArrayList<SqlNode>(nodes.size());
         for (var node : nodes) {
             if (node instanceof SqlCond) {

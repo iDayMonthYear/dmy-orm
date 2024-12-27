@@ -8,6 +8,7 @@ import cn.com.idmy.orm.core.SqlNode.SqlSet;
 import cn.com.idmy.orm.mybatis.handler.TypeHandlerValue;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.hutool.core.collection.CollUtil;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,7 +28,7 @@ class UpdateSqlGenerator extends SqlGenerator {
     }
 
     @Override
-    protected Pair<String, List<Object>> doGenerate() {
+    protected @NotNull Pair<String, List<Object>> doGenerate() {
         var sets = new ArrayList<SqlSet>(nodes.size());
         var wheres = new ArrayList<SqlNode>(nodes.size() - 1);
         for (var node : nodes) {
@@ -55,7 +56,7 @@ class UpdateSqlGenerator extends SqlGenerator {
         return Pair.of(sql.toString(), params);
     }
 
-    protected void genSet(SqlSet set) {
+    protected void genSet(@NotNull SqlSet set) {
         var col = set.column;
         var expr = genSqlExpr(col, set.expr, null);
         var map = Tables.getTable(entityClass).columnMap();

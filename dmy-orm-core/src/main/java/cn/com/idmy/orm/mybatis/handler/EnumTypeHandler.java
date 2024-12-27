@@ -1,9 +1,10 @@
 package cn.com.idmy.orm.mybatis.handler;
 
 import cn.com.idmy.base.annotation.EnumValue;
-import jakarta.annotation.Nullable;
 import org.apache.ibatis.type.BaseTypeHandler;
 import org.apache.ibatis.type.JdbcType;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Field;
 import java.sql.CallableStatement;
@@ -17,15 +18,16 @@ import java.util.concurrent.ConcurrentHashMap;
 public class EnumTypeHandler<E extends Enum<E>> extends BaseTypeHandler<E> {
     private static final Map<Class<?>, Field> enumValueFieldCache = new ConcurrentHashMap<>(1);
     private final Class<E> type;
+    @Nullable
     private final Field valueField;
 
-    public EnumTypeHandler(Class<E> type) {
+    public EnumTypeHandler(@NotNull Class<E> type) {
         this.type = type;
         this.valueField = getEnumValueField(type);
     }
 
     @Override
-    public void setNonNullParameter(PreparedStatement ps, int idx, E param, JdbcType jdbcType) throws SQLException {
+    public void setNonNullParameter(@NotNull PreparedStatement ps, int idx, @NotNull E param, @NotNull JdbcType jdbcType) throws SQLException {
         if (valueField == null) {
             ps.setString(idx, param.name());
         } else {
@@ -38,22 +40,22 @@ public class EnumTypeHandler<E extends Enum<E>> extends BaseTypeHandler<E> {
     }
 
     @Override
-    public E getNullableResult(ResultSet rs, String name) throws SQLException {
+    public E getNullableResult(@NotNull ResultSet rs, @NotNull String name) throws SQLException {
         return rs.wasNull() ? null : valueOf(rs.getObject(name));
     }
 
     @Override
-    public E getNullableResult(ResultSet rs, int idx) throws SQLException {
+    public E getNullableResult(@NotNull ResultSet rs, int idx) throws SQLException {
         return rs.wasNull() ? null : valueOf(rs.getObject(idx));
     }
 
     @Override
-    public E getNullableResult(CallableStatement cs, int idx) throws SQLException {
+    public E getNullableResult(@NotNull CallableStatement cs, int idx) throws SQLException {
         return cs.wasNull() ? null : valueOf(cs.getObject(idx));
     }
 
     @Nullable
-    private Field getEnumValueField(Class<E> type) {
+    private Field getEnumValueField(@NotNull Class<E> type) {
         return enumValueFieldCache.computeIfAbsent(type, $ -> {
             for (Field field : type.getDeclaredFields()) {
                 if (field.isAnnotationPresent(EnumValue.class)) {

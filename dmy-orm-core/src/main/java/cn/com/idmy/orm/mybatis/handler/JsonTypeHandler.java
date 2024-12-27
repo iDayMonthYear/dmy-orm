@@ -7,6 +7,7 @@ import org.apache.ibatis.type.BaseTypeHandler;
 import org.apache.ibatis.type.JdbcType;
 import org.apache.ibatis.type.MappedJdbcTypes;
 import org.apache.ibatis.type.MappedTypes;
+import org.jetbrains.annotations.NotNull;
 
 import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
@@ -17,6 +18,7 @@ import java.sql.SQLException;
 @MappedJdbcTypes({JdbcType.VARCHAR})
 @RequiredArgsConstructor
 public class JsonTypeHandler<T> extends BaseTypeHandler<T> {
+    @NotNull
     private final TypeReference<T> type;
 
     @Override

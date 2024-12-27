@@ -10,6 +10,7 @@ import org.apache.ibatis.executor.parameter.ParameterHandler;
 import org.apache.ibatis.mapping.BoundSql;
 import org.apache.ibatis.mapping.MappedStatement;
 import org.apache.ibatis.session.Configuration;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
 
@@ -22,7 +23,7 @@ class MybatisConfiguration extends Configuration {
     }
 
     @Override
-    public ParameterHandler newParameterHandler(MappedStatement ms, Object param, BoundSql boundSql) {
+    public ParameterHandler newParameterHandler(@NotNull MappedStatement ms, @NotNull Object param, @NotNull BoundSql boundSql) {
         if (!ms.getId().endsWith(SelectKeyGenerator.SELECT_KEY_SUFFIX)) {
             if (param instanceof Map<?, ?> map && map.containsKey(MybatisSqlProvider.SQL_PARAMS)) {
                 var handler = new MybatisParameterHandler(ms, param, boundSql);
@@ -33,7 +34,7 @@ class MybatisConfiguration extends Configuration {
     }
 
     @Override
-    public void addMappedStatement(MappedStatement ms) {
+    public void addMappedStatement(@NotNull MappedStatement ms) {
         var table = Tables.getTable(ms);
         ms = MybatisModifier.replaceIdGenerator(ms, table);
         ms = MybatisModifier.addResultMap(ms, table);

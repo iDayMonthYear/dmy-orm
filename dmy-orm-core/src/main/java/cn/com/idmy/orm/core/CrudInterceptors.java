@@ -1,6 +1,9 @@
 package cn.com.idmy.orm.core;
 
 
+import lombok.NonNull;
+import org.jetbrains.annotations.NotNull;
+
 import java.util.*;
 
 /**
@@ -13,7 +16,7 @@ public class CrudInterceptors {
     /**
      * 添加拦截器
      */
-    public static void addInterceptor(CrudInterceptor interceptor) {
+    public static void addInterceptor(@NonNull CrudInterceptor interceptor) {
         // 根据拦截器关心的操作类型分组存储
         for (var type : interceptor.interceptTypes()) {
             typeInterceptors.computeIfAbsent(type, k -> new ArrayList<>()).add(interceptor);
@@ -23,7 +26,7 @@ public class CrudInterceptors {
     /**
      * 插入前拦截 - 单个实体
      */
-    static void interceptCreate(Object entity) {
+    static void interceptCreate(@NotNull Object entity) {
         var interceptors = typeInterceptors.get(CrudType.INSERT);
         if (interceptors != null) {
             var entityClass = entity.getClass();
@@ -38,7 +41,7 @@ public class CrudInterceptors {
     /**
      * 插入前拦截 - 实体集合
      */
-    static void interceptCreate(Collection<?> entities) {
+    static void interceptCreate(@NonNull Collection<?> entities) {
         if (!entities.isEmpty()) {
             var interceptors = typeInterceptors.get(CrudType.INSERT);
             if (interceptors != null) {
@@ -55,7 +58,7 @@ public class CrudInterceptors {
     /**
      * 更新前拦截 - 使用条件更新
      */
-    static void interceptUpdate(Class<?> entityClass, List<SqlNode> nodes) {
+    static void interceptUpdate(@NotNull Class<?> entityClass, @NotNull List<SqlNode> nodes) {
         var interceptors = typeInterceptors.get(CrudType.UPDATE);
         if (interceptors != null) {
             for (var interceptor : interceptors) {
@@ -69,7 +72,7 @@ public class CrudInterceptors {
     /**
      * 删除前拦截
      */
-    static void interceptDelete(Class<?> entityClass, List<SqlNode> nodes) {
+    static void interceptDelete(@NotNull Class<?> entityClass, @NotNull List<SqlNode> nodes) {
         var interceptors = typeInterceptors.get(CrudType.DELETE);
         if (interceptors != null) {
             for (var interceptor : interceptors) {
@@ -83,7 +86,7 @@ public class CrudInterceptors {
     /**
      * 查询前拦截
      */
-    static void interceptQuery(Class<?> entityClass, List<SqlNode> nodes) {
+    static void interceptQuery(@NotNull Class<?> entityClass, @NotNull List<SqlNode> nodes) {
         var interceptors = typeInterceptors.get(CrudType.SELECT);
         if (interceptors != null) {
             for (var interceptor : interceptors) {

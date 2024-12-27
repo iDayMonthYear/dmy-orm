@@ -4,33 +4,35 @@ import cn.com.idmy.base.model.Pair;
 import cn.com.idmy.orm.core.TableInfo.TableColumn;
 import cn.com.idmy.orm.mybatis.handler.TypeHandlerValue;
 import org.dromara.hutool.core.reflect.FieldUtil;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 public class CreateSqlGenerator extends SqlGenerator {
     private final Object input;
 
-    public CreateSqlGenerator(Class<?> entityClass, Object input) {
-        super(entityClass, null);
+    public CreateSqlGenerator(@NotNull Class<?> entityClass, @NotNull Object input) {
+        super(entityClass, Collections.emptyList());
         this.input = input;
     }
 
     @Override
-    protected Pair<String, List<Object>> doGenerate() {
+    protected @NotNull Pair<String, List<Object>> doGenerate() {
         if (input instanceof Collection<?> ls) {
-            // 调用批量插入拦截器
             CrudInterceptors.interceptCreate(ls);
             return genInsert(ls);
         } else {
-            // 调用单个插入拦截器
             CrudInterceptors.interceptCreate(input);
             return genInsert(input);
         }
     }
 
-    protected Object getTypeHandlerValue(TableColumn column, Object val) {
+    @Nullable
+    protected Object getTypeHandlerValue(@NotNull TableColumn column, @Nullable Object val) {
         var th = column.typeHandler();
         if (th == null || val == null) {
             return val;
@@ -43,7 +45,8 @@ public class CreateSqlGenerator extends SqlGenerator {
         sql.append(SqlConsts.INSERT_INTO).append(SqlConsts.STRESS_MARK).append(tableName).append(SqlConsts.STRESS_MARK).append(SqlConsts.BLANK).append(SqlConsts.BRACKET_LEFT);
     }
 
-    private Pair<String, List<Object>> genInsert(Object entity) {
+    @NotNull
+    private Pair<String, List<Object>> genInsert(@NotNull Object entity) {
         genInsertHeader();
         var values = new StringBuilder(SqlConsts.VALUES).append(SqlConsts.BRACKET_LEFT);
         var table = Tables.getTable(entity.getClass());
@@ -64,7 +67,8 @@ public class CreateSqlGenerator extends SqlGenerator {
     }
 
     // 新增批量插入方法
-    private Pair<String, List<Object>> genInsert(Collection<?> entities) {
+    @NotNull
+    private Pair<String, List<Object>> genInsert(@NotNull Collection<?> entities) {
         genInsertHeader();
         var cols = Tables.getTable(entityClass).columns();
         int colSize = cols.length;

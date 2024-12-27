@@ -6,6 +6,7 @@ import cn.com.idmy.orm.core.SqlNode.SqlNodeType;
 import cn.com.idmy.orm.core.SqlNode.SqlOr;
 import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,16 +15,20 @@ import java.util.Objects;
 @Slf4j
 @Accessors(fluent = true, chain = true)
 abstract class Crud<T, CRUD extends Crud<T, CRUD>> {
+    @NotNull
     protected List<SqlNode> nodes = new ArrayList<>();
     @SuppressWarnings({"unchecked"})
+    @NotNull
     protected final CRUD $this = (CRUD) this;
+    @NotNull
     protected Class<T> entityClass;
     protected int sqlParamsSize;
 
-    protected Crud(Class<T> entityClass) {
+    protected Crud(@NotNull Class<T> entityClass) {
         this.entityClass = entityClass;
     }
 
+    @NotNull
     public abstract Pair<String, List<Object>> sql();
 
     @Override
@@ -35,12 +40,13 @@ abstract class Crud<T, CRUD extends Crud<T, CRUD>> {
         }
     }
 
-    protected CRUD addNode(SqlNode node) {
+    @NotNull
+    protected CRUD addNode(@NotNull SqlNode node) {
         nodes.add(node);
         return $this;
     }
 
-    protected boolean hasColumn(String column, SqlNodeType type) {
+    protected boolean hasColumn(@NotNull String column, @NotNull SqlNodeType type) {
         return nodes.stream().anyMatch(n -> {
             if (n instanceof SqlColumn col) {
                 return Objects.equals(col.column(), column) && n.type() == type;
@@ -50,10 +56,12 @@ abstract class Crud<T, CRUD extends Crud<T, CRUD>> {
         });
     }
 
-    protected List<SqlNode> columns(String column) {
+    @NotNull
+    protected List<SqlNode> columns(@NotNull String column) {
         return nodes.stream().filter(n -> n instanceof SqlColumn col && Objects.equals(col.column(), column)).toList();
     }
 
+    @NotNull
     public CRUD or() {
         return addNode(new SqlOr());
     }

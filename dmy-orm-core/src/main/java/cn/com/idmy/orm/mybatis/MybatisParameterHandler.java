@@ -9,6 +9,8 @@ import org.apache.ibatis.mapping.MappedStatement;
 import org.apache.ibatis.scripting.defaults.DefaultParameterHandler;
 import org.apache.ibatis.type.TypeHandler;
 import org.apache.ibatis.type.TypeHandlerRegistry;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -18,16 +20,17 @@ import java.util.Map;
 
 @Slf4j
 class MybatisParameterHandler extends DefaultParameterHandler {
+    @NotNull
     private final TypeHandlerRegistry typeHandlerRegistry;
 
-    public MybatisParameterHandler(MappedStatement ms, Object param, BoundSql boundSql) {
+    public MybatisParameterHandler(@NotNull MappedStatement ms, @NotNull Object param, @NotNull BoundSql boundSql) {
         super(ms, param, boundSql);
         this.typeHandlerRegistry = ms.getConfiguration().getTypeHandlerRegistry();
     }
 
     @Override
     @SuppressWarnings({"unchecked"})
-    public void setParameters(PreparedStatement ps) {
+    public void setParameters(@NotNull PreparedStatement ps) {
         try {
             var params = (Map<String, Object>) getParameterObject();
             var sqlParams = (List<Object>) params.get(MybatisSqlProvider.SQL_PARAMS);
@@ -44,7 +47,7 @@ class MybatisParameterHandler extends DefaultParameterHandler {
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
-    private void setParameter(PreparedStatement ps, int idx, Object value, Map<String, Object> params) throws SQLException {
+    private void setParameter(@NotNull PreparedStatement ps, int idx, @Nullable Object value, @NotNull Map<String, Object> params) throws SQLException {
         switch (value) {
             case null -> ps.setObject(idx, null);
             case Object[] val -> {

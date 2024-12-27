@@ -6,6 +6,7 @@ import org.apache.ibatis.executor.Executor;
 import org.apache.ibatis.executor.keygen.KeyGenerator;
 import org.apache.ibatis.mapping.MappedStatement;
 import org.dromara.hutool.core.collection.CollUtil;
+import org.jetbrains.annotations.NotNull;
 
 import java.sql.Statement;
 import java.util.Map;
@@ -16,7 +17,7 @@ public class EntitiesIdGenerator implements KeyGenerator {
 
     @Override
     @SuppressWarnings({"unchecked"})
-    public void processBefore(Executor executor, MappedStatement ms, Statement st, Object param) {
+    public void processBefore(@NotNull Executor executor,@NotNull  MappedStatement ms,@NotNull  Statement st, @NotNull Object param) {
         var params = (Map<String, Object>) param;
         var entities = MybatisSqlProvider.findEntities(params);
         if (CollUtil.isNotEmpty(entities)) {

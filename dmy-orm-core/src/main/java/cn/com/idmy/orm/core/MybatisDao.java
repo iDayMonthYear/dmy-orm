@@ -2,195 +2,321 @@ package cn.com.idmy.orm.core;
 
 import cn.com.idmy.base.model.Page;
 import cn.com.idmy.base.util.Assert;
-import jakarta.annotation.Nullable;
+import cn.com.idmy.orm.OrmException;
+import cn.com.idmy.orm.core.SqlNode.SqlCond;
 import lombok.NonNull;
 import org.apache.ibatis.annotations.*;
+import org.dromara.hutool.core.array.ArrayUtil;
 import org.dromara.hutool.core.collection.CollStreamUtil;
+import org.dromara.hutool.core.collection.CollUtil;
+import org.dromara.hutool.core.convert.ConvertUtil;
 import org.dromara.hutool.core.reflect.ClassUtil;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import static cn.com.idmy.orm.core.MybatisSqlProvider.clearSelectColumns;
+import static cn.com.idmy.orm.core.Tables.getIdName;
+import static cn.com.idmy.orm.core.Tables.getTable;
+import static org.dromara.hutool.core.util.ObjUtil.getTypeArgument;
 
 public interface MybatisDao<T, ID> {
-    int DEFAULT_BATCH_SIZE = 1000;
-
-    @SuppressWarnings({"unchecked"})
+    @NotNull
+    @SuppressWarnings("unchecked")
     default Class<T> entityClass() {
-        return (Class<T>) ClassUtil.getTypeArgument(getClass());
+        return (Class<T>) getTypeArgument(getClass());
     }
 
-    @SuppressWarnings({"unchecked"})
+    @NotNull
+    @SuppressWarnings("unchecked")
     default Class<ID> idClass() {
-        return (Class<ID>) ClassUtil.getTypeArgument(getClass(), 1);
+        return (Class<ID>) getTypeArgument(getClass(), 1);
     }
 
+    @NotNull
     default TableInfo table() {
-        return Tables.getTable(entityClass());
+        return getTable(entityClass());
     }
 
-    @UpdateProvider(type = MybatisSqlProvider.class, method = MybatisSqlProvider.updateBySql)
-    int updateBySql(@Param(MybatisSqlProvider.CRUD) String sql, @Param(MybatisSqlProvider.SQL_PARAMS) List<Object> params);
+    @NotNull
+    default Query<T> q() {
+        return Query.of(this);
+    }
+
+    @NotNull
+    default Update<T> u() {
+        return Update.of(this);
+    }
+
+    @NotNull
+    default Delete<T> d() {
+        return Delete.of(this);
+    }
+
+    @SelectProvider(type = MybatisSqlProvider.class, method = MybatisSqlProvider.count)
+    long count(@NotNull @Param(MybatisSqlProvider.CRUD) Query<T> q);
+
+    default boolean exist(@NotNull Query<T> q) {
+        return count(q) > 0;
+    }
+
+    default boolean exist(@NonNull ID id) {
+        var q = q();
+        q.sqlParamsSize = 1;
+        q.addNode(new SqlCond(getIdName(this), Op.EQ, id));
+        return exist(q);
+    }
+
+    default void exist(@NonNull ID id, @NotNull String msg, @NotNull Object... params) {
+        if (!exist(id)) {
+            throw new IllegalStateException(String.format(msg, params));
+        }
+    }
+
+    default void exist(@NotNull Query<T> q, @NotNull String msg, @NotNull Object... params) {
+        if (!exist(q)) {
+            throw new IllegalStateException(String.format(msg, params));
+        }
+    }
+
+    default boolean notExist(@NotNull Query<T> q) {
+        return !exist(q);
+    }
+
+    default boolean notExist(@NonNull ID id) {
+        return !exist(id);
+    }
+
+    default void notExist(@NonNull ID id, @NotNull String msg, @NotNull Object... params) {
+        if (!notExist(id)) {
+            throw new IllegalStateException(String.format(msg, params));
+        }
+    }
+
+    default void notExist(@NotNull Query<T> q, @NotNull String msg, @NotNull Object... params) {
+        if (!notExist(q)) {
+            throw new IllegalStateException(String.format(msg, params));
+        }
+    }
+
+    @NotNull
+    @SelectProvider(type = MybatisSqlProvider.class, method = MybatisSqlProvider.find)
+    List<T> find(@NotNull @Param(MybatisSqlProvider.CRUD) Query<T> q);
+
+    @NotNull
+    default List<T> all() {
+        return find(q());
+    }
+
+    @NotNull
+    default List<T> find(@Nullable Collection<ID> ids) {
+        if (CollUtil.isEmpty(ids)) {
+            return Collections.emptyList();
+        } else {
+            var q = q();
+            q.sqlParamsSize = 1;
+            q.addNode(new SqlCond(getIdName(this), Op.IN, ids));
+            return find(q);
+        }
+    }
+
+    @NotNull
+    default List<T> find(@NotNull Collection<ID> ids, @NotNull String msg, @NotNull Object... params) {
+        return Assert.notEmpty(find(ids), msg, params);
+    }
+
+    @NotNull
+    default <R> List<R> find(@NotNull FieldGetter<T, R> field, @Nullable Collection<ID> ids) {
+        if (CollUtil.isEmpty(ids)) {
+            return Collections.emptyList();
+        } else {
+            var q = q().select(field);
+            q.sqlParamsSize = 1;
+            q.addNode(new SqlCond(getIdName(this), Op.IN, ids));
+            return find(q).stream().map(field::get).toList();
+        }
+    }
+
+    @NotNull
+    default <R> List<R> find(@NotNull FieldGetter<T, R> field, @NotNull Query<T> q) {
+        clearSelectColumns(q);
+        var ts = find(q.select(field));
+        return CollStreamUtil.toList(ts, field::get);
+    }
+
+    @Nullable
+    @SelectProvider(type = MybatisSqlProvider.class, method = MybatisSqlProvider.getNullable)
+    T getNullable(@NotNull @Param(MybatisSqlProvider.CRUD) Query<T> q);
+
+    @Nullable
+    default T getNullable(@NonNull ID id) {
+        var q = q();
+        q.sqlParamsSize = 1;
+        q.addNode(new SqlCond(getIdName(this), Op.EQ, id));
+        return getNullable(q);
+    }
+
+    @NotNull
+    default T get(@NonNull ID id) {
+        return Assert.notNull(getNullable(id), "根据主键「{}」找不到「{}」数据", id, table().comment());
+    }
+
+    @Nullable
+    default <R> R getNullable(@NotNull FieldGetter<T, R> field, @NonNull ID id) {
+        var q = q().select(field);
+        q.sqlParamsSize = 1;
+        q.addNode(new SqlCond(getIdName(this), Op.EQ, id));
+        T t = getNullable(q);
+        return t == null ? null : field.get(t);
+    }
+
+    @NotNull
+    default <R> R get(@NotNull FieldGetter<T, R> field, @NonNull ID id, @NotNull String msg, @NotNull Object... params) {
+        return Assert.notNull(getNullable(field, id), msg, params);
+    }
+
+    @Nullable
+    default <R> R getNullable(@NotNull FieldGetter<T, R> field, @NotNull Query<T> q) {
+        clearSelectColumns(q);
+        q.limit = 1;
+        q.select(field);
+        T t = getNullable(q);
+        return t == null ? null : field.get(t);
+    }
+
+    @NotNull
+    default <R> R get(@NotNull FieldGetter<T, R> field, @NotNull Query<T> q, @NotNull String msg, @NotNull Object... params) {
+        return Assert.notNull(getNullable(field, q), msg, params);
+    }
+
+    @NotNull
+    default T get(@NotNull Query<T> q, @NotNull String msg, @NotNull Object... params) {
+        return Assert.notNull(getNullable(q), msg, params);
+    }
+
+    @NotNull
+    default Map<ID, T> map(@Nullable ID... ids) {
+        return ArrayUtil.isEmpty(ids) ? Collections.emptyMap() : MybatisSqlProvider.map(this, ids);
+    }
+
+    @NotNull
+    default Map<ID, T> map(@Nullable Collection<ID> ids) {
+        return CollUtil.isEmpty(ids) ? Collections.emptyMap() : MybatisSqlProvider.map(this, ids);
+    }
+
+    @NotNull
+    default <R> Map<R, T> map(@NotNull FieldGetter<T, R> field, @NotNull Query<T> q) {
+        return CollStreamUtil.toIdentityMap(find(q), field::get);
+    }
+
+    @NotNull
+    default <IN> Page<T> page(@NonNull Page<IN> page, @NotNull Query<T> q) {
+        return MybatisSqlProvider.page(this, page, q);
+    }
+
+    @Nullable
+    default <R extends Number> R sqlFn(@NotNull SqlFnName name, @NotNull FieldGetter<T, R> field, @NotNull Query<T> q) {
+        if (name == SqlFnName.IF_NULL) {
+            throw new OrmException("不支持ifnull");
+        } else {
+            clearSelectColumns(q);
+            q.limit = 1;
+            T t = getNullable(q.select(() -> new SqlFn<>(name, field)));
+            return t == null ? null : field.get(t);
+        }
+    }
+
+    @Nullable
+    default <R extends Number> R abs(@NotNull FieldGetter<T, R> field, @NotNull Query<T> q) {
+        return sqlFn(SqlFnName.ABS, field, q);
+    }
+
+    @Nullable
+    default <R extends Number> R avg(@NotNull FieldGetter<T, R> field, @NotNull Query<T> q) {
+        return sqlFn(SqlFnName.AVG, field, q);
+    }
+
+    @Nullable
+    default <R extends Number> R max(@NotNull FieldGetter<T, R> field, @NotNull Query<T> q) {
+        return sqlFn(SqlFnName.MAX, field, q);
+    }
+
+    @Nullable
+    default <R extends Number> R min(@NotNull FieldGetter<T, R> field, @NotNull Query<T> q) {
+        return sqlFn(SqlFnName.MIN, field, q);
+    }
+
+    @NotNull
+    default <R extends Number> R sum(@NotNull FieldGetter<T, R> field, @NotNull Query<T> q) {
+        R result = sqlFn(SqlFnName.SUM, field, q);
+        if (result == null) {
+            var fieldType = ClassUtil.getTypeArgument(field.getClass());
+            @SuppressWarnings("unchecked") R zero = (R) ConvertUtil.convert(fieldType, 0);
+            return zero;
+        } else {
+            return result;
+        }
+    }
 
     @InsertProvider(type = MybatisSqlProvider.class, method = MybatisSqlProvider.create)
     int create(@NonNull @Param(MybatisSqlProvider.ENTITY) T entity);
 
-    /**
-     * 批量插入主键为自增时，不会回写到实体类。（需要查询回写，影响性能）
-     */
     @InsertProvider(type = MybatisSqlProvider.class, method = MybatisSqlProvider.creates)
     int creates(@NonNull @Param(MybatisSqlProvider.ENTITIES) Collection<T> entities);
 
-    @Nullable
-    @SelectProvider(type = MybatisSqlProvider.class, method = MybatisSqlProvider.get)
-    T get(@NonNull @Param(MybatisSqlProvider.CRUD) Query<T> query);
-
-    @SelectProvider(type = MybatisSqlProvider.class, method = MybatisSqlProvider.find)
-    List<T> find(@NonNull @Param(MybatisSqlProvider.CRUD) Query<T> query);
-
-    @UpdateProvider(type = MybatisSqlProvider.class, method = MybatisSqlProvider.update)
-    int update(@NonNull @Param(MybatisSqlProvider.CRUD) Update<T> update);
-
-    @DeleteProvider(type = MybatisSqlProvider.class, method = MybatisSqlProvider.delete)
-    int delete(@NonNull @Param(MybatisSqlProvider.CRUD) Delete<T> delete);
-
-    @SelectProvider(type = MybatisSqlProvider.class, method = MybatisSqlProvider.count)
-    long count(@NonNull @Param(MybatisSqlProvider.CRUD) Query<T> query);
-
-    default int creates(@NonNull Collection<T> entities, int size) {
-        return MybatisDaoDelegate.creates(this, entities, size);
-    }
-
-    default int createOrUpdate(@NonNull T entity) {
-        return MybatisDaoDelegate.createOrUpdate(this, entity, true);
+    default int creates(@Nullable Collection<T> entities, int size) {
+        return MybatisSqlProvider.creates(this, entities, size);
     }
 
     default int createOrUpdate(@NonNull T entity, boolean ignoreNull) {
-        return MybatisDaoDelegate.createOrUpdate(this, entity, ignoreNull);
+        ID idVal = Tables.getIdValue(entity);
+        if (idVal == null) {
+            return create(entity);
+        } else {
+            return exist(idVal) ? MybatisSqlProvider.update(this, entity, ignoreNull) : create(entity);
+        }
     }
 
-    default int update(@NonNull T entity, boolean ignoreNull) {
-        return MybatisDaoDelegate.update(this, entity, ignoreNull);
+    default int createOrUpdate(@NonNull T entity) {
+        return createOrUpdate(entity, true);
     }
+
+    @UpdateProvider(type = MybatisSqlProvider.class, method = MybatisSqlProvider.update)
+    int update(@NotNull @Param(MybatisSqlProvider.CRUD) Update<T> update);
 
     default int update(@NonNull T entity) {
         return update(entity, true);
     }
 
+    default int update(@NonNull T entity, boolean ignoreNull) {
+        return MybatisSqlProvider.update(this, entity, ignoreNull);
+    }
+
+    @UpdateProvider(type = MybatisSqlProvider.class, method = MybatisSqlProvider.updateBySql)
+    int updateBySql(@NonNull @Param(MybatisSqlProvider.CRUD) String sql, @NonNull @Param(MybatisSqlProvider.SQL_PARAMS) List<Object> params);
+
+    @DeleteProvider(type = MybatisSqlProvider.class, method = MybatisSqlProvider.delete)
+    int delete(@NotNull @Param(MybatisSqlProvider.CRUD) Delete<T> d);
+
     default int delete(@NonNull ID id) {
-        return MybatisDaoDelegate.delete(this, id);
+        var d = d();
+        d.sqlParamsSize = 1;
+        d.addNode(new SqlCond(getIdName(this), Op.EQ, id));
+        return delete(d);
     }
 
-    default int delete(@NonNull Collection<ID> ids) {
-        return MybatisDaoDelegate.delete(this, ids);
-    }
-
-    default <IN> Page<T> page(@NonNull Page<IN> page, @NonNull Query<T> select) {
-        return MybatisDaoDelegate.page(this, page, select);
-    }
-
-    @Nullable
-    default T getNullable(@NonNull ID id) {
-        return MybatisDaoDelegate.get(this, id);
-    }
-
-    default T get(ID id) {
-        return Assert.notNull(getNullable(id), "根据主键「{}」找不到「{}」数据", table().comment(), id);
-    }
-
-    default List<T> find(Collection<ID> ids, String msg, Object... params) {
-        return Assert.notEmpty(find(ids), msg, params);
-    }
-
-    @Nullable
-    default <R> R get(@NonNull FieldGetter<T, R> field, @NonNull ID id) {
-        return MybatisDaoDelegate.get(this, field, id);
-    }
-
-    @Nullable
-    default <R> R get(@NonNull FieldGetter<T, R> field, @NonNull Query<T> select) {
-        return MybatisDaoDelegate.get(this, field, select);
-    }
-
-    @SuppressWarnings({"unchecked"})
-    @Nullable
-    default T get(@NonNull Query<T> select, @NonNull FieldGetter<T, ?>... fields) {
-        return MybatisDaoDelegate.get(this, select, fields);
-    }
-
-    default List<T> all() {
-        return find(Query.of(this));
-    }
-
-    default List<T> find(@NonNull Collection<ID> ids) {
-        return MybatisDaoDelegate.find(this, ids);
-    }
-
-    default <R> List<R> find(@NonNull FieldGetter<T, R> field, @NonNull Collection<ID> ids) {
-        return MybatisDaoDelegate.find(this, field, ids);
-    }
-
-    default <R> List<R> find(@NonNull FieldGetter<T, R> field, @NonNull Query<T> select) {
-        return MybatisDaoDelegate.find(this, field, select);
-    }
-
-    default boolean exists(@NonNull ID id) {
-        return MybatisDaoDelegate.exists(this, id);
-    }
-
-    default boolean notExists(@NonNull ID id) {
-        return !exists(id);
-    }
-
-    default boolean exists(@NonNull Query<T> select) {
-        return count(select) > 0;
-    }
-
-    default boolean notExists(@NonNull Query<T> select) {
-        return !exists(select);
-    }
-
-    @Nullable
-    default <R extends Number> R sqlFn(@NonNull SqlFnName name, @NonNull FieldGetter<T, R> field, @NonNull Query<T> query) {
-        return MybatisDaoDelegate.sqlFn(this, name, field, query);
-    }
-
-    @Nullable
-    default <R extends Number> R sum(@NonNull FieldGetter<T, R> field, @NonNull Query<T> query) {
-        return sqlFn(SqlFnName.SUM, field, query);
-    }
-
-    @Nullable
-    default <R extends Number> R avg(@NonNull FieldGetter<T, R> field, @NonNull Query<T> query) {
-        return sqlFn(SqlFnName.AVG, field, query);
-    }
-
-    @Nullable
-    default <R extends Number> R min(@NonNull FieldGetter<T, R> field, @NonNull Query<T> query) {
-        return sqlFn(SqlFnName.MIN, field, query);
-    }
-
-    @Nullable
-    default <R extends Number> R max(@NonNull FieldGetter<T, R> field, @NonNull Query<T> query) {
-        return sqlFn(SqlFnName.MAX, field, query);
-    }
-
-    @Nullable
-    default <R extends Number> R abs(@NonNull FieldGetter<T, R> field, @NonNull Query<T> query) {
-        return sqlFn(SqlFnName.ABS, field, query);
-    }
-
-    @SuppressWarnings({"unchecked"})
-    default Map<ID, T> map(@NonNull ID... ids) {
-        return MybatisDaoDelegate.map(this, ids);
-    }
-
-    default Map<ID, T> map(@NonNull Collection<ID> ids) {
-        return MybatisDaoDelegate.map(this, ids);
-    }
-
-    default <R> Map<R, T> map(@NonNull FieldGetter<T, R> field, @NonNull Query<T> query) {
-        return CollStreamUtil.toIdentityMap(find(query), field::get);
+    default int delete(@Nullable Collection<ID> ids) {
+        if (CollUtil.isEmpty(ids)) {
+            return -1;
+        } else {
+            var d = d();
+            d.sqlParamsSize = 1;
+            d.addNode(new SqlCond(getIdName(this), Op.IN, ids));
+            return delete(d);
+        }
     }
 }

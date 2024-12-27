@@ -6,6 +6,7 @@ import cn.com.idmy.base.annotation.Table.Id;
 import com.alibaba.fastjson2.JSONObject;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 import lombok.experimental.SuperBuilder;
@@ -13,13 +14,14 @@ import lombok.experimental.SuperBuilder;
 import java.time.LocalDateTime;
 import java.util.Map;
 
+@EqualsAndHashCode(of = "id", callSuper = false)
 @Data
 @Accessors(fluent = true)
 @SuperBuilder
 @AllArgsConstructor
 @NoArgsConstructor
 @Table("app")
-public class App  {
+public class App extends BaseApp {
     @Id
     protected Long id;
     @Column("t_key")

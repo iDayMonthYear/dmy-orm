@@ -3,18 +3,21 @@ package cn.com.idmy.orm.mybatis;
 import cn.com.idmy.orm.core.MybatisSqlProvider;
 import cn.com.idmy.orm.core.TableInfo;
 import cn.com.idmy.orm.core.TableInfo.TableId;
+import lombok.NoArgsConstructor;
 import org.apache.ibatis.executor.keygen.NoKeyGenerator;
 import org.apache.ibatis.executor.keygen.SelectKeyGenerator;
 import org.apache.ibatis.mapping.*;
 import org.apache.ibatis.mapping.ResultMapping.Builder;
 import org.apache.ibatis.session.Configuration;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+@NoArgsConstructor(access = lombok.AccessLevel.PRIVATE)
 class MybatisModifier {
-    static SelectKeyGenerator getSelectKeyGenerator(MappedStatement ms, TableId id) {
+    static SelectKeyGenerator getSelectKeyGenerator(@NotNull MappedStatement ms, @NotNull TableId id) {
         var sequence = id.value();
         var selectId = ms.getId() + SelectKeyGenerator.SELECT_KEY_SUFFIX;
         var config = ms.getConfiguration();
@@ -41,12 +44,12 @@ class MybatisModifier {
         return new SelectKeyGenerator(newMs, id.before());
     }
 
-    private static List<ResultMap> createIdResultMaps(Configuration cfg, String sid, Class<?> type, List<ResultMapping> mappings) {
+    private static List<ResultMap> createIdResultMaps(@NotNull Configuration cfg, @NotNull String sid, @NotNull Class<?> type, @NotNull List<ResultMapping> mappings) {
         var resultMap = new ResultMap.Builder(cfg, sid, type, mappings, null).build();
         return Collections.singletonList(resultMap);
     }
 
-    static MappedStatement replaceIdGenerator(MappedStatement ms, TableInfo tableInfo) {
+    static MappedStatement replaceIdGenerator(@NotNull MappedStatement ms, @NotNull TableInfo tableInfo) {
         if (ms.getKeyGenerator() == NoKeyGenerator.INSTANCE) {
             var msId = ms.getId();
             if (msId.endsWith(MybatisSqlProvider.create) || msId.endsWith(MybatisSqlProvider.creates)) {
@@ -56,7 +59,7 @@ class MybatisModifier {
         return ms;
     }
 
-    private static MappedStatement replaceIdGenerator0(MappedStatement ms, TableInfo tableInfo) {
+    private static MappedStatement replaceIdGenerator0(@NotNull MappedStatement ms, @NotNull TableInfo tableInfo) {
         var generator = MybatisIdGeneratorUtil.create(ms, tableInfo);
         if (generator == NoKeyGenerator.INSTANCE) {
             return ms;
@@ -87,7 +90,7 @@ class MybatisModifier {
     }
 
 
-    static MappedStatement addResultMap(MappedStatement ms, TableInfo tableInfo) {
+    static MappedStatement addResultMap(@NotNull MappedStatement ms, @NotNull TableInfo tableInfo) {
         var cfg = ms.getConfiguration();
         var resultMapId = tableInfo.entityClass().getName() + ".BaseResultMap";
         // 确保 ResultMap 已创建
@@ -119,7 +122,7 @@ class MybatisModifier {
                 .build();
     }
 
-    private static void addResultMap(Configuration cfg, Class<?> entityClass, TableInfo table, String resultMapId) {
+    private static void addResultMap(@NotNull Configuration cfg, @NotNull Class<?> entityClass, @NotNull TableInfo table, @NotNull String resultMapId) {
         var resultMappings = new ArrayList<ResultMapping>();
 
         // 添加ID映射

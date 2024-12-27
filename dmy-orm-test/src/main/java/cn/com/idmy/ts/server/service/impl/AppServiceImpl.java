@@ -85,7 +85,7 @@ public class AppServiceImpl implements AppService {
 //                .eq(App::getId, c -> c.plus(1));
 //        dao.find(select);
         Query<App> select = Query.of(dao)
-                .select(() -> SqlFn.min(App::id)).eq(App::id, c -> c.plus(1));
+                .select(() -> SqlFn.min(App::id)).eq(App::creatorId, 1).eq(App::id, c -> c.plus(1));
         dao.find(select);
         List<App> apps = new ArrayList<>();
         apps.add(App.builder().id(null).key("1").build());

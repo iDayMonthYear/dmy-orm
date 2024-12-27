@@ -1,16 +1,32 @@
 package cn.com.idmy.orm.core;
 
+import cn.com.idmy.base.model.Page;
+import cn.com.idmy.base.model.Param;
 import cn.com.idmy.orm.OrmException;
+import cn.com.idmy.orm.core.SqlNode.SqlCond;
+import cn.com.idmy.orm.core.SqlNode.SqlSet;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.builder.annotation.ProviderContext;
+import org.dromara.hutool.core.collection.CollStreamUtil;
+import org.dromara.hutool.core.collection.CollUtil;
+import org.dromara.hutool.core.reflect.FieldUtil;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
+
+import static cn.com.idmy.orm.core.Tables.getIdName;
+import static cn.com.idmy.orm.core.Tables.getTableByMapperClass;
 
 @Slf4j
 @RequiredArgsConstructor
 public class MybatisSqlProvider {
+    public static int DEFAULT_BATCH_SIZE = 1000;
     public static final String CRUD = "$crud$";
     public static final String SQL_PARAMS = "$sqlParams$";
 
@@ -18,7 +34,7 @@ public class MybatisSqlProvider {
     public static final String ENTITIES = "$entities$";
     public static final String ENTITY_CLASS = "$$entityClass$";
 
-    public static final String get = "get";
+    public static final String getNullable = "getNullable";
     public static final String find = "find";
     public static final String delete = "delete";
     public static final String update = "update";
@@ -27,14 +43,15 @@ public class MybatisSqlProvider {
     public static final String creates = "creates";
     public static final String updateBySql = "updateBySql";
 
-    protected static void clearSelectColumns(Query<?> query) {
-        if (query.hasSelectColumn) {
-            query.clearSelectColumns();
-            log.warn("select ... from 中间不能有字段或者函数");
+    protected static void clearSelectColumns(@NotNull Query<?> q) {
+        if (q.hasSelectColumn) {
+            q.clearSelectColumns();
+            log.error("select ... from 中间不能有字段或者函数");
         }
     }
 
-    private static String genCommonSql(Map<String, Object> params) {
+    @NotNull
+    private static String genCommonSql(@NotNull Map<String, Object> params) {
         var where = (Crud<?, ?>) params.get(CRUD);
         putEntityClass(params, where.entityClass);
         var pair = where.sql();
@@ -42,47 +59,127 @@ public class MybatisSqlProvider {
         return pair.left;
     }
 
-    public static void putEntityClass(Map<String, Object> params, Class<?> entityClass) {
+    public static void putEntityClass(@NotNull Map<String, Object> params, @NotNull Class<?> entityClass) {
         params.put(ENTITY_CLASS, entityClass);
     }
 
-    public static Class<?> getEntityClass(Map<String, Object> params) {
+    @NotNull
+    public static Class<?> getEntityClass(@NotNull Map<String, Object> params) {
         return (Class<?>) params.get(ENTITY_CLASS);
     }
 
-    public static Collection<Object> findEntities(Map<String, Object> params) {
+    @SuppressWarnings("unchecked")
+    @NotNull
+    public static Collection<Object> findEntities(@NotNull Map<String, Object> params) {
         return (Collection<Object>) params.get(ENTITIES);
     }
 
-    public String get(Map<String, Object> params) {
+    public static <T, ID> int update(@NotNull MybatisDao<T, ID> dao, @NotNull T entity, boolean ignoreNull) {
+        var table = Tables.getTable(entity.getClass());
+        var id = table.id();
+        var idField = id.field();
+        var idValue = FieldUtil.getFieldValue(entity, idField);
+        if (idValue == null) {
+            throw new OrmException("主键不能为空");
+        }
+        var u = dao.u().addNode(new SqlCond(id.name(), Op.EQ, idValue));
+        var columns = table.columns();
+        int size = columns.length;
+        for (int i = 0; i < size; i++) {
+            var column = columns[i];
+            var field = column.field();
+            if (field != idField) {
+                var value = FieldUtil.getFieldValue(entity, field);
+                if (!ignoreNull || value != null) {
+                    u.addNode(new SqlSet(column.name(), value));
+                }
+            }
+        }
+        var sql = u.sql();
+        return dao.updateBySql(sql.left, sql.right);
+    }
+
+    public static <T, ID> int creates(@NotNull MybatisDao<T, ID> dao, @Nullable Collection<T> entities, int size) {
+        if (CollUtil.isEmpty(entities)) {
+            return -1;
+        }
+        if (size <= 0) {
+            size = DEFAULT_BATCH_SIZE;
+        }
+        var entityList = entities instanceof List ? (List<T>) entities : new ArrayList<>(entities);
+        int sum = 0;
+        int entitiesSize = entities.size();
+        int maxIdx = entitiesSize / size + (entitiesSize % size == 0 ? 0 : 1);
+        for (int i = 0; i < maxIdx; i++) {
+            sum += dao.creates(entityList.subList(i * size, Math.min(i * size + size, entitiesSize)));
+        }
+        return sum;
+    }
+
+
+    @NotNull
+    static <T, ID> Map<ID, T> map(@NotNull MybatisDao<T, ID> dao, @NonNull Object ids) {
+        var q = dao.q();
+        q.sqlParamsSize = 1;
+        q.addNode(new SqlCond(getIdName(dao), Op.IN, ids));
+        var entities = dao.find(q);
+        return CollStreamUtil.toIdentityMap(entities, Tables::getIdValue);
+    }
+
+    @NotNull
+    public static <T, ID, R> Page<T> page(@NotNull MybatisDao<T, ID> dao, @NotNull Page<R> page, @NotNull Query<T> q) {
+        q.limit = page.getPageSize();
+        q.offset = page.getOffset();
+        q.orderBy(page.getSorts());
+
+        var params = page.getParams();
+        if (params instanceof Param<?> param) {
+            q.param(param);
+        }
+        var rows = dao.find(q);
+        if (page.getHasTotal() == null || page.getHasTotal()) {
+            page.setTotal(dao.count(q));
+        } else {
+            page.setTotal(rows.size());
+        }
+        return Page.of(page.getPageNo(), page.getPageSize(), page.getTotal(), rows);
+    }
+
+    @NotNull
+    public String getNullable(@NotNull Map<String, Object> params) {
         return genCommonSql(params);
     }
 
-    public String find(Map<String, Object> params) {
+    @NotNull
+    public String find(@NotNull Map<String, Object> params) {
         return genCommonSql(params);
     }
 
-    public String update(Map<String, Object> params, ProviderContext context) {
+    @NotNull
+    public String update(@NotNull Map<String, Object> params) {
         return genCommonSql(params);
     }
 
-    public String delete(Map<String, Object> params) {
+    @NotNull
+    public String delete(@NotNull Map<String, Object> params) {
         return genCommonSql(params);
     }
 
-    public String count(Map<String, Object> params) {
-        var query = (Query<?>) params.get(CRUD);
-        clearSelectColumns(query);
-        query.limit = null;
-        query.offset = null;
-        query.select(SqlFn::count);
-        putEntityClass(params, query.entityClass);
-        var pair = query.sql();
+    @NotNull
+    public String count(@NotNull Map<String, Object> params) {
+        var q = (Query<?>) params.get(CRUD);
+        clearSelectColumns(q);
+        q.limit = null;
+        q.offset = null;
+        q.select(SqlFn::count);
+        putEntityClass(params, q.entityClass);
+        var pair = q.sql();
         params.put(SQL_PARAMS, pair.right);
         return pair.left;
     }
 
-    public String create(Map<String, Object> params) {
+    @NotNull
+    public String create(@NotNull Map<String, Object> params) {
         var entity = params.get(ENTITY);
         var entityClass = entity.getClass();
         var generator = new CreateSqlGenerator(entityClass, entity);
@@ -92,7 +189,8 @@ public class MybatisSqlProvider {
         return pair.left;
     }
 
-    public String creates(Map<String, Object> params) {
+    @NotNull
+    public String creates(@NotNull Map<String, Object> params) {
         var entities = findEntities(params);
         if (entities.isEmpty()) {
             throw new OrmException("批量创建的实体集合不能为空");
@@ -105,8 +203,9 @@ public class MybatisSqlProvider {
         return pair.left;
     }
 
-    public String updateBySql(Map<String, Object> params, ProviderContext context) {
-        TableInfo table = Tables.getTableByMapperClass(context.getMapperType());
+    @NotNull
+    public String updateBySql(@NotNull Map<String, Object> params, @NotNull ProviderContext context) {
+        TableInfo table = getTableByMapperClass(context.getMapperType());
         putEntityClass(params, table.entityClass());
         return (String) params.get(CRUD);
     }

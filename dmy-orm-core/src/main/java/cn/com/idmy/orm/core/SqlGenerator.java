@@ -5,11 +5,13 @@ import cn.com.idmy.orm.OrmException;
 import cn.com.idmy.orm.core.SqlNode.SqlCond;
 import cn.com.idmy.orm.core.SqlNode.SqlNodeType;
 import cn.com.idmy.orm.core.SqlNode.SqlOr;
-import jakarta.annotation.Nullable;
 import lombok.Getter;
+import lombok.NonNull;
 import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.hutool.core.collection.CollUtil;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
 import java.util.List;
@@ -28,19 +30,23 @@ import static cn.com.idmy.orm.core.SqlConsts.WHERE;
 @Getter
 @Accessors(fluent = true)
 public abstract class SqlGenerator {
+    @NotNull
     protected final Class<?> entityClass;
+    @NotNull
     protected final String tableName;
+    @NotNull
     protected final List<SqlNode> nodes;
+    @NotNull
     protected final StringBuilder sql = new StringBuilder();
     protected List<Object> params;
 
-    public SqlGenerator(Class<?> entityClass, List<SqlNode> notes) {
+    public SqlGenerator(@NotNull Class<?> entityClass, @NotNull List<SqlNode> notes) {
         this.entityClass = entityClass;
         this.nodes = notes;
         tableName = Tables.getTableName(entityClass);
     }
 
-    protected String warpKeyword(String str) {
+    protected String warpKeyword(@NonNull String str) {
         return STRESS_MARK + str + STRESS_MARK;
     }
 
@@ -66,7 +72,7 @@ public abstract class SqlGenerator {
         return placeholder.toString();
     }
 
-    protected static void genPlaceholder(Object val, StringBuilder placeholder) {
+    protected static void genPlaceholder(Object val, @NotNull StringBuilder placeholder) {
         if (val instanceof Collection<?> ls) {
             genPlaceholder(placeholder, ls.size());
         } else if (val instanceof Object[] arr) {
@@ -76,7 +82,7 @@ public abstract class SqlGenerator {
         }
     }
 
-    protected static void genPlaceholder(StringBuilder placeholder, int size) {
+    protected static void genPlaceholder(@NotNull StringBuilder placeholder, int size) {
         placeholder.append(BRACKET_LEFT);
         for (int i = 0; i < size; i++) {
             placeholder.append(PLACEHOLDER);
@@ -87,13 +93,13 @@ public abstract class SqlGenerator {
         placeholder.append(BRACKET_RIGHT);
     }
 
-    protected void genCond(SqlCond cond) {
+    protected void genCond(@NotNull SqlCond cond) {
         var col = cond.column;
         var expr = genSqlExpr(col, cond.expr, cond.op);
         sql.append(warpKeyword(col)).append(BLANK).append(cond.op.getSymbol()).append(BLANK).append(expr);
     }
 
-    protected void genCondOr(SqlNode node) {
+    protected void genCondOr(@NotNull SqlNode node) {
         if (node instanceof SqlOr) {
             sql.append(SqlConsts.OR);
         } else if (node instanceof SqlCond cond) {
@@ -101,7 +107,7 @@ public abstract class SqlGenerator {
         }
     }
 
-    protected static void skipAdjoinOr(SqlNode node, List<SqlNode> wheres) {
+    protected static void skipAdjoinOr(@NotNull SqlNode node, @NotNull List<SqlNode> wheres) {
         if (CollUtil.isNotEmpty(wheres)) {
             if (wheres.getLast().type == SqlNodeType.OR) {
                 if (log.isWarnEnabled()) {
@@ -113,7 +119,7 @@ public abstract class SqlGenerator {
         }
     }
 
-    protected static void removeLastOr(List<SqlNode> wheres) {
+    protected static void removeLastOr(@NotNull List<SqlNode> wheres) {
         if (CollUtil.isNotEmpty(wheres) && wheres.getLast() instanceof SqlOr) {
             wheres.removeLast();
             if (log.isWarnEnabled()) {
@@ -122,7 +128,7 @@ public abstract class SqlGenerator {
         }
     }
 
-    protected void genWhere(List<SqlNode> wheres) {
+    protected void genWhere(@NotNull List<SqlNode> wheres) {
         if (!wheres.isEmpty()) {
             removeLastOr(wheres);
             sql.append(WHERE);
@@ -138,6 +144,7 @@ public abstract class SqlGenerator {
         }
     }
 
+    @NotNull
     protected Pair<String, List<Object>> generate() {
         // 根据具体类型调用对应的拦截方法
         switch (this) {
@@ -150,5 +157,6 @@ public abstract class SqlGenerator {
         return doGenerate();
     }
 
+    @NotNull
     protected abstract Pair<String, List<Object>> doGenerate();
 }

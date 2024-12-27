@@ -7,6 +7,7 @@ import org.apache.ibatis.executor.Executor;
 import org.apache.ibatis.executor.keygen.KeyGenerator;
 import org.apache.ibatis.mapping.MappedStatement;
 import org.apache.ibatis.session.Configuration;
+import org.jetbrains.annotations.NotNull;
 
 import java.sql.Statement;
 
@@ -16,7 +17,7 @@ public class CustomIdGenerator implements KeyGenerator {
     protected final TableId id;
     protected IdGenerator idGenerator;
 
-    public CustomIdGenerator(Configuration cfg, TableInfo table) {
+    public CustomIdGenerator(@NotNull Configuration cfg, @NotNull TableInfo table) {
         this.configuration = cfg;
         this.table = table;
         this.id = table.id();

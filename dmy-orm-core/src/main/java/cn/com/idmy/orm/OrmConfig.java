@@ -1,10 +1,8 @@
 package cn.com.idmy.orm;
 
-import cn.com.idmy.base.annotation.Table.Id.IdType;
-import cn.com.idmy.orm.core.CrudInterceptor;
-import cn.com.idmy.orm.core.CrudInterceptors;
-import cn.com.idmy.orm.core.FieldGetter;
-import cn.com.idmy.orm.core.Tables;
+import cn.com.idmy.base.annotation.Table.IdType;
+import cn.com.idmy.orm.core.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -31,10 +29,20 @@ public class OrmConfig {
     }
 
     @Setter
+    @NotNull
     private IdType defaultIdType = IdType.AUTO;
+    @NotNull
     private NameStrategy tableNameStrategy = NameStrategy.DEFAULT;
+    @NotNull
     private NameStrategy columnNameStrategy = NameStrategy.DEFAULT;
 
+    public void defaultBatchSize(int size) {
+        if (size > 10) {
+            MybatisSqlProvider.DEFAULT_BATCH_SIZE = size;
+        }
+    }
+
+    @NotNull
     private String nameStrategy(String name, NameStrategy strategy) {
         return switch (strategy) {
             case DEFAULT -> name;
@@ -45,19 +53,22 @@ public class OrmConfig {
         };
     }
 
+    @NotNull
     public String toTableName(String name) {
         return nameStrategy(name, tableNameStrategy);
     }
 
+    @NotNull
     public String toColumnName(String name) {
         return nameStrategy(name, columnNameStrategy);
     }
 
-    public static <T, R> void register(Class<T> entityClass, FieldGetter<T, R> col, TypeHandler<?> handler) {
+    @NotNull
+    public static <T, R> void register(@NotNull Class<T> entityClass, @NotNull FieldGetter<T, R> col, @NotNull TypeHandler<?> handler) {
         Tables.bindTypeHandler(entityClass, col, handler);
     }
 
-    public static void register(CrudInterceptor interceptor) {
+    public static void register(@NotNull CrudInterceptor interceptor) {
         CrudInterceptors.addInterceptor(interceptor);
     }
 }

@@ -1,13 +1,14 @@
 package cn.com.idmy.orm.core;
 
 import cn.com.idmy.base.annotation.Table;
-import cn.com.idmy.base.annotation.Table.Id.IdType;
+import cn.com.idmy.base.annotation.Table.Column;
+import cn.com.idmy.base.annotation.Table.Id;
+import cn.com.idmy.base.annotation.Table.IdType;
 import cn.com.idmy.base.util.LambdaUtil;
 import cn.com.idmy.orm.OrmConfig;
 import cn.com.idmy.orm.OrmException;
 import cn.com.idmy.orm.core.TableInfo.TableColumn;
 import cn.com.idmy.orm.core.TableInfo.TableId;
-import jakarta.annotation.Nullable;
 import lombok.NoArgsConstructor;
 import org.apache.ibatis.mapping.MappedStatement;
 import org.apache.ibatis.type.TypeHandler;
@@ -16,6 +17,8 @@ import org.dromara.hutool.core.collection.CollUtil;
 import org.dromara.hutool.core.reflect.ClassUtil;
 import org.dromara.hutool.core.reflect.FieldUtil;
 import org.dromara.hutool.core.text.StrUtil;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -30,7 +33,7 @@ public class Tables {
     private static final Map<Field, TypeHandler<?>> typeHandlers = new ConcurrentHashMap<>();
     private static final OrmConfig config = OrmConfig.config();
 
-    public static <T, R> void bindTypeHandler(Class<T> entityClass, FieldGetter<T, R> col, TypeHandler<?> handler) {
+    public static <T, R> void bindTypeHandler(@NotNull Class<T> entityClass, @NotNull FieldGetter<T, R> col, @NotNull TypeHandler<?> handler) {
         var fieldName = LambdaUtil.getFieldName(col);
         try {
             var field = entityClass.getDeclaredField(fieldName);
@@ -47,11 +50,13 @@ public class Tables {
         typeHandlers.clear();
     }
 
-    public static TableInfo getTable(Class<?> entityClass) {
+    @NotNull
+    public static TableInfo getTable(@NotNull Class<?> entityClass) {
         return entityTableInfos.computeIfAbsent(entityClass, Tables::init);
     }
 
-    public static TableInfo getTable(MappedStatement ms) {
+    @NotNull
+    public static TableInfo getTable(@NotNull MappedStatement ms) {
         String className = ms.getId().substring(0, ms.getId().lastIndexOf("."));
         try {
             return getTableByMapperClass(Class.forName(className));
@@ -60,21 +65,20 @@ public class Tables {
         }
     }
 
-    public static TableInfo getTableByMapperClass(Class<?> mapperClass) {
+    @NotNull
+    public static TableInfo getTableByMapperClass(@NotNull Class<?> mapperClass) {
         return MapUtil.computeIfAbsent(mapperTableInfos, mapperClass, key -> getTable(ClassUtil.getTypeArgument(mapperClass)));
     }
 
-    private static TableInfo init(Class<?> entityClass) {
+    @NotNull
+    private static TableInfo init(@NotNull Class<?> entityClass) {
         final String tableName;
         final String tableComment;
+        Table table = null;
         if (entityClass.isAnnotationPresent(Table.class)) {
-            var table = entityClass.getAnnotation(Table.class);
-            var value = table.value();
-            if (StrUtil.isBlank(value)) {
-                tableName = config.toTableName(entityClass.getSimpleName());
-            } else {
-                tableName = value;
-            }
+            table = entityClass.getAnnotation(Table.class);
+            String value = table.value();
+            tableName = StrUtil.isBlank(value) ? config.toTableName(entityClass.getSimpleName()) : value;
             tableComment = table.comment();
         } else {
             tableName = config.toTableName(entityClass.getSimpleName());
@@ -86,16 +90,11 @@ public class Tables {
         var columns = new ArrayList<TableColumn>();
         var columnMap = new HashMap<String, TableColumn>();
         for (var field : fields) {
-            if (field.isAnnotationPresent(Table.Id.class)) {
+            if (field.isAnnotationPresent(Id.class)) {
                 if (tableId == null) {
-                    var id = field.getAnnotation(Table.Id.class);
-                    String name;
-                    if (StrUtil.isBlank(id.name())) {
-                        name = config.toColumnName(field.getName());
-                    } else {
-                        name = id.name();
-                    }
-                    IdType idType = id.type();
+                    var id = field.getAnnotation(Id.class);
+                    var name = StrUtil.isBlank(id.name()) ? config.toColumnName(field.getName()) : id.name();
+                    var idType = table != null && table.idType() != IdType.DEFAULT ? table.idType() : id.type();
                     if (idType == IdType.DEFAULT) {
                         idType = config.defaultIdType();
                     }
@@ -105,16 +104,12 @@ public class Tables {
                 }
             }
 
-            if (!field.isAnnotationPresent(Table.Column.class) || !field.getAnnotation(Table.Column.class).ignore()) {
-                var column = field.getAnnotation(Table.Column.class);
-                String name;
-                boolean large;
-                String comment;
-                if (column == null) {
-                    comment = null;
-                    name = null;
-                    large = false;
-                } else {
+            if (!field.isAnnotationPresent(Column.class) || !field.getAnnotation(Column.class).ignore()) {
+                Column column = field.getAnnotation(Column.class);
+                String name = null;
+                boolean large = false;
+                String comment = "";
+                if (column != null) {
                     name = column.value();
                     large = column.large();
                     comment = column.comment();
@@ -122,17 +117,13 @@ public class Tables {
                 if (StrUtil.isBlank(name)) {
                     name = config.toColumnName(field.getName());
                 }
-                var tableColumn = new TableColumn(
-                        field,
-                        name,
-                        large,
-                        comment,
-                        typeHandlers.get(field)
-                );
+                TypeHandler<?> handler = typeHandlers.get(field);
+                TableColumn tableColumn = new TableColumn(field, name, large, comment, handler);
                 columns.add(tableColumn);
                 columnMap.put(name, tableColumn);
             }
         }
+
         if (tableId == null) {
             throw new OrmException("实体类" + entityClass.getName() + "中不存在主键");
         } else {
@@ -140,48 +131,52 @@ public class Tables {
         }
     }
 
-    public static String getTableName(Class<?> entityClass) {
+    @NotNull
+    public static String getTableName(@NotNull Class<?> entityClass) {
         return getTable(entityClass).name();
     }
 
-    public static TableId getId(Class<?> entityClass) {
+    @NotNull
+    public static TableId getId(@NotNull Class<?> entityClass) {
         return getTable(entityClass).id();
     }
 
-    public static String getIdName(Class<?> entityClass) {
+    @NotNull
+    public static String getIdName(@NotNull Class<?> entityClass) {
         return getId(entityClass).name();
     }
 
-    public static String getIdName(MybatisDao<?, ?> dao) {
+    @NotNull
+    public static String getIdName(@NotNull MybatisDao<?, ?> dao) {
         return getId(dao.entityClass()).name();
     }
 
+    @Nullable
     @SuppressWarnings("unchecked")
-    public static <T> T getIdValue(Object entity) {
+    public static <T> T getIdValue(@NotNull Object entity) {
         var table = getTable(entity.getClass());
         return (T) FieldUtil.getFieldValue(entity, table.id().field());
     }
 
-    public static Field getIdField(Class<?> entityClass) {
+    @NotNull
+    public static Field getIdField(@NotNull Class<?> entityClass) {
         return getTable(entityClass).id().field();
     }
 
     @Nullable
-    public static String getColumnName(Class<?> entityClass, String fieldName) {
+    public static String getColumnName(@NotNull Class<?> entityClass, @NotNull String fieldName) {
         var table = getTable(entityClass);
         var columnMap = table.columnMap();
         if (CollUtil.isEmpty(columnMap)) {
             return null;
-        }
-        var column = columnMap.get(fieldName);
-        if (column == null) {
-            return null;
         } else {
-            return column.name();
+            var column = columnMap.get(fieldName);
+            return column == null ? null : column.name();
         }
     }
 
-    public static <T> String getColumnName(Class<?> entityClass, FieldGetter<T, ?> field) {
+    @NotNull
+    public static <T> String getColumnName(@NotNull Class<?> entityClass, @NotNull FieldGetter<T, ?> field) {
         var fieldName = LambdaUtil.getFieldName(field);
         var columnName = getColumnName(entityClass, fieldName);
         if (StrUtil.isBlank(columnName)) {

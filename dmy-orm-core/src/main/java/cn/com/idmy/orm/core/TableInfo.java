@@ -1,34 +1,35 @@
 package cn.com.idmy.orm.core;
 
-import cn.com.idmy.base.annotation.Table.Id.IdType;
-import jakarta.annotation.Nullable;
+import cn.com.idmy.base.annotation.Table.IdType;
 import org.apache.ibatis.type.TypeHandler;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Field;
 import java.util.Map;
 
 public record TableInfo(
-        Class<?> entityClass,
-        String name,
-        TableId id,
-        String comment,
-        TableColumn[] columns,
-        Map<String, TableColumn> columnMap) {
+        @NotNull Class<?> entityClass,
+        @NotNull String name,
+        @NotNull TableId id,
+        @NotNull String comment,
+        @NotNull TableColumn[] columns,
+        @NotNull Map<String, TableColumn> columnMap) {
 
     public record TableId(
-            Field field,
-            String name,
-            IdType idType,
-            String value,
+            @NotNull Field field,
+            @NotNull String name,
+            @NotNull IdType idType,
+            @NotNull String value,
             boolean before,
-            String comment) {
+            @NotNull String comment) {
     }
 
     public record TableColumn(
-            Field field,
-            String name,
+            @NotNull Field field,
+            @NotNull String name,
             boolean large,
-            String comment,
+            @NotNull String comment,
             @Nullable
             TypeHandler<?> typeHandler) {
     }

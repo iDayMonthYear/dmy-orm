@@ -4,6 +4,8 @@ import cn.com.idmy.base.model.Pair;
 import cn.com.idmy.orm.OrmException;
 import cn.com.idmy.orm.core.SqlNode.*;
 import lombok.extern.slf4j.Slf4j;
+import org.dromara.hutool.core.text.StrUtil;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -13,15 +15,16 @@ import static cn.com.idmy.orm.core.SqlConsts.*;
 
 @Slf4j
 class QuerySqlGenerator extends SqlGenerator {
+    @NotNull
     protected Query<?> query;
 
-    protected QuerySqlGenerator(Query<?> query) {
+    protected QuerySqlGenerator(@NotNull Query<?> query) {
         super(query.entityClass, query.nodes);
         this.query = query;
     }
 
     @Override
-    protected Pair<String, List<Object>> doGenerate() {
+    protected @NotNull Pair<String, List<Object>> doGenerate() {
         var selectColumns = new ArrayList<SqlSelectColumn>(1);
         var wheres = new ArrayList<SqlNode>(nodes.size());
         var groups = new ArrayList<SqlGroupBy>(1);
@@ -66,7 +69,7 @@ class QuerySqlGenerator extends SqlGenerator {
 
     protected void genDistinct(SqlDistinct distinct) {
         var col = distinct.column;
-        if (col == null) {
+        if (StrUtil.isBlank(col)) {
             sql.append(DISTINCT);
         } else {
             sql.append(DISTINCT).append(BRACKET_LEFT).append(warpKeyword(col)).append(BRACKET_RIGHT);
