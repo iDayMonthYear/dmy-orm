@@ -2,13 +2,13 @@ package cn.com.idmy.orm;
 
 import cn.com.idmy.base.annotation.Table.IdType;
 import cn.com.idmy.orm.core.*;
-import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import org.apache.ibatis.type.TypeHandler;
 import org.dromara.hutool.core.text.StrUtil;
+import org.jetbrains.annotations.NotNull;
 
 @Getter
 @Accessors(fluent = true)
@@ -43,7 +43,7 @@ public class OrmConfig {
     }
 
     @NotNull
-    private String nameStrategy(String name, NameStrategy strategy) {
+    private String nameStrategy(@NotNull String name, @NotNull NameStrategy strategy) {
         return switch (strategy) {
             case DEFAULT -> name;
             case LOWER -> name.toLowerCase();
@@ -54,16 +54,15 @@ public class OrmConfig {
     }
 
     @NotNull
-    public String toTableName(String name) {
+    public String toTableName(@NotNull String name) {
         return nameStrategy(name, tableNameStrategy);
     }
 
     @NotNull
-    public String toColumnName(String name) {
+    public String toColumnName(@NotNull String name) {
         return nameStrategy(name, columnNameStrategy);
     }
 
-    @NotNull
     public static <T, R> void register(@NotNull Class<T> entityClass, @NotNull FieldGetter<T, R> col, @NotNull TypeHandler<?> handler) {
         Tables.bindTypeHandler(entityClass, col, handler);
     }

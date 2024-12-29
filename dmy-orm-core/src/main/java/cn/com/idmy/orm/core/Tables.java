@@ -73,16 +73,16 @@ public class Tables {
     @NotNull
     private static TableInfo init(@NotNull Class<?> entityClass) {
         final String tableName;
-        final String tableComment;
+        final String tableTitle;
         Table table = null;
         if (entityClass.isAnnotationPresent(Table.class)) {
             table = entityClass.getAnnotation(Table.class);
-            String value = table.value();
-            tableName = StrUtil.isBlank(value) ? config.toTableName(entityClass.getSimpleName()) : value;
-            tableComment = table.comment();
+            String name = table.name();
+            tableName = StrUtil.isBlank(name) ? config.toTableName(entityClass.getSimpleName()) : name;
+            tableTitle = StrUtil.isBlank(table.value()) ? null : table.value();
         } else {
             tableName = config.toTableName(entityClass.getSimpleName());
-            tableComment = "";
+            tableTitle = null;
         }
 
         TableId tableId = null;
@@ -94,11 +94,11 @@ public class Tables {
                 if (tableId == null) {
                     var id = field.getAnnotation(Id.class);
                     var name = StrUtil.isBlank(id.name()) ? config.toColumnName(field.getName()) : id.name();
-                    var idType = table != null && table.idType() != IdType.DEFAULT ? table.idType() : id.type();
+                    var idType = table == null || table.idType() == IdType.DEFAULT ? id.type() : table.idType();
                     if (idType == IdType.DEFAULT) {
                         idType = config.defaultIdType();
                     }
-                    tableId = new TableId(field, name, idType, id.value(), id.before(), id.comment());
+                    tableId = new TableId(field, name, idType, id.value(), id.before(), id.title());
                 } else {
                     throw new OrmException("实体类" + entityClass.getName() + "中存在多个主键");
                 }
@@ -108,17 +108,20 @@ public class Tables {
                 Column column = field.getAnnotation(Column.class);
                 String name = null;
                 boolean large = false;
-                String comment = "";
+                String title = null;
                 if (column != null) {
-                    name = column.value();
+                    name = column.name();
                     large = column.large();
-                    comment = column.comment();
+                    title = column.value();
                 }
                 if (StrUtil.isBlank(name)) {
                     name = config.toColumnName(field.getName());
                 }
+                if (StrUtil.isBlank(title)) {
+                    title = null;
+                }
                 TypeHandler<?> handler = typeHandlers.get(field);
-                TableColumn tableColumn = new TableColumn(field, name, large, comment, handler);
+                TableColumn tableColumn = new TableColumn(field, name, large, title, handler);
                 columns.add(tableColumn);
                 columnMap.put(name, tableColumn);
             }
@@ -127,7 +130,7 @@ public class Tables {
         if (tableId == null) {
             throw new OrmException("实体类" + entityClass.getName() + "中不存在主键");
         } else {
-            return new TableInfo(entityClass, tableName, tableId, tableComment, columns.toArray(new TableColumn[0]), columnMap);
+            return new TableInfo(entityClass, tableName, tableId, tableTitle, columns.toArray(new TableColumn[0]), columnMap);
         }
     }
 
@@ -164,14 +167,35 @@ public class Tables {
     }
 
     @Nullable
-    public static String getColumnName(@NotNull Class<?> entityClass, @NotNull String fieldName) {
+    public static TableColumn getColum(@NotNull Class<?> entityClass, @NotNull String fieldName) {
         var table = getTable(entityClass);
         var columnMap = table.columnMap();
         if (CollUtil.isEmpty(columnMap)) {
             return null;
         } else {
-            var column = columnMap.get(fieldName);
-            return column == null ? null : column.name();
+            return columnMap.get(fieldName);
+        }
+    }
+
+    @Nullable
+    public static <T> TableColumn getColum(@NotNull Class<?> entityClass, @NotNull FieldGetter<T, ?> field) {
+        var table = getTable(entityClass);
+        var columnMap = table.columnMap();
+        if (CollUtil.isEmpty(columnMap)) {
+            return null;
+        } else {
+            String fieldName = LambdaUtil.getFieldName(field);
+            return columnMap.get(fieldName);
+        }
+    }
+
+    @Nullable
+    public static String getColumnName(@NotNull Class<?> entityClass, @NotNull String fieldName) {
+        TableColumn colum = getColum(entityClass, fieldName);
+        if (colum == null) {
+            return null;
+        } else {
+            return colum.name();
         }
     }
 

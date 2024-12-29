@@ -20,16 +20,20 @@ import java.util.Map;
 @SuperBuilder
 @AllArgsConstructor
 @NoArgsConstructor
-@Table("app")
+@Table(value = "应用", name = "app")
 public class App extends BaseApp {
     @Id
     protected Long id;
-    @Column("t_key")
+    @Column(name = "t_key", value = "Key")
     protected String key;
+    @Column("名称")
     protected String name;
+    @Column("JSON")
     protected JSONObject json;
     protected Map<Integer, Long> json2;
     protected Long a;
+    @Column("创建时间")
     protected LocalDateTime createdAt;
+    @Column("更新时间")
     protected LocalDateTime updatedAt;
 }

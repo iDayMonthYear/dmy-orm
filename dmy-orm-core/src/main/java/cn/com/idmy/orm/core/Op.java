@@ -6,18 +6,19 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @RequiredArgsConstructor
 public enum Op {
-    EQ("="),           // Equal
-    NE("<>"),          // Not Equal
-    LT("<"),           // Less Than
-    LE("<="),          // Less Than or Equal
-    GT(">"),           // Greater Than
-    GE(">="),          // Greater Than or Equal
-    IN("in"),          // In
-    NOT_IN("not in"),  // Not In
-    BETWEEN("between"), // Between
-    NOT_BETWEEN("not between"), // Not Between
-    LIKE("like"),      // Like
-    IS_NULL("is null"), // Is Null
-    IS_NOT_NULL("is not null"); // Is Not Null
+    EQ("="),
+    NE("<>"),
+    LT("<"),
+    LE("<="),
+    GT(">"),
+    GE(">="),
+    IN("in"),
+    NOT_IN("not in"),
+    BETWEEN("between"),
+    NOT_BETWEEN("not between"),
+    LIKE("like"),
+    NOT_LIKE("not like"),
+    IS_NULL("is null"),
+    IS_NOT_NULL("is not null");
     private final String symbol;
 }

@@ -46,7 +46,7 @@ public class SqlNode {
         @NotNull
         final Object expr;
 
-        public SqlCond(@NotNull String column, @NonNull Op op, @NonNull Object expr) {
+        public SqlCond(@NotNull String column, @NonNull Op op, @NotNull Object expr) {
             super(SqlNodeType.COND);
             this.column = SqlUtil.checkColumn(column);
             this.op = op;
@@ -123,7 +123,7 @@ public class SqlNode {
         public SqlSelectColumn(@NonNull SqlFnExpr<?> expr) {
             super(SqlNodeType.SELECT_COLUMN);
             this.expr = expr;
-            var fn = expr.apply();
+            var fn = expr.apply(new SqlFn<>());
             var name = fn.name();
             column = name == COUNT ? ASTERISK : fn.column();
         }

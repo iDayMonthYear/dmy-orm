@@ -14,10 +14,7 @@ import org.dromara.hutool.core.reflect.ClassUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static cn.com.idmy.orm.core.MybatisSqlProvider.clearSelectColumns;
 import static cn.com.idmy.orm.core.Tables.getIdName;
@@ -152,6 +149,16 @@ public interface MybatisDao<T, ID> {
     @SelectProvider(type = MybatisSqlProvider.class, method = MybatisSqlProvider.getNullable)
     T getNullable(@NotNull @Param(MybatisSqlProvider.CRUD) Query<T> q);
 
+    @NotNull
+    default T get(@NotNull Query<T> q, @NotNull String msg, @NotNull Object... params) {
+        return Assert.notNull(getNullable(q), msg, params);
+    }
+
+    @NotNull
+    default T get(@NotNull Query<T> q) {
+        return get(q, "根据「查询条件」找不到「{}」", Optional.ofNullable(table().title()).orElse(table().name()));
+    }
+
     @Nullable
     default T getNullable(@NonNull ID id) {
         var q = q();
@@ -162,7 +169,7 @@ public interface MybatisDao<T, ID> {
 
     @NotNull
     default T get(@NonNull ID id) {
-        return Assert.notNull(getNullable(id), "根据主键「{}」找不到「{}」数据", id, table().comment());
+        return Assert.notNull(getNullable(id), "根据主键「{}」找不到「{}」", id, Optional.ofNullable(table().title()).orElse(table().name()));
     }
 
     @Nullable
@@ -172,6 +179,18 @@ public interface MybatisDao<T, ID> {
         q.addNode(new SqlCond(getIdName(this), Op.EQ, id));
         T t = getNullable(q);
         return t == null ? null : field.get(t);
+    }
+
+    @NotNull
+    default <R> R get(@NotNull FieldGetter<T, R> field, @NonNull ID id) {
+        R r = getNullable(field, id);
+        if (r == null) {
+            var colum = Tables.getColum(entityClass(), field);
+            assert colum != null;
+            throw new OrmException("根据主键「{}」找不到「{}」", id, Optional.ofNullable(colum.title()).orElse(colum.name()));
+        } else {
+            return r;
+        }
     }
 
     @NotNull
@@ -194,8 +213,15 @@ public interface MybatisDao<T, ID> {
     }
 
     @NotNull
-    default T get(@NotNull Query<T> q, @NotNull String msg, @NotNull Object... params) {
-        return Assert.notNull(getNullable(q), msg, params);
+    default <R> R get(@NotNull FieldGetter<T, R> field, @NotNull Query<T> q) {
+        R r = getNullable(field, q);
+        if (r == null) {
+            var col = Tables.getColum(entityClass(), field);
+            assert col != null;
+            throw new OrmException("根据主键「查询条件」找不到「{}」", Optional.ofNullable(col.title()).orElse(col.name()));
+        } else {
+            return r;
+        }
     }
 
     @NotNull
@@ -225,7 +251,7 @@ public interface MybatisDao<T, ID> {
         } else {
             clearSelectColumns(q);
             q.limit = 1;
-            T t = getNullable(q.select(() -> new SqlFn<>(name, field)));
+            T t = getNullable(q.select((c) -> new SqlFn<>(name, field)));
             return t == null ? null : field.get(t);
         }
     }

@@ -3,8 +3,10 @@ package cn.com.idmy.ts.server.model.enums;
 import cn.com.idmy.base.model.IEnum;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.Accessors;
 
 @Getter
+@Accessors(fluent = true)
 @RequiredArgsConstructor
 public enum TriggerType implements IEnum<Integer> {
     MANUAL(1, "手动触发"),
@@ -15,5 +17,5 @@ public enum TriggerType implements IEnum<Integer> {
     MISFIRE(6, "过期补偿");
 
     private final Integer value;
-    private final String name;
+    private final String title;
 }

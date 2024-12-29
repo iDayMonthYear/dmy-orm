@@ -16,6 +16,10 @@
 
     <dependencies>
         <dependency>
+            <groupId>jakarta.annotation</groupId>
+            <artifactId>jakarta.annotation-api</artifactId>
+        </dependency>
+        <dependency>
             <groupId>cn.com.idmy.orm</groupId>
             <artifactId>dmy-orm-core</artifactId>
             <version>${project.version}</version>

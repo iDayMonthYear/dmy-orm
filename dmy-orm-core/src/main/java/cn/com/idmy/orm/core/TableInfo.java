@@ -12,7 +12,7 @@ public record TableInfo(
         @NotNull Class<?> entityClass,
         @NotNull String name,
         @NotNull TableId id,
-        @NotNull String comment,
+        @Nullable String title,
         @NotNull TableColumn[] columns,
         @NotNull Map<String, TableColumn> columnMap) {
 
@@ -22,14 +22,14 @@ public record TableInfo(
             @NotNull IdType idType,
             @NotNull String value,
             boolean before,
-            @NotNull String comment) {
+            @Nullable String title) {
     }
 
     public record TableColumn(
             @NotNull Field field,
             @NotNull String name,
             boolean large,
-            @NotNull String comment,
+            @Nullable String title,
             @Nullable
             TypeHandler<?> typeHandler) {
     }

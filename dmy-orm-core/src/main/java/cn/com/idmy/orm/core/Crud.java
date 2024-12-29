@@ -19,7 +19,7 @@ abstract class Crud<T, CRUD extends Crud<T, CRUD>> {
     protected List<SqlNode> nodes = new ArrayList<>();
     @SuppressWarnings({"unchecked"})
     @NotNull
-    protected final CRUD $this = (CRUD) this;
+    protected final CRUD crud = (CRUD) this;
     @NotNull
     protected Class<T> entityClass;
     protected int sqlParamsSize;
@@ -43,7 +43,7 @@ abstract class Crud<T, CRUD extends Crud<T, CRUD>> {
     @NotNull
     protected CRUD addNode(@NotNull SqlNode node) {
         nodes.add(node);
-        return $this;
+        return crud;
     }
 
     protected boolean hasColumn(@NotNull String column, @NotNull SqlNodeType type) {

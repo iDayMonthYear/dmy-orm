@@ -6,15 +6,19 @@ import cn.com.idmy.orm.core.SqlNode.SqlNodeType;
 import cn.com.idmy.orm.core.SqlNode.SqlOr;
 import cn.com.idmy.orm.core.SqlNode.SqlSet;
 import cn.com.idmy.orm.mybatis.handler.TypeHandlerValue;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.hutool.core.collection.CollUtil;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import static cn.com.idmy.orm.core.SqlConsts.BLANK;
 import static cn.com.idmy.orm.core.SqlConsts.DELIMITER;
 import static cn.com.idmy.orm.core.SqlConsts.EQUAL;
+import static cn.com.idmy.orm.core.SqlConsts.PLACEHOLDER;
 import static cn.com.idmy.orm.core.SqlConsts.SET;
 import static cn.com.idmy.orm.core.SqlConsts.UPDATE;
 
@@ -56,9 +60,20 @@ class UpdateSqlGenerator extends SqlGenerator {
         return Pair.of(sql.toString(), params);
     }
 
+    protected String genSet(@NonNull String col, @NonNull SqlOpExpr expr) {
+        var sqlOp = expr.apply(new SqlOp<>());
+        params.add(sqlOp.value());
+        return warpKeyword(col) + BLANK + sqlOp.op() + BLANK + PLACEHOLDER;
+    }
+
+    protected String genSet(@NonNull String col, @Nullable Object val) {
+        params.add(val);
+        return PLACEHOLDER;
+    }
+
     protected void genSet(@NotNull SqlSet set) {
         var col = set.column;
-        var expr = genSqlExpr(col, set.expr, null);
+        var expr = genSet(col, set.expr);
         var map = Tables.getTable(entityClass).columnMap();
         if (CollUtil.isNotEmpty(map)) {
             var th = map.get(col).typeHandler();

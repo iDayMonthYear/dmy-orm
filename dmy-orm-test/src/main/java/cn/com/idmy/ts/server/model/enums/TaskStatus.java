@@ -1,11 +1,13 @@
 package cn.com.idmy.ts.server.model.enums;
 
 import cn.com.idmy.base.model.IEnum;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.Accessors;
 
 @Getter
-@AllArgsConstructor
+@Accessors(fluent = true)
+@RequiredArgsConstructor
 public enum TaskStatus implements IEnum<Integer> {
     NO_EXECUTOR(-99, "无执行器"),
     UNREQUESTED(-100, "未请求"),
@@ -19,5 +21,5 @@ public enum TaskStatus implements IEnum<Integer> {
     SUCCESS(200, "成功"),
     ;
     private final Integer value;
-    private final String name;
+    private final String title;
 }

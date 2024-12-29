@@ -3,8 +3,10 @@ package cn.com.idmy.ts.server.model.enums;
 import cn.com.idmy.base.model.IEnum;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.Accessors;
 
 @Getter
+@Accessors(fluent = true)
 @RequiredArgsConstructor
 public enum NativeTask implements IEnum<Integer> {
     UPDATE_TIMEOUT_TASK_STATUS(-1, "更新超时任务状态"),
@@ -13,7 +15,7 @@ public enum NativeTask implements IEnum<Integer> {
     HOLIDAY_DATA_SYNC(-4, "节假日数据同步");
 
     private final Integer value;
-    private final String name;
+    private final String title;
 
     public static boolean isNative(int id) {
         return id < 0;

@@ -2,7 +2,6 @@ package cn.com.idmy.ts.server.service.impl;
 
 import cn.com.idmy.base.model.Page;
 import cn.com.idmy.orm.core.Query;
-import cn.com.idmy.orm.core.SqlFn;
 import cn.com.idmy.ts.server.dao.AppDao;
 import cn.com.idmy.ts.server.model.entity.App;
 import cn.com.idmy.ts.server.service.AppService;
@@ -81,11 +80,18 @@ public class AppServiceImpl implements AppService {
 //        map.put(1, 2L);
 //        dao.update(Updates.of(dao).set(App::getJson2, map).eq(App::getId, 1L));
 //        App app = dao.get(1L);
-//        Selects<App> select = Selects.of(dao)
-//                .eq(App::getId, c -> c.plus(1));
+//        Query<App> select = Query.of(dao).eq(App::id, 1).eq(App::creatorId, c -> c.plus(1L));
 //        dao.find(select);
+//        Query<App> select = Query.of(dao)
+//                .select(() -> SqlFn.min(App::id)).eq(App::creatorId, 1L).eq(App::creatorId,  c -> c.plus(1L));
+
+
         Query<App> select = Query.of(dao)
-                .select(() -> SqlFn.min(App::id)).eq(App::creatorId, 1).eq(App::id, c -> c.plus(1));
+                .select(c -> c.max(App::id))
+                .between(App::createdAt, LocalDateTime.now().minusDays(30), LocalDateTime.now())
+                .eq(App::id, c -> c.plus(1L))
+                .eq(App::id, "43423");
+
         dao.find(select);
         List<App> apps = new ArrayList<>();
         apps.add(App.builder().id(null).key("1").build());
