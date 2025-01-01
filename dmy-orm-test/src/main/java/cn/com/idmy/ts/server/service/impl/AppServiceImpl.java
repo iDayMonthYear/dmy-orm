@@ -2,6 +2,7 @@ package cn.com.idmy.ts.server.service.impl;
 
 import cn.com.idmy.base.model.Page;
 import cn.com.idmy.orm.core.Query;
+import cn.com.idmy.orm.core.SqlFn;
 import cn.com.idmy.ts.server.dao.AppDao;
 import cn.com.idmy.ts.server.model.entity.App;
 import cn.com.idmy.ts.server.service.AppService;
@@ -87,7 +88,9 @@ public class AppServiceImpl implements AppService {
 
 
         Query<App> select = Query.of(dao)
-                .select(c -> c.max(App::id))
+                .select(App::name)
+                .select(App::name, App::id)
+                .select(() -> SqlFn.min(App::id))
                 .between(App::createdAt, LocalDateTime.now().minusDays(30), LocalDateTime.now())
                 .eq(App::id, c -> c.plus(1L))
                 .eq(App::id, "43423");

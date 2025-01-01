@@ -135,19 +135,24 @@ public abstract class SqlGenerator {
         }
     }
 
-    protected void genWhere(@NonNull List<SqlNode> wheres) {
-        if (!wheres.isEmpty()) {
+    protected boolean genWhere(@NonNull List<SqlNode> wheres) {
+        if (wheres.isEmpty()) {
+            return true;
+        } else {
+            boolean out = true;
             removeLastOr(wheres);
             sql.append(WHERE);
             for (int i = 0, size = wheres.size(); i < size; i++) {
                 var node = wheres.get(i);
                 genCondOr(node);
+                out = false;
                 if (i < size - 1) {
                     if (wheres.get(i + 1).type == SqlNodeType.COND && node.type != SqlNodeType.OR) {
                         sql.append(AND);
                     }
                 }
             }
+            return out;
         }
     }
 

@@ -82,7 +82,7 @@ class QuerySqlGenerator extends SqlGenerator {
             sql.append(col);
         } else {
             var expr = sc.expr;
-            var fn = expr.apply(new SqlFn<>());
+            var fn = expr.get();
             var name = fn.name();
             if (name == SqlFnName.IF_NULL) {
                 sql.append(name.getName()).append(BRACKET_LEFT).append(col).append(DELIMITER).append(PLACEHOLDER).append(BRACKET_RIGHT).append(BLANK).append(col);

@@ -251,7 +251,7 @@ public interface MybatisDao<T, ID> {
         } else {
             clearSelectColumns(q);
             q.limit = 1;
-            T t = getNullable(q.select((c) -> new SqlFn<>(name, field)));
+            T t = getNullable(q.select(c -> new SqlFn<>(name, field)));
             return t == null ? null : field.get(t);
         }
     }

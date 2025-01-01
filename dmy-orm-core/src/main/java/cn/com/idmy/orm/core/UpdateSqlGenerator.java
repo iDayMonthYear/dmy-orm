@@ -56,8 +56,12 @@ class UpdateSqlGenerator extends SqlGenerator {
                 }
             }
         }
-        genWhere(wheres);
-        return Pair.of(sql.toString(), params);
+        boolean empty = genWhere(wheres);
+        if (empty && !update.force) {
+            throw new IllegalArgumentException("更新语句没有条件！可使用 force 强制执行");
+        } else {
+            return Pair.of(sql.toString(), params);
+        }
     }
 
     protected String genSet(@NonNull String col, @NonNull SqlOpExpr expr) {

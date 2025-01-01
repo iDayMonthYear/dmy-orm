@@ -38,47 +38,47 @@ public class SqlFn<T> {
     }
 
     @NotNull
-    public SqlFn<T> count() {
+    public static <T> SqlFn<T> count() {
         return new SqlFn<>(SqlFnName.COUNT);
     }
 
     @NotNull
-    public SqlFn<T> count(@NotNull FieldGetter<T, ?> field) {
+    public static <T> SqlFn<T> count(@NotNull FieldGetter<T, ?> field) {
         return new SqlFn<>(SqlFnName.COUNT, field);
     }
 
     @NotNull
-    public SqlFn<T> sum(@NotNull FieldGetter<T, ?> field) {
+    public static <T> SqlFn<T> sum(@NotNull FieldGetter<T, ?> field) {
         return new SqlFn<>(SqlFnName.SUM, field);
     }
 
     @NotNull
-    public SqlFn<T> max(@NotNull FieldGetter<T, ?> field) {
+    public static <T> SqlFn<T> max(@NotNull FieldGetter<T, ?> field) {
         return new SqlFn<>(SqlFnName.MAX, field);
     }
 
     @NotNull
-    public SqlFn<T> min(@NotNull FieldGetter<T, ?> field) {
+    public static <T> SqlFn<T> min(@NotNull FieldGetter<T, ?> field) {
         return new SqlFn<>(SqlFnName.MIN, field);
     }
 
     @NotNull
-    public SqlFn<T> avg(@NotNull FieldGetter<T, ?> field) {
+    public static <T> SqlFn<T> avg(@NotNull FieldGetter<T, ?> field) {
         return new SqlFn<>(SqlFnName.AVG, field);
     }
 
     @NotNull
-    public SqlFn<T> abs(@NotNull FieldGetter<T, ?> field) {
+    public static <T> SqlFn<T> abs(@NotNull FieldGetter<T, ?> field) {
         return new SqlFn<>(SqlFnName.ABS, field);
     }
 
     @NotNull
-    public SqlFn<T> length(@NotNull FieldGetter<T, ?> field) {
+    public static <T> SqlFn<T> length(@NotNull FieldGetter<T, ?> field) {
         return new SqlFn<>(SqlFnName.LENGTH, field);
     }
 
     @NotNull
-    public SqlFn<T> ifNull(@NotNull FieldGetter<T, ?> field, @NotNull Object value) {
+    public static <T> SqlFn<T> ifNull(@NotNull FieldGetter<T, ?> field, @NotNull Object value) {
         return new SqlFn<>(SqlFnName.IF_NULL, field, value);
     }
 }

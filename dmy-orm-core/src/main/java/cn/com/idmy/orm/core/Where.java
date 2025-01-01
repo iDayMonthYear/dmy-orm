@@ -1,6 +1,7 @@
 package cn.com.idmy.orm.core;
 
 import cn.com.idmy.orm.core.SqlNode.SqlCond;
+import lombok.NonNull;
 import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.hutool.core.array.ArrayUtil;
@@ -24,7 +25,7 @@ public abstract class Where<T, SUD extends Where<T, SUD>> extends Crud<T, SUD> {
     }
 
     @NotNull
-    protected SUD addNode(@NotNull SqlCond node) {
+    public SUD addNode(@NotNull SqlCond node) {
         switch (node.expr) {
             case Collection<?> ls -> {
                 if (ls.isEmpty()) {
@@ -44,6 +45,12 @@ public abstract class Where<T, SUD extends Where<T, SUD>> extends Crud<T, SUD> {
 
     //region 比较操作
     // 等于
+    @NotNull
+    public SUD eq(@NonNull Object id) {
+        addNode(new SqlCond(Tables.getIdName(entityClass), Op.EQ, id));
+        return crud;
+    }
+
     @NotNull
     public SUD eq(@NotNull FieldGetter<T, ?> field, @Nullable Object val) {
         return val == null ? crud : addNode(new SqlCond(getColumnName(entityClass, field), Op.EQ, val));
@@ -236,11 +243,6 @@ public abstract class Where<T, SUD extends Where<T, SUD>> extends Crud<T, SUD> {
     //region 包含操作
     // IN
     @NotNull
-    public SUD in(@NotNull FieldGetter<T, ?> field, @Nullable Object val) {
-        return val == null ? crud : addNode(new SqlCond(getColumnName(entityClass, field), Op.IN, val));
-    }
-
-    @NotNull
     public SUD in(@NotNull FieldGetter<T, ?> field, @Nullable Object... vals) {
         return ArrayUtil.isEmpty(vals) ? crud : addNode(new SqlCond(getColumnName(entityClass, field), Op.IN, vals));
     }
@@ -248,11 +250,6 @@ public abstract class Where<T, SUD extends Where<T, SUD>> extends Crud<T, SUD> {
     @NotNull
     public SUD in(@NotNull FieldGetter<T, ?> field, @Nullable Collection<?> vals) {
         return CollUtil.isEmpty(vals) ? crud : addNode(new SqlCond(getColumnName(entityClass, field), Op.IN, vals));
-    }
-
-    @NotNull
-    public SUD in(@NotNull FieldGetter<T, ?> field, @Nullable Object val, boolean if0) {
-        return if0 ? in(field, val) : crud;
     }
 
     @NotNull
@@ -266,10 +263,6 @@ public abstract class Where<T, SUD extends Where<T, SUD>> extends Crud<T, SUD> {
     }
 
     // NOT IN
-    @NotNull
-    public SUD notIn(@NotNull FieldGetter<T, ?> field, @Nullable Object val) {
-        return val == null ? crud : addNode(new SqlCond(getColumnName(entityClass, field), Op.NOT_IN, val));
-    }
 
     @NotNull
     public SUD notIn(@NotNull FieldGetter<T, ?> field, @Nullable Object... vals) {
@@ -279,11 +272,6 @@ public abstract class Where<T, SUD extends Where<T, SUD>> extends Crud<T, SUD> {
     @NotNull
     public SUD notIn(@NotNull FieldGetter<T, ?> field, @Nullable Collection<?> vals) {
         return CollUtil.isEmpty(vals) ? crud : addNode(new SqlCond(getColumnName(entityClass, field), Op.NOT_IN, vals));
-    }
-
-    @NotNull
-    public SUD notIn(@NotNull FieldGetter<T, ?> field, @Nullable Object val, boolean if0) {
-        return if0 ? in(field, val) : crud;
     }
 
     @NotNull

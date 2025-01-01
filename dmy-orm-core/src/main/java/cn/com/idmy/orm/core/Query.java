@@ -58,7 +58,7 @@ public class Query<T> extends Where<T, Query<T>> {
         return addNode(new SqlDistinct(getColumnName(entityClass, field)));
     }
 
-    void clearSelectColumns() {
+    protected void clearSelectColumns() {
         nodes = nodes.stream().filter(node -> node.type != SqlNodeType.SELECT_COLUMN && node.type != SqlNodeType.DISTINCT).collect(Collectors.toList());
     }
 

@@ -123,7 +123,7 @@ public class SqlNode {
         public SqlSelectColumn(@NonNull SqlFnExpr<?> expr) {
             super(SqlNodeType.SELECT_COLUMN);
             this.expr = expr;
-            var fn = expr.apply(new SqlFn<>());
+            var fn = expr.get();
             var name = fn.name();
             column = name == COUNT ? ASTERISK : fn.column();
         }

@@ -35,7 +35,11 @@ class DeleteSqlGenerator extends SqlGenerator {
         sql.append(DELETE_FROM).append(SqlConsts.STRESS_MARK).append(tableName).append(SqlConsts.STRESS_MARK);
         params = new ArrayList<>(delete.sqlParamsSize);
 
-        genWhere(wheres);
-        return Pair.of(sql.toString(), params);
+        boolean empty = genWhere(wheres);
+        if (empty && !delete.force) {
+            throw new IllegalArgumentException("删除语句没有条件！可使用 force 强制执行");
+        } else {
+            return Pair.of(sql.toString(), params);
+        }
     }
 }
