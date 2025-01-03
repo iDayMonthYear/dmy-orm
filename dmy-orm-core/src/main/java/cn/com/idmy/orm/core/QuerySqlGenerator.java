@@ -87,6 +87,11 @@ class QuerySqlGenerator extends SqlGenerator {
             if (name == SqlFnName.IF_NULL) {
                 sql.append(name.getName()).append(BRACKET_LEFT).append(col).append(DELIMITER).append(PLACEHOLDER).append(BRACKET_RIGHT).append(BLANK).append(col);
                 params.add(fn.value());
+            } else if (name == SqlFnName.COUNT) {
+                sql.append(name.getName()).append(BRACKET_LEFT).append(ASTERISK).append(BRACKET_RIGHT);
+                if (!ASTERISK.equals(fn.column())) {
+                    sql.append(BLANK).append(col);
+                }
             } else {
                 sql.append(name.getName()).append(BRACKET_LEFT).append(col).append(BRACKET_RIGHT).append(BLANK).append(col);
             }

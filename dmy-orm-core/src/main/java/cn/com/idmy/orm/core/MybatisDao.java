@@ -11,6 +11,7 @@ import org.dromara.hutool.core.collection.CollStreamUtil;
 import org.dromara.hutool.core.collection.CollUtil;
 import org.dromara.hutool.core.convert.ConvertUtil;
 import org.dromara.hutool.core.reflect.ClassUtil;
+import org.dromara.hutool.core.reflect.TypeUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -19,19 +20,18 @@ import java.util.*;
 import static cn.com.idmy.orm.core.MybatisSqlProvider.clearSelectColumns;
 import static cn.com.idmy.orm.core.Tables.getIdName;
 import static cn.com.idmy.orm.core.Tables.getTable;
-import static org.dromara.hutool.core.util.ObjUtil.getTypeArgument;
 
 public interface MybatisDao<T, ID> {
     @NotNull
     @SuppressWarnings("unchecked")
     default Class<T> entityClass() {
-        return (Class<T>) getTypeArgument(getClass());
+        return (Class<T>) TypeUtil.getTypeArgument(getClass());
     }
 
     @NotNull
     @SuppressWarnings("unchecked")
     default Class<ID> idClass() {
-        return (Class<ID>) getTypeArgument(getClass(), 1);
+        return (Class<ID>) TypeUtil.getTypeArgument(getClass(), 1);
     }
 
     @NotNull
@@ -54,8 +54,14 @@ public interface MybatisDao<T, ID> {
         return Delete.of(this);
     }
 
+    @Nullable
     @SelectProvider(type = MybatisSqlProvider.class, method = MybatisSqlProvider.count)
-    long count(@NotNull @Param(MybatisSqlProvider.CRUD) Query<T> q);
+    Long count0(@NotNull @Param(MybatisSqlProvider.CRUD) Query<T> q);
+
+    default long count(@NotNull Query<T> q) {
+        Long l = count0(q);
+        return l == null ? 0 : l;
+    }
 
     default boolean exist(@NotNull Query<T> q) {
         return count(q) > 0;
@@ -100,9 +106,15 @@ public interface MybatisDao<T, ID> {
         }
     }
 
-    @NotNull
+    @Nullable
     @SelectProvider(type = MybatisSqlProvider.class, method = MybatisSqlProvider.find)
-    List<T> find(@NotNull @Param(MybatisSqlProvider.CRUD) Query<T> q);
+    List<T> find0(@NotNull @Param(MybatisSqlProvider.CRUD) Query<T> q);
+
+    @NotNull
+    default List<T> find(@NotNull Query<T> q) {
+        List<T> ts = find0(q);
+        return ts == null ? new ArrayList<T>(0) : ts;
+    }
 
     @NotNull
     default List<T> all() {
@@ -143,6 +155,13 @@ public interface MybatisDao<T, ID> {
         clearSelectColumns(q);
         var ts = find(q.select(field));
         return CollStreamUtil.toList(ts, field::get);
+    }
+
+    @NotNull
+    default List<T> find(@NotNull Query<T> q, @NotNull FieldGetter<T, ?> field, FieldGetter<T, ?>... fields) {
+        q.select(field);
+        q.select(fields);
+        return find(q);
     }
 
     @Nullable
@@ -222,6 +241,14 @@ public interface MybatisDao<T, ID> {
         } else {
             return r;
         }
+    }
+
+    @Nullable
+    default T getNullable(@NotNull Query<T> q, @NotNull FieldGetter<T, ?> field, FieldGetter<T, ?>... fields) {
+        clearSelectColumns(q);
+        q.select(field);
+        q.select(fields);
+        return getNullable(q);
     }
 
     @NotNull

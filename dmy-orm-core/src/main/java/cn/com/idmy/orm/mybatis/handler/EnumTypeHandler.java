@@ -29,7 +29,7 @@ public class EnumTypeHandler<E extends Enum<E>> extends BaseTypeHandler<E> {
     @Override
     public void setNonNullParameter(@NotNull PreparedStatement ps, int idx, @NotNull E param, @NotNull JdbcType jdbcType) throws SQLException {
         if (valueField == null) {
-            ps.setString(idx, param.name());
+            ps.setObject(idx, param);
         } else {
             try {
                 ps.setObject(idx, valueField.get(param));
@@ -54,7 +54,6 @@ public class EnumTypeHandler<E extends Enum<E>> extends BaseTypeHandler<E> {
         return cs.wasNull() ? null : valueOf(cs.getObject(idx));
     }
 
-    @Nullable
     private Field getEnumValueField(@NotNull Class<E> type) {
         return enumValueFieldCache.computeIfAbsent(type, $ -> {
             for (Field field : type.getDeclaredFields()) {

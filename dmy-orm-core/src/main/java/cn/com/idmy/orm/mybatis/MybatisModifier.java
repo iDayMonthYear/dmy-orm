@@ -60,7 +60,7 @@ class MybatisModifier {
     }
 
     private static MappedStatement replaceIdGenerator0(@NotNull MappedStatement ms, @NotNull TableInfo tableInfo) {
-        var generator = MybatisIdGeneratorUtil.create(ms, tableInfo);
+        var generator = MybatisUtil.createKeyGenerator(ms, tableInfo);
         if (generator == NoKeyGenerator.INSTANCE) {
             return ms;
         }

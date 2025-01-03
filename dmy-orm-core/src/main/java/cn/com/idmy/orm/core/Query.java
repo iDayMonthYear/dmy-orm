@@ -11,6 +11,7 @@ import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.hutool.core.array.ArrayUtil;
 import org.dromara.hutool.core.collection.CollUtil;
+import org.dromara.hutool.core.lang.Console;
 import org.dromara.hutool.core.text.StrUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -43,6 +44,7 @@ public class Query<T> extends Where<T, Query<T>> {
 
     @NotNull
     public static <T, ID> Query<T> of(@NotNull MybatisDao<T, ID> dao) {
+        Console.log(dao.entityClass());
         return new Query<>(dao.entityClass());
     }
 

@@ -21,10 +21,13 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Predicate;
 
 @NoArgsConstructor(access = lombok.AccessLevel.PRIVATE)
 public class Tables {
@@ -70,6 +73,43 @@ public class Tables {
         return MapUtil.computeIfAbsent(mapperTableInfos, mapperClass, key -> getTable(ClassUtil.getTypeArgument(mapperClass)));
     }
 
+    public static List<Field> getFields(Class<?> entityClass) {
+        List<Field> fields = new ArrayList<>();
+        doGetFields(entityClass, fields);
+        return fields;
+    }
+
+    public static void applyAllClass(Class<?> clazz, Predicate<Class<?>> checkToContinue) {
+        Class<?> currentClass = clazz;
+        while (currentClass != null && currentClass != Object.class && checkToContinue.test(currentClass)) {
+            currentClass = currentClass.getSuperclass();
+        }
+    }
+
+    private static void doGetFields(Class<?> entityClass, List<Field> fields) {
+        applyAllClass(entityClass, currentClass -> {
+            Field[] declaredFields = currentClass.getDeclaredFields();
+            for (Field declaredField : declaredFields) {
+                int modifiers = declaredField.getModifiers();
+                if (!Modifier.isStatic(modifiers)
+                        && !Modifier.isTransient(modifiers)
+                        && !existName(fields, declaredField)) {
+                    fields.add(declaredField);
+                }
+            }
+            return true;
+        });
+    }
+
+    private static boolean existName(List<Field> fields, Field field) {
+        for (Field f : fields) {
+            if (f.getName().equalsIgnoreCase(field.getName())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     @NotNull
     private static TableInfo init(@NotNull Class<?> entityClass) {
         final String tableName;
@@ -86,7 +126,7 @@ public class Tables {
         }
 
         TableId tableId = null;
-        var fields = entityClass.getDeclaredFields();
+        var fields = getFields(entityClass);
         var columns = new ArrayList<TableColumn>();
         var columnMap = new HashMap<String, TableColumn>();
         for (var field : fields) {
