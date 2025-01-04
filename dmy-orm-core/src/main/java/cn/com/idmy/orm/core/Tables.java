@@ -173,15 +173,20 @@ public class Tables {
         }
     }
 
-    @Nullable
+    @NotNull
     public static <T> TableColumn getColum(@NotNull Class<?> entityClass, @NotNull FieldGetter<T, ?> field) {
         var table = getTable(entityClass);
         var columnMap = table.columnMap();
         if (CollUtil.isEmpty(columnMap)) {
-            return null;
+            throw new OrmException("实体类" + entityClass.getName() + "中不存在字段" + field);
         } else {
             String fieldName = LambdaUtil.getFieldName(field);
-            return columnMap.get(fieldName);
+            TableColumn tableColumn = columnMap.get(fieldName);
+            if (tableColumn == null) {
+                throw new OrmException("实体类" + entityClass.getName() + "中不存在字段" + fieldName);
+            } else {
+                return tableColumn;
+            }
         }
     }
 
@@ -197,13 +202,7 @@ public class Tables {
 
     @NotNull
     public static <T> String getColumnName(@NotNull Class<?> entityClass, @NotNull FieldGetter<T, ?> field) {
-        var fieldName = LambdaUtil.getFieldName(field);
-        var columnName = getColumnName(entityClass, fieldName);
-        if (StrUtil.isBlank(columnName)) {
-            throw new OrmException("实体类" + entityClass.getName() + "中不存在字段" + fieldName);
-        } else {
-            return columnName;
-        }
+        return getColum(entityClass, field).name();
     }
 
     public static void clearTables() {
