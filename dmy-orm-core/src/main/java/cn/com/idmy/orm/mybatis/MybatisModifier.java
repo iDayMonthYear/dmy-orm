@@ -92,42 +92,42 @@ class MybatisModifier {
 
     static MappedStatement addResultMap(@NotNull MappedStatement ms, @NotNull TableInfo tableInfo) {
         var cfg = ms.getConfiguration();
+
+        // 处理 count 查询的特殊情况
+        if (ms.getId().endsWith(MybatisSqlProvider.count)) {
+            var resultMappings = new ArrayList<ResultMapping>(1) {{
+                add(new ResultMapping.Builder(cfg, "count", "COUNT(*)", long.class).build());
+            }};
+            var resultMaps = List.of(new ResultMap.Builder(cfg, ms.getId() + ".CountResultMap", long.class, resultMappings).build());
+            return new MappedStatement
+                    .Builder(cfg, ms.getId(), ms.getSqlSource(), ms.getSqlCommandType())
+                    .resultMaps(resultMaps).build();
+        }
+
+        // 处理普通实体查询
         var resultMapId = tableInfo.entityClass().getName() + ".BaseResultMap";
-        // 确保 ResultMap 已创建
         if (!cfg.hasResultMap(resultMapId)) {
             addResultMap(cfg, tableInfo.entityClass(), tableInfo, resultMapId);
         }
 
-        // 替换为实体类的 ResultMap
-        var resultMaps = new ArrayList<ResultMap>(1);
-        resultMaps.add(cfg.getResultMap(resultMapId));
+        var resultMaps = new ArrayList<ResultMap>(1) {{
+            add(cfg.getResultMap(resultMapId));
+        }};
 
-        return new MappedStatement.Builder(cfg, ms.getId(), ms.getSqlSource(), ms.getSqlCommandType())
-                .resource(ms.getResource())
-                .fetchSize(ms.getFetchSize())
-                .timeout(ms.getTimeout())
-                .statementType(ms.getStatementType())
-                .keyGenerator(ms.getKeyGenerator())
-                .keyProperty(ms.getKeyProperties() == null ? null : String.join(",", ms.getKeyProperties()))
-                .keyColumn(ms.getKeyColumns() == null ? null : String.join(",", ms.getKeyColumns()))
-                .databaseId(ms.getDatabaseId())
-                .lang(ms.getLang())
-                .resultOrdered(ms.isResultOrdered())
-                .resultSets(ms.getResultSets() == null ? null : String.join(",", ms.getResultSets()))
-                .resultMaps(resultMaps)  // 使用实体类的 ResultMap
-                .resultSetType(ms.getResultSetType())
-                .flushCacheRequired(ms.isFlushCacheRequired())
-                .useCache(ms.isUseCache())
-                .cache(ms.getCache())
+        return new MappedStatement
+                .Builder(cfg, ms.getId(), ms.getSqlSource(), ms.getSqlCommandType())
+                .resultMaps(resultMaps)
                 .build();
     }
 
     private static void addResultMap(@NotNull Configuration cfg, @NotNull Class<?> entityClass, @NotNull TableInfo table, @NotNull String resultMapId) {
-        var resultMappings = new ArrayList<ResultMapping>();
-
         // 添加ID映射
-        var id = table.id();
-        resultMappings.add(new Builder(cfg, id.field().getName(), id.name(), id.field().getType()).flags(Collections.singletonList(ResultFlag.ID)).build());
+        var resultMappings = new ArrayList<ResultMapping>() {{
+            var id = table.id();
+            add(new Builder(cfg, id.field().getName(), id.name(), id.field().getType())
+                    .flags(Collections.singletonList(ResultFlag.ID))
+                    .build());
+        }};
 
         // 添加普通列映射
         for (var column : table.columns()) {

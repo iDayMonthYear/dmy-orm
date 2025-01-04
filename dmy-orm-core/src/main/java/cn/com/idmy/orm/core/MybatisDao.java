@@ -54,14 +54,8 @@ public interface MybatisDao<T, ID> {
         return Delete.of(this);
     }
 
-    @Nullable
     @SelectProvider(type = MybatisSqlProvider.class, method = MybatisSqlProvider.count)
-    Long count0(@NotNull @Param(MybatisSqlProvider.CRUD) Query<T> q);
-
-    default long count(@NotNull Query<T> q) {
-        Long l = count0(q);
-        return l == null ? 0 : l;
-    }
+    long count(@NotNull @Param(MybatisSqlProvider.CRUD) Query<T> q);
 
     default boolean exist(@NotNull Query<T> q) {
         return count(q) > 0;
