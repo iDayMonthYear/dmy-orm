@@ -12,8 +12,6 @@ import org.jetbrains.annotations.Nullable;
 import java.io.Serializable;
 import java.util.List;
 
-import static cn.com.idmy.orm.core.Tables.getColumnName;
-
 
 @Slf4j
 @Accessors(fluent = true, chain = false)
@@ -33,12 +31,12 @@ public class Update<T> extends Where<T, Update<T>> {
 
     @NotNull
     public Update<T> set(@NotNull FieldGetter<T, ?> field, @Nullable Object val) {
-        return addNode(new SqlSet(getColumnName(entityClass, field), val));
+        return addNode(new SqlSet(entityClass, field, val));
     }
 
     @NotNull
     public Update<T> set(@NotNull FieldGetter<T, ?> field, @NotNull SqlOpExpr expr) {
-        return addNode(new SqlSet(getColumnName(entityClass, field), expr));
+        return addNode(new SqlSet(entityClass, field, expr));
     }
 
     @NotNull

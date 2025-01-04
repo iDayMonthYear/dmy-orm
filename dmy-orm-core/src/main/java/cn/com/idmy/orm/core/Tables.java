@@ -38,15 +38,9 @@ public class Tables {
 
     public static <T, R> void bindTypeHandler(@NotNull Class<T> entityClass, @NotNull FieldGetter<T, R> col, @NotNull TypeHandler<?> handler) {
         var fieldName = LambdaUtil.getFieldName(col);
-        try {
-            var field = entityClass.getDeclaredField(fieldName);
-            field.setAccessible(true);
-            typeHandlers.put(field, handler);
-        } catch (NoSuchFieldException e) {
-            throw new OrmException("Field not found: " + fieldName, e);
-        } catch (SecurityException e) {
-            throw new OrmException("Access denied to field: " + fieldName, e);
-        }
+        var field = FieldUtil.getField(entityClass, fieldName);
+        field.setAccessible(true);
+        typeHandlers.put(field, handler);
     }
 
     public static void clearTypeHandlers() {
@@ -218,7 +212,7 @@ public class Tables {
     }
 
     @Nullable
-    public static <T> TableColumn getColum(@NotNull Class<?> entityClass, @NotNull FieldGetter<T, ?> field) {
+    public static <T> TableColumn getColumNullable(@NotNull Class<?> entityClass, @NotNull FieldGetter<T, ?> field) {
         var table = getTable(entityClass);
         var columnMap = table.columnMap();
         if (CollUtil.isEmpty(columnMap)) {
@@ -226,6 +220,23 @@ public class Tables {
         } else {
             String fieldName = LambdaUtil.getFieldName(field);
             return columnMap.get(fieldName);
+        }
+    }
+
+    @NotNull
+    public static <T> TableColumn getColum(@NotNull Class<?> entityClass, @NotNull FieldGetter<T, ?> field) {
+        var table = getTable(entityClass);
+        var columnMap = table.columnMap();
+        if (CollUtil.isEmpty(columnMap)) {
+            throw new OrmException("实体类" + entityClass.getName() + "中不存在字段" + field.getClass());
+        } else {
+            String fieldName = LambdaUtil.getFieldName(field);
+            TableColumn col = columnMap.get(fieldName);
+            if (col == null) {
+                throw new OrmException("实体类" + entityClass.getName() + "中不存在字段" + fieldName);
+            } else {
+                return col;
+            }
         }
     }
 
@@ -241,13 +252,7 @@ public class Tables {
 
     @NotNull
     public static <T> String getColumnName(@NotNull Class<?> entityClass, @NotNull FieldGetter<T, ?> field) {
-        var fieldName = LambdaUtil.getFieldName(field);
-        var columnName = getColumnName(entityClass, fieldName);
-        if (StrUtil.isBlank(columnName)) {
-            throw new OrmException("实体类" + entityClass.getName() + "中不存在字段" + fieldName);
-        } else {
-            return columnName;
-        }
+        return getColum(entityClass, field).name();
     }
 
     public static void clearTables() {

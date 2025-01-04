@@ -198,7 +198,7 @@ public interface MybatisDao<T, ID> {
     default <R> R get(@NotNull FieldGetter<T, R> field, @NonNull ID id) {
         R r = getNullable(field, id);
         if (r == null) {
-            var colum = Tables.getColum(entityClass(), field);
+            var colum = Tables.getColumNullable(entityClass(), field);
             assert colum != null;
             throw new OrmException("根据主键「{}」找不到「{}」", id, Optional.ofNullable(colum.title()).orElse(colum.name()));
         } else {
@@ -229,7 +229,7 @@ public interface MybatisDao<T, ID> {
     default <R> R get(@NotNull FieldGetter<T, R> field, @NotNull Query<T> q) {
         R r = getNullable(field, q);
         if (r == null) {
-            var col = Tables.getColum(entityClass(), field);
+            var col = Tables.getColumNullable(entityClass(), field);
             assert col != null;
             throw new OrmException("根据主键「查询条件」找不到「{}」", Optional.ofNullable(col.title()).orElse(col.name()));
         } else {

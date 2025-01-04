@@ -35,6 +35,7 @@ public class OrmAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     SqlSessionFactory sqlSessionFactory(
+            OrmProps props,
             DataSource dataSource,
             EnumWatchInterceptor enumWatchInterceptor
     ) throws Exception {
@@ -42,6 +43,7 @@ public class OrmAutoConfiguration {
         factory.setDataSource(dataSource);
         factory.setConfiguration(new MybatisConfiguration());
 //        factory.setPlugins(enumWatchInterceptor);
+        factory.setMapperLocations(props.resolveMapperLocations());
         return factory.getObject();
     }
 

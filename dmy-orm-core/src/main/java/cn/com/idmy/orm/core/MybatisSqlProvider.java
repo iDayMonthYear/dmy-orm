@@ -91,7 +91,7 @@ public class MybatisSqlProvider {
             if (field != idField) {
                 var value = FieldUtil.getFieldValue(entity, field);
                 if (!ignoreNull || value != null) {
-                    u.addNode(new SqlSet(column.name(), value));
+                    u.addNode(new SqlSet(column, value));
                 }
             }
         }

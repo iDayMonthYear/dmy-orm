@@ -48,49 +48,82 @@ public class CreateSqlGenerator extends SqlGenerator {
     @NotNull
     private Pair<String, List<Object>> genInsert(@NotNull Object entity) {
         genInsertHeader();
-        var values = new StringBuilder(SqlConsts.VALUES).append(SqlConsts.BRACKET_LEFT);
         var table = Tables.getTable(entity.getClass());
         var columns = table.columns();
+
+        // 收集非空字段
+        var columnList = new ArrayList<String>();
+        var valueList = new ArrayList<String>();
         params = new ArrayList<>();
-        for (int i = 0, size = columns.length; i < size; i++) {
-            var col = columns[i];
+
+        for (var col : columns) {
             var val = FieldUtil.getFieldValue(entity, col.field());
-            sql.append(SqlConsts.STRESS_MARK).append(col.name()).append(SqlConsts.STRESS_MARK).append(SqlConsts.DELIMITER);
-            values.append(SqlConsts.PLACEHOLDER).append(SqlConsts.DELIMITER);
-            params.add(getTypeHandlerValue(col, val));
+            if (val != null) {  // 只处理非空值
+                columnList.add(SqlConsts.STRESS_MARK + col.name() + SqlConsts.STRESS_MARK);
+                valueList.add(SqlConsts.PLACEHOLDER);
+                params.add(getTypeHandlerValue(col, val));
+            }
         }
-        // 删除最后一个分隔符
-        sql.setLength(sql.length() - SqlConsts.DELIMITER.length());
-        values.setLength(values.length() - SqlConsts.DELIMITER.length());
-        sql.append(SqlConsts.BRACKET_RIGHT).append(values).append(SqlConsts.BRACKET_RIGHT);
+
+        // 构建SQL
+        sql.append(String.join(SqlConsts.DELIMITER, columnList))
+                .append(SqlConsts.BRACKET_RIGHT)
+                .append(SqlConsts.VALUES)
+                .append(SqlConsts.BRACKET_LEFT)
+                .append(String.join(SqlConsts.DELIMITER, valueList))
+                .append(SqlConsts.BRACKET_RIGHT);
+
         return Pair.of(sql.toString(), params);
     }
 
-    // 新增批量插入方法
+    // 批量插入也需要修改
     @NotNull
     private Pair<String, List<Object>> genInsert(@NotNull Collection<?> entities) {
-        genInsertHeader();
-        var cols = Tables.getTable(entityClass).columns();
-        int colSize = cols.length;
-        // 构建列名部分
-        for (int i = 0; i < colSize; i++) {
-            sql.append(SqlConsts.STRESS_MARK).append(cols[i].name()).append(SqlConsts.STRESS_MARK).append(SqlConsts.DELIMITER);
+        if (entities.isEmpty()) {
+            throw new IllegalArgumentException("实体集合不能为空");
         }
-        sql.setLength(sql.length() - SqlConsts.DELIMITER.length());
-        sql.append(SqlConsts.BRACKET_RIGHT);
 
-        // 构建values部分
-        sql.append(SqlConsts.VALUES);
-        params = new ArrayList<>(entities.size() * colSize); // 预分配空间
-        for (Object entity : entities) { // 使用传统的 for 循环
+        genInsertHeader();
+        var table = Tables.getTable(entityClass);
+        var columns = table.columns();
+
+        // 收集所有实体中出现的非空字段
+        var columnIndices = new ArrayList<Integer>();
+
+        for (int i = 0; i < columns.length; i++) {
+            var col = columns[i];
+            boolean hasNonNullValue = false;
+
+            for (Object entity : entities) {
+                if (FieldUtil.getFieldValue(entity, col.field()) != null) {
+                    hasNonNullValue = true;
+                    break;
+                }
+            }
+
+            if (hasNonNullValue) {
+                columnIndices.add(i);
+                sql.append(SqlConsts.STRESS_MARK).append(col.name()).append(SqlConsts.STRESS_MARK).append(SqlConsts.DELIMITER);
+            }
+        }
+
+        // 删除最后一个分隔符
+        sql.setLength(sql.length() - SqlConsts.DELIMITER.length());
+        sql.append(SqlConsts.BRACKET_RIGHT).append(SqlConsts.VALUES);
+
+        // 构建值部分
+        params = new ArrayList<>();
+
+        for (Object entity : entities) {
             sql.append(SqlConsts.BRACKET_LEFT);
-            for (int i = 0; i < colSize; i++) {
-                var col = cols[i];
+            for (int colIndex : columnIndices) {
+                var col = columns[colIndex];
                 var val = FieldUtil.getFieldValue(entity, col.field());
                 params.add(getTypeHandlerValue(col, val));
                 sql.append(SqlConsts.PLACEHOLDER).append(SqlConsts.DELIMITER);
             }
-            sql.setLength(sql.length() - SqlConsts.DELIMITER.length()); // 删除最后一个分隔符
+            // 删除最后一个分隔符
+            sql.setLength(sql.length() - SqlConsts.DELIMITER.length());
             sql.append(SqlConsts.BRACKET_RIGHT).append(SqlConsts.DELIMITER);
         }
 

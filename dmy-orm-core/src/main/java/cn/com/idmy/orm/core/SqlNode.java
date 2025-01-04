@@ -1,13 +1,19 @@
 package cn.com.idmy.orm.core;
 
 import cn.com.idmy.base.util.SqlUtil;
+import cn.com.idmy.orm.OrmException;
+import cn.com.idmy.orm.core.TableInfo.TableColumn;
 import lombok.Data;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.Accessors;
+import org.dromara.hutool.core.collection.iter.IterUtil;
+import org.dromara.hutool.core.util.ObjUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.Collection;
 
 import static cn.com.idmy.orm.core.SqlConsts.ASTERISK;
 import static cn.com.idmy.orm.core.SqlFnName.COUNT;
@@ -52,6 +58,30 @@ public class SqlNode {
             this.op = op;
             this.expr = expr;
         }
+
+        public <T> SqlCond(Class<T> entityClass, FieldGetter<T, ?> field, @NonNull Op op, @NotNull Object expr) {
+            super(SqlNodeType.COND);
+            this.op = op;
+            this.expr = expr;
+            if (expr instanceof SqlOpExpr) {
+                this.column = Tables.getColumnName(entityClass, field);
+            } else {
+                var col = Tables.getColum(entityClass, field);
+                if (ObjUtil.isNotEmpty(expr)) {
+                    var type1 = col.field().getType();
+                    var type2 = expr.getClass();
+                    if (expr instanceof Object[] arr) {
+                        type2 = arr[0].getClass();
+                    } else if (expr instanceof Collection<?> ls) {
+                        type2 = IterUtil.getFirst(ls.iterator()).getClass();
+                    }
+                    if (type1 != type2) {
+                        throw new OrmException("「{}」字段类型「{}」和参数类型「{}」不匹配", entityClass.getSimpleName(), type1.getSimpleName(), type2.getSimpleName());
+                    }
+                }
+                this.column = col.name();
+            }
+        }
     }
 
     public static class SqlOr extends SqlNode {
@@ -78,6 +108,32 @@ public class SqlNode {
             super(SqlNodeType.SET);
             this.column = SqlUtil.checkColumn(column);
             this.expr = expr;
+        }
+
+        public SqlSet(TableColumn col, @Nullable Object value) {
+            super(SqlNodeType.SET);
+            check(col, value);
+            this.expr = value;
+            this.column = col.name();
+        }
+
+        public <T> SqlSet(Class<T> entityClass, FieldGetter<T, ?> field, @Nullable Object value) {
+            this(Tables.getColum(entityClass, field), value);
+        }
+
+        protected void check(TableColumn col, @Nullable Object value) {
+            if (ObjUtil.isNotEmpty(value)) {
+                if (value instanceof Object[] || value instanceof Collection<?>) {
+                    throw new OrmException("update 语句 set 不支持集合或数组");
+                } else {
+                    assert value != null;
+                    var type1 = col.field().getType();
+                    var type2 = value.getClass();
+                    if (type1 != type2) {
+                        throw new OrmException("字段类型「{}」和参数类型「{}」不匹配", type1.getSimpleName(), type2.getSimpleName());
+                    }
+                }
+            }
         }
     }
 
