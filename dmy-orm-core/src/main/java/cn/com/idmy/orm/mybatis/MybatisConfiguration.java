@@ -10,6 +10,7 @@ import org.apache.ibatis.executor.keygen.SelectKeyGenerator;
 import org.apache.ibatis.executor.parameter.ParameterHandler;
 import org.apache.ibatis.mapping.BoundSql;
 import org.apache.ibatis.mapping.MappedStatement;
+import org.apache.ibatis.mapping.SqlCommandType;
 import org.apache.ibatis.session.Configuration;
 import org.dromara.hutool.core.text.StrUtil;
 import org.jetbrains.annotations.NotNull;
@@ -39,10 +40,11 @@ class MybatisConfiguration extends Configuration {
     public void addMappedStatement(@NotNull MappedStatement ms) {
         var table = Tables.getTable(ms);
         if (StrUtil.endWithAny(ms.getId(), MybatisSqlProvider.create, MybatisSqlProvider.creates) && ms.getKeyGenerator() == NoKeyGenerator.INSTANCE) {
-            ms = MybatisModifier.replaceIdGenerator(ms, table);
-        } else if (StrUtil.endWithAny(ms.getId(), MybatisSqlProvider.getNullable, MybatisSqlProvider.find0, MybatisSqlProvider.count)) {
-            ms = MybatisModifier.addResultMap(ms, table);
+            super.addMappedStatement(MybatisModifier.replaceIdGenerator(ms, table));
+        } else if (ms.getSqlCommandType() == SqlCommandType.SELECT) {
+            super.addMappedStatement(MybatisModifier.addSelectResultMap(ms, table));
+        } else {
+            super.addMappedStatement(ms);
         }
-        super.addMappedStatement(ms);
     }
 }

@@ -90,7 +90,7 @@ class MybatisModifier {
     }
 
 
-    static MappedStatement addResultMap(@NotNull MappedStatement ms, @NotNull TableInfo tableInfo) {
+    static MappedStatement addSelectResultMap(@NotNull MappedStatement ms, @NotNull TableInfo tableInfo) {
         var cfg = ms.getConfiguration();
 
         // 处理 count 查询的特殊情况
@@ -108,7 +108,7 @@ class MybatisModifier {
         // 处理普通实体查询
         var resultMapId = tableInfo.entityClass().getName() + ".BaseResultMap";
         if (!cfg.hasResultMap(resultMapId)) {
-            addResultMap(cfg, tableInfo.entityClass(), tableInfo, resultMapId);
+            addSelectResultMap(cfg, tableInfo.entityClass(), tableInfo, resultMapId);
         }
 
         var resultMaps = new ArrayList<ResultMap>(1) {{
@@ -121,7 +121,7 @@ class MybatisModifier {
                 .build();
     }
 
-    private static void addResultMap(@NotNull Configuration cfg, @NotNull Class<?> entityClass, @NotNull TableInfo table, @NotNull String resultMapId) {
+    private static void addSelectResultMap(@NotNull Configuration cfg, @NotNull Class<?> entityClass, @NotNull TableInfo table, @NotNull String resultMapId) {
         // 添加ID映射
         var resultMappings = new ArrayList<ResultMapping>() {{
             var id = table.id();
