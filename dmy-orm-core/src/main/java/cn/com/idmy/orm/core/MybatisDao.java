@@ -57,45 +57,45 @@ public interface MybatisDao<T, ID> {
     @SelectProvider(type = MybatisSqlProvider.class, method = MybatisSqlProvider.count)
     long count(@NotNull @Param(MybatisSqlProvider.CRUD) Query<T> q);
 
-    default boolean exist(@NotNull Query<T> q) {
+    default boolean exists(@NotNull Query<T> q) {
         return count(q) > 0;
     }
 
-    default boolean exist(@NonNull ID id) {
+    default boolean exists(@NonNull ID id) {
         var q = q();
         q.sqlParamsSize = 1;
         q.addNode(new SqlCond(getIdName(this), Op.EQ, id));
-        return exist(q);
+        return exists(q);
     }
 
-    default void exist(@NonNull ID id, @NotNull String msg, @NotNull Object... params) {
-        if (!exist(id)) {
+    default void exists(@NonNull ID id, @NotNull String msg, @NotNull Object... params) {
+        if (!exists(id)) {
             throw new IllegalStateException(String.format(msg, params));
         }
     }
 
-    default void exist(@NotNull Query<T> q, @NotNull String msg, @NotNull Object... params) {
-        if (!exist(q)) {
+    default void exists(@NotNull Query<T> q, @NotNull String msg, @NotNull Object... params) {
+        if (!exists(q)) {
             throw new IllegalStateException(String.format(msg, params));
         }
     }
 
-    default boolean notExist(@NotNull Query<T> q) {
-        return !exist(q);
+    default boolean notExists(@NotNull Query<T> q) {
+        return !exists(q);
     }
 
-    default boolean notExist(@NonNull ID id) {
-        return !exist(id);
+    default boolean notExists(@NonNull ID id) {
+        return !exists(id);
     }
 
-    default void notExist(@NonNull ID id, @NotNull String msg, @NotNull Object... params) {
-        if (!notExist(id)) {
+    default void notExists(@NonNull ID id, @NotNull String msg, @NotNull Object... params) {
+        if (!notExists(id)) {
             throw new IllegalStateException(String.format(msg, params));
         }
     }
 
-    default void notExist(@NotNull Query<T> q, @NotNull String msg, @NotNull Object... params) {
-        if (!notExist(q)) {
+    default void notExists(@NotNull Query<T> q, @NotNull String msg, @NotNull Object... params) {
+        if (!notExists(q)) {
             throw new IllegalStateException(String.format(msg, params));
         }
     }
@@ -324,7 +324,7 @@ public interface MybatisDao<T, ID> {
         if (idVal == null) {
             return create(entity);
         } else {
-            return exist(idVal) ? MybatisSqlProvider.update(this, entity, ignoreNull) : create(entity);
+            return exists(idVal) ? MybatisSqlProvider.update(this, entity, ignoreNull) : create(entity);
         }
     }
 
