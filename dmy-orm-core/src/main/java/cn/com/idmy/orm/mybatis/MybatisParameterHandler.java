@@ -37,8 +37,9 @@ class MybatisParameterHandler extends DefaultParameterHandler {
             if (sqlParams == null) {
                 super.setParameters(ps);
             } else {
-                for (int i = 0, size = sqlParams.size(); i < size; i++) {
-                    setParameter(ps, i + 1, sqlParams.get(i), params);
+                int idx = 1;
+                for (var param : sqlParams) {
+                    idx = setParameter(ps, idx, param, params);
                 }
             }
         } catch (SQLException e) {
@@ -47,32 +48,43 @@ class MybatisParameterHandler extends DefaultParameterHandler {
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
-    private void setParameter(@NotNull PreparedStatement ps, int idx, @Nullable Object value, @NotNull Map<String, Object> params) throws SQLException {
+    private int setParameter(@NotNull PreparedStatement ps, int idx, @Nullable Object value, @NotNull Map<String, Object> params) throws SQLException {
         switch (value) {
-            case null -> ps.setObject(idx, null);
-            case Object[] val -> {
-                if (val.length == 0) {
+            case null -> {
+                ps.setObject(idx, null);
+                return idx + 1;
+            }
+            case Object[] arr -> {
+                if (arr.length == 0) {
                     throw new OrmException("Empty array");
                 }
-                for (var item : val) {
-                    setParameter(ps, idx++, item, params);
+                int curIdx = idx;
+                for (var item : arr) {
+                    curIdx = setParameter(ps, curIdx, item, params);
                 }
+                return curIdx;
             }
-            case Collection<?> val -> {
-                if (val.isEmpty()) {
-                    throw new OrmException("Empty list");
+            case Collection<?> arr -> {
+                if (arr.isEmpty()) {
+                    throw new OrmException("Empty collection");
                 }
-                for (var item : val) {
-                    setParameter(ps, idx++, item, params);
+                int curIdx = idx;
+                for (var item : arr) {
+                    curIdx = setParameter(ps, curIdx, item, params);
                 }
+                return curIdx;
             }
-            case TypeHandlerValue val -> val.setParameter(ps, idx);
+            case TypeHandlerValue val -> {
+                val.setParameter(ps, idx);
+                return idx + 1;
+            }
             default -> {
                 TypeHandler th = typeHandlerRegistry.getTypeHandler(value.getClass());
                 if (th == null) {
                     th = typeHandlerRegistry.getUnknownTypeHandler();
                 }
                 th.setParameter(ps, idx, value, null);
+                return idx + 1;
             }
         }
     }

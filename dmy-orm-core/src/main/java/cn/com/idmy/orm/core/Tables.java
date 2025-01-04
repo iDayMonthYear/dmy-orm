@@ -212,7 +212,7 @@ public class Tables {
     }
 
     @Nullable
-    public static <T> TableColumn getColumNullable(@NotNull Class<?> entityClass, @NotNull FieldGetter<T, ?> field) {
+    public static <T> TableColumn getColum(@NotNull Class<?> entityClass, @NotNull FieldGetter<T, ?> field) {
         var table = getTable(entityClass);
         var columnMap = table.columnMap();
         if (CollUtil.isEmpty(columnMap)) {
@@ -220,23 +220,6 @@ public class Tables {
         } else {
             String fieldName = LambdaUtil.getFieldName(field);
             return columnMap.get(fieldName);
-        }
-    }
-
-    @NotNull
-    public static <T> TableColumn getColum(@NotNull Class<?> entityClass, @NotNull FieldGetter<T, ?> field) {
-        var table = getTable(entityClass);
-        var columnMap = table.columnMap();
-        if (CollUtil.isEmpty(columnMap)) {
-            throw new OrmException("实体类" + entityClass.getName() + "中不存在字段" + field.getClass());
-        } else {
-            String fieldName = LambdaUtil.getFieldName(field);
-            TableColumn col = columnMap.get(fieldName);
-            if (col == null) {
-                throw new OrmException("实体类" + entityClass.getName() + "中不存在字段" + fieldName);
-            } else {
-                return col;
-            }
         }
     }
 
@@ -252,7 +235,13 @@ public class Tables {
 
     @NotNull
     public static <T> String getColumnName(@NotNull Class<?> entityClass, @NotNull FieldGetter<T, ?> field) {
-        return getColum(entityClass, field).name();
+        var fieldName = LambdaUtil.getFieldName(field);
+        var columnName = getColumnName(entityClass, fieldName);
+        if (StrUtil.isBlank(columnName)) {
+            throw new OrmException("实体类" + entityClass.getName() + "中不存在字段" + fieldName);
+        } else {
+            return columnName;
+        }
     }
 
     public static void clearTables() {

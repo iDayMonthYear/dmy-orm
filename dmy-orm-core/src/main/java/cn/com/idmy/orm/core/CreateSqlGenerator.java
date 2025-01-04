@@ -1,6 +1,7 @@
 package cn.com.idmy.orm.core;
 
 import cn.com.idmy.base.model.Pair;
+import cn.com.idmy.orm.OrmException;
 import cn.com.idmy.orm.core.TableInfo.TableColumn;
 import cn.com.idmy.orm.mybatis.handler.TypeHandlerValue;
 import org.dromara.hutool.core.reflect.FieldUtil;
@@ -72,8 +73,11 @@ public class CreateSqlGenerator extends SqlGenerator {
                 .append(SqlConsts.BRACKET_LEFT)
                 .append(String.join(SqlConsts.DELIMITER, valueList))
                 .append(SqlConsts.BRACKET_RIGHT);
-
-        return Pair.of(sql.toString(), params);
+        if (params.isEmpty()) {
+            throw new OrmException("插入数据不能为空");
+        } else {
+            return Pair.of(sql.toString(), params);
+        }
     }
 
     // 批量插入也需要修改
@@ -129,6 +133,11 @@ public class CreateSqlGenerator extends SqlGenerator {
 
         // 删除最后一个分隔符
         sql.setLength(sql.length() - SqlConsts.DELIMITER.length());
-        return Pair.of(sql.toString(), params);
+
+        if (params.isEmpty()) {
+            throw new OrmException("插入数据不能为空");
+        } else {
+            return Pair.of(sql.toString(), params);
+        }
     }
 }

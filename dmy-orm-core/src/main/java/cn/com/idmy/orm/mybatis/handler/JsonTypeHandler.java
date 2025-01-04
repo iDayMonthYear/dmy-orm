@@ -15,7 +15,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 @MappedTypes({Object.class})
-@MappedJdbcTypes({JdbcType.VARCHAR})
+@MappedJdbcTypes({JdbcType.VARCHAR, JdbcType.LONGVARCHAR, JdbcType.CLOB})
 @RequiredArgsConstructor
 public class JsonTypeHandler<T> extends BaseTypeHandler<T> {
     @NotNull
@@ -23,12 +23,17 @@ public class JsonTypeHandler<T> extends BaseTypeHandler<T> {
 
     @Override
     public void setNonNullParameter(PreparedStatement ps, int idx, T param, JdbcType jdbcType) throws SQLException {
-        ps.setString(idx, JSON.toJSONString(param));
+        if (param == null) {
+            ps.setNull(idx, jdbcType.TYPE_CODE);
+        } else {
+            ps.setString(idx, JSON.toJSONString(param));
+        }
     }
 
     @Override
     public T getNullableResult(ResultSet rs, String name) throws SQLException {
-        return rs.wasNull() ? null : parseJson(rs.getString(name));
+        String json = rs.getString(name);
+        return rs.wasNull() ? null : parseJson(json);
     }
 
     @Override
