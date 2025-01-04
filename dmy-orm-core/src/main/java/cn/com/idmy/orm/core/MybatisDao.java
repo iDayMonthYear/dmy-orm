@@ -101,7 +101,7 @@ public interface MybatisDao<T, ID> {
     }
 
     @Nullable
-    @SelectProvider(type = MybatisSqlProvider.class, method = MybatisSqlProvider.find)
+    @SelectProvider(type = MybatisSqlProvider.class, method = MybatisSqlProvider.find0)
     List<T> find0(@NotNull @Param(MybatisSqlProvider.CRUD) Query<T> q);
 
     @NotNull

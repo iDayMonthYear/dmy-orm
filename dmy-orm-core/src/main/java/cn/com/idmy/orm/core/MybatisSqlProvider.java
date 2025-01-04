@@ -35,7 +35,7 @@ public class MybatisSqlProvider {
     public static final String ENTITY_CLASS = "$$entityClass$";
 
     public static final String getNullable = "getNullable";
-    public static final String find = "find";
+    public static final String find0 = "find0";
     public static final String delete = "delete";
     public static final String update = "update";
     public static final String count = "count";
@@ -151,7 +151,7 @@ public class MybatisSqlProvider {
     }
 
     @NotNull
-    public String find(@NotNull Map<String, Object> params) {
+    public String find0(@NotNull Map<String, Object> params) {
         return genCommonSql(params);
     }
 

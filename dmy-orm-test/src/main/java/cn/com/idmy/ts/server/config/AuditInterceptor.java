@@ -14,8 +14,8 @@ public class AuditInterceptor implements CrudInterceptor {
     @Override
     public void beforeCreate(@NotNull Object entity) {
         if (entity instanceof App app) {
-            app.createdAt(LocalDateTime.now());
-            app.updatedAt(LocalDateTime.now());
+            app.setCreatedAt(LocalDateTime.now());
+            app.setUpdatedAt(LocalDateTime.now());
         }
     }
 

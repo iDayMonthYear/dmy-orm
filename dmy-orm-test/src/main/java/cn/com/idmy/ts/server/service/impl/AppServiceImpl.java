@@ -1,8 +1,6 @@
 package cn.com.idmy.ts.server.service.impl;
 
 import cn.com.idmy.base.model.Page;
-import cn.com.idmy.orm.core.Query;
-import cn.com.idmy.orm.core.SqlFn;
 import cn.com.idmy.ts.server.dao.AppDao;
 import cn.com.idmy.ts.server.model.entity.App;
 import cn.com.idmy.ts.server.service.AppService;
@@ -10,8 +8,6 @@ import lombok.RequiredArgsConstructor;
 import org.dromara.hutool.core.lang.Console;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -69,7 +65,7 @@ public class AppServiceImpl implements AppService {
 //        long count = dao.count(SelectChain.of(dao));
 //        System.out.println(count);
 //
-        Console.error(dao.find(Query.of(dao).endsWith(App::name, "票")));
+//        Console.error(dao.find(Query.of(dao).endsWith(App::name, "票")));
 //        Console.error(dao.find(Selects.of(dao).between(App::getId, 1, 10)));
 //        Page<App> pageIn = Page.of(1, 2);
 //        pageIn.setParams(new App());
@@ -87,59 +83,32 @@ public class AppServiceImpl implements AppService {
 //                .select(() -> SqlFn.min(App::id)).eq(App::creatorId, 1L).eq(App::creatorId,  c -> c.plus(1L));
 
 
-        Query<App> select = Query.of(dao)
-                .select(App::name)
-                .select(App::name, App::id)
-                .select(() -> SqlFn.min(App::id))
-                .between(App::createdAt, LocalDateTime.now().minusDays(30), LocalDateTime.now())
-                .eq(App::id, c -> c.plus(1L))
-                .eq(App::id, "43423");
+//        Query<App> select = Query.of(dao)
+//                .select(App::name)
+//                .select(App::name, App::id)
+//                .select(() -> SqlFn.min(App::id))
+//                .between(App::createdAt, LocalDateTime.now().minusDays(30), LocalDateTime.now())
+//                .eq(App::id, c -> c.plus(1L))
+//                .eq(App::id, "43423");
 
-        dao.find(select);
-        List<App> apps = new ArrayList<>();
-        apps.add(App.builder().id(null).key("1").build());
-        apps.add(App.builder().key("2").build());
+//        dao.find(select);
+//        List<App> apps = new ArrayList<>();
+//        apps.add(App.builder().id(null).key("1").build());
+//        apps.add(App.builder().key("2").build());
 
-        dao.create(apps.getFirst());
-        dao.update(App.builder().id(3344L).key(System.currentTimeMillis() + "").build(), false);
+        App app = App.builder().id(null).name("1").build();
+        dao.create(app);
+        Console.error(app);
+//        dao.update(App.builder().id(3344L).key(System.currentTimeMillis() + "").build(), false);
         return null;
     }
 
     @Override
     public void testBatchOperations() {
-        System.out.println("=== Testing batch operations ===");
 
-        // Test batch query
-        List<App> apps = find(List.of(1L, 2L));
-        System.out.println("Found " + apps.size() + " apps in batch query");
-
-        // Test using SelectChain
-        Query<App> chain = Query.of(dao);
-        chain.in(App::id, 1, 2);
-        List<App> chainResult = dao.find(chain);
-        System.out.println("Found " + chainResult.size() + " apps using SelectChain");
-
-        System.out.println("Batch operations test completed");
     }
 
     @Override
     public void testQueryConditions() {
-        System.out.println("=== Testing query conditions ===");
-
-        // Test different query conditions
-        Query<App> chain = Query.of(dao);
-
-        // Test like condition
-        List<App> adminApps = dao.find(chain);
-        System.out.println("Found " + adminApps.size() + " admin apps");
-
-        // Test multiple conditions
-        chain = Query.of(dao);
-        chain.in(App::key, "dmy-ts-admin")
-                .gt(App::createdAt, LocalDateTime.now().minusDays(30));
-        List<App> recentApps = dao.find(chain);
-        System.out.println("Found " + recentApps.size() + " recent admin apps");
-
-        System.out.println("Query conditions test completed");
     }
 }

@@ -74,7 +74,7 @@ class MybatisModifier {
                 .fetchSize(ms.getFetchSize())
                 .timeout(ms.getTimeout())
                 .statementType(ms.getStatementType())
-                .keyGenerator(generator) // 替换主键生成器
+                .keyGenerator(generator)
                 .keyProperty(MybatisSqlProvider.ENTITY + "." + tableInfo.id().field().getName())
                 .keyColumn(tableInfo.id().name())
                 .databaseId(ms.getDatabaseId())
@@ -101,7 +101,8 @@ class MybatisModifier {
             var resultMaps = List.of(new ResultMap.Builder(cfg, ms.getId() + ".CountResultMap", long.class, resultMappings).build());
             return new MappedStatement
                     .Builder(cfg, ms.getId(), ms.getSqlSource(), ms.getSqlCommandType())
-                    .resultMaps(resultMaps).build();
+                    .resultMaps(resultMaps)
+                    .build();
         }
 
         // 处理普通实体查询
