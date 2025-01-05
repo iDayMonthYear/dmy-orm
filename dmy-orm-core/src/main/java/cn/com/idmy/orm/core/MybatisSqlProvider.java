@@ -5,12 +5,17 @@ import cn.com.idmy.base.model.Param;
 import cn.com.idmy.orm.OrmException;
 import cn.com.idmy.orm.core.SqlNode.SqlCond;
 import cn.com.idmy.orm.core.SqlNode.SqlSet;
+import cn.com.idmy.orm.mybatis.MybatisUtil;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.builder.annotation.ProviderContext;
+import org.apache.ibatis.session.SqlSessionFactory;
 import org.dromara.hutool.core.collection.CollStreamUtil;
 import org.dromara.hutool.core.collection.CollUtil;
+import org.dromara.hutool.core.reflect.ClassUtil;
 import org.dromara.hutool.core.reflect.FieldUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -24,8 +29,12 @@ import static cn.com.idmy.orm.core.Tables.getIdName;
 import static cn.com.idmy.orm.core.Tables.getTableByMapperClass;
 
 @Slf4j
+@Accessors(fluent = true)
 @RequiredArgsConstructor
 public class MybatisSqlProvider {
+    @Setter
+    private static SqlSessionFactory sqlSessionFactory;
+
     public static int DEFAULT_BATCH_SIZE = 1000;
     public static final String CRUD = "$crud$";
     public static final String SQL_PARAMS = "$sqlParams$";
@@ -99,6 +108,15 @@ public class MybatisSqlProvider {
         return dao.updateBySql(sql.left, sql.right);
     }
 
+    public static <T, ID> int[] update(@NotNull MybatisDao<T, ID> dao, @NotNull Collection<T> entities, int size, boolean ignoreNull) {
+        List<Class<?>> interfaces = ClassUtil.getInterfaces(dao.getClass());
+        if (CollUtil.isEmpty(interfaces)) {
+            throw new OrmException("dao must be interface");
+        } else {
+            return MybatisUtil.batch(sqlSessionFactory, entities, size, interfaces.getFirst(), ($, t) -> dao.update(t, ignoreNull));
+        }
+    }
+
     public static <T, ID> int creates(@NotNull MybatisDao<T, ID> dao, @Nullable Collection<T> entities, int size) {
         if (CollUtil.isEmpty(entities)) {
             return -1;
@@ -115,7 +133,6 @@ public class MybatisSqlProvider {
         }
         return sum;
     }
-
 
     @NotNull
     static <T, ID> Map<ID, T> map(@NotNull MybatisDao<T, ID> dao, @NonNull Object ids) {

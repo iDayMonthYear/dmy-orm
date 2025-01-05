@@ -338,6 +338,14 @@ public interface MybatisDao<T, ID> {
         return MybatisSqlProvider.update(this, entity, ignoreNull);
     }
 
+    default int[] update(@Nullable Collection<T> entities, int size, boolean ignoreNull) {
+        if (entities == null) {
+            return new int[]{0};
+        } else {
+            return MybatisSqlProvider.update(this, entities, size, ignoreNull);
+        }
+    }
+
     @UpdateProvider(type = MybatisSqlProvider.class, method = MybatisSqlProvider.updateBySql)
     int updateBySql(@NonNull @Param(MybatisSqlProvider.CRUD) String sql, @NonNull @Param(MybatisSqlProvider.SQL_PARAMS) List<Object> params);
 

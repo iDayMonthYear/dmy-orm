@@ -48,6 +48,7 @@ public class OrmAutoConfiguration {
         bean.setMapperLocations(props.resolveMapperLocations());
 
         var factory = bean.getObject();
+        MybatisSqlProvider.sqlSessionFactory(factory);
         if (props.isCheckDbColumn()) {
             new CheckDbColumn(ctx, factory).scan();
         }
