@@ -1,7 +1,6 @@
 package cn.com.idmy.orm.core;
 
 import cn.com.idmy.base.annotation.Table.IdType;
-import org.apache.ibatis.type.TypeHandler;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -29,8 +28,6 @@ public record TableInfo(
             @NotNull Field field,
             @NotNull String name,
             boolean large,
-            @Nullable String title,
-            @Nullable
-            TypeHandler<?> typeHandler) {
+            @Nullable String title) {
     }
 }

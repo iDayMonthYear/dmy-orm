@@ -8,7 +8,6 @@ import cn.com.idmy.orm.core.SqlNode.SqlSet;
 import cn.com.idmy.orm.mybatis.handler.TypeHandlerValue;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
-import org.dromara.hutool.core.collection.CollUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -78,9 +77,9 @@ class UpdateSqlGenerator extends SqlGenerator {
     protected void genSet(@NotNull SqlSet set) {
         var col = set.column;
         var expr = genSet(col, set.expr);
-        var map = Tables.getTable(entityClass).columnMap();
-        if (CollUtil.isNotEmpty(map)) {
-            var th = map.get(col).typeHandler();
+        var colum = Tables.getColum(entityClass, col);
+        if (colum != null) {
+            var th = Tables.getTypeHandler(colum.field());
             if (th != null) {
                 var val = params.removeLast();
                 params.add(new TypeHandlerValue(th, val));

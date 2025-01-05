@@ -33,8 +33,8 @@ public class CreateSqlGenerator extends SqlGenerator {
     }
 
     @Nullable
-    protected Object getTypeHandlerValue(@NotNull TableColumn column, @Nullable Object val) {
-        var th = column.typeHandler();
+    protected Object getTypeHandlerValue(@NotNull TableColumn col, @Nullable Object val) {
+        var th = Tables.getTypeHandler(col.field());
         if (th == null || val == null) {
             return val;
         } else {

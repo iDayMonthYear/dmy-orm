@@ -44,6 +44,11 @@ public class Tables {
         typeHandlers.clear();
     }
 
+    @Nullable
+    public static TypeHandler<?> getTypeHandler(Field field) {
+        return typeHandlers.get(field);
+    }
+
     @NotNull
     public static TableInfo getTable(@NotNull Class<?> entityClass) {
         return entityTableInfos.computeIfAbsent(entityClass, Tables::init);
@@ -115,8 +120,7 @@ public class Tables {
                     title = null;
                 }
                 if (!columnMap.containsKey(name)) {
-                    TypeHandler<?> handler = typeHandlers.get(field);
-                    TableColumn tableColumn = new TableColumn(field, name, large, title, handler);
+                    TableColumn tableColumn = new TableColumn(field, name, large, title);
                     columns.add(tableColumn);
                     columnMap.put(name, tableColumn);
                 }

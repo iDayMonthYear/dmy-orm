@@ -3,6 +3,7 @@ package cn.com.idmy.orm.mybatis;
 import cn.com.idmy.orm.core.MybatisSqlProvider;
 import cn.com.idmy.orm.core.TableInfo;
 import cn.com.idmy.orm.core.TableInfo.TableId;
+import cn.com.idmy.orm.core.Tables;
 import lombok.NoArgsConstructor;
 import org.apache.ibatis.executor.keygen.NoKeyGenerator;
 import org.apache.ibatis.executor.keygen.SelectKeyGenerator;
@@ -134,7 +135,7 @@ class MybatisModifier {
         for (var column : table.columns()) {
             var builder = new ResultMapping.Builder(cfg, column.field().getName(), column.name(), column.field().getType());
             // 如果有TypeHandler，设置到ResultMapping中
-            var handler = column.typeHandler();
+            var handler = Tables.getTypeHandler(column.field());
             if (handler != null) {
                 builder.typeHandler(handler);
             }
