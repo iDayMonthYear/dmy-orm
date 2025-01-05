@@ -45,7 +45,7 @@ public class Tables {
     }
 
     @Nullable
-    public static TypeHandler<?> getTypeHandler(Field field) {
+    public static TypeHandler<?> getTypeHandler(@NotNull Field field) {
         return typeHandlers.get(field);
     }
 
