@@ -2,17 +2,19 @@ package cn.com.idmy.orm.mybatis;
 
 import cn.com.idmy.orm.core.MybatisSqlProvider;
 import org.apache.ibatis.session.SqlSessionFactory;
+import org.apache.ibatis.type.TypeHandler;
 import org.mybatis.spring.SqlSessionFactoryBean;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 
 import javax.sql.DataSource;
+import java.util.List;
 
-@Configuration
+@AutoConfiguration
 @ConditionalOnClass({SqlSessionFactory.class})
 @EnableConfigurationProperties(OrmProps.class)
 public class OrmAutoConfiguration {
@@ -34,11 +36,10 @@ public class OrmAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    SqlSessionFactory sqlSessionFactory(OrmProps props, DataSource dataSource, ApplicationContext ctx, EnumWatchInterceptor enumWatchInterceptor) throws Exception {
+    SqlSessionFactory sqlSessionFactory(OrmProps props, DataSource dataSource, ApplicationContext ctx, EnumWatchInterceptor enumWatchInterceptor, List<TypeHandler<?>> typeHandlers) throws Exception {
         var bean = new SqlSessionFactoryBean();
         bean.setDataSource(dataSource);
         var cfg = new MybatisConfiguration();
-        var typeHandlers = props.getTypeHandlers();
         if (typeHandlers != null) {
             typeHandlers.forEach(cfg::register);
         }

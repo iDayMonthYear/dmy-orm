@@ -1,0 +1,35 @@
+{
+  "properties": [
+    {
+      "name": "orm.check-db-column",
+      "type": "java.lang.Boolean",
+      "description": "Whether to check database column.",
+      "defaultValue": false,
+      "sourceType": "cn.com.idmy.orm.mybatis.OrmProps"
+    },
+    {
+      "name": "orm.mapper-locations",
+      "type": "java.lang.String[]",
+      "description": "Locations of MyBatis mapper files.",
+      "defaultValue": ["classpath*:/dao/**/*.xml"],
+      "sourceType": "cn.com.idmy.orm.mybatis.OrmProps"
+    },
+    {
+      "name": "orm.type-handlers",
+      "type": "java.util.List<org.apache.ibatis.type.TypeHandler>",
+      "description": "List of custom TypeHandlers.",
+      "sourceType": "cn.com.idmy.orm.mybatis.OrmProps"
+    }
+  ],
+  "hints": [
+    {
+      "name": "orm.mapper-locations",
+      "values": [
+        {
+          "value": "classpath*:/dao/**/*.xml",
+          "description": "Default mapper location pattern"
+        }
+      ]
+    }
+  ]
+} 

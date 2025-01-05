@@ -37,7 +37,7 @@ class CheckDbColumn {
                 var mapperType = ctx.getType(mapper);
                 var entityType = ClassUtil.getTypeArgument(mapperType);
                 if (entityType.isAnnotationPresent(Table.class)) {
-                    checkDbColumn(conn, entityType, Tables.getTable(entityType));
+                    check(conn, entityType, Tables.getTable(entityType));
                 } else {
                     assert mapperType != null;
                     errors.add(StrUtil.format("{} 的实体类没有 Table 注解", mapperType.getName()));
@@ -50,7 +50,7 @@ class CheckDbColumn {
         }
     }
 
-    private void checkDbColumn(Connection conn, Class<?> entityType, TableInfo table) throws Exception {
+    private void check(Connection conn, Class<?> entityType, TableInfo table) throws Exception {
         var meta = conn.getMetaData();
         var resultSet = meta.getColumns(null, null, table.name(), null);
         var columns = new HashSet<>();

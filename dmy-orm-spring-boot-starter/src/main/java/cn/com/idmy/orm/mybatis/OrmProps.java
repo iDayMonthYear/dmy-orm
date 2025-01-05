@@ -1,24 +1,32 @@
 package cn.com.idmy.orm.mybatis;
 
 import lombok.Data;
-import org.apache.ibatis.type.TypeHandler;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+/**
+ * Configuration properties for ORM.
+ */
 @Data
-@ConfigurationProperties(prefix = "dmy.orm")
+@ConfigurationProperties(prefix = "orm")
 public class OrmProps {
     private static final ResourcePatternResolver resourceResolver = new PathMatchingResourcePatternResolver();
-    private boolean checkDbColumn;
+
+    /**
+     * Whether to check database column.
+     */
+    private boolean checkDbColumn = false;
+
+    /**
+     * Locations of MyBatis mapper files.
+     */
     private String[] mapperLocations = new String[]{"classpath*:/dao/**/*.xml"};
-    private List<TypeHandler<?>> typeHandlers;
 
     private Resource[] resources(String location) {
         try {
@@ -29,6 +37,8 @@ public class OrmProps {
     }
 
     public Resource[] resolveMapperLocations() {
-        return Stream.of(Optional.ofNullable(this.mapperLocations).orElse(new String[0])).flatMap(location -> Stream.of(resources(location))).toArray(Resource[]::new);
+        return Stream.of(Optional.ofNullable(this.mapperLocations).orElse(new String[0]))
+                .flatMap(location -> Stream.of(resources(location)))
+                .toArray(Resource[]::new);
     }
 }
