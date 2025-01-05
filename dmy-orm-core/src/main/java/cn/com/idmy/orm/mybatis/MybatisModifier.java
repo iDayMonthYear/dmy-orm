@@ -13,55 +13,43 @@ import org.apache.ibatis.session.Configuration;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 @NoArgsConstructor(access = lombok.AccessLevel.PRIVATE)
 class MybatisModifier {
     static SelectKeyGenerator getSelectKeyGenerator(@NotNull MappedStatement ms, @NotNull TableId id) {
-        var sequence = id.value();
+        var cfg = ms.getConfiguration();
+        var seq = id.value();
         var selectId = ms.getId() + SelectKeyGenerator.SELECT_KEY_SUFFIX;
-        var config = ms.getConfiguration();
-        var sqlSource = ms.getLang().createSqlSource(config, sequence.trim(), id.field().getType());
-        var newMs = new MappedStatement.Builder(config, selectId, sqlSource, SqlCommandType.SELECT)
-                .resource(ms.getResource())
-                .fetchSize(null)
-                .timeout(null)
+        var idField = id.field();
+        var sqlSource = ms.getLang().createSqlSource(cfg, seq.trim(), idField.getType());
+        var keyProperty = MybatisSqlProvider.ENTITY + "." + idField.getName();
+        var idResultMaps = List.of(new ResultMap.Builder(cfg, selectId + "-Inline", idField.getType(), new ArrayList<>(), null).build());
+        var newMs = new MappedStatement
+                .Builder(cfg, selectId, sqlSource, SqlCommandType.SELECT)
                 .statementType(StatementType.PREPARED)
                 .keyGenerator(NoKeyGenerator.INSTANCE)
-                .keyProperty(MybatisSqlProvider.ENTITY + "." + id.field().getName())
-                .keyColumn(id.name())
+                .keyProperty(keyProperty)
                 .databaseId(ms.getDatabaseId())
-                .lang(ms.getLang())
-                .resultOrdered(false)
-                .resultSets(null)
-                .resultMaps(createIdResultMaps(config, selectId + "-Inline", id.field().getType(), new ArrayList<>()))
-                .resultSetType(null)
-                .flushCacheRequired(false)
-                .useCache(false)
+                .resource(ms.getResource())
+                .resultMaps(idResultMaps)
                 .cache(ms.getCache())
+                .keyColumn(id.name())
+                .lang(ms.getLang())
+                .flushCacheRequired(false)
+                .resultOrdered(false)
+                .useCache(false)
+                .resultSetType(null)
+                .resultSets(null)
+                .timeout(null)
+                .fetchSize(null)
                 .build();
-        config.addMappedStatement(newMs);
+        cfg.addMappedStatement(newMs);
         return new SelectKeyGenerator(newMs, id.before());
     }
 
-    private static List<ResultMap> createIdResultMaps(@NotNull Configuration cfg, @NotNull String sid, @NotNull Class<?> type, @NotNull List<ResultMapping> mappings) {
-        var resultMap = new ResultMap.Builder(cfg, sid, type, mappings, null).build();
-        return Collections.singletonList(resultMap);
-    }
-
-    static MappedStatement replaceIdGenerator(@NotNull MappedStatement ms, @NotNull TableInfo tableInfo) {
-        if (ms.getKeyGenerator() == NoKeyGenerator.INSTANCE) {
-            var msId = ms.getId();
-            if (msId.endsWith(MybatisSqlProvider.create) || msId.endsWith(MybatisSqlProvider.creates)) {
-                return replaceIdGenerator0(ms, tableInfo);
-            }
-        }
-        return ms;
-    }
-
-    private static MappedStatement replaceIdGenerator0(@NotNull MappedStatement ms, @NotNull TableInfo tableInfo) {
-        var generator = MybatisUtil.createKeyGenerator(ms, tableInfo);
+    protected static MappedStatement replaceIdGenerator(@NotNull MappedStatement ms, @NotNull TableInfo table) {
+        var generator = MybatisUtil.createKeyGenerator(ms, table);
         if (generator == NoKeyGenerator.INSTANCE) {
             return ms;
         }
@@ -70,18 +58,24 @@ class MybatisModifier {
             generator = new EntitiesIdGenerator(generator);
         }
 
-        return new MappedStatement.Builder(ms.getConfiguration(), ms.getId(), ms.getSqlSource(), ms.getSqlCommandType())
+        var cfg = ms.getConfiguration();
+        var keyProperty = MybatisSqlProvider.ENTITY + "." + table.id().field().getName();
+        var resultSet = ms.getResultSets() == null ? null : String.join(",", ms.getResultSets());
+        var sqlCommandType = ms.getSqlCommandType();
+        var sqlSource = ms.getSqlSource();
+        return new MappedStatement
+                .Builder(cfg, ms.getId(), sqlSource, sqlCommandType)
                 .resource(ms.getResource())
                 .fetchSize(ms.getFetchSize())
                 .timeout(ms.getTimeout())
                 .statementType(ms.getStatementType())
                 .keyGenerator(generator)
-                .keyProperty(MybatisSqlProvider.ENTITY + "." + tableInfo.id().field().getName())
-                .keyColumn(tableInfo.id().name())
+                .keyProperty(keyProperty)
+                .keyColumn(table.id().name())
                 .databaseId(ms.getDatabaseId())
                 .lang(ms.getLang())
                 .resultOrdered(ms.isResultOrdered())
-                .resultSets(ms.getResultSets() == null ? null : String.join(",", ms.getResultSets()))
+                .resultSets(resultSet)
                 .resultMaps(ms.getResultMaps())
                 .resultSetType(ms.getResultSetType())
                 .flushCacheRequired(ms.isFlushCacheRequired())
@@ -90,59 +84,42 @@ class MybatisModifier {
                 .build();
     }
 
-
-    static MappedStatement addSelectResultMap(@NotNull MappedStatement ms, @NotNull TableInfo tableInfo) {
+    protected static MappedStatement replaceCountAsteriskResultMap(@NotNull MappedStatement ms) {
         var cfg = ms.getConfiguration();
-
-        // 处理 count 查询的特殊情况
-        if (ms.getId().endsWith(MybatisSqlProvider.count)) {
-            var resultMappings = new ArrayList<ResultMapping>(1) {{
-                add(new ResultMapping.Builder(cfg, "count", "COUNT(*)", long.class).build());
-            }};
-            var resultMaps = List.of(new ResultMap.Builder(cfg, ms.getId() + ".CountResultMap", long.class, resultMappings).build());
-            return new MappedStatement
-                    .Builder(cfg, ms.getId(), ms.getSqlSource(), ms.getSqlCommandType())
-                    .resultMaps(resultMaps)
-                    .build();
-        }
-
-        // 处理普通实体查询
-        var resultMapId = tableInfo.entityClass().getName() + ".BaseResultMap";
-        if (!cfg.hasResultMap(resultMapId)) {
-            addSelectResultMap(cfg, tableInfo.entityClass(), tableInfo, resultMapId);
-        }
-
-        var resultMaps = new ArrayList<ResultMap>(1) {{
-            add(cfg.getResultMap(resultMapId));
-        }};
-
-        return new MappedStatement
-                .Builder(cfg, ms.getId(), ms.getSqlSource(), ms.getSqlCommandType())
-                .resultMaps(resultMaps)
-                .build();
+        var msId = ms.getId();
+        var resultMappings = List.of(new ResultMapping.Builder(cfg, "count", "count(*)", long.class).build());
+        var resultMaps = List.of(new ResultMap.Builder(cfg, msId + ".CountCountAsteriskMap", long.class, resultMappings).build());
+        var sqlSource = ms.getSqlSource();
+        var sqlCommandType = ms.getSqlCommandType();
+        return new MappedStatement.Builder(cfg, msId, sqlSource, sqlCommandType).resultMaps(resultMaps).build();
     }
 
-    private static void addSelectResultMap(@NotNull Configuration cfg, @NotNull Class<?> entityClass, @NotNull TableInfo table, @NotNull String resultMapId) {
-        // 添加ID映射
-        var resultMappings = new ArrayList<ResultMapping>() {{
-            var id = table.id();
-            add(new Builder(cfg, id.field().getName(), id.name(), id.field().getType())
-                    .flags(Collections.singletonList(ResultFlag.ID))
-                    .build());
-        }};
+    static MappedStatement replaceGetAndFindResultMap(@NotNull MappedStatement ms, @NotNull TableInfo table) {
+        var cfg = ms.getConfiguration();
+        var resultMapId = table.entityClass().getName() + ".GetAndFindResultMap";
+        if (!cfg.hasResultMap(resultMapId)) {
+            replaceGetAndFindResultMap(cfg, table.entityClass(), table, resultMapId);
+        }
+        var msId = ms.getId();
+        var sqlSource = ms.getSqlSource();
+        var sqlCommandType = ms.getSqlCommandType();
+        var resultMaps = List.of(cfg.getResultMap(resultMapId));
+        return new MappedStatement.Builder(cfg, msId, sqlSource, sqlCommandType).resultMaps(resultMaps).build();
+    }
 
-        // 添加普通列映射
+    private static void replaceGetAndFindResultMap(@NotNull Configuration cfg, @NotNull Class<?> entityClass, @NotNull TableInfo table, @NotNull String resultMapId) {
+        var id = table.id();
+        var resultMappings = new ArrayList<ResultMapping>() {{
+            add(new Builder(cfg, id.field().getName(), id.name(), id.field().getType()).flags(List.of(ResultFlag.ID)).build());
+        }};
         for (var column : table.columns()) {
             var builder = new ResultMapping.Builder(cfg, column.field().getName(), column.name(), column.field().getType());
-            // 如果有TypeHandler，设置到ResultMapping中
             var handler = Tables.getTypeHandler(column.field());
             if (handler != null) {
                 builder.typeHandler(handler);
             }
             resultMappings.add(builder.build());
         }
-
-        // 创建并添加ResultMap
         cfg.addResultMap(new ResultMap.Builder(cfg, resultMapId, entityClass, resultMappings).build());
     }
 }
