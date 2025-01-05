@@ -29,9 +29,9 @@ public class CrudInterceptors {
     static void interceptCreate(@NotNull Object entity) {
         var interceptors = typeInterceptors.get(CrudType.INSERT);
         if (interceptors != null) {
-            var entityClass = entity.getClass();
+            var entityType = entity.getClass();
             for (var interceptor : interceptors) {
-                if (interceptor.support(entityClass)) {
+                if (interceptor.support(entityType)) {
                     interceptor.beforeCreate(entity);
                 }
             }
@@ -45,9 +45,9 @@ public class CrudInterceptors {
         if (!entities.isEmpty()) {
             var interceptors = typeInterceptors.get(CrudType.INSERT);
             if (interceptors != null) {
-                var entityClass = entities.iterator().next().getClass();
+                var entityType = entities.iterator().next().getClass();
                 for (var interceptor : interceptors) {
-                    if (interceptor.support(entityClass)) {
+                    if (interceptor.support(entityType)) {
                         interceptor.beforeCreate(entities);
                     }
                 }
@@ -58,12 +58,12 @@ public class CrudInterceptors {
     /**
      * 更新前拦截 - 使用条件更新
      */
-    static void interceptUpdate(@NotNull Class<?> entityClass, @NotNull List<SqlNode> nodes) {
+    static void interceptUpdate(@NotNull Class<?> entityType, @NotNull List<SqlNode> nodes) {
         var interceptors = typeInterceptors.get(CrudType.UPDATE);
         if (interceptors != null) {
             for (var interceptor : interceptors) {
-                if (interceptor.support(entityClass)) {
-                    interceptor.beforeUpdate(entityClass, nodes);
+                if (interceptor.support(entityType)) {
+                    interceptor.beforeUpdate(entityType, nodes);
                 }
             }
         }
@@ -72,12 +72,12 @@ public class CrudInterceptors {
     /**
      * 删除前拦截
      */
-    static void interceptDelete(@NotNull Class<?> entityClass, @NotNull List<SqlNode> nodes) {
+    static void interceptDelete(@NotNull Class<?> entityType, @NotNull List<SqlNode> nodes) {
         var interceptors = typeInterceptors.get(CrudType.DELETE);
         if (interceptors != null) {
             for (var interceptor : interceptors) {
-                if (interceptor.support(entityClass)) {
-                    interceptor.beforeDelete(entityClass, nodes);
+                if (interceptor.support(entityType)) {
+                    interceptor.beforeDelete(entityType, nodes);
                 }
             }
         }
@@ -86,12 +86,12 @@ public class CrudInterceptors {
     /**
      * 查询前拦截
      */
-    static void interceptQuery(@NotNull Class<?> entityClass, @NotNull List<SqlNode> nodes) {
+    static void interceptQuery(@NotNull Class<?> entityType, @NotNull List<SqlNode> nodes) {
         var interceptors = typeInterceptors.get(CrudType.SELECT);
         if (interceptors != null) {
             for (var interceptor : interceptors) {
-                if (interceptor.support(entityClass)) {
-                    interceptor.beforeQuery(entityClass, nodes);
+                if (interceptor.support(entityType)) {
+                    interceptor.beforeQuery(entityType, nodes);
                 }
             }
         }

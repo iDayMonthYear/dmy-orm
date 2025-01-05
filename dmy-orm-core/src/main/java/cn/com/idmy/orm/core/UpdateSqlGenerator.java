@@ -26,7 +26,7 @@ class UpdateSqlGenerator extends SqlGenerator {
     protected Update<?> update;
 
     protected UpdateSqlGenerator(Update<?> update) {
-        super(update.entityClass, update.nodes);
+        super(update.entityType, update.nodes);
         this.update = update;
     }
 
@@ -77,7 +77,7 @@ class UpdateSqlGenerator extends SqlGenerator {
     protected void genSet(@NotNull SqlSet set) {
         var col = set.column;
         var expr = genSet(col, set.expr);
-        var colum = Tables.getColum(entityClass, col);
+        var colum = Tables.getColum(entityType, col);
         if (colum != null) {
             var th = Tables.getTypeHandler(colum.field());
             if (th != null) {

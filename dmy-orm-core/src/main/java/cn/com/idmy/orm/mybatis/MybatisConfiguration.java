@@ -11,6 +11,7 @@ import org.apache.ibatis.mapping.BoundSql;
 import org.apache.ibatis.mapping.MappedStatement;
 import org.apache.ibatis.mapping.SqlCommandType;
 import org.apache.ibatis.session.Configuration;
+import org.apache.ibatis.type.TypeHandler;
 import org.dromara.hutool.core.text.StrUtil;
 import org.jetbrains.annotations.NotNull;
 
@@ -26,6 +27,10 @@ class MybatisConfiguration extends Configuration {
         registry.register(JsonArrayTypeHandler.class);
     }
 
+    public void register(@NotNull TypeHandler<?> handler) {
+        getTypeHandlerRegistry().register(handler);
+    }
+
     @Override
     public ParameterHandler newParameterHandler(@NotNull MappedStatement ms, @NotNull Object param, @NotNull BoundSql boundSql) {
         if (!ms.getId().endsWith(SELECT_KEY_SUFFIX)) {
@@ -39,16 +44,20 @@ class MybatisConfiguration extends Configuration {
 
     @Override
     public void addMappedStatement(@NotNull MappedStatement ms) {
-        var table = Tables.getTable(ms);
+        var table = Tables.getTable(ms.getId().substring(0, ms.getId().lastIndexOf(".")));
         var msId = ms.getId();
         if (StrUtil.endWithAny(msId, "." + MybatisSqlProvider.create, "." + MybatisSqlProvider.creates) && ms.getKeyGenerator() == NoKeyGenerator.INSTANCE) {
             ms = MybatisModifier.replaceIdGenerator(ms, table);
         } else if (StrUtil.endWith(msId, "." + MybatisSqlProvider.count)) {
             ms = MybatisModifier.replaceCountAsteriskResultMap(ms);
         } else if (StrUtil.endWithAny(msId, "." + MybatisSqlProvider.getNullable, "." + MybatisSqlProvider.find0)) {
-            ms = MybatisModifier.replaceGetAndFindResultMap(ms, table);
+            ms = MybatisModifier.replaceQueryResultMap(ms, table);
         } else if (ms.getSqlCommandType() == SqlCommandType.SELECT) {
-
+            /*List<ResultMap> resultMaps = ms.getResultMaps();
+            for (ResultMap resultMap : resultMaps) {
+                table = Tables.getTable(resultMap.getType());
+                ms = MybatisModifier.replaceQueryResultMap(ms, table);
+            }*/
         }
         super.addMappedStatement(ms);
     }

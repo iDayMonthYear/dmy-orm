@@ -1,12 +1,14 @@
 package cn.com.idmy.orm.mybatis;
 
 import lombok.Data;
+import org.apache.ibatis.type.TypeHandler;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -14,8 +16,9 @@ import java.util.stream.Stream;
 @ConfigurationProperties(prefix = "dmy.orm")
 public class OrmProps {
     private static final ResourcePatternResolver resourceResolver = new PathMatchingResourcePatternResolver();
-    private boolean checkDatabaseColumn;
+    private boolean checkDbColumn;
     private String[] mapperLocations = new String[]{"classpath*:/dao/**/*.xml"};
+    private List<TypeHandler<?>> typeHandlers;
 
     private Resource[] resources(String location) {
         try {

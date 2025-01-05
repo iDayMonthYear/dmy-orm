@@ -45,7 +45,7 @@ class EnumWatchListener {
     @EventListener
     public void onEnumWatchEvent(EnumWatchEvent event) {
         WatchKey key = new WatchKey(
-                event.entityClass(),
+                event.entityType(),
                 event.enumClass(),
                 event.action(),
                 event.timing()
@@ -63,7 +63,7 @@ class EnumWatchListener {
         }
     }
 
-    private record WatchKey(Class<?> entityClass, Class<?> enumClass, Action action, Timing timing) {
+    private record WatchKey(Class<?> entityType, Class<?> enumType, Action action, Timing timing) {
         @Override
         public boolean equals(Object o) {
             if (this == o) {
@@ -73,8 +73,8 @@ class EnumWatchListener {
                 return false;
             }
             WatchKey watchKey = (WatchKey) o;
-            return Objects.equals(entityClass, watchKey.entityClass) &&
-                    Objects.equals(enumClass, watchKey.enumClass) &&
+            return Objects.equals(entityType, watchKey.entityType) &&
+                    Objects.equals(enumType, watchKey.enumType) &&
                     action == watchKey.action &&
                     timing == watchKey.timing;
         }

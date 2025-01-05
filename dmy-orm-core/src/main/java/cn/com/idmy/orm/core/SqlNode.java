@@ -60,14 +60,14 @@ public class SqlNode {
             this.expr = expr;
         }
 
-        public <T> SqlCond(Class<T> entityClass, FieldGetter<T, ?> field, @NonNull Op op, @NotNull Object expr) {
+        public <T> SqlCond(Class<T> entityType, FieldGetter<T, ?> field, @NonNull Op op, @NotNull Object expr) {
             super(SqlNodeType.COND);
             this.op = op;
             this.expr = expr;
             if (expr instanceof SqlOpExpr) {
-                this.column = Tables.getColumnName(entityClass, field);
+                this.column = Tables.getColumnName(entityType, field);
             } else {
-                var col = Tables.getColum(entityClass, field);
+                var col = Tables.getColum(entityType, field);
                 if (ObjUtil.isNotEmpty(expr)) {
                     var type1 = col.field().getType();
                     var type2 = expr.getClass();
@@ -80,7 +80,7 @@ public class SqlNode {
                         type1 = ConvertUtil.wrap(type1);
                     }
                     if (type1 != type2) {
-                        throw new OrmException("「{}」字段类型「{}」和参数类型「{}」不匹配", entityClass.getSimpleName(), type1.getSimpleName(), type2.getSimpleName());
+                        throw new OrmException("「{}」字段类型「{}」和参数类型「{}」不匹配", entityType.getSimpleName(), type1.getSimpleName(), type2.getSimpleName());
                     }
                 }
                 this.column = col.name();
@@ -121,8 +121,8 @@ public class SqlNode {
             this.column = col.name();
         }
 
-        public <T> SqlSet(Class<T> entityClass, FieldGetter<T, ?> field, @Nullable Object value) {
-            this(Tables.getColum(entityClass, field), value);
+        public <T> SqlSet(Class<T> entityType, FieldGetter<T, ?> field, @Nullable Object value) {
+            this(Tables.getColum(entityType, field), value);
         }
 
         protected void check(TableColumn col, @Nullable Object value) {

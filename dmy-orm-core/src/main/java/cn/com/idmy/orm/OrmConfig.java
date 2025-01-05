@@ -63,8 +63,8 @@ public class OrmConfig {
         return nameStrategy(name, columnNameStrategy);
     }
 
-    public static <T, R> void register(@NotNull Class<T> entityClass, @NotNull FieldGetter<T, R> col, @NotNull TypeHandler<?> handler) {
-        Tables.bindTypeHandler(entityClass, col, handler);
+    public static <T, R> void register(@NotNull Class<T> entityType, @NotNull FieldGetter<T, R> col, @NotNull TypeHandler<?> handler) {
+        Tables.bindTypeHandler(entityType, col, handler);
     }
 
     public static void register(@NotNull CrudInterceptor interceptor) {

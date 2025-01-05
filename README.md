@@ -266,7 +266,7 @@ public class OrderIdGenerator implements IdGenerator {
 
 在 DMY-ORM 中，可以通过 `TableManager` 类的 `register` 方法注册自定义的 `TypeHandler`。该方法接受以下参数：
 
-- `entityClass`：实体类的 Class 对象。
+- `entityType`：实体类的 Class 对象。
 - `col`：一个 `ColumnGetter` 函数，用于获取字段名。
 - `handlerClass`：自定义的 `TypeHandler` 类。
 

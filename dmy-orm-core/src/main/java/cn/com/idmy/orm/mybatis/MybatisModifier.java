@@ -94,11 +94,11 @@ class MybatisModifier {
         return new MappedStatement.Builder(cfg, msId, sqlSource, sqlCommandType).resultMaps(resultMaps).build();
     }
 
-    static MappedStatement replaceGetAndFindResultMap(@NotNull MappedStatement ms, @NotNull TableInfo table) {
+    static MappedStatement replaceQueryResultMap(@NotNull MappedStatement ms, @NotNull TableInfo table) {
         var cfg = ms.getConfiguration();
-        var resultMapId = table.entityClass().getName() + ".GetAndFindResultMap";
+        var resultMapId = table.entityType().getName() + ".QueryResultMap";
         if (!cfg.hasResultMap(resultMapId)) {
-            replaceGetAndFindResultMap(cfg, table.entityClass(), table, resultMapId);
+            replaceQueryResultMap(cfg, table.entityType(), table, resultMapId);
         }
         var msId = ms.getId();
         var sqlSource = ms.getSqlSource();
@@ -107,19 +107,19 @@ class MybatisModifier {
         return new MappedStatement.Builder(cfg, msId, sqlSource, sqlCommandType).resultMaps(resultMaps).build();
     }
 
-    private static void replaceGetAndFindResultMap(@NotNull Configuration cfg, @NotNull Class<?> entityClass, @NotNull TableInfo table, @NotNull String resultMapId) {
+    private static void replaceQueryResultMap(@NotNull Configuration cfg, @NotNull Class<?> entityType, @NotNull TableInfo table, @NotNull String resultMapId) {
         var id = table.id();
         var resultMappings = new ArrayList<ResultMapping>() {{
             add(new Builder(cfg, id.field().getName(), id.name(), id.field().getType()).flags(List.of(ResultFlag.ID)).build());
         }};
-        for (var column : table.columns()) {
-            var builder = new ResultMapping.Builder(cfg, column.field().getName(), column.name(), column.field().getType());
-            var handler = Tables.getTypeHandler(column.field());
+        for (var col : table.columns()) {
+            var builder = new ResultMapping.Builder(cfg, col.field().getName(), col.name(), col.field().getType());
+            var handler = Tables.getTypeHandler(col.field());
             if (handler != null) {
                 builder.typeHandler(handler);
             }
             resultMappings.add(builder.build());
         }
-        cfg.addResultMap(new ResultMap.Builder(cfg, resultMapId, entityClass, resultMappings).build());
+        cfg.addResultMap(new ResultMap.Builder(cfg, resultMapId, entityType, resultMappings).build());
     }
 }

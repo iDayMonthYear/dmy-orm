@@ -1,6 +1,7 @@
 package cn.com.idmy.orm.core;
 
 import cn.com.idmy.base.model.Pair;
+import cn.com.idmy.orm.OrmException;
 import cn.com.idmy.orm.core.SqlNode.SqlCond;
 import cn.com.idmy.orm.core.SqlNode.SqlOr;
 import lombok.extern.slf4j.Slf4j;
@@ -17,7 +18,7 @@ class DeleteSqlGenerator extends SqlGenerator {
     protected Delete<?> delete;
 
     protected DeleteSqlGenerator(@NotNull Delete<?> delete) {
-        super(delete.entityClass, delete.nodes);
+        super(delete.entityType, delete.nodes);
         this.delete = delete;
     }
 
@@ -37,7 +38,7 @@ class DeleteSqlGenerator extends SqlGenerator {
 
         boolean empty = genWhere(wheres);
         if (empty && !delete.force) {
-            throw new IllegalArgumentException("删除语句没有条件！可使用 force 强制执行");
+            throw new OrmException("删除语句没有条件！可使用 force 强制执行");
         } else {
             return Pair.of(sql.toString(), params);
         }

@@ -16,8 +16,8 @@ import java.util.List;
 public class CreateSqlGenerator extends SqlGenerator {
     private final Object input;
 
-    public CreateSqlGenerator(@NotNull Class<?> entityClass, @NotNull Object input) {
-        super(entityClass, Collections.emptyList());
+    public CreateSqlGenerator(@NotNull Class<?> entityType, @NotNull Object input) {
+        super(entityType, Collections.emptyList());
         this.input = input;
     }
 
@@ -88,7 +88,7 @@ public class CreateSqlGenerator extends SqlGenerator {
         }
 
         genInsertHeader();
-        var table = Tables.getTable(entityClass);
+        var table = Tables.getTable(entityType);
         var columns = table.columns();
 
         // 收集所有实体中出现的非空字段

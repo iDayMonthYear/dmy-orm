@@ -29,7 +29,7 @@ import static cn.com.idmy.orm.core.SqlConsts.WHERE;
 @Accessors(fluent = true)
 public abstract class SqlGenerator {
     @NonNull
-    protected final Class<?> entityClass;
+    protected final Class<?> entityType;
     @NonNull
     protected final String tableName;
     @NonNull
@@ -38,10 +38,10 @@ public abstract class SqlGenerator {
     protected final StringBuilder sql = new StringBuilder();
     protected List<Object> params;
 
-    public SqlGenerator(@NonNull Class<?> entityClass, @NonNull List<SqlNode> notes) {
-        this.entityClass = entityClass;
+    public SqlGenerator(@NonNull Class<?> entityType, @NonNull List<SqlNode> notes) {
+        this.entityType = entityType;
         this.nodes = notes;
-        tableName = Tables.getTableName(entityClass);
+        tableName = Tables.getTableName(entityType);
     }
 
     protected String warpKeyword(@NonNull String str) {
@@ -118,7 +118,7 @@ public abstract class SqlGenerator {
         if (CollUtil.isNotEmpty(wheres)) {
             if (wheres.getLast().type == SqlNodeType.OR) {
                 if (log.isWarnEnabled()) {
-                    log.warn("存在相邻的or，已自动移除");
+                    log.warn("存在相邻的 or，已自动移除");
                 }
             } else {
                 wheres.add(node);
@@ -130,7 +130,7 @@ public abstract class SqlGenerator {
         if (CollUtil.isNotEmpty(wheres) && wheres.getLast() instanceof SqlOr) {
             wheres.removeLast();
             if (log.isWarnEnabled()) {
-                log.warn("where条件最后存在 or，已自动移除");
+                log.warn("where 条件最后存在 or，已自动移除");
             }
         }
     }
@@ -160,9 +160,9 @@ public abstract class SqlGenerator {
     protected Pair<String, List<Object>> generate() {
         // 根据具体类型调用对应的拦截方法
         switch (this) {
-            case UpdateSqlGenerator ignored -> CrudInterceptors.interceptUpdate(entityClass, nodes);
-            case DeleteSqlGenerator ignored -> CrudInterceptors.interceptDelete(entityClass, nodes);
-            case QuerySqlGenerator ignored -> CrudInterceptors.interceptQuery(entityClass, nodes);
+            case UpdateSqlGenerator ignored -> CrudInterceptors.interceptUpdate(entityType, nodes);
+            case DeleteSqlGenerator ignored -> CrudInterceptors.interceptDelete(entityType, nodes);
+            case QuerySqlGenerator ignored -> CrudInterceptors.interceptQuery(entityType, nodes);
             default -> {
             }
         }

@@ -26,25 +26,25 @@ public interface CrudInterceptor {
     /**
      * 更新前拦截 - 使用条件更新
      */
-    default void beforeUpdate(@NotNull Class<?> entityClass, @NotNull List<SqlNode> nodes) {
+    default void beforeUpdate(@NotNull Class<?> entityType, @NotNull List<SqlNode> nodes) {
     }
 
     /**
      * 删除前拦截
      */
-    default void beforeDelete(@NotNull Class<?> entityClass, @NotNull List<SqlNode> nodes) {
+    default void beforeDelete(@NotNull Class<?> entityType, @NotNull List<SqlNode> nodes) {
     }
 
     /**
      * 查询前拦截
      */
-    default void beforeQuery(@NotNull Class<?> entityClass, @NotNull List<SqlNode> nodes) {
+    default void beforeQuery(@NotNull Class<?> entityType, @NotNull List<SqlNode> nodes) {
     }
 
     /**
      * 是否拦截该实体类
      */
-    default boolean support(@NotNull Class<?> entityClass) {
+    default boolean support(@NotNull Class<?> entityType) {
         return true;
     }
 

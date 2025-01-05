@@ -23,7 +23,7 @@ public class EntitiesIdGenerator implements KeyGenerator {
         if (CollUtil.isNotEmpty(entities)) {
             for (var entity : entities) {
                 params.put(MybatisSqlProvider.ENTITY, entity);
-                MybatisSqlProvider.putEntityClass(params, entity.getClass());
+                MybatisSqlProvider.putEntityType(params, entity.getClass());
                 keyGenerator.processBefore(executor, ms, st, param);
             }
         }

@@ -20,7 +20,7 @@ public class Delete<T> extends Where<T, Delete<T>> {
     protected boolean force;
 
     protected Delete(@NotNull MybatisDao<T, ?> dao) {
-        super(dao.entityClass());
+        super(dao.entityType());
         this.dao = dao;
     }
 

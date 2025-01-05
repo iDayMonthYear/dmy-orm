@@ -8,7 +8,7 @@ import java.lang.reflect.Field;
 import java.util.Map;
 
 public record TableInfo(
-        @NotNull Class<?> entityClass,
+        @NotNull Class<?> entityType,
         @NotNull String name,
         @NotNull TableId id,
         @Nullable String title,

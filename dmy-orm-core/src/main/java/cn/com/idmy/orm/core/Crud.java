@@ -21,11 +21,11 @@ abstract class Crud<T, CRUD extends Crud<T, CRUD>> {
     @NotNull
     protected final CRUD crud = (CRUD) this;
     @NotNull
-    protected Class<T> entityClass;
+    protected Class<T> entityType;
     protected int sqlParamsSize;
 
-    protected Crud(@NotNull Class<T> entityClass) {
-        this.entityClass = entityClass;
+    protected Crud(@NotNull Class<T> entityType) {
+        this.entityType = entityType;
     }
 
     @NotNull

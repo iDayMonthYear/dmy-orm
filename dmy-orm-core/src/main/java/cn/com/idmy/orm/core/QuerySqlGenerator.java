@@ -19,7 +19,7 @@ class QuerySqlGenerator extends SqlGenerator {
     protected Query<?> query;
 
     protected QuerySqlGenerator(@NotNull Query<?> query) {
-        super(query.entityClass, query.nodes);
+        super(query.entityType, query.nodes);
         this.query = query;
     }
 
@@ -108,7 +108,7 @@ class QuerySqlGenerator extends SqlGenerator {
                 var sc = scs.get(i);
                 var col = genSelectColumn(sc);
                 if (set.contains(col)) {
-                    throw new OrmException("select " + col + " 列名重复会导致映射到实体类异常");
+                    throw new OrmException("select {} 列名重复会导致映射到实体类异常", col);
                 } else {
                     set.add(col);
                     if (i < size - 1 && scs.get(i + 1).type == SqlNodeType.SELECT_COLUMN) {

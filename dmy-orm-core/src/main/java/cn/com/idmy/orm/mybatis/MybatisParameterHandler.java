@@ -56,7 +56,7 @@ class MybatisParameterHandler extends DefaultParameterHandler {
             }
             case Object[] arr -> {
                 if (arr.length == 0) {
-                    throw new OrmException("Empty array");
+                    throw new OrmException("空数组");
                 }
                 int curIdx = idx;
                 for (var item : arr) {
@@ -66,7 +66,7 @@ class MybatisParameterHandler extends DefaultParameterHandler {
             }
             case Collection<?> arr -> {
                 if (arr.isEmpty()) {
-                    throw new OrmException("Empty collection");
+                    throw new OrmException("空集合");
                 }
                 int curIdx = idx;
                 for (var item : arr) {

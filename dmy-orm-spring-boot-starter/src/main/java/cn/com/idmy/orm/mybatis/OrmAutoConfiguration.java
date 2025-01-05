@@ -34,22 +34,22 @@ public class OrmAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    SqlSessionFactory sqlSessionFactory(
-            OrmProps props,
-            DataSource dataSource,
-            EnumWatchInterceptor enumWatchInterceptor
-    ) throws Exception {
-        SqlSessionFactoryBean factory = new SqlSessionFactoryBean();
-        factory.setDataSource(dataSource);
-        factory.setConfiguration(new MybatisConfiguration());
-//        factory.setPlugins(enumWatchInterceptor);
-        factory.setMapperLocations(props.resolveMapperLocations());
-        return factory.getObject();
-    }
+    SqlSessionFactory sqlSessionFactory(OrmProps props, DataSource dataSource, ApplicationContext ctx, EnumWatchInterceptor enumWatchInterceptor) throws Exception {
+        var bean = new SqlSessionFactoryBean();
+        bean.setDataSource(dataSource);
+        var cfg = new MybatisConfiguration();
+        var typeHandlers = props.getTypeHandlers();
+        if (typeHandlers != null) {
+            typeHandlers.forEach(cfg::register);
+        }
+        bean.setConfiguration(cfg);
+        //bean.setPlugins(enumWatchInterceptor);
+        bean.setMapperLocations(props.resolveMapperLocations());
 
-    @Bean
-    @ConditionalOnMissingBean
-    CheckDatabaseColumn checkDatabaseColumn(ApplicationContext ctx, SqlSessionFactory factory, OrmProps props) {
-        return props.isCheckDatabaseColumn() ? new CheckDatabaseColumn(ctx, factory) : null;
+        var factory = bean.getObject();
+        if (props.isCheckDbColumn()) {
+            new CheckDbColumn(ctx, factory).scan();
+        }
+        return factory;
     }
 }

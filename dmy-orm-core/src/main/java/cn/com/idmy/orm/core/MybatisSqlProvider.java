@@ -32,7 +32,7 @@ public class MybatisSqlProvider {
 
     public static final String ENTITY = "$entity$";
     public static final String ENTITIES = "$entities$";
-    public static final String ENTITY_CLASS = "$$entityClass$";
+    public static final String ENTITY_TYPE = "$$entityType$";
 
     public static final String getNullable = "getNullable";
     public static final String find0 = "find0";
@@ -53,19 +53,19 @@ public class MybatisSqlProvider {
     @NotNull
     private static String genCommonSql(@NotNull Map<String, Object> params) {
         var where = (Crud<?, ?>) params.get(CRUD);
-        putEntityClass(params, where.entityClass);
+        putEntityType(params, where.entityType);
         var pair = where.sql();
         params.put(SQL_PARAMS, pair.right);
         return pair.left;
     }
 
-    public static void putEntityClass(@NotNull Map<String, Object> params, @NotNull Class<?> entityClass) {
-        params.put(ENTITY_CLASS, entityClass);
+    public static void putEntityType(@NotNull Map<String, Object> params, @NotNull Class<?> entityType) {
+        params.put(ENTITY_TYPE, entityType);
     }
 
     @NotNull
-    public static Class<?> getEntityClass(@NotNull Map<String, Object> params) {
-        return (Class<?>) params.get(ENTITY_CLASS);
+    public static Class<?> getEntityType(@NotNull Map<String, Object> params) {
+        return (Class<?>) params.get(ENTITY_TYPE);
     }
 
     @SuppressWarnings("unchecked")
@@ -172,7 +172,7 @@ public class MybatisSqlProvider {
         q.limit = null;
         q.offset = null;
         q.select(SqlFn::count);
-        putEntityClass(params, q.entityClass);
+        putEntityType(params, q.entityType);
         var pair = q.sql();
         params.put(SQL_PARAMS, pair.right);
         return pair.left;
@@ -181,11 +181,11 @@ public class MybatisSqlProvider {
     @NotNull
     public String create(@NotNull Map<String, Object> params) {
         var entity = params.get(ENTITY);
-        var entityClass = entity.getClass();
-        var generator = new CreateSqlGenerator(entityClass, entity);
+        var entityType = entity.getClass();
+        var generator = new CreateSqlGenerator(entityType, entity);
         var pair = generator.generate();
         params.put(SQL_PARAMS, pair.right);
-        putEntityClass(params, entityClass);
+        putEntityType(params, entityType);
         return pair.left;
     }
 
@@ -195,18 +195,18 @@ public class MybatisSqlProvider {
         if (entities.isEmpty()) {
             throw new OrmException("批量创建的实体集合不能为空");
         }
-        var entityClass = entities.iterator().next().getClass();
-        var generator = new CreateSqlGenerator(entityClass, entities);
+        var entityType = entities.iterator().next().getClass();
+        var generator = new CreateSqlGenerator(entityType, entities);
         var pair = generator.generate();
         params.put(SQL_PARAMS, pair.right);
-        putEntityClass(params, entityClass);
+        putEntityType(params, entityType);
         return pair.left;
     }
 
     @NotNull
     public String updateBySql(@NotNull Map<String, Object> params, @NotNull ProviderContext context) {
         TableInfo table = getTableByMapperClass(context.getMapperType());
-        putEntityClass(params, table.entityClass());
+        putEntityType(params, table.entityType());
         return (String) params.get(CRUD);
     }
 }

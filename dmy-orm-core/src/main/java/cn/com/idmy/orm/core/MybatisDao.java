@@ -17,26 +17,22 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
-import static cn.com.idmy.orm.core.MybatisSqlProvider.clearSelectColumns;
-import static cn.com.idmy.orm.core.Tables.getIdName;
-import static cn.com.idmy.orm.core.Tables.getTable;
-
 public interface MybatisDao<T, ID> {
     @NotNull
     @SuppressWarnings("unchecked")
-    default Class<T> entityClass() {
+    default Class<T> entityType() {
         return (Class<T>) TypeUtil.getTypeArgument(getClass());
     }
 
     @NotNull
     @SuppressWarnings("unchecked")
-    default Class<ID> idClass() {
+    default Class<ID> idType() {
         return (Class<ID>) TypeUtil.getTypeArgument(getClass(), 1);
     }
 
     @NotNull
     default TableInfo table() {
-        return getTable(entityClass());
+        return Tables.getTable(entityType());
     }
 
     @NotNull
@@ -64,7 +60,7 @@ public interface MybatisDao<T, ID> {
     default boolean exists(@NonNull ID id) {
         var q = q();
         q.sqlParamsSize = 1;
-        q.addNode(new SqlCond(getIdName(this), Op.EQ, id));
+        q.addNode(new SqlCond(Tables.getIdName(this), Op.EQ, id));
         return exists(q);
     }
 
@@ -122,7 +118,7 @@ public interface MybatisDao<T, ID> {
         } else {
             var q = q();
             q.sqlParamsSize = 1;
-            q.addNode(new SqlCond(getIdName(this), Op.IN, ids));
+            q.addNode(new SqlCond(Tables.getIdName(this), Op.IN, ids));
             return find(q);
         }
     }
@@ -139,14 +135,14 @@ public interface MybatisDao<T, ID> {
         } else {
             var q = q().select(field);
             q.sqlParamsSize = 1;
-            q.addNode(new SqlCond(getIdName(this), Op.IN, ids));
+            q.addNode(new SqlCond(Tables.getIdName(this), Op.IN, ids));
             return find(q).stream().map(field::get).toList();
         }
     }
 
     @NotNull
     default <R> List<R> find(@NotNull FieldGetter<T, R> field, @NotNull Query<T> q) {
-        clearSelectColumns(q);
+        MybatisSqlProvider.clearSelectColumns(q);
         var ts = find(q.select(field));
         return CollStreamUtil.toList(ts, field::get);
     }
@@ -176,7 +172,7 @@ public interface MybatisDao<T, ID> {
     default T getNullable(@NonNull ID id) {
         var q = q();
         q.sqlParamsSize = 1;
-        q.addNode(new SqlCond(getIdName(this), Op.EQ, id));
+        q.addNode(new SqlCond(Tables.getIdName(this), Op.EQ, id));
         return getNullable(q);
     }
 
@@ -189,7 +185,7 @@ public interface MybatisDao<T, ID> {
     default <R> R getNullable(@NotNull FieldGetter<T, R> field, @NonNull ID id) {
         var q = q().select(field);
         q.sqlParamsSize = 1;
-        q.addNode(new SqlCond(getIdName(this), Op.EQ, id));
+        q.addNode(new SqlCond(Tables.getIdName(this), Op.EQ, id));
         T t = getNullable(q);
         return t == null ? null : field.get(t);
     }
@@ -198,8 +194,7 @@ public interface MybatisDao<T, ID> {
     default <R> R get(@NotNull FieldGetter<T, R> field, @NonNull ID id) {
         R r = getNullable(field, id);
         if (r == null) {
-            var colum = Tables.getColum(entityClass(), field);
-            assert colum != null;
+            var colum = Tables.getColum(entityType(), field);
             throw new OrmException("根据主键「{}」找不到「{}」", id, Optional.ofNullable(colum.title()).orElse(colum.name()));
         } else {
             return r;
@@ -213,7 +208,7 @@ public interface MybatisDao<T, ID> {
 
     @Nullable
     default <R> R getNullable(@NotNull FieldGetter<T, R> field, @NotNull Query<T> q) {
-        clearSelectColumns(q);
+        MybatisSqlProvider.clearSelectColumns(q);
         q.limit = 1;
         q.select(field);
         T t = getNullable(q);
@@ -229,7 +224,7 @@ public interface MybatisDao<T, ID> {
     default <R> R get(@NotNull FieldGetter<T, R> field, @NotNull Query<T> q) {
         R r = getNullable(field, q);
         if (r == null) {
-            var col = Tables.getColum(entityClass(), field);
+            var col = Tables.getColum(entityType(), field);
             assert col != null;
             throw new OrmException("根据主键「查询条件」找不到「{}」", Optional.ofNullable(col.title()).orElse(col.name()));
         } else {
@@ -239,7 +234,7 @@ public interface MybatisDao<T, ID> {
 
     @Nullable
     default T getNullable(@NotNull Query<T> q, @NotNull FieldGetter<T, ?> field, FieldGetter<T, ?>... fields) {
-        clearSelectColumns(q);
+        MybatisSqlProvider.clearSelectColumns(q);
         q.select(field);
         q.select(fields);
         return getNullable(q);
@@ -270,7 +265,7 @@ public interface MybatisDao<T, ID> {
         if (name == SqlFnName.IF_NULL) {
             throw new OrmException("不支持ifnull");
         } else {
-            clearSelectColumns(q);
+            MybatisSqlProvider.clearSelectColumns(q);
             q.limit = 1;
             T t = getNullable(q.select(c -> new SqlFn<>(name, field)));
             return t == null ? null : field.get(t);
@@ -352,7 +347,7 @@ public interface MybatisDao<T, ID> {
     default int delete(@NonNull ID id) {
         var d = d();
         d.sqlParamsSize = 1;
-        d.addNode(new SqlCond(getIdName(this), Op.EQ, id));
+        d.addNode(new SqlCond(Tables.getIdName(this), Op.EQ, id));
         return delete(d);
     }
 
@@ -362,7 +357,7 @@ public interface MybatisDao<T, ID> {
         } else {
             var d = d();
             d.sqlParamsSize = 1;
-            d.addNode(new SqlCond(getIdName(this), Op.IN, ids));
+            d.addNode(new SqlCond(Tables.getIdName(this), Op.IN, ids));
             return delete(d);
         }
     }

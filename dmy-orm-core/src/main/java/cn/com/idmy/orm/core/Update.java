@@ -20,7 +20,7 @@ public class Update<T> extends Where<T, Update<T>> {
     protected boolean force;
 
     protected Update(@NotNull MybatisDao<T, ?> dao) {
-        super(dao.entityClass());
+        super(dao.entityType());
         this.dao = dao;
     }
 
@@ -31,12 +31,12 @@ public class Update<T> extends Where<T, Update<T>> {
 
     @NotNull
     public Update<T> set(@NotNull FieldGetter<T, ?> field, @Nullable Object val) {
-        return addNode(new SqlSet(entityClass, field, val));
+        return addNode(new SqlSet(entityType, field, val));
     }
 
     @NotNull
     public Update<T> set(@NotNull FieldGetter<T, ?> field, @NotNull SqlOpExpr expr) {
-        return addNode(new SqlSet(entityClass, field, expr));
+        return addNode(new SqlSet(entityType, field, expr));
     }
 
     @NotNull
