@@ -20,6 +20,8 @@ import java.util.Map;
 import static org.apache.ibatis.executor.keygen.SelectKeyGenerator.SELECT_KEY_SUFFIX;
 
 class MybatisConfiguration extends Configuration {
+    private static final String DOT = ".";
+
     public MybatisConfiguration() {
         var registry = getTypeHandlerRegistry();
         registry.setDefaultEnumTypeHandler(EnumTypeHandler.class);
@@ -44,13 +46,14 @@ class MybatisConfiguration extends Configuration {
 
     @Override
     public void addMappedStatement(@NotNull MappedStatement ms) {
-        var table = Tables.getTable(ms.getId().substring(0, ms.getId().lastIndexOf(".")));
+
+        var table = Tables.getTable(ms.getId().substring(0, ms.getId().lastIndexOf(DOT)));
         var msId = ms.getId();
-        if (StrUtil.endWithAny(msId, "." + MybatisSqlProvider.create, "." + MybatisSqlProvider.creates) && ms.getKeyGenerator() == NoKeyGenerator.INSTANCE) {
+        if (StrUtil.endWithAny(msId, DOT + MybatisSqlProvider.create, DOT + MybatisSqlProvider.creates) && ms.getKeyGenerator() == NoKeyGenerator.INSTANCE) {
             ms = MybatisModifier.replaceIdGenerator(ms, table);
-        } else if (StrUtil.endWith(msId, "." + MybatisSqlProvider.count)) {
+        } else if (StrUtil.endWith(msId, DOT + MybatisSqlProvider.count)) {
             ms = MybatisModifier.replaceCountAsteriskResultMap(ms);
-        } else if (StrUtil.endWithAny(msId, "." + MybatisSqlProvider.getNullable, "." + MybatisSqlProvider.find0)) {
+        } else if (StrUtil.endWithAny(msId, DOT + MybatisSqlProvider.getNullable, DOT + MybatisSqlProvider.find0)) {
             ms = MybatisModifier.replaceQueryResultMap(ms, table);
         } else if (ms.getSqlCommandType() == SqlCommandType.SELECT) {
 
