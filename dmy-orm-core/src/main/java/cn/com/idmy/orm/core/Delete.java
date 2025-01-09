@@ -47,6 +47,6 @@ public class Delete<T> extends Where<T, Delete<T>> {
     @NotNull
     @Override
     public Pair<String, List<Object>> sql() {
-        return new DeleteSqlGenerator(this).generate();
+        return new DeleteSqlGenerator(this).gen();
     }
 }

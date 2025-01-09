@@ -17,11 +17,11 @@ public class EntitiesIdGenerator implements KeyGenerator {
 
     @Override
     @SuppressWarnings({"unchecked"})
-    public void processBefore(@NotNull Executor executor,@NotNull  MappedStatement ms,@NotNull  Statement st, @NotNull Object param) {
+    public void processBefore(@NotNull Executor executor, @NotNull MappedStatement ms, @NotNull Statement st, @NotNull Object param) {
         var params = (Map<String, Object>) param;
-        var entities = MybatisSqlProvider.findEntities(params);
-        if (CollUtil.isNotEmpty(entities)) {
-            for (var entity : entities) {
+        var ls = MybatisSqlProvider.findEntities(params);
+        if (CollUtil.isNotEmpty(ls)) {
+            for (var entity : ls) {
                 params.put(MybatisSqlProvider.ENTITY, entity);
                 MybatisSqlProvider.putEntityType(params, entity.getClass());
                 keyGenerator.processBefore(executor, ms, st, param);

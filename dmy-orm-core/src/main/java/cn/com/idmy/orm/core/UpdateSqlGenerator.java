@@ -14,22 +14,22 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-import static cn.com.idmy.orm.core.SqlConsts.*;
 
 @Slf4j
 class UpdateSqlGenerator extends SqlGenerator {
-    protected Update<?> update;
+    protected final Update<?> update;
 
-    protected UpdateSqlGenerator(Update<?> update) {
-        super(update.entityType, update.nodes);
-        this.update = update;
+    protected UpdateSqlGenerator(Update<?> u) {
+        super(u.entityType, u.nodes);
+        this.update = u;
     }
 
     @Override
-    protected @NotNull Pair<String, List<Object>> doGenerate() {
+    protected @NotNull Pair<String, List<Object>> doGen() {
         var sets = new ArrayList<SqlSet>(nodes.size());
         var wheres = new ArrayList<SqlNode>(nodes.size() - 1);
-        for (var node : nodes) {
+        for (int i = 0, size = nodes.size(); i < size; i++) {
+            var node = nodes.get(i);
             if (node instanceof SqlSet set) {
                 sets.add(set);
             } else if (node instanceof SqlCond) {
@@ -39,7 +39,7 @@ class UpdateSqlGenerator extends SqlGenerator {
             }
         }
 
-        sql.append(UPDATE).append(SqlConsts.STRESS_MARK).append(tableName).append(SqlConsts.STRESS_MARK).append(SET);
+        sql.append(UPDATE).append(STRESS_MARK).append(tableName).append(STRESS_MARK).append(SET);
         params = new ArrayList<>(update.sqlParamsSize);
 
         if (!sets.isEmpty()) {
@@ -50,8 +50,7 @@ class UpdateSqlGenerator extends SqlGenerator {
                 }
             }
         }
-        boolean empty = genWhere(wheres);
-        if (empty && !update.force) {
+        if (genWhere(wheres) && !update.force) {
             throw new IllegalArgumentException("更新语句没有条件！可使用 force 强制执行");
         } else {
             return new Pair<>(sql.toString(), params);
@@ -59,9 +58,9 @@ class UpdateSqlGenerator extends SqlGenerator {
     }
 
     protected String genSet(@NonNull String col, @NonNull SqlOpExpr expr) {
-        var sqlOp = expr.apply(new SqlOp<>());
+        var sqlOp = expr.op(new SqlOp<>());
         params.add(sqlOp.value());
-        return warpKeyword(col) + BLANK + sqlOp.op() + BLANK + PLACEHOLDER;
+        return keyword(col) + BLANK + sqlOp.op() + BLANK + PLACEHOLDER;
     }
 
     protected String genSet(@NonNull String col, @Nullable Object val) {
@@ -80,6 +79,6 @@ class UpdateSqlGenerator extends SqlGenerator {
                 params.add(new TypeHandlerValue(th, val));
             }
         }
-        sql.append(warpKeyword(col)).append(EQUAL).append(expr);
+        sql.append(keyword(col)).append(EQUAL).append(expr);
     }
 }

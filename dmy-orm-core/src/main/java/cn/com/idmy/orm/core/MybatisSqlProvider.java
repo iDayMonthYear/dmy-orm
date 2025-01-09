@@ -92,10 +92,10 @@ public class MybatisSqlProvider {
             throw new OrmException("主键不能为空");
         }
         var u = dao.u().addNode(new SqlCond(id.name(), Op.EQ, idValue));
-        var columns = table.columns();
-        int size = columns.length;
+        var cols = table.columns();
+        int size = cols.length;
         for (int i = 0; i < size; i++) {
-            var column = columns[i];
+            var column = cols[i];
             var field = column.field();
             if (field != idField) {
                 var value = FieldUtil.getFieldValue(entity, field);
@@ -108,30 +108,31 @@ public class MybatisSqlProvider {
         return dao.updateBySql(sql.left(), sql.right());
     }
 
-    public static <T, ID> int[] update(@NotNull MybatisDao<T, ID> dao, @NotNull Collection<T> entities, int size, boolean ignoreNull) {
-        List<Class<?>> interfaces = ClassUtil.getInterfaces(dao.getClass());
+    public static <T, ID> int[] update(@NotNull MybatisDao<T, ID> dao, @NotNull Collection<T> ls, int size, boolean ignoreNull) {
+        var interfaces = ClassUtil.getInterfaces(dao.getClass());
         if (CollUtil.isEmpty(interfaces)) {
             throw new OrmException("dao must be interface");
         } else {
-            return MybatisUtil.batch(sqlSessionFactory, entities, size, interfaces.getFirst(), ($, t) -> dao.update(t, ignoreNull));
+            return MybatisUtil.batch(sqlSessionFactory, ls, size, interfaces.getFirst(), ($, t) -> dao.update(t, ignoreNull));
         }
     }
 
-    public static <T, ID> int creates(@NotNull MybatisDao<T, ID> dao, @Nullable Collection<T> entities, int size) {
-        if (CollUtil.isEmpty(entities)) {
+    public static <T, ID> int creates(@NotNull MybatisDao<T, ID> dao, @Nullable Collection<T> ls, int size) {
+        if (CollUtil.isEmpty(ls)) {
             return -1;
+        } else {
+            if (size <= 0) {
+                size = DEFAULT_BATCH_SIZE;
+            }
+            var entityList = ls instanceof List ? (List<T>) ls : new ArrayList<>(ls);
+            int sum = 0;
+            int entitiesSize = ls.size();
+            int maxIdx = entitiesSize / size + (entitiesSize % size == 0 ? 0 : 1);
+            for (int i = 0; i < maxIdx; i++) {
+                sum += dao.creates(entityList.subList(i * size, Math.min(i * size + size, entitiesSize)));
+            }
+            return sum;
         }
-        if (size <= 0) {
-            size = DEFAULT_BATCH_SIZE;
-        }
-        var entityList = entities instanceof List ? (List<T>) entities : new ArrayList<>(entities);
-        int sum = 0;
-        int entitiesSize = entities.size();
-        int maxIdx = entitiesSize / size + (entitiesSize % size == 0 ? 0 : 1);
-        for (int i = 0; i < maxIdx; i++) {
-            sum += dao.creates(entityList.subList(i * size, Math.min(i * size + size, entitiesSize)));
-        }
-        return sum;
     }
 
     @NotNull
@@ -139,8 +140,7 @@ public class MybatisSqlProvider {
         var q = dao.q();
         q.sqlParamsSize = 1;
         q.addNode(new SqlCond(getIdName(dao), Op.IN, ids));
-        var entities = dao.find(q);
-        return CollStreamUtil.toIdentityMap(entities, Tables::getIdValue);
+        return CollStreamUtil.toIdentityMap(dao.find(q), Tables::getIdValue);
     }
 
     @NotNull
@@ -200,7 +200,7 @@ public class MybatisSqlProvider {
         var entity = params.get(ENTITY);
         var entityType = entity.getClass();
         var generator = new CreateSqlGenerator(entityType, entity);
-        var pair = generator.generate();
+        var pair = generator.gen();
         params.put(SQL_PARAMS, pair.right());
         putEntityType(params, entityType);
         return pair.left();
@@ -208,21 +208,22 @@ public class MybatisSqlProvider {
 
     @NotNull
     public String creates(@NotNull Map<String, Object> params) {
-        var entities = findEntities(params);
-        if (entities.isEmpty()) {
+        var ls = findEntities(params);
+        if (ls.isEmpty()) {
             throw new OrmException("批量创建的实体集合不能为空");
+        } else {
+            var entityType = ls.iterator().next().getClass();
+            var generator = new CreateSqlGenerator(entityType, ls);
+            var pair = generator.gen();
+            params.put(SQL_PARAMS, pair.right());
+            putEntityType(params, entityType);
+            return pair.left();
         }
-        var entityType = entities.iterator().next().getClass();
-        var generator = new CreateSqlGenerator(entityType, entities);
-        var pair = generator.generate();
-        params.put(SQL_PARAMS, pair.right());
-        putEntityType(params, entityType);
-        return pair.left();
     }
 
     @NotNull
     public String updateBySql(@NotNull Map<String, Object> params, @NotNull ProviderContext context) {
-        TableInfo table = getTableByMapperClass(context.getMapperType());
+        var table = getTableByMapperClass(context.getMapperType());
         putEntityType(params, table.entityType());
         return (String) params.get(CRUD);
     }

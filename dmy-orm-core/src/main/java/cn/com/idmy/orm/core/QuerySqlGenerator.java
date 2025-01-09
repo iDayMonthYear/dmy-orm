@@ -11,21 +11,20 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
-import static cn.com.idmy.orm.core.SqlConsts.*;
 
 @Slf4j
 class QuerySqlGenerator extends SqlGenerator {
     @NotNull
-    protected Query<?> query;
+    protected final Query<?> query;
 
-    protected QuerySqlGenerator(@NotNull Query<?> query) {
-        super(query.entityType, query.nodes);
-        this.query = query;
+    protected QuerySqlGenerator(@NotNull Query<?> q) {
+        super(q.entityType, q.nodes);
+        this.query = q;
     }
 
     @Override
-    protected @NotNull Pair<String, List<Object>> doGenerate() {
-        var selectColumns = new ArrayList<SqlSelectColumn>(1);
+    protected @NotNull Pair<String, List<Object>> doGen() {
+        var selects = new ArrayList<SqlSelectColumn>(1);
         var wheres = new ArrayList<SqlNode>(nodes.size());
         var groups = new ArrayList<SqlGroupBy>(1);
         var orders = new ArrayList<SqlOrderBy>(2);
@@ -33,7 +32,7 @@ class QuerySqlGenerator extends SqlGenerator {
         for (int i = 0, size = nodes.size(); i < size; i++) {
             switch (nodes.get(i)) {
                 case SqlCond cond -> wheres.add(cond);
-                case SqlSelectColumn selectColumn -> selectColumns.add(selectColumn);
+                case SqlSelectColumn select -> selects.add(select);
                 case SqlGroupBy groupBy -> groups.add(groupBy);
                 case SqlOrderBy orderBy -> orders.add(orderBy);
                 case SqlOr or -> skipAdjoinOr(or, wheres);
@@ -48,13 +47,13 @@ class QuerySqlGenerator extends SqlGenerator {
 
         if (distinct != null) {
             genDistinct(distinct);
-            if (!selectColumns.isEmpty()) {
+            if (!selects.isEmpty()) {
                 sql.append(DELIMITER);
             }
         }
 
-        genSelectColumn(selectColumns);
-        sql.append(FROM).append(SqlConsts.STRESS_MARK).append(tableName).append(SqlConsts.STRESS_MARK);
+        genSelectColumn(selects);
+        sql.append(FROM).append(STRESS_MARK).append(tableName).append(STRESS_MARK);
         genWhere(wheres);
         genGroupBy(groups);
         genOrderBy(orders);
@@ -67,17 +66,17 @@ class QuerySqlGenerator extends SqlGenerator {
         return new Pair<>(sql.toString(), params);
     }
 
-    protected void genDistinct(SqlDistinct distinct) {
-        var col = distinct.column;
+    protected void genDistinct(SqlDistinct d) {
+        var col = d.column;
         if (StrUtil.isBlank(col)) {
             sql.append(DISTINCT);
         } else {
-            sql.append(DISTINCT).append(BRACKET_LEFT).append(warpKeyword(col)).append(BRACKET_RIGHT);
+            sql.append(DISTINCT).append(BRACKET_LEFT).append(keyword(col)).append(BRACKET_RIGHT);
         }
     }
 
     protected String genSelectColumn(SqlSelectColumn sc) {
-        var col = warpKeyword(sc.column);
+        var col = keyword(sc.column);
         if (sc.expr == null) {
             sql.append(col);
         } else {
@@ -99,19 +98,19 @@ class QuerySqlGenerator extends SqlGenerator {
         return sc.column;
     }
 
-    protected void genSelectColumn(List<SqlSelectColumn> scs) {
-        if (scs.isEmpty()) {
+    protected void genSelectColumn(List<SqlSelectColumn> ls) {
+        if (ls.isEmpty()) {
             sql.append(ASTERISK);
         } else {
-            var set = new HashSet<>(scs.size());
-            for (int i = 0, size = scs.size(); i < size; i++) {
-                var sc = scs.get(i);
+            var set = new HashSet<>(ls.size());
+            for (int i = 0, size = ls.size(); i < size; i++) {
+                var sc = ls.get(i);
                 var col = genSelectColumn(sc);
                 if (set.contains(col)) {
                     throw new OrmException("select {} 列名重复会导致映射到实体类异常", col);
                 } else {
                     set.add(col);
-                    if (i < size - 1 && scs.get(i + 1).type == SqlNodeType.SELECT_COLUMN) {
+                    if (i < size - 1 && ls.get(i + 1).type == SqlNodeType.SELECT_COLUMN) {
                         sql.append(DELIMITER);
                     }
                 }
@@ -119,32 +118,32 @@ class QuerySqlGenerator extends SqlGenerator {
         }
     }
 
-    protected void genGroupBy(SqlGroupBy group) {
-        sql.append(warpKeyword(group.column));
+    protected void genGroupBy(SqlGroupBy g) {
+        sql.append(keyword(g.column));
     }
 
-    protected void genGroupBy(List<SqlGroupBy> groups) {
-        if (!groups.isEmpty()) {
+    protected void genGroupBy(List<SqlGroupBy> ls) {
+        if (!ls.isEmpty()) {
             sql.append(GROUP_BY);
-            for (int i = 0, size = groups.size(); i < size; i++) {
-                genGroupBy(groups.get(i));
-                if (i < size - 1 && groups.get(i + 1).type == SqlNodeType.GROUP_BY) {
+            for (int i = 0, size = ls.size(); i < size; i++) {
+                genGroupBy(ls.get(i));
+                if (i < size - 1 && ls.get(i + 1).type == SqlNodeType.GROUP_BY) {
                     sql.append(DELIMITER);
                 }
             }
         }
     }
 
-    protected void genOrderBy(SqlOrderBy order) {
-        sql.append(warpKeyword(order.column)).append(order.desc ? DESC : EMPTY);
+    protected void genOrderBy(SqlOrderBy o) {
+        sql.append(keyword(o.column)).append(o.desc ? DESC : EMPTY);
     }
 
-    private void genOrderBy(List<SqlOrderBy> orders) {
-        if (!orders.isEmpty()) {
+    private void genOrderBy(List<SqlOrderBy> ls) {
+        if (!ls.isEmpty()) {
             sql.append(ORDER_BY);
-            for (int i = 0, size = orders.size(); i < size; i++) {
-                genOrderBy(orders.get(i));
-                if (i < size - 1 && orders.get(i + 1).type == SqlNodeType.ORDER_BY) {
+            for (int i = 0, size = ls.size(); i < size; i++) {
+                genOrderBy(ls.get(i));
+                if (i < size - 1 && ls.get(i + 1).type == SqlNodeType.ORDER_BY) {
                     sql.append(DELIMITER);
                 }
             }

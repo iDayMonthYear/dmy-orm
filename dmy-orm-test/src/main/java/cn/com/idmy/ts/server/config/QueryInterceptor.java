@@ -14,7 +14,7 @@ import java.util.Set;
 // 只关心查询操作的拦截器
 public class QueryInterceptor implements CrudInterceptor {
     @Override
-    public void beforeQuery(@NotNull Class<?> entityType, List<SqlNode> nodes) {
+    public void beforeQuery(@NotNull Class<?> entityType, @NotNull List<SqlNode> nodes) {
         nodes.add(new SqlCond("key", Op.EQ, 1));
     }
 

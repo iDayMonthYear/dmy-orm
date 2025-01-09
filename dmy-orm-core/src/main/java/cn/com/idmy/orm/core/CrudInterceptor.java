@@ -19,8 +19,8 @@ public interface CrudInterceptor {
     /**
      * 创建前拦截 - 实体集合
      */
-    default void beforeCreate(@NotNull Collection<?> entities) {
-        entities.forEach(this::beforeCreate);
+    default void beforeCreate(@NotNull Collection<?> ls) {
+        ls.forEach(this::beforeCreate);
     }
 
     /**

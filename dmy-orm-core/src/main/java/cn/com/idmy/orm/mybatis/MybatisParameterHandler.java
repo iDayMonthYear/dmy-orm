@@ -43,7 +43,7 @@ class MybatisParameterHandler extends DefaultParameterHandler {
                 }
             }
         } catch (SQLException e) {
-            throw new OrmException(e);
+            throw new OrmException("设置参数异常", e);
         }
     }
 

@@ -41,14 +41,14 @@ public class CrudInterceptors {
     /**
      * 插入前拦截 - 实体集合
      */
-    static void interceptCreate(@NonNull Collection<?> entities) {
-        if (!entities.isEmpty()) {
+    static void interceptCreate(@NonNull Collection<?> ls) {
+        if (!ls.isEmpty()) {
             var interceptors = typeInterceptors.get(CrudType.INSERT);
             if (interceptors != null) {
-                var entityType = entities.iterator().next().getClass();
+                var entityType = ls.iterator().next().getClass();
                 for (var interceptor : interceptors) {
                     if (interceptor.support(entityType)) {
-                        interceptor.beforeCreate(entities);
+                        interceptor.beforeCreate(ls);
                     }
                 }
             }

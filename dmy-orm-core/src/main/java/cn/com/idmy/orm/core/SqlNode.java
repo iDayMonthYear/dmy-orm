@@ -52,9 +52,9 @@ public class SqlNode {
         @NotNull
         final Object expr;
 
-        public SqlCond(@NotNull String column, @NonNull Op op, @NotNull Object expr) {
+        public SqlCond(@NotNull String col, @NonNull Op op, @NotNull Object expr) {
             super(SqlNodeType.COND);
-            this.column = SqlUtil.checkColumn(column);
+            this.column = SqlUtil.checkColumn(col);
             this.op = op;
             this.expr = expr;
         }
@@ -64,7 +64,7 @@ public class SqlNode {
             this.op = op;
             this.expr = expr;
             if (expr instanceof SqlOpExpr) {
-                this.column = Tables.getColumnName(entityType, field);
+                column = Tables.getColumnName(entityType, field);
             } else {
                 var col = Tables.getColum(entityType, field);
                 if (ObjUtil.isNotEmpty(expr)) {
@@ -82,7 +82,7 @@ public class SqlNode {
                         throw new OrmException("「{}」字段类型「{}」和参数类型「{}」不匹配", entityType.getSimpleName(), type1.getSimpleName(), type2.getSimpleName());
                     }
                 }
-                this.column = col.name();
+                column = col.name();
             }
         }
     }
@@ -101,37 +101,37 @@ public class SqlNode {
         @Nullable
         final Object expr;
 
-        public SqlSet(@NotNull String column, @Nullable Object expr) {
+        public SqlSet(@NotNull String col, @Nullable Object expr) {
             super(SqlNodeType.SET);
-            this.column = SqlUtil.checkColumn(column);
+            this.column = SqlUtil.checkColumn(col);
             this.expr = expr;
         }
 
-        public SqlSet(@NotNull String column, @NonNull SqlOpExpr expr) {
+        public SqlSet(@NotNull String col, @NonNull SqlOpExpr expr) {
             super(SqlNodeType.SET);
-            this.column = SqlUtil.checkColumn(column);
+            this.column = SqlUtil.checkColumn(col);
             this.expr = expr;
         }
 
-        public SqlSet(TableColumn col, @Nullable Object value) {
+        public SqlSet(TableColumn col, @Nullable Object val) {
             super(SqlNodeType.SET);
-            check(col, value);
-            this.expr = value;
+            check(col, val);
+            this.expr = val;
             this.column = col.name();
         }
 
-        public <T> SqlSet(Class<T> entityType, FieldGetter<T, ?> field, @Nullable Object value) {
-            this(Tables.getColum(entityType, field), value);
+        public <T> SqlSet(Class<T> entityType, FieldGetter<T, ?> field, @Nullable Object val) {
+            this(Tables.getColum(entityType, field), val);
         }
 
-        protected void check(TableColumn col, @Nullable Object value) {
-            if (ObjUtil.isNotEmpty(value)) {
-                if (value instanceof Object[] || value instanceof Collection<?>) {
+        protected void check(TableColumn col, @Nullable Object val) {
+            if (ObjUtil.isNotEmpty(val)) {
+                if (val instanceof Object[] || val instanceof Collection<?>) {
                     throw new OrmException("update 语句 set 不支持集合或数组");
                 } else {
-                    assert value != null;
+                    assert val != null;
                     var type1 = col.field().getType();
-                    var type2 = value.getClass();
+                    var type2 = val.getClass();
                     if (type1.isPrimitive()) {
                         type1 = ConvertUtil.wrap(type1);
                     }
@@ -149,9 +149,9 @@ public class SqlNode {
         @NotNull
         final String column;
 
-        public SqlGroupBy(@NotNull String column) {
+        public SqlGroupBy(@NotNull String col) {
             super(SqlNodeType.GROUP_BY);
-            this.column = SqlUtil.checkColumn(column);
+            this.column = SqlUtil.checkColumn(col);
         }
     }
 
@@ -162,9 +162,9 @@ public class SqlNode {
         final String column;
         final boolean desc;
 
-        public SqlOrderBy(@NotNull String column, boolean desc) {
+        public SqlOrderBy(@NotNull String col, boolean desc) {
             super(SqlNodeType.ORDER_BY);
-            this.column = SqlUtil.checkColumn(column);
+            this.column = SqlUtil.checkColumn(col);
             this.desc = desc;
         }
     }
@@ -177,9 +177,9 @@ public class SqlNode {
         @Nullable
         SqlFnExpr<?> expr;
 
-        public SqlSelectColumn(@NotNull String column) {
+        public SqlSelectColumn(@NotNull String col) {
             super(SqlNodeType.SELECT_COLUMN);
-            this.column = SqlUtil.checkColumn(column);
+            this.column = SqlUtil.checkColumn(col);
         }
 
         public SqlSelectColumn(@NonNull SqlFnExpr<?> expr) {
@@ -207,9 +207,9 @@ public class SqlNode {
             this.column = "";
         }
 
-        public SqlDistinct(@NotNull String column) {
+        public SqlDistinct(@NotNull String col) {
             this();
-            this.column = SqlUtil.checkColumn(column);
+            this.column = SqlUtil.checkColumn(col);
         }
     }
 }

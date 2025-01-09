@@ -10,22 +10,22 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 
-import static cn.com.idmy.orm.core.SqlConsts.DELETE_FROM;
 
 @Slf4j
 class DeleteSqlGenerator extends SqlGenerator {
     @NotNull
     protected Delete<?> delete;
 
-    protected DeleteSqlGenerator(@NotNull Delete<?> delete) {
-        super(delete.entityType, delete.nodes);
-        this.delete = delete;
+    protected DeleteSqlGenerator(@NotNull Delete<?> d) {
+        super(d.entityType, d.nodes);
+        this.delete = d;
     }
 
     @Override
-    protected @NotNull Pair<String, List<Object>> doGenerate() {
+    protected @NotNull Pair<String, List<Object>> doGen() {
         var wheres = new ArrayList<SqlNode>(nodes.size());
-        for (var node : nodes) {
+        for (int i = 0, size = nodes.size(); i < size; i++) {
+            var node = nodes.get(i);
             if (node instanceof SqlCond) {
                 wheres.add(node);
             } else if (node instanceof SqlOr) {
@@ -33,11 +33,10 @@ class DeleteSqlGenerator extends SqlGenerator {
             }
         }
 
-        sql.append(DELETE_FROM).append(SqlConsts.STRESS_MARK).append(tableName).append(SqlConsts.STRESS_MARK);
+        sql.append(DELETE_FROM).append(STRESS_MARK).append(tableName).append(STRESS_MARK);
         params = new ArrayList<>(delete.sqlParamsSize);
 
-        boolean empty = genWhere(wheres);
-        if (empty && !delete.force) {
+        if (genWhere(wheres) && !delete.force) {
             throw new OrmException("删除语句没有条件！可使用 force 强制执行");
         } else {
             return new Pair<>(sql.toString(), params);

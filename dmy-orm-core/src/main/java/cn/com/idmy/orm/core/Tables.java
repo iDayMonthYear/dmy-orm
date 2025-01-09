@@ -97,7 +97,7 @@ public class Tables {
                     }
                     tableId = new TableId(field, name, idType, id.value(), id.before(), id.title());
                 } else if (field.getClass() == entityType) {
-                    throw new OrmException("实体类" + entityType.getName() + "中存在多个主键");
+                    throw new OrmException("实体类「{}」中存在多个主键", entityType.getName());
                 }
             }
 

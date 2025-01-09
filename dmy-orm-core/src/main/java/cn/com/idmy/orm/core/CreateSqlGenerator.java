@@ -22,7 +22,7 @@ public class CreateSqlGenerator extends SqlGenerator {
     }
 
     @Override
-    protected @NotNull Pair<String, List<Object>> doGenerate() {
+    protected @NotNull Pair<String, List<Object>> doGen() {
         if (input instanceof Collection<?> ls) {
             CrudInterceptors.interceptCreate(ls);
             return genInsert(ls);
@@ -43,7 +43,7 @@ public class CreateSqlGenerator extends SqlGenerator {
     }
 
     private void genInsertHeader() {
-        sql.append(SqlConsts.INSERT_INTO).append(SqlConsts.STRESS_MARK).append(tableName).append(SqlConsts.STRESS_MARK).append(SqlConsts.BLANK).append(SqlConsts.BRACKET_LEFT);
+        sql.append(INSERT_INTO).append(STRESS_MARK).append(tableName).append(STRESS_MARK).append(BLANK).append(BRACKET_LEFT);
     }
 
     @NotNull
@@ -60,19 +60,19 @@ public class CreateSqlGenerator extends SqlGenerator {
         for (var col : columns) {
             var val = FieldUtil.getFieldValue(entity, col.field());
             if (val != null) {  // 只处理非空值
-                columnList.add(SqlConsts.STRESS_MARK + col.name() + SqlConsts.STRESS_MARK);
-                valueList.add(SqlConsts.PLACEHOLDER);
+                columnList.add(STRESS_MARK + col.name() + STRESS_MARK);
+                valueList.add(PLACEHOLDER);
                 params.add(getTypeHandlerValue(col, val));
             }
         }
 
         // 构建SQL
-        sql.append(String.join(SqlConsts.DELIMITER, columnList))
-                .append(SqlConsts.BRACKET_RIGHT)
-                .append(SqlConsts.VALUES)
-                .append(SqlConsts.BRACKET_LEFT)
-                .append(String.join(SqlConsts.DELIMITER, valueList))
-                .append(SqlConsts.BRACKET_RIGHT);
+        sql.append(String.join(DELIMITER, columnList))
+                .append(BRACKET_RIGHT)
+                .append(VALUES)
+                .append(BRACKET_LEFT)
+                .append(String.join(DELIMITER, valueList))
+                .append(BRACKET_RIGHT);
         if (params.isEmpty()) {
             throw new OrmException("插入数据不能为空");
         } else {
@@ -82,23 +82,23 @@ public class CreateSqlGenerator extends SqlGenerator {
 
     // 批量插入也需要修改
     @NotNull
-    private Pair<String, List<Object>> genInsert(@NotNull Collection<?> entities) {
-        if (entities.isEmpty()) {
+    private Pair<String, List<Object>> genInsert(@NotNull Collection<?> ls) {
+        if (ls.isEmpty()) {
             throw new IllegalArgumentException("实体集合不能为空");
         }
 
         genInsertHeader();
         var table = Tables.getTable(entityType);
-        var columns = table.columns();
+        var cols = table.columns();
 
         // 收集所有实体中出现的非空字段
-        var columnIndices = new ArrayList<Integer>();
+        var colIndices = new ArrayList<Integer>();
 
-        for (int i = 0; i < columns.length; i++) {
-            var col = columns[i];
+        for (int i = 0; i < cols.length; i++) {
+            var col = cols[i];
             boolean hasNonNullValue = false;
 
-            for (Object entity : entities) {
+            for (Object entity : ls) {
                 if (FieldUtil.getFieldValue(entity, col.field()) != null) {
                     hasNonNullValue = true;
                     break;
@@ -106,33 +106,33 @@ public class CreateSqlGenerator extends SqlGenerator {
             }
 
             if (hasNonNullValue) {
-                columnIndices.add(i);
-                sql.append(SqlConsts.STRESS_MARK).append(col.name()).append(SqlConsts.STRESS_MARK).append(SqlConsts.DELIMITER);
+                colIndices.add(i);
+                sql.append(STRESS_MARK).append(col.name()).append(STRESS_MARK).append(DELIMITER);
             }
         }
 
         // 删除最后一个分隔符
-        sql.setLength(sql.length() - SqlConsts.DELIMITER.length());
-        sql.append(SqlConsts.BRACKET_RIGHT).append(SqlConsts.VALUES);
+        sql.setLength(sql.length() - DELIMITER.length());
+        sql.append(BRACKET_RIGHT).append(VALUES);
 
         // 构建值部分
         params = new ArrayList<>();
 
-        for (Object entity : entities) {
-            sql.append(SqlConsts.BRACKET_LEFT);
-            for (int colIndex : columnIndices) {
-                var col = columns[colIndex];
+        for (Object entity : ls) {
+            sql.append(BRACKET_LEFT);
+            for (int colIndex : colIndices) {
+                var col = cols[colIndex];
                 var val = FieldUtil.getFieldValue(entity, col.field());
                 params.add(getTypeHandlerValue(col, val));
-                sql.append(SqlConsts.PLACEHOLDER).append(SqlConsts.DELIMITER);
+                sql.append(PLACEHOLDER).append(DELIMITER);
             }
             // 删除最后一个分隔符
-            sql.setLength(sql.length() - SqlConsts.DELIMITER.length());
-            sql.append(SqlConsts.BRACKET_RIGHT).append(SqlConsts.DELIMITER);
+            sql.setLength(sql.length() - DELIMITER.length());
+            sql.append(BRACKET_RIGHT).append(DELIMITER);
         }
 
         // 删除最后一个分隔符
-        sql.setLength(sql.length() - SqlConsts.DELIMITER.length());
+        sql.setLength(sql.length() - DELIMITER.length());
 
         if (params.isEmpty()) {
             throw new OrmException("插入数据不能为空");

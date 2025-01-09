@@ -27,7 +27,6 @@ public abstract class SqlGenerator {
     protected static final String STRESS_MARK = "`";
     protected static final String BRACKET_LEFT = "(";
     protected static final String BRACKET_RIGHT = ")";
-
     protected static final String OR = " or ";
     protected static final String AND = " and ";
     protected static final String SET = " set ";
@@ -44,14 +43,11 @@ public abstract class SqlGenerator {
     protected static final String INTO = " into ";
     protected static final String INSERT_INTO = INSERT + INTO;
     protected static final String DELETE_FROM = DELETE + FROM;
-
     protected static final String LIMIT = " limit ";
     protected static final String OFFSET = " offset ";
-
     protected static final String DESC = " desc";
-
     protected static final String EQUAL = " = ";
-    protected static final String EQUALS_PLACEHOLDER = " = ? ";
+    protected static final String BETWEEN = "? and ?";
 
     @NonNull
     protected final Class<?> entityType;
@@ -69,53 +65,53 @@ public abstract class SqlGenerator {
         tableName = Tables.getTableName(entityType);
     }
 
-    protected String warpKeyword(@NonNull String str) {
-        return STRESS_MARK + str + STRESS_MARK;
+    protected String keyword(@NonNull String val) {
+        return STRESS_MARK + val + STRESS_MARK;
     }
 
-    protected static StringBuilder genPlaceholder(@NonNull Object val, @NonNull StringBuilder placeholder) {
+    protected static StringBuilder genPlaceholder(@NonNull Object val, @NonNull StringBuilder ph) {
         if (val instanceof Collection<?> ls) {
-            genPlaceholder(placeholder, ls.size());
+            genPlaceholder(ph, ls.size());
         } else if (val instanceof Object[] arr) {
-            genPlaceholder(placeholder, arr.length);
+            genPlaceholder(ph, arr.length);
         } else {
-            placeholder.append(PLACEHOLDER);
+            ph.append(PLACEHOLDER);
         }
-        return placeholder;
+        return ph;
     }
 
-    protected static void genPlaceholder(@NonNull StringBuilder placeholder, int size) {
-        placeholder.append(BRACKET_LEFT);
+    protected static void genPlaceholder(@NonNull StringBuilder ph, int size) {
+        ph.append(BRACKET_LEFT);
         for (int i = 0; i < size; i++) {
-            placeholder.append(PLACEHOLDER);
+            ph.append(PLACEHOLDER);
             if (i != size - 1) {
-                placeholder.append(DELIMITER);
+                ph.append(DELIMITER);
             }
         }
-        placeholder.append(BRACKET_RIGHT);
+        ph.append(BRACKET_RIGHT);
     }
 
     protected String genCond(@NonNull String col, @NonNull SqlOpExpr expr) {
-        var sqlOp = expr.apply(new SqlOp<>());
+        var sqlOp = expr.op(new SqlOp<>());
         params.add(sqlOp.value());
-        return warpKeyword(col) + BLANK + sqlOp.op() + BLANK + PLACEHOLDER;
+        return keyword(col) + BLANK + sqlOp.op() + BLANK + PLACEHOLDER;
     }
 
-    protected String genCond(@NonNull Op op, @NonNull Object value) {
+    protected String genCond(@NonNull Op op, @NonNull Object val) {
         var placeholder = new StringBuilder();
         if (op == Op.IS_NULL || op == Op.IS_NOT_NULL) {
             return PLACEHOLDER;
         } else if (op == Op.BETWEEN || op == Op.NOT_BETWEEN) {
-            Object[] arr = (Object[]) value;
+            Object[] arr = (Object[]) val;
             if (arr.length == 2) {
-                params.add(value);
-                return "? and ?";
+                params.add(val);
+                return BETWEEN;
             } else {
                 throw new OrmException("between 参数必须为2个元素");
             }
         } else {
-            params.add(value);
-            return genPlaceholder(value, placeholder).toString();
+            params.add(val);
+            return genPlaceholder(val, placeholder).toString();
         }
     }
 
@@ -128,7 +124,7 @@ public abstract class SqlGenerator {
         } else {
             str = genCond(cond.op, expr);
         }
-        sql.append(warpKeyword(col)).append(BLANK).append(cond.op.getSymbol()).append(BLANK).append(str);
+        sql.append(keyword(col)).append(BLANK).append(cond.op.getSymbol()).append(BLANK).append(str);
     }
 
     protected void genCondOr(@NonNull SqlNode node) {
@@ -151,28 +147,28 @@ public abstract class SqlGenerator {
         }
     }
 
-    protected static void removeLastOr(@NonNull List<SqlNode> wheres) {
-        if (CollUtil.isNotEmpty(wheres) && wheres.getLast() instanceof SqlOr) {
-            wheres.removeLast();
+    protected static void removeLastOr(@NonNull List<SqlNode> ls) {
+        if (CollUtil.isNotEmpty(ls) && ls.getLast() instanceof SqlOr) {
+            ls.removeLast();
             if (log.isWarnEnabled()) {
                 log.warn("where 条件最后存在 or，已自动移除");
             }
         }
     }
 
-    protected boolean genWhere(@NonNull List<SqlNode> wheres) {
-        if (wheres.isEmpty()) {
+    protected boolean genWhere(@NonNull List<SqlNode> ls) {
+        if (ls.isEmpty()) {
             return true;
         } else {
             boolean out = true;
-            removeLastOr(wheres);
+            removeLastOr(ls);
             sql.append(WHERE);
-            for (int i = 0, size = wheres.size(); i < size; i++) {
-                var node = wheres.get(i);
+            for (int i = 0, size = ls.size(); i < size; i++) {
+                var node = ls.get(i);
                 genCondOr(node);
                 out = false;
                 if (i < size - 1) {
-                    if (wheres.get(i + 1).type == SqlNodeType.COND && node.type != SqlNodeType.OR) {
+                    if (ls.get(i + 1).type == SqlNodeType.COND && node.type != SqlNodeType.OR) {
                         sql.append(AND);
                     }
                 }
@@ -182,8 +178,7 @@ public abstract class SqlGenerator {
     }
 
     @NonNull
-    protected Pair<String, List<Object>> generate() {
-        // 根据具体类型调用对应的拦截方法
+    protected Pair<String, List<Object>> gen() {
         switch (this) {
             case UpdateSqlGenerator ignored -> CrudInterceptors.interceptUpdate(entityType, nodes);
             case DeleteSqlGenerator ignored -> CrudInterceptors.interceptDelete(entityType, nodes);
@@ -191,9 +186,9 @@ public abstract class SqlGenerator {
             default -> {
             }
         }
-        return doGenerate();
+        return doGen();
     }
 
     @NonNull
-    protected abstract Pair<String, List<Object>> doGenerate();
+    protected abstract Pair<String, List<Object>> doGen();
 }
