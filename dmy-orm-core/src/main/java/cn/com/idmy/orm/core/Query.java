@@ -1,5 +1,6 @@
 package cn.com.idmy.orm.core;
 
+import cn.com.idmy.base.config.BaseConfig;
 import cn.com.idmy.base.model.At;
 import cn.com.idmy.base.model.Model;
 import cn.com.idmy.base.model.Pair;
@@ -19,8 +20,6 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static cn.com.idmy.base.constant.DefaultConsts.CREATED_AT;
-import static cn.com.idmy.base.constant.DefaultConsts.UPDATED_AT;
 import static cn.com.idmy.orm.core.Tables.getColumnName;
 import static cn.com.idmy.orm.core.Tables.getIdName;
 
@@ -151,14 +150,14 @@ public class Query<T> extends Where<T, Query<T>> {
             if (param instanceof At at) {
                 var createdAts = at.createdAts();
                 if (ArrayUtil.isNotEmpty(createdAts) && createdAts.length == 2) {
-                    var createdAt = getColumnName(entityType, CREATED_AT);
+                    var createdAt = getColumnName(entityType, BaseConfig.createdAt);
                     if (createdAt != null) {
                         addNode(new SqlCond(createdAt, Op.BETWEEN, createdAts));
                     }
                 }
                 var updatedAts = at.updatedAts();
                 if (ArrayUtil.isNotEmpty(updatedAts) && updatedAts.length == 2) {
-                    var updatedAt = getColumnName(entityType, UPDATED_AT);
+                    var updatedAt = getColumnName(entityType, BaseConfig.updatedAt);
                     if (updatedAt != null) {
                         addNode(new SqlCond(updatedAt, Op.BETWEEN, createdAts));
                     }
