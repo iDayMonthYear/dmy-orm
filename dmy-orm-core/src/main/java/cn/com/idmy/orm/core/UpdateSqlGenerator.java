@@ -32,8 +32,8 @@ class UpdateSqlGenerator extends SqlGenerator {
             var node = nodes.get(i);
             if (node instanceof SqlSet set) {
                 sets.add(set);
-            } else if (node instanceof SqlCond) {
-                wheres.add(node);
+            } else if (node instanceof SqlCond cond) {
+                wheres.add(cond);
             } else if (node instanceof SqlOr) {
                 skipAdjoinOr(node, wheres);
             }
@@ -50,7 +50,9 @@ class UpdateSqlGenerator extends SqlGenerator {
                 }
             }
         }
-        if (genWhere(wheres) && !update.force) {
+
+        boolean empty = genWhere(wheres);
+        if (empty && !update.force) {
             throw new IllegalArgumentException("更新语句没有条件！可使用 force 强制执行");
         } else {
             return new Pair<>(sql.toString(), params);
