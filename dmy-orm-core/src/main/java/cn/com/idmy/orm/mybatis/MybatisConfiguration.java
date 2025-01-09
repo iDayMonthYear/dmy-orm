@@ -53,11 +53,7 @@ class MybatisConfiguration extends Configuration {
         } else if (StrUtil.endWithAny(msId, "." + MybatisSqlProvider.getNullable, "." + MybatisSqlProvider.find0)) {
             ms = MybatisModifier.replaceQueryResultMap(ms, table);
         } else if (ms.getSqlCommandType() == SqlCommandType.SELECT) {
-            /*List<ResultMap> resultMaps = ms.getResultMaps();
-            for (ResultMap resultMap : resultMaps) {
-                table = Tables.getTable(resultMap.getType());
-                ms = MybatisModifier.replaceQueryResultMap(ms, table);
-            }*/
+
         }
         super.addMappedStatement(ms);
     }
