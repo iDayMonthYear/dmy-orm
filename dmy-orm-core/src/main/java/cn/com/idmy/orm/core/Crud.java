@@ -34,7 +34,7 @@ abstract class Crud<T, CRUD extends Crud<T, CRUD>> {
     @Override
     public String toString() {
         try {
-            return sql().left;
+            return sql().left();
         } catch (Exception e) {
             return "异常：" + e.getMessage();
         }

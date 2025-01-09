@@ -40,7 +40,7 @@ class DeleteSqlGenerator extends SqlGenerator {
         if (empty && !delete.force) {
             throw new OrmException("删除语句没有条件！可使用 force 强制执行");
         } else {
-            return Pair.of(sql.toString(), params);
+            return new Pair<>(sql.toString(), params);
         }
     }
 }

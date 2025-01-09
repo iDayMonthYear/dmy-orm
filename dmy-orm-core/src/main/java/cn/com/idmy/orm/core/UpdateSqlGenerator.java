@@ -14,12 +14,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-import static cn.com.idmy.orm.core.SqlConsts.BLANK;
-import static cn.com.idmy.orm.core.SqlConsts.DELIMITER;
-import static cn.com.idmy.orm.core.SqlConsts.EQUAL;
-import static cn.com.idmy.orm.core.SqlConsts.PLACEHOLDER;
-import static cn.com.idmy.orm.core.SqlConsts.SET;
-import static cn.com.idmy.orm.core.SqlConsts.UPDATE;
+import static cn.com.idmy.orm.core.SqlConsts.*;
 
 @Slf4j
 class UpdateSqlGenerator extends SqlGenerator {
@@ -59,7 +54,7 @@ class UpdateSqlGenerator extends SqlGenerator {
         if (empty && !update.force) {
             throw new IllegalArgumentException("更新语句没有条件！可使用 force 强制执行");
         } else {
-            return Pair.of(sql.toString(), params);
+            return new Pair<>(sql.toString(), params);
         }
     }
 

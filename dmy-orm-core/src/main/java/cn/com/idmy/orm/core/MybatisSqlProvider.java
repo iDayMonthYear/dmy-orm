@@ -64,8 +64,8 @@ public class MybatisSqlProvider {
         var where = (Crud<?, ?>) params.get(CRUD);
         putEntityType(params, where.entityType);
         var pair = where.sql();
-        params.put(SQL_PARAMS, pair.right);
-        return pair.left;
+        params.put(SQL_PARAMS, pair.right());
+        return pair.left();
     }
 
     public static void putEntityType(@NotNull Map<String, Object> params, @NotNull Class<?> entityType) {
@@ -105,7 +105,7 @@ public class MybatisSqlProvider {
             }
         }
         var sql = u.sql();
-        return dao.updateBySql(sql.left, sql.right);
+        return dao.updateBySql(sql.left(), sql.right());
     }
 
     public static <T, ID> int[] update(@NotNull MybatisDao<T, ID> dao, @NotNull Collection<T> entities, int size, boolean ignoreNull) {
@@ -191,8 +191,8 @@ public class MybatisSqlProvider {
         q.select(SqlFn::count);
         putEntityType(params, q.entityType);
         var pair = q.sql();
-        params.put(SQL_PARAMS, pair.right);
-        return pair.left;
+        params.put(SQL_PARAMS, pair.right());
+        return pair.left();
     }
 
     @NotNull
@@ -201,9 +201,9 @@ public class MybatisSqlProvider {
         var entityType = entity.getClass();
         var generator = new CreateSqlGenerator(entityType, entity);
         var pair = generator.generate();
-        params.put(SQL_PARAMS, pair.right);
+        params.put(SQL_PARAMS, pair.right());
         putEntityType(params, entityType);
-        return pair.left;
+        return pair.left();
     }
 
     @NotNull
@@ -215,9 +215,9 @@ public class MybatisSqlProvider {
         var entityType = entities.iterator().next().getClass();
         var generator = new CreateSqlGenerator(entityType, entities);
         var pair = generator.generate();
-        params.put(SQL_PARAMS, pair.right);
+        params.put(SQL_PARAMS, pair.right());
         putEntityType(params, entityType);
-        return pair.left;
+        return pair.left();
     }
 
     @NotNull
