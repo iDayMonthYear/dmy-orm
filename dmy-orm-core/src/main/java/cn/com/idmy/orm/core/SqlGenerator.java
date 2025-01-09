@@ -14,20 +14,45 @@ import org.dromara.hutool.core.collection.CollUtil;
 import java.util.Collection;
 import java.util.List;
 
-import static cn.com.idmy.orm.core.SqlConsts.AND;
-import static cn.com.idmy.orm.core.SqlConsts.BLANK;
-import static cn.com.idmy.orm.core.SqlConsts.BRACKET_LEFT;
-import static cn.com.idmy.orm.core.SqlConsts.BRACKET_RIGHT;
-import static cn.com.idmy.orm.core.SqlConsts.DELIMITER;
-import static cn.com.idmy.orm.core.SqlConsts.PLACEHOLDER;
-import static cn.com.idmy.orm.core.SqlConsts.STRESS_MARK;
-import static cn.com.idmy.orm.core.SqlConsts.WHERE;
-
 
 @Slf4j
 @Getter
 @Accessors(fluent = true)
 public abstract class SqlGenerator {
+    protected static final String EMPTY = "";
+    protected static final String BLANK = " ";
+    protected static final String ASTERISK = "*";
+    protected static final String DELIMITER = ", ";
+    protected static final String PLACEHOLDER = "?";
+    protected static final String STRESS_MARK = "`";
+    protected static final String BRACKET_LEFT = "(";
+    protected static final String BRACKET_RIGHT = ")";
+
+    protected static final String OR = " or ";
+    protected static final String AND = " and ";
+    protected static final String SET = " set ";
+    protected static final String FROM = " from ";
+    protected static final String WHERE = " where ";
+    protected static final String SELECT = "select ";
+    protected static final String VALUES = " values ";
+    protected static final String DELETE = "delete";
+    protected static final String UPDATE = "update ";
+    protected static final String DISTINCT = "distinct ";
+    protected static final String GROUP_BY = " group by ";
+    protected static final String ORDER_BY = " order by ";
+    protected static final String INSERT = "insert";
+    protected static final String INTO = " into ";
+    protected static final String INSERT_INTO = INSERT + INTO;
+    protected static final String DELETE_FROM = DELETE + FROM;
+
+    protected static final String LIMIT = " limit ";
+    protected static final String OFFSET = " offset ";
+
+    protected static final String DESC = " desc";
+
+    protected static final String EQUAL = " = ";
+    protected static final String EQUALS_PLACEHOLDER = " = ? ";
+
     @NonNull
     protected final Class<?> entityType;
     @NonNull
@@ -108,7 +133,7 @@ public abstract class SqlGenerator {
 
     protected void genCondOr(@NonNull SqlNode node) {
         if (node instanceof SqlOr) {
-            sql.append(SqlConsts.OR);
+            sql.append(OR);
         } else if (node instanceof SqlCond cond) {
             genCond(cond);
         }

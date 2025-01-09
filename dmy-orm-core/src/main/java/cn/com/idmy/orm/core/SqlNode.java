@@ -16,7 +16,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
 
-import static cn.com.idmy.orm.core.SqlConsts.ASTERISK;
 import static cn.com.idmy.orm.core.SqlFnName.COUNT;
 
 @Data
@@ -188,7 +187,7 @@ public class SqlNode {
             this.expr = expr;
             var fn = expr.get();
             var name = fn.name();
-            column = name == COUNT ? ASTERISK : fn.column();
+            column = name == COUNT ? "*" : fn.column();
         }
 
         public SqlSelectColumn(@NonNull SqlFnExpr<?> expr, @NotNull String alias) {

@@ -1,6 +1,6 @@
 package cn.com.idmy.orm.core;
 
-import cn.com.idmy.base.config.BaseConfig;
+import cn.com.idmy.base.config.DefaultConfig;
 import cn.com.idmy.base.model.At;
 import cn.com.idmy.base.model.Model;
 import cn.com.idmy.base.model.Pair;
@@ -150,14 +150,14 @@ public class Query<T> extends Where<T, Query<T>> {
             if (param instanceof At at) {
                 var createdAts = at.getCreatedAts();
                 if (ArrayUtil.isNotEmpty(createdAts) && createdAts.length == 2) {
-                    var createdAt = getColumnName(entityType, BaseConfig.createdAt);
+                    var createdAt = getColumnName(entityType, DefaultConfig.createdAt);
                     if (createdAt != null) {
                         addNode(new SqlCond(createdAt, Op.BETWEEN, createdAts));
                     }
                 }
                 var updatedAts = at.getUpdatedAts();
                 if (ArrayUtil.isNotEmpty(updatedAts) && updatedAts.length == 2) {
-                    var updatedAt = getColumnName(entityType, BaseConfig.updatedAt);
+                    var updatedAt = getColumnName(entityType, DefaultConfig.updatedAt);
                     if (updatedAt != null) {
                         addNode(new SqlCond(updatedAt, Op.BETWEEN, createdAts));
                     }
