@@ -28,7 +28,7 @@ public class AppServiceImpl implements AppService {
 
     @Override
     public List<App> find(Collection<Long> ids) {
-        return dao.find(ids);
+        return dao.list(ids);
     }
 
     @Override

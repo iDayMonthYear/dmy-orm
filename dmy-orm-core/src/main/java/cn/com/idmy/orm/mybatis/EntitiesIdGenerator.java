@@ -19,7 +19,7 @@ public class EntitiesIdGenerator implements KeyGenerator {
     @SuppressWarnings({"unchecked"})
     public void processBefore(@NotNull Executor executor, @NotNull MappedStatement ms, @NotNull Statement st, @NotNull Object param) {
         var params = (Map<String, Object>) param;
-        var ls = MybatisSqlProvider.findEntities(params);
+        var ls = MybatisSqlProvider.listEntity(params);
         if (CollUtil.isNotEmpty(ls)) {
             for (var entity : ls) {
                 params.put(MybatisSqlProvider.ENTITY, entity);

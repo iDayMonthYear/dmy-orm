@@ -97,61 +97,61 @@ public interface MybatisDao<T, ID> {
     }
 
     @Nullable
-    @SelectProvider(type = MybatisSqlProvider.class, method = MybatisSqlProvider.find0)
-    List<T> find0(@NotNull @Param(MybatisSqlProvider.CRUD) Query<T> q);
+    @SelectProvider(type = MybatisSqlProvider.class, method = MybatisSqlProvider.list0)
+    List<T> list0(@NotNull @Param(MybatisSqlProvider.CRUD) Query<T> q);
 
     @NotNull
-    default List<T> find(@NotNull Query<T> q) {
-        List<T> ts = find0(q);
+    default List<T> list(@NotNull Query<T> q) {
+        List<T> ts = list0(q);
         return ts == null ? new ArrayList<T>(0) : ts;
     }
 
     @NotNull
     default List<T> all() {
-        return find(q());
+        return list(q());
     }
 
     @NotNull
-    default List<T> find(@Nullable Collection<ID> ids) {
+    default List<T> list(@Nullable Collection<ID> ids) {
         if (CollUtil.isEmpty(ids)) {
             return Collections.emptyList();
         } else {
             var q = q();
             q.sqlParamsSize = 1;
             q.addNode(new SqlCond(Tables.getIdName(this), Op.IN, ids));
-            return find(q);
+            return list(q);
         }
     }
 
     @NotNull
-    default List<T> find(@NotNull Collection<ID> ids, @NotNull String msg, @NotNull Object... params) {
-        return Assert.notEmpty(find(ids), msg, params);
+    default List<T> list(@NotNull Collection<ID> ids, @NotNull String msg, @NotNull Object... params) {
+        return Assert.notEmpty(list(ids), msg, params);
     }
 
     @NotNull
-    default <R> List<R> find(@NotNull FieldGetter<T, R> field, @Nullable Collection<ID> ids) {
+    default <R> List<R> list(@NotNull FieldGetter<T, R> field, @Nullable Collection<ID> ids) {
         if (CollUtil.isEmpty(ids)) {
             return Collections.emptyList();
         } else {
             var q = q().select(field);
             q.sqlParamsSize = 1;
             q.addNode(new SqlCond(Tables.getIdName(this), Op.IN, ids));
-            return find(q).stream().map(field::get).toList();
+            return list(q).stream().map(field::get).toList();
         }
     }
 
     @NotNull
-    default <R> List<R> find(@NotNull FieldGetter<T, R> field, @NotNull Query<T> q) {
+    default <R> List<R> list(@NotNull FieldGetter<T, R> field, @NotNull Query<T> q) {
         MybatisSqlProvider.clearSelectColumns(q);
-        var ts = find(q.select(field));
+        var ts = list(q.select(field));
         return CollStreamUtil.toList(ts, field::get);
     }
 
     @NotNull
-    default List<T> find(@NotNull Query<T> q, @NotNull FieldGetter<T, ?> field, FieldGetter<T, ?>... fields) {
+    default List<T> list(@NotNull Query<T> q, @NotNull FieldGetter<T, ?> field, FieldGetter<T, ?>... fields) {
         q.select(field);
         q.select(fields);
-        return find(q);
+        return list(q);
     }
 
     @Nullable
@@ -252,7 +252,7 @@ public interface MybatisDao<T, ID> {
 
     @NotNull
     default <R> Map<R, T> map(@NotNull FieldGetter<T, R> field, @NotNull Query<T> q) {
-        return CollStreamUtil.toIdentityMap(find(q), field::get);
+        return CollStreamUtil.toIdentityMap(list(q), field::get);
     }
 
     @NotNull

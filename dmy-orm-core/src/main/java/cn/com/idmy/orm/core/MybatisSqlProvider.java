@@ -44,7 +44,7 @@ public class MybatisSqlProvider {
     public static final String ENTITY_TYPE = "$$entityType$";
 
     public static final String getNullable = "getNullable";
-    public static final String find0 = "find0";
+    public static final String list0 = "list0";
     public static final String delete = "delete";
     public static final String update = "update";
     public static final String count = "count";
@@ -79,7 +79,7 @@ public class MybatisSqlProvider {
 
     @SuppressWarnings("unchecked")
     @NotNull
-    public static Collection<Object> findEntities(@NotNull Map<String, Object> params) {
+    public static Collection<Object> listEntity(@NotNull Map<String, Object> params) {
         return (Collection<Object>) params.get(ENTITIES);
     }
 
@@ -140,7 +140,7 @@ public class MybatisSqlProvider {
         var q = dao.q();
         q.sqlParamsSize = 1;
         q.addNode(new SqlCond(getIdName(dao), Op.IN, ids));
-        return CollStreamUtil.toIdentityMap(dao.find(q), Tables::getIdValue);
+        return CollStreamUtil.toIdentityMap(dao.list(q), Tables::getIdValue);
     }
 
     @NotNull
@@ -153,7 +153,7 @@ public class MybatisSqlProvider {
         if (params instanceof Param<?> param) {
             q.param(param);
         }
-        var rows = dao.find(q);
+        var rows = dao.list(q);
         if (page.getHasTotal() == null || page.getHasTotal()) {
             page.setTotal(dao.count(q));
         } else {
@@ -168,7 +168,7 @@ public class MybatisSqlProvider {
     }
 
     @NotNull
-    public String find0(@NotNull Map<String, Object> params) {
+    public String list0(@NotNull Map<String, Object> params) {
         return genCommonSql(params);
     }
 
@@ -208,7 +208,7 @@ public class MybatisSqlProvider {
 
     @NotNull
     public String creates(@NotNull Map<String, Object> params) {
-        var ls = findEntities(params);
+        var ls = listEntity(params);
         if (ls.isEmpty()) {
             throw new OrmException("批量创建的实体集合不能为空");
         } else {
