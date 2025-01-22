@@ -1,6 +1,7 @@
 package cn.com.idmy.orm.core;
 
 import cn.com.idmy.base.model.Pair;
+import cn.com.idmy.orm.OrmException;
 import cn.com.idmy.orm.core.SqlNode.SqlCond;
 import cn.com.idmy.orm.core.SqlNode.SqlNodeType;
 import cn.com.idmy.orm.core.SqlNode.SqlOr;
@@ -53,9 +54,9 @@ class UpdateSqlGenerator extends SqlGenerator {
 
         boolean empty = genWhere(wheres);
         if (empty && !update.force) {
-            throw new IllegalArgumentException("更新语句没有条件！可使用 force 强制执行");
+            throw new OrmException("更新语句没有条件！可使用 force 强制执行");
         } else {
-            return new Pair<>(sql.toString(), params);
+            return Pair.of(sql.toString(), params);
         }
     }
 

@@ -64,8 +64,8 @@ public class MybatisSqlProvider {
         var where = (Crud<?, ?>) params.get(CRUD);
         putEntityType(params, where.entityType);
         var pair = where.sql();
-        params.put(SQL_PARAMS, pair.right());
-        return pair.left();
+        params.put(SQL_PARAMS, pair.right);
+        return pair.left;
     }
 
     public static void putEntityType(@NotNull Map<String, Object> params, @NotNull Class<?> entityType) {
@@ -105,7 +105,7 @@ public class MybatisSqlProvider {
             }
         }
         var sql = u.sql();
-        return dao.updateBySql(sql.left(), sql.right());
+        return dao.updateBySql(sql.left, sql.right);
     }
 
     public static <T, ID> int[] update(@NotNull MybatisDao<T, ID> dao, @NotNull Collection<T> ls, int size, boolean ignoreNull) {
@@ -145,21 +145,21 @@ public class MybatisSqlProvider {
 
     @NotNull
     public static <T, ID, R> Page<T> page(@NotNull MybatisDao<T, ID> dao, @NotNull Page<R> page, @NotNull Query<T> q) {
-        q.limit = page.getPageSize();
-        q.offset = page.getOffset();
-        q.orderBy(page.getSorts());
+        q.limit = page.pageSize();
+        q.offset = page.offset();
+        q.orderBy(page.sorts());
 
-        var params = page.getParams();
+        var params = page.params();
         if (params instanceof Param<?> param) {
             q.param(param);
         }
         var rows = dao.list(q);
-        if (page.getHasTotal() == null || page.getHasTotal()) {
-            page.setTotal(dao.count(q));
+        if (page.hasTotal() == null || page.hasTotal()) {
+            page.total(dao.count(q));
         } else {
-            page.setTotal(rows.size());
+            page.total(rows.size());
         }
-        return Page.of(page.getPageNo(), page.getPageSize(), page.getTotal(), rows);
+        return Page.of(page.pageNo(), page.pageSize(), page.total(), rows);
     }
 
     @NotNull
@@ -191,8 +191,8 @@ public class MybatisSqlProvider {
         q.select(SqlFn::count);
         putEntityType(params, q.entityType);
         var pair = q.sql();
-        params.put(SQL_PARAMS, pair.right());
-        return pair.left();
+        params.put(SQL_PARAMS, pair.right);
+        return pair.left;
     }
 
     @NotNull
@@ -201,9 +201,9 @@ public class MybatisSqlProvider {
         var entityType = entity.getClass();
         var generator = new CreateSqlGenerator(entityType, entity);
         var pair = generator.gen();
-        params.put(SQL_PARAMS, pair.right());
+        params.put(SQL_PARAMS, pair.right);
         putEntityType(params, entityType);
-        return pair.left();
+        return pair.left;
     }
 
     @NotNull
@@ -215,9 +215,9 @@ public class MybatisSqlProvider {
             var entityType = ls.iterator().next().getClass();
             var generator = new CreateSqlGenerator(entityType, ls);
             var pair = generator.gen();
-            params.put(SQL_PARAMS, pair.right());
+            params.put(SQL_PARAMS, pair.right);
             putEntityType(params, entityType);
-            return pair.left();
+            return pair.left;
         }
     }
 

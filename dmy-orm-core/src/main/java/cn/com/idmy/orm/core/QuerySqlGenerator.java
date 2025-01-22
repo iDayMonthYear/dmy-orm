@@ -63,7 +63,7 @@ class QuerySqlGenerator extends SqlGenerator {
         if (query.offset != null) {
             sql.append(OFFSET).append(query.offset);
         }
-        return new Pair<>(sql.toString(), params);
+        return Pair.of(sql.toString(), params);
     }
 
     protected void genDistinct(SqlDistinct d) {
