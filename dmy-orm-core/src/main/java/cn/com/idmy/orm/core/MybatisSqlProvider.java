@@ -153,13 +153,20 @@ public class MybatisSqlProvider {
         if (params instanceof Param<?> param) {
             q.param(param);
         }
-        var rows = dao.list(q);
-        if (page.hasTotal() == null || page.hasTotal()) {
-            page.total(dao.count(q));
-        } else {
-            page.total(rows.size());
+        var hasTotal = page.hasTotal() == null || page.hasTotal();
+        long total = -1;
+        if (hasTotal) {
+            total = dao.count(q);
         }
-        return Page.of(page.pageNo(), page.pageSize(), page.total(), rows);
+        if (total == 0) {
+            return Page.empty();
+        } else {
+            var rows = dao.list(q);
+            if (!hasTotal) {
+                page.total(rows.size());
+            }
+            return Page.of(page.pageNo(), page.pageSize(), page.total(), rows);
+        }
     }
 
     @NotNull
