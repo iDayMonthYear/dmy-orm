@@ -156,7 +156,14 @@ public class MybatisSqlProvider {
         var hasTotal = page.hasTotal() == null || page.hasTotal();
         long total = -1;
         if (hasTotal) {
+            var limit = q.limit;
+            var offset = q.offset;
+            var nodes = q.nodes;
+            q.nodes = new ArrayList<>();
             total = dao.count(q);
+            q.limit = limit;
+            q.offset = offset;
+            q.nodes = nodes;
         }
         if (total == 0) {
             return Page.empty();
