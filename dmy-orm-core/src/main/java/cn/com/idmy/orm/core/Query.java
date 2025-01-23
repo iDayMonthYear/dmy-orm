@@ -148,14 +148,14 @@ public class Query<T> extends Where<T, Query<T>> {
     public Query<T> param(@Nullable Object param) {
         if (param != null) {
             if (param instanceof At at) {
-                var createdAts = at.getCreatedAts();
+                var createdAts = at.createdAts();
                 if (ArrayUtil.isNotEmpty(createdAts) && createdAts.length == 2) {
                     var createdAt = getColumnName(entityType, DefaultConfig.createdAt);
                     if (createdAt != null) {
                         addNode(new SqlCond(createdAt, Op.BETWEEN, createdAts));
                     }
                 }
-                var updatedAts = at.getUpdatedAts();
+                var updatedAts = at.updatedAts();
                 if (ArrayUtil.isNotEmpty(updatedAts) && updatedAts.length == 2) {
                     var updatedAt = getColumnName(entityType, DefaultConfig.updatedAt);
                     if (updatedAt != null) {
@@ -165,15 +165,15 @@ public class Query<T> extends Where<T, Query<T>> {
             }
 
             if (param instanceof Model<?> model) {
-                var id = model.getId();
+                var id = model.id();
                 if (id != null) {
                     addNode(new SqlCond(getIdName(entityType), Op.EQ, id));
                 } else {
-                    var ids = model.getIds();
+                    var ids = model.ids();
                     if (CollUtil.isNotEmpty(ids)) {
                         addNode(new SqlCond(getIdName(entityType), Op.IN, ids));
                     } else {
-                        var notIds = model.getNotIds();
+                        var notIds = model.notIds();
                         if (CollUtil.isNotEmpty(notIds)) {
                             addNode(new SqlCond(getIdName(entityType), Op.NOT_IN, notIds));
                         }
