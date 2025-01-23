@@ -170,9 +170,9 @@ public class MybatisSqlProvider {
         } else {
             var rows = dao.list(q);
             if (!hasTotal) {
-                page.total(rows.size());
+                total = rows.size();
             }
-            return Page.of(page.pageNo(), page.pageSize(), page.total(), rows);
+            return Page.of(page.pageNo(), page.pageSize(), total, rows);
         }
     }
 
