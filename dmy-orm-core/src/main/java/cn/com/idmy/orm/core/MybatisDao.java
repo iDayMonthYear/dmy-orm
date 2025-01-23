@@ -103,7 +103,7 @@ public interface MybatisDao<T, ID> {
     @NotNull
     default List<T> list(@NotNull Query<T> q) {
         List<T> ts = list0(q);
-        return ts == null ? new ArrayList<T>(0) : ts;
+        return ts == null ? new ArrayList<>(0) : ts;
     }
 
     @NotNull
