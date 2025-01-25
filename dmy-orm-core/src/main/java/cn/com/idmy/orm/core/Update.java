@@ -35,7 +35,7 @@ public class Update<T> extends Where<T, Update<T>> {
     }
 
     @NotNull
-    public Update<T> set(@NotNull FieldGetter<T, ?> field, @NotNull SqlOpExpr expr) {
+    public Update<T> set(@NotNull FieldGetter<T, ?> field, @Nullable SqlOpExpr expr) {
         return addNode(new SqlSet(entityType, field, expr));
     }
 
