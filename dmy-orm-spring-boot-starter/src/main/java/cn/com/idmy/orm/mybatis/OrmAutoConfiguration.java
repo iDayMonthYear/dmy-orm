@@ -1,5 +1,6 @@
 package cn.com.idmy.orm.mybatis;
 
+import cn.com.idmy.orm.OrmConfig;
 import cn.com.idmy.orm.core.MybatisSqlProvider;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.ibatis.type.TypeHandler;
@@ -37,13 +38,16 @@ public class OrmAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     SqlSessionFactory sqlSessionFactory(OrmProps props, DataSource dataSource, ApplicationContext ctx, EnumWatchInterceptor enumWatchInterceptor, List<TypeHandler<?>> typeHandlers) throws Exception {
+        OrmConfig cfg = OrmConfig.config();
+        cfg.enableIEnumValue(props.isEnableIEnumValue());
+
         var bean = new SqlSessionFactoryBean();
         bean.setDataSource(dataSource);
-        var cfg = new MybatisConfiguration();
+        var configuration = new MybatisConfiguration();
         if (typeHandlers != null) {
-            typeHandlers.forEach(cfg::register);
+            typeHandlers.forEach(configuration::register);
         }
-        bean.setConfiguration(cfg);
+        bean.setConfiguration(configuration);
         //bean.setPlugins(enumWatchInterceptor);
         bean.setMapperLocations(props.resolveMapperLocations());
 

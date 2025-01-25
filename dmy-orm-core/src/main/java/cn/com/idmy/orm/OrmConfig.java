@@ -29,6 +29,9 @@ public class OrmConfig {
     }
 
     @Setter
+    private boolean enableIEnumValue;
+
+    @Setter
     @NotNull
     private IdType defaultIdType = IdType.AUTO;
     @NotNull

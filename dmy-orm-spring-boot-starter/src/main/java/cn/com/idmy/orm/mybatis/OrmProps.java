@@ -10,22 +10,12 @@ import java.io.IOException;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-/**
- * Configuration properties for ORM.
- */
 @Data
 @ConfigurationProperties(prefix = "orm")
 public class OrmProps {
     private static final ResourcePatternResolver resourceResolver = new PathMatchingResourcePatternResolver();
-
-    /**
-     * Whether to check database column.
-     */
     private boolean checkDbColumn = false;
-
-    /**
-     * Locations of MyBatis mapper files.
-     */
+    private boolean enableIEnumValue = false;
     private String[] mapperLocations = new String[]{"classpath*:/dao/**/*.xml"};
 
     private Resource[] resources(String location) {

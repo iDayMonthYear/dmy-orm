@@ -1,6 +1,8 @@
 package cn.com.idmy.orm.mybatis.handler;
 
 import cn.com.idmy.base.annotation.EnumValue;
+import cn.com.idmy.base.model.IEnum;
+import cn.com.idmy.orm.OrmConfig;
 import org.apache.ibatis.type.BaseTypeHandler;
 import org.apache.ibatis.type.JdbcType;
 import org.jetbrains.annotations.NotNull;
@@ -20,15 +22,21 @@ public class EnumTypeHandler<E extends Enum<E>> extends BaseTypeHandler<E> {
     private final Class<E> type;
     @Nullable
     private final Field valueField;
+    private final boolean isIEnum;
+    private final boolean enableIEnumValue;
 
     public EnumTypeHandler(@NotNull Class<E> type) {
         this.type = type;
-        this.valueField = getEnumValueField(type);
+        this.isIEnum = IEnum.class.isAssignableFrom(type);
+        this.enableIEnumValue = OrmConfig.config().enableIEnumValue();
+        this.valueField = (!isIEnum || !enableIEnumValue) ? getEnumValueField(type) : null;
     }
 
     @Override
     public void setNonNullParameter(@NotNull PreparedStatement ps, int idx, @NotNull E param, @NotNull JdbcType jdbcType) throws SQLException {
-        if (valueField == null) {
+        if (isIEnum && enableIEnumValue) {
+            ps.setObject(idx, ((IEnum<?>) param).value());
+        } else if (valueField == null) {
             ps.setObject(idx, param.name());
         } else {
             try {
@@ -67,7 +75,14 @@ public class EnumTypeHandler<E extends Enum<E>> extends BaseTypeHandler<E> {
     }
 
     private E valueOf(Object value) throws SQLException {
-        if (valueField == null) {
+        if (isIEnum && enableIEnumValue) {
+            for (E enumConstant : type.getEnumConstants()) {
+                if (Objects.equals(value, ((IEnum<?>) enumConstant).value())) {
+                    return enumConstant;
+                }
+            }
+            throw new SQLException("Cannot convert " + value + " to " + type.getSimpleName());
+        } else if (valueField == null) {
             return Enum.valueOf(type, value.toString());
         } else {
             for (E enumConstant : type.getEnumConstants()) {
