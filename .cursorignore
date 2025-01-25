@@ -1,0 +1,67 @@
+# Add directories or file patterns to ignore during indexing (e.g. foo/ or *.csv)
+
+# 编译输出目录
+target/
+out/
+build/
+
+# IDE相关文件
+.idea/
+*.iml
+.vscode/
+.project
+.classpath
+.settings/
+
+# 依赖目录
+node_modules/
+.mvn/
+
+# 日志文件
+logs/
+*.log
+
+# 临时文件
+*.tmp
+*.temp
+*.swp
+*~
+
+# 系统文件
+.DS_Store
+Thumbs.db
+
+# 配置文件
+application-local.yml
+application-local.properties
+*.local.yml
+*.local.properties
+
+# 测试覆盖率报告
+coverage/
+jacoco/
+
+# 其他构建工具生成的文件
+.gradle/
+bin/
+
+# 敏感信息文件
+*.key
+*.pem
+*.p12
+*.jks
+
+# 文档生成目录
+docs/_build/
+javadoc/
+
+# 前端构建输出
+dist/
+node/
+
+# Maven Wrapper
+.mvn/wrapper/maven-wrapper.jar
+
+# 自动生成的文件
+generated/
+.generated/
