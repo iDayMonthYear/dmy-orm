@@ -88,7 +88,7 @@ class MybatisModifier {
         var cfg = ms.getConfiguration();
         var msId = ms.getId();
         var resultMappings = List.of(new ResultMapping.Builder(cfg, "count", "count(*)", long.class).build());
-        var resultMaps = List.of(new ResultMap.Builder(cfg, msId + ".CountCountAsteriskMap", long.class, resultMappings).build());
+        var resultMaps = List.of(new ResultMap.Builder(cfg, msId + ".CountAsteriskResultMap", long.class, resultMappings).build());
         var sqlSource = ms.getSqlSource();
         var sqlCommandType = ms.getSqlCommandType();
         return new MappedStatement.Builder(cfg, msId, sqlSource, sqlCommandType).resultMaps(resultMaps).build();

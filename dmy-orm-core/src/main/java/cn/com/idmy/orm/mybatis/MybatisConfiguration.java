@@ -46,7 +46,6 @@ class MybatisConfiguration extends Configuration {
 
     @Override
     public void addMappedStatement(@NotNull MappedStatement ms) {
-
         var table = Tables.getTable(ms.getId().substring(0, ms.getId().lastIndexOf(DOT)));
         var msId = ms.getId();
         if (StrUtil.endWithAny(msId, DOT + MybatisSqlProvider.create, DOT + MybatisSqlProvider.creates) && ms.getKeyGenerator() == NoKeyGenerator.INSTANCE) {
