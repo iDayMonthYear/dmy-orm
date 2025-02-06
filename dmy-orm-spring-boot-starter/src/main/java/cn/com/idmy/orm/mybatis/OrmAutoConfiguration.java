@@ -46,7 +46,7 @@ public class OrmAutoConfiguration {
         var bean = new SqlSessionFactoryBean();
         bean.setDataSource(dataSource);
         var configuration = new MybatisConfiguration();
-        var obj = ctx.getBean("jsonTypeHandlers");
+        var obj = ctx.getBean("mybatisTypeHandlers");
         if (obj instanceof List<?> typeHandlers) {
             for (Object o : typeHandlers) {
                 configuration.register((TypeHandler<?>) o);
