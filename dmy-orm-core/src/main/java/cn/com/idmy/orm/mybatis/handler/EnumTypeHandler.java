@@ -49,17 +49,32 @@ public class EnumTypeHandler<E extends Enum<E>> extends BaseTypeHandler<E> {
 
     @Override
     public E getNullableResult(@NotNull ResultSet rs, @NotNull String name) throws SQLException {
-        return rs.wasNull() ? null : valueOf(rs.getObject(name));
+        if (rs.wasNull()) {
+            return null;
+        } else {
+            Object object = rs.getObject(name);
+            return valueOf(object);
+        }
     }
 
     @Override
     public E getNullableResult(@NotNull ResultSet rs, int idx) throws SQLException {
-        return rs.wasNull() ? null : valueOf(rs.getObject(idx));
+        if (rs.wasNull()) {
+            return null;
+        } else {
+            Object object = rs.getObject(idx);
+            return valueOf(object);
+        }
     }
 
     @Override
     public E getNullableResult(@NotNull CallableStatement cs, int idx) throws SQLException {
-        return cs.wasNull() ? null : valueOf(cs.getObject(idx));
+        if (cs.wasNull()) {
+            return null;
+        } else {
+            Object object = cs.getObject(idx);
+            return valueOf(object);
+        }
     }
 
     private Field getEnumValueField(@NotNull Class<E> type) {

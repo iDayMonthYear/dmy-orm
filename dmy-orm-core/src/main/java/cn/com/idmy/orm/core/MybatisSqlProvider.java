@@ -159,7 +159,7 @@ public class MybatisSqlProvider {
             var limit = q.limit;
             var offset = q.offset;
             var nodes = q.nodes;
-            q.nodes = new ArrayList<>();
+            q.clearSelectColumns();
             total = dao.count(q);
             q.limit = limit;
             q.offset = offset;
