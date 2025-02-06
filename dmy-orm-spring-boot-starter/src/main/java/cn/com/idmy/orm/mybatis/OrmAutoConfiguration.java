@@ -11,6 +11,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Lazy;
 
 import javax.sql.DataSource;
 import java.util.List;
@@ -37,15 +38,19 @@ public class OrmAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    SqlSessionFactory sqlSessionFactory(OrmProps props, DataSource dataSource, ApplicationContext ctx, EnumWatchInterceptor enumWatchInterceptor, List<TypeHandler<?>> typeHandlers) throws Exception {
+    @Lazy
+    SqlSessionFactory sqlSessionFactory(OrmProps props, DataSource dataSource, ApplicationContext ctx, EnumWatchInterceptor enumWatchInterceptor) throws Exception {
         OrmConfig cfg = OrmConfig.config();
         cfg.enableIEnumValue(props.isEnableIEnumValue());
 
         var bean = new SqlSessionFactoryBean();
         bean.setDataSource(dataSource);
         var configuration = new MybatisConfiguration();
-        if (typeHandlers != null) {
-            typeHandlers.forEach(configuration::register);
+        var obj = ctx.getBean("jsonTypeHandlers");
+        if (obj instanceof List<?> typeHandlers) {
+            for (Object o : typeHandlers) {
+                configuration.register((TypeHandler<?>) o);
+            }
         }
         bean.setConfiguration(configuration);
         //bean.setPlugins(enumWatchInterceptor);
