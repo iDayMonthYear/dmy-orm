@@ -42,14 +42,15 @@ public class OrmAutoConfiguration {
     SqlSessionFactory sqlSessionFactory(OrmProps props, DataSource dataSource, ApplicationContext ctx, EnumWatchInterceptor enumWatchInterceptor) throws Exception {
         OrmConfig cfg = OrmConfig.config();
         cfg.enableIEnumValue(props.isEnableIEnumValue());
-
         var bean = new SqlSessionFactoryBean();
         bean.setDataSource(dataSource);
         var configuration = new MybatisConfiguration();
-        var obj = ctx.getBean("mybatisTypeHandlers");
-        if (obj instanceof List<?> typeHandlers) {
-            for (Object o : typeHandlers) {
-                configuration.register((TypeHandler<?>) o);
+        if (ctx.containsBean("mybatisTypeHandlers")) {
+            var obj = ctx.getBean("mybatisTypeHandlers");
+            if (obj instanceof List<?> typeHandlers) {
+                for (Object o : typeHandlers) {
+                    configuration.register((TypeHandler<?>) o);
+                }
             }
         }
         bean.setConfiguration(configuration);
