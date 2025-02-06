@@ -3,6 +3,7 @@ package cn.com.idmy.orm.mybatis.handler;
 import cn.com.idmy.base.annotation.EnumValue;
 import cn.com.idmy.base.model.IEnum;
 import cn.com.idmy.orm.OrmConfig;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.type.BaseTypeHandler;
 import org.apache.ibatis.type.JdbcType;
 import org.jetbrains.annotations.NotNull;
@@ -17,6 +18,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
+@Slf4j
 public class EnumTypeHandler<E extends Enum<E>> extends BaseTypeHandler<E> {
     private static final Map<Class<?>, Field> enumValueFieldCache = new ConcurrentHashMap<>(1);
     private final Class<E> type;
@@ -48,31 +50,31 @@ public class EnumTypeHandler<E extends Enum<E>> extends BaseTypeHandler<E> {
     }
 
     @Override
-    public E getNullableResult(@NotNull ResultSet rs, @NotNull String name) throws SQLException {
-        if (rs.wasNull()) {
+    public E getNullableResult(@NotNull ResultSet rs, @NotNull String idx) throws SQLException {
+        Object object = rs.getObject(idx);
+        if (object == null || rs.wasNull()) {
             return null;
         } else {
-            Object object = rs.getObject(name);
             return valueOf(object);
         }
     }
 
     @Override
     public E getNullableResult(@NotNull ResultSet rs, int idx) throws SQLException {
-        if (rs.wasNull()) {
+        Object object = rs.getObject(idx);
+        if (object == null || rs.wasNull()) {
             return null;
         } else {
-            Object object = rs.getObject(idx);
             return valueOf(object);
         }
     }
 
     @Override
     public E getNullableResult(@NotNull CallableStatement cs, int idx) throws SQLException {
-        if (cs.wasNull()) {
+        Object object = cs.getObject(idx);
+        if (object == null || cs.wasNull()) {
             return null;
         } else {
-            Object object = cs.getObject(idx);
             return valueOf(object);
         }
     }

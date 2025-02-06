@@ -100,7 +100,15 @@ class QuerySqlGenerator extends SqlGenerator {
 
     protected void genSelectColumn(List<SqlSelectColumn> ls) {
         if (ls.isEmpty()) {
-            sql.append(ASTERISK);
+            var table = Tables.getTable(entityType);
+            var cols = table.columns();
+            int len = cols.length;
+            for (int i = 0; i < len; i++) {
+                sql.append(keyword(cols[i].name()));
+                if (i < len - 1) {
+                    sql.append(DELIMITER);
+                }
+            }
         } else {
             var set = new HashSet<>(ls.size());
             for (int i = 0, size = ls.size(); i < size; i++) {

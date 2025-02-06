@@ -138,7 +138,7 @@ public abstract class SqlGenerator {
     protected static void skipAdjoinOr(@NonNull SqlNode node, @NonNull List<SqlNode> wheres) {
         if (CollUtil.isNotEmpty(wheres)) {
             if (wheres.getLast().type == SqlNodeType.OR) {
-                if (log.isWarnEnabled()) {
+                if (log.isDebugEnabled()) {
                     log.warn("存在相邻的 or，已自动移除");
                 }
             } else {
@@ -150,7 +150,7 @@ public abstract class SqlGenerator {
     protected static void removeLastOr(@NonNull List<SqlNode> ls) {
         if (CollUtil.isNotEmpty(ls) && ls.getLast() instanceof SqlOr) {
             ls.removeLast();
-            if (log.isWarnEnabled()) {
+            if (log.isDebugEnabled()) {
                 log.warn("where 条件最后存在 or，已自动移除");
             }
         }
