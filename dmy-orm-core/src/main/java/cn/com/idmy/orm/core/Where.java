@@ -1,6 +1,7 @@
 package cn.com.idmy.orm.core;
 
 import cn.com.idmy.orm.core.SqlNode.SqlCond;
+import cn.com.idmy.orm.core.SqlNode.SqlOr;
 import lombok.NonNull;
 import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
@@ -14,16 +15,17 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Collection;
+import java.util.function.Consumer;
 
 @Slf4j
 @Accessors(fluent = true, chain = false)
-public abstract class Where<T, SUD extends Where<T, SUD>> extends Crud<T, SUD> {
+public abstract class Where<T, CRUD extends Where<T, CRUD>> extends Crud<T, CRUD> {
     protected Where(@NotNull Class<T> entityType) {
         super(entityType);
     }
 
     @NotNull
-    public SUD addNode(@NotNull SqlCond node) {
+    public CRUD addNode(@NotNull SqlCond node) {
         switch (node.expr) {
             case Collection<?> ls -> {
                 if (ls.isEmpty()) {
@@ -44,75 +46,75 @@ public abstract class Where<T, SUD extends Where<T, SUD>> extends Crud<T, SUD> {
     //region 比较操作
     // 等于
     @NotNull
-    public SUD eq(@NonNull Object id) {
+    public CRUD eq(@NonNull Object id) {
         addNode(new SqlCond(Tables.getIdName(entityType), Op.EQ, id));
         return crud;
     }
 
     @NotNull
-    public SUD eq(@NotNull FieldGetter<T, ?> field, @Nullable Object val) {
+    public CRUD eq(@NotNull FieldGetter<T, ?> field, @Nullable Object val) {
         return val == null ? crud : addNode(new SqlCond(entityType, field, Op.EQ, val));
     }
 
     @NotNull
-    public SUD eq(@NotNull FieldGetter<T, ?> field, @NotNull SqlOpExpr expr) {
+    public CRUD eq(@NotNull FieldGetter<T, ?> field, @NotNull SqlOpExpr expr) {
         return addNode(new SqlCond(entityType, field, Op.EQ, expr));
     }
 
     @NotNull
-    public SUD eq(@NotNull FieldGetter<T, ?> field, @Nullable Object val, boolean if0) {
+    public CRUD eq(@NotNull FieldGetter<T, ?> field, @Nullable Object val, boolean if0) {
         return if0 ? eq(field, val) : crud;
     }
 
     @NotNull
-    public SUD eq(@NotNull FieldGetter<T, ?> field, @NotNull SqlOpExpr expr, boolean if0) {
+    public CRUD eq(@NotNull FieldGetter<T, ?> field, @NotNull SqlOpExpr expr, boolean if0) {
         return if0 ? eq(field, expr) : crud;
     }
 
     @NotNull
-    public SUD eq(@NotNull FieldGetter<T, ?> field, @Nullable String val) {
+    public CRUD eq(@NotNull FieldGetter<T, ?> field, @Nullable String val) {
         return StrUtil.isNotBlank(val) ? addNode(new SqlCond(entityType, field, Op.EQ, val)) : crud;
     }
 
     // 不等于
     @NotNull
-    public SUD ne(@NotNull FieldGetter<T, ?> field, @Nullable Object val) {
+    public CRUD ne(@NotNull FieldGetter<T, ?> field, @Nullable Object val) {
         return val == null ? crud : addNode(new SqlCond(entityType, field, Op.NE, val));
     }
 
     @NotNull
-    public SUD ne(@NotNull FieldGetter<T, ?> field, @NotNull SqlOpExpr expr) {
+    public CRUD ne(@NotNull FieldGetter<T, ?> field, @NotNull SqlOpExpr expr) {
         return addNode(new SqlCond(entityType, field, Op.NE, expr));
     }
 
     @NotNull
-    public SUD ne(@NotNull FieldGetter<T, ?> field, @Nullable Object val, boolean if0) {
+    public CRUD ne(@NotNull FieldGetter<T, ?> field, @Nullable Object val, boolean if0) {
         return if0 ? ne(field, val) : crud;
     }
 
     @NotNull
-    public SUD ne(@NotNull FieldGetter<T, ?> field, @NotNull SqlOpExpr expr, boolean if0) {
+    public CRUD ne(@NotNull FieldGetter<T, ?> field, @NotNull SqlOpExpr expr, boolean if0) {
         return if0 ? ne(field, expr) : crud;
     }
 
     @NotNull
-    public SUD ne(@NotNull FieldGetter<T, ?> field, @Nullable String val) {
+    public CRUD ne(@NotNull FieldGetter<T, ?> field, @Nullable String val) {
         return StrUtil.isNotBlank(val) ? addNode(new SqlCond(entityType, field, Op.NE, val)) : crud;
     }
 
     // 大于
     @NotNull
-    public SUD gt(@NotNull FieldGetter<T, ?> field, @Nullable Object val) {
+    public CRUD gt(@NotNull FieldGetter<T, ?> field, @Nullable Object val) {
         return val == null ? crud : addNode(new SqlCond(entityType, field, Op.GT, val));
     }
 
     @NotNull
-    public SUD gt(@NotNull FieldGetter<T, ?> field, @NotNull SqlOpExpr expr) {
+    public CRUD gt(@NotNull FieldGetter<T, ?> field, @NotNull SqlOpExpr expr) {
         return addNode(new SqlCond(entityType, field, Op.GT, expr));
     }
 
     @NotNull
-    public SUD gt(@NotNull FieldGetter<T, ?> field, @Nullable LocalDateTime val) {
+    public CRUD gt(@NotNull FieldGetter<T, ?> field, @Nullable LocalDateTime val) {
         if (val == null) {
             return crud;
         } else {
@@ -122,54 +124,54 @@ public abstract class Where<T, SUD extends Where<T, SUD>> extends Crud<T, SUD> {
     }
 
     @NotNull
-    public SUD gt(@NotNull FieldGetter<T, ?> field, @Nullable Object val, boolean if0) {
+    public CRUD gt(@NotNull FieldGetter<T, ?> field, @Nullable Object val, boolean if0) {
         return if0 ? gt(field, val) : crud;
     }
 
     @NotNull
-    public SUD gt(@NotNull FieldGetter<T, ?> field, @NotNull SqlOpExpr expr, boolean if0) {
+    public CRUD gt(@NotNull FieldGetter<T, ?> field, @NotNull SqlOpExpr expr, boolean if0) {
         return if0 ? gt(field, expr) : crud;
     }
 
     @NotNull
-    public SUD gt(@NotNull FieldGetter<T, ?> field, @Nullable LocalDateTime val, boolean if0) {
+    public CRUD gt(@NotNull FieldGetter<T, ?> field, @Nullable LocalDateTime val, boolean if0) {
         return if0 ? gt(field, val) : crud;
     }
 
     // 大于等于
     @NotNull
-    public SUD ge(@NotNull FieldGetter<T, ?> field, @Nullable Object val) {
+    public CRUD ge(@NotNull FieldGetter<T, ?> field, @Nullable Object val) {
         return val == null ? crud : addNode(new SqlCond(entityType, field, Op.GE, val));
     }
 
     @NotNull
-    public SUD ge(@NotNull FieldGetter<T, ?> field, @NotNull SqlOpExpr expr) {
+    public CRUD ge(@NotNull FieldGetter<T, ?> field, @NotNull SqlOpExpr expr) {
         return addNode(new SqlCond(entityType, field, Op.GE, expr));
     }
 
     @NotNull
-    public SUD ge(@NotNull FieldGetter<T, ?> field, @Nullable Object val, boolean if0) {
+    public CRUD ge(@NotNull FieldGetter<T, ?> field, @Nullable Object val, boolean if0) {
         return if0 ? ge(field, val) : crud;
     }
 
     @NotNull
-    public SUD ge(@NotNull FieldGetter<T, ?> field, @NotNull SqlOpExpr expr, boolean if0) {
+    public CRUD ge(@NotNull FieldGetter<T, ?> field, @NotNull SqlOpExpr expr, boolean if0) {
         return if0 ? ge(field, expr) : crud;
     }
 
     // 小于
     @NotNull
-    public SUD lt(@NotNull FieldGetter<T, ?> field, @Nullable Object val) {
+    public CRUD lt(@NotNull FieldGetter<T, ?> field, @Nullable Object val) {
         return val == null ? crud : addNode(new SqlCond(entityType, field, Op.LT, val));
     }
 
     @NotNull
-    public SUD lt(@NotNull FieldGetter<T, ?> field, @NotNull SqlOpExpr expr) {
+    public CRUD lt(@NotNull FieldGetter<T, ?> field, @NotNull SqlOpExpr expr) {
         return addNode(new SqlCond(entityType, field, Op.LT, expr));
     }
 
     @NotNull
-    public SUD lt(@NotNull FieldGetter<T, ?> field, @Nullable LocalDateTime val) {
+    public CRUD lt(@NotNull FieldGetter<T, ?> field, @Nullable LocalDateTime val) {
         if (val == null) {
             return crud;
         } else {
@@ -179,38 +181,38 @@ public abstract class Where<T, SUD extends Where<T, SUD>> extends Crud<T, SUD> {
     }
 
     @NotNull
-    public SUD lt(@NotNull FieldGetter<T, ?> field, @Nullable Object val, boolean if0) {
+    public CRUD lt(@NotNull FieldGetter<T, ?> field, @Nullable Object val, boolean if0) {
         return if0 ? lt(field, val) : crud;
     }
 
     @NotNull
-    public SUD lt(@NotNull FieldGetter<T, ?> field, SqlOpExpr expr, boolean if0) {
+    public CRUD lt(@NotNull FieldGetter<T, ?> field, SqlOpExpr expr, boolean if0) {
         return if0 ? lt(field, expr) : crud;
     }
 
     @NotNull
-    public SUD lt(@NotNull FieldGetter<T, ?> field, LocalDateTime val, boolean if0) {
+    public CRUD lt(@NotNull FieldGetter<T, ?> field, LocalDateTime val, boolean if0) {
         return if0 ? lt(field, val) : crud;
     }
 
     // 小于等于
     @NotNull
-    public SUD le(@NotNull FieldGetter<T, ?> field, @Nullable Object val) {
+    public CRUD le(@NotNull FieldGetter<T, ?> field, @Nullable Object val) {
         return val == null ? crud : addNode(new SqlCond(entityType, field, Op.LE, val));
     }
 
     @NotNull
-    public SUD le(@NotNull FieldGetter<T, ?> field, SqlOpExpr expr) {
+    public CRUD le(@NotNull FieldGetter<T, ?> field, SqlOpExpr expr) {
         return addNode(new SqlCond(entityType, field, Op.LE, expr));
     }
 
     @NotNull
-    public SUD le(@NotNull FieldGetter<T, ?> field, @Nullable Object val, boolean if0) {
+    public CRUD le(@NotNull FieldGetter<T, ?> field, @Nullable Object val, boolean if0) {
         return if0 ? le(field, val) : crud;
     }
 
     @NotNull
-    public SUD le(@NotNull FieldGetter<T, ?> field, SqlOpExpr expr, boolean if0) {
+    public CRUD le(@NotNull FieldGetter<T, ?> field, SqlOpExpr expr, boolean if0) {
         return if0 ? le(field, expr) : crud;
     }
     //endregion
@@ -218,62 +220,62 @@ public abstract class Where<T, SUD extends Where<T, SUD>> extends Crud<T, SUD> {
     //region 字符串操作
 
     @NotNull
-    public SUD like(@NotNull FieldGetter<T, String> field, @Nullable String val) {
+    public CRUD like(@NotNull FieldGetter<T, String> field, @Nullable String val) {
         return StrUtil.isBlank(val) ? crud : addNode(new SqlCond(entityType, field, Op.LIKE, "%" + val + "%"));
     }
 
     @NotNull
-    public SUD like(@NotNull FieldGetter<T, String> field, @Nullable String val, boolean if0) {
+    public CRUD like(@NotNull FieldGetter<T, String> field, @Nullable String val, boolean if0) {
         return if0 ? like(field, val) : crud;
     }
 
     @NotNull
-    public SUD startsWith(@NotNull FieldGetter<T, String> field, @Nullable String val) {
+    public CRUD startsWith(@NotNull FieldGetter<T, String> field, @Nullable String val) {
         return StrUtil.isBlank(val) ? crud : addNode(new SqlCond(entityType, field, Op.LIKE, val + "%"));
     }
 
     @NotNull
-    public SUD startsWith(@NotNull FieldGetter<T, String> field, @Nullable String val, boolean if0) {
+    public CRUD startsWith(@NotNull FieldGetter<T, String> field, @Nullable String val, boolean if0) {
         return if0 ? startsWith(field, val) : crud;
     }
 
     @NotNull
-    public SUD endsWith(@NotNull FieldGetter<T, String> field, @Nullable String val) {
+    public CRUD endsWith(@NotNull FieldGetter<T, String> field, @Nullable String val) {
         return StrUtil.isBlank(val) ? crud : addNode(new SqlCond(entityType, field, Op.LIKE, "%" + val));
     }
 
     @NotNull
-    public SUD endsWith(@NotNull FieldGetter<T, String> field, @Nullable String val, boolean if0) {
+    public CRUD endsWith(@NotNull FieldGetter<T, String> field, @Nullable String val, boolean if0) {
         return if0 ? endsWith(field, val) : crud;
     }
 
     @NotNull
-    public SUD notLike(@NotNull FieldGetter<T, String> field, @Nullable String val) {
+    public CRUD notLike(@NotNull FieldGetter<T, String> field, @Nullable String val) {
         return StrUtil.isBlank(val) ? crud : addNode(new SqlCond(entityType, field, Op.NOT_LIKE, "%" + val + "%"));
     }
 
     @NotNull
-    public SUD notLike(@NotNull FieldGetter<T, String> field, @Nullable String val, boolean if0) {
+    public CRUD notLike(@NotNull FieldGetter<T, String> field, @Nullable String val, boolean if0) {
         return if0 ? notLike(field, val) : crud;
     }
 
     @NotNull
-    public SUD notStartsWith(@NotNull FieldGetter<T, String> field, @Nullable String val) {
+    public CRUD notStartsWith(@NotNull FieldGetter<T, String> field, @Nullable String val) {
         return StrUtil.isBlank(val) ? crud : addNode(new SqlCond(entityType, field, Op.NOT_LIKE, val + "%"));
     }
 
     @NotNull
-    public SUD notStartsWith(@NotNull FieldGetter<T, String> field, @Nullable String val, boolean if0) {
+    public CRUD notStartsWith(@NotNull FieldGetter<T, String> field, @Nullable String val, boolean if0) {
         return if0 ? notStartsWith(field, val) : crud;
     }
 
     @NotNull
-    public SUD notEndsWith(@NotNull FieldGetter<T, String> field, @Nullable String val) {
+    public CRUD notEndsWith(@NotNull FieldGetter<T, String> field, @Nullable String val) {
         return StrUtil.isBlank(val) ? crud : addNode(new SqlCond(entityType, field, Op.NOT_LIKE, "%" + val));
     }
 
     @NotNull
-    public SUD notEndsWith(@NotNull FieldGetter<T, String> field, @Nullable String val, boolean if0) {
+    public CRUD notEndsWith(@NotNull FieldGetter<T, String> field, @Nullable String val, boolean if0) {
         return if0 ? notEndsWith(field, val) : crud;
     }
     //endregion
@@ -281,51 +283,51 @@ public abstract class Where<T, SUD extends Where<T, SUD>> extends Crud<T, SUD> {
     //region 包含操作
     // IN
     @NotNull
-    public SUD in(@NotNull FieldGetter<T, ?> field, @Nullable Object... vals) {
+    public CRUD in(@NotNull FieldGetter<T, ?> field, @Nullable Object... vals) {
         return ArrayUtil.isEmpty(vals) ? crud : addNode(new SqlCond(entityType, field, Op.IN, vals));
     }
 
     @NotNull
-    public SUD in(@NotNull FieldGetter<T, ?> field, @Nullable Collection<?> vals) {
+    public CRUD in(@NotNull FieldGetter<T, ?> field, @Nullable Collection<?> vals) {
         return CollUtil.isEmpty(vals) ? crud : addNode(new SqlCond(entityType, field, Op.IN, vals));
     }
 
     @NotNull
-    public SUD in(@NotNull FieldGetter<T, ?> field, @Nullable Collection<?> vals, boolean if0) {
+    public CRUD in(@NotNull FieldGetter<T, ?> field, @Nullable Collection<?> vals, boolean if0) {
         return if0 ? in(field, vals) : crud;
     }
 
     @NotNull
-    public SUD in(@NotNull FieldGetter<T, ?> field, @Nullable Object[] vals, boolean if0) {
+    public CRUD in(@NotNull FieldGetter<T, ?> field, @Nullable Object[] vals, boolean if0) {
         return if0 ? in(field, vals) : crud;
     }
 
     // NOT IN
 
     @NotNull
-    public SUD notIn(@NotNull FieldGetter<T, ?> field, @Nullable Object... vals) {
+    public CRUD notIn(@NotNull FieldGetter<T, ?> field, @Nullable Object... vals) {
         return ArrayUtil.isEmpty(vals) ? crud : addNode(new SqlCond(entityType, field, Op.NOT_IN, vals));
     }
 
     @NotNull
-    public SUD notIn(@NotNull FieldGetter<T, ?> field, @Nullable Collection<?> vals) {
+    public CRUD notIn(@NotNull FieldGetter<T, ?> field, @Nullable Collection<?> vals) {
         return CollUtil.isEmpty(vals) ? crud : addNode(new SqlCond(entityType, field, Op.NOT_IN, vals));
     }
 
     @NotNull
-    public SUD notIn(@NotNull FieldGetter<T, ?> field, @Nullable Collection<?> vals, boolean if0) {
+    public CRUD notIn(@NotNull FieldGetter<T, ?> field, @Nullable Collection<?> vals, boolean if0) {
         return if0 ? in(field, vals) : crud;
     }
 
     @NotNull
-    public SUD notIn(@NotNull FieldGetter<T, ?> field, @Nullable Object[] vals, boolean if0) {
+    public CRUD notIn(@NotNull FieldGetter<T, ?> field, @Nullable Object[] vals, boolean if0) {
         return if0 ? in(field, vals) : crud;
     }
     //endregion
 
     //region NULL值操作
     @NotNull
-    public SUD nulls(@NotNull FieldGetter<T, ?> field, @Nullable Boolean bol) {
+    public CRUD nulls(@NotNull FieldGetter<T, ?> field, @Nullable Boolean bol) {
         if (bol == null) {
             return crud;
         } else if (bol) {
@@ -336,22 +338,22 @@ public abstract class Where<T, SUD extends Where<T, SUD>> extends Crud<T, SUD> {
     }
 
     @NotNull
-    public SUD isNull(@NotNull FieldGetter<T, ?> field) {
+    public CRUD isNull(@NotNull FieldGetter<T, ?> field) {
         return nulls(field, true);
     }
 
     @NotNull
-    public SUD isNull(@NotNull FieldGetter<T, ?> field, boolean if0) {
+    public CRUD isNull(@NotNull FieldGetter<T, ?> field, boolean if0) {
         return nulls(field, if0 ? true : null);
     }
 
     @NotNull
-    public SUD isNotNull(@NotNull FieldGetter<T, ?> field) {
+    public CRUD isNotNull(@NotNull FieldGetter<T, ?> field) {
         return nulls(field, false);
     }
 
     @NotNull
-    public SUD isNotNull(@NotNull FieldGetter<T, ?> field, boolean if0) {
+    public CRUD isNotNull(@NotNull FieldGetter<T, ?> field, boolean if0) {
         return nulls(field, if0 ? false : null);
     }
     //endregion
@@ -359,7 +361,7 @@ public abstract class Where<T, SUD extends Where<T, SUD>> extends Crud<T, SUD> {
     //region 范围操作
     // BETWEEN - 通用类型
     @NotNull
-    public SUD between(@NotNull FieldGetter<T, ?> field, @Nullable Object[] pair) {
+    public CRUD between(@NotNull FieldGetter<T, ?> field, @Nullable Object[] pair) {
         if (pair == null || pair.length != 2) {
             return crud;
         } else {
@@ -368,7 +370,7 @@ public abstract class Where<T, SUD extends Where<T, SUD>> extends Crud<T, SUD> {
     }
 
     @NotNull
-    public SUD between(@NotNull FieldGetter<T, ?> field, @Nullable Object start, @Nullable Object end) {
+    public CRUD between(@NotNull FieldGetter<T, ?> field, @Nullable Object start, @Nullable Object end) {
         if (start == null || end == null) {
             return crud;
         } else {
@@ -377,18 +379,18 @@ public abstract class Where<T, SUD extends Where<T, SUD>> extends Crud<T, SUD> {
     }
 
     @NotNull
-    public SUD between(@NotNull FieldGetter<T, ?> field, @Nullable Object[] pair, boolean if0) {
+    public CRUD between(@NotNull FieldGetter<T, ?> field, @Nullable Object[] pair, boolean if0) {
         return if0 ? between(field, pair) : crud;
     }
 
     @NotNull
-    public SUD between(@NotNull FieldGetter<T, ?> field, @Nullable Object start, @Nullable Object end, boolean if0) {
+    public CRUD between(@NotNull FieldGetter<T, ?> field, @Nullable Object start, @Nullable Object end, boolean if0) {
         return if0 ? between(field, start, end) : crud;
     }
 
     // BETWEEN - LocalDateTime
     @NotNull
-    public SUD between(@NotNull FieldGetter<T, LocalDateTime> field, @Nullable LocalDateTime start, @Nullable LocalDateTime end) {
+    public CRUD between(@NotNull FieldGetter<T, LocalDateTime> field, @Nullable LocalDateTime start, @Nullable LocalDateTime end) {
         if (start == null && end == null) {
             return crud;
         }
@@ -410,13 +412,13 @@ public abstract class Where<T, SUD extends Where<T, SUD>> extends Crud<T, SUD> {
     }
 
     @NotNull
-    public SUD between(@NotNull FieldGetter<T, LocalDateTime> field, @Nullable LocalDateTime start, @Nullable LocalDateTime end, boolean if0) {
+    public CRUD between(@NotNull FieldGetter<T, LocalDateTime> field, @Nullable LocalDateTime start, @Nullable LocalDateTime end, boolean if0) {
         return if0 ? between(field, start, end) : crud;
     }
 
     // BETWEEN - LocalDate
     @NotNull
-    public SUD between(@NotNull FieldGetter<T, LocalDate> field, @Nullable LocalDate start, @Nullable LocalDate end) {
+    public CRUD between(@NotNull FieldGetter<T, LocalDate> field, @Nullable LocalDate start, @Nullable LocalDate end) {
         if (start == null && end == null) {
             return crud;
         }
@@ -432,13 +434,13 @@ public abstract class Where<T, SUD extends Where<T, SUD>> extends Crud<T, SUD> {
     }
 
     @NotNull
-    public SUD between(@NotNull FieldGetter<T, LocalDate> field, @Nullable LocalDate start, @Nullable LocalDate end, boolean if0) {
+    public CRUD between(@NotNull FieldGetter<T, LocalDate> field, @Nullable LocalDate start, @Nullable LocalDate end, boolean if0) {
         return if0 ? between(field, start, end) : crud;
     }
 
     // BETWEEN - LocalTime
     @NotNull
-    public SUD between(@NotNull FieldGetter<T, LocalTime> field, @Nullable LocalTime start, @Nullable LocalTime end) {
+    public CRUD between(@NotNull FieldGetter<T, LocalTime> field, @Nullable LocalTime start, @Nullable LocalTime end) {
         if (start == null && end == null) {
             return crud;
         }
@@ -458,13 +460,13 @@ public abstract class Where<T, SUD extends Where<T, SUD>> extends Crud<T, SUD> {
     }
 
     @NotNull
-    public SUD between(@NotNull FieldGetter<T, LocalTime> field, @Nullable LocalTime start, @Nullable LocalTime end, boolean if0) {
+    public CRUD between(@NotNull FieldGetter<T, LocalTime> field, @Nullable LocalTime start, @Nullable LocalTime end, boolean if0) {
         return if0 ? between(field, start, end) : crud;
     }
 
     // NOT BETWEEN - 通用类型
     @NotNull
-    public SUD notBetween(@NotNull FieldGetter<T, ?> field, @Nullable Object[] pair) {
+    public CRUD notBetween(@NotNull FieldGetter<T, ?> field, @Nullable Object[] pair) {
         if (pair == null || pair.length != 2) {
             return crud;
         } else {
@@ -473,7 +475,7 @@ public abstract class Where<T, SUD extends Where<T, SUD>> extends Crud<T, SUD> {
     }
 
     @NotNull
-    public SUD notBetween(@NotNull FieldGetter<T, ?> field, @Nullable Object start, @Nullable Object end) {
+    public CRUD notBetween(@NotNull FieldGetter<T, ?> field, @Nullable Object start, @Nullable Object end) {
         if (start == null || end == null) {
             return crud;
         } else {
@@ -482,18 +484,18 @@ public abstract class Where<T, SUD extends Where<T, SUD>> extends Crud<T, SUD> {
     }
 
     @NotNull
-    public SUD notBetween(@NotNull FieldGetter<T, ?> field, @Nullable Object[] pair, boolean if0) {
+    public CRUD notBetween(@NotNull FieldGetter<T, ?> field, @Nullable Object[] pair, boolean if0) {
         return if0 ? between(field, pair) : crud;
     }
 
     @NotNull
-    public SUD notBetween(@NotNull FieldGetter<T, ?> field, @Nullable Object start, @Nullable Object end, boolean if0) {
+    public CRUD notBetween(@NotNull FieldGetter<T, ?> field, @Nullable Object start, @Nullable Object end, boolean if0) {
         return if0 ? between(field, start, end) : crud;
     }
 
     // NOT BETWEEN - LocalDateTime
     @NotNull
-    public SUD notBetween(@NotNull FieldGetter<T, LocalDateTime> field, @Nullable LocalDateTime start, @Nullable LocalDateTime end) {
+    public CRUD notBetween(@NotNull FieldGetter<T, LocalDateTime> field, @Nullable LocalDateTime start, @Nullable LocalDateTime end) {
         if (start == null && end == null) {
             return crud;
         }
@@ -515,13 +517,13 @@ public abstract class Where<T, SUD extends Where<T, SUD>> extends Crud<T, SUD> {
     }
 
     @NotNull
-    public SUD notBetween(@NotNull FieldGetter<T, LocalDateTime> field, @Nullable LocalDateTime start, @Nullable LocalDateTime end, boolean if0) {
+    public CRUD notBetween(@NotNull FieldGetter<T, LocalDateTime> field, @Nullable LocalDateTime start, @Nullable LocalDateTime end, boolean if0) {
         return if0 ? between(field, start, end) : crud;
     }
 
     // NOT BETWEEN - LocalDate
     @NotNull
-    public SUD notBetween(@NotNull FieldGetter<T, LocalDate> field, @Nullable LocalDate start, @Nullable LocalDate end) {
+    public CRUD notBetween(@NotNull FieldGetter<T, LocalDate> field, @Nullable LocalDate start, @Nullable LocalDate end) {
         if (start == null && end == null) {
             return crud;
         }
@@ -537,13 +539,13 @@ public abstract class Where<T, SUD extends Where<T, SUD>> extends Crud<T, SUD> {
     }
 
     @NotNull
-    public SUD notBetween(@NotNull FieldGetter<T, LocalDate> field, @Nullable LocalDate start, @Nullable LocalDate end, boolean if0) {
+    public CRUD notBetween(@NotNull FieldGetter<T, LocalDate> field, @Nullable LocalDate start, @Nullable LocalDate end, boolean if0) {
         return if0 ? between(field, start, end) : crud;
     }
 
     // NOT BETWEEN - LocalTime
     @NotNull
-    public SUD notBetween(@NotNull FieldGetter<T, LocalTime> field, @Nullable LocalTime start, @Nullable LocalTime end) {
+    public CRUD notBetween(@NotNull FieldGetter<T, LocalTime> field, @Nullable LocalTime start, @Nullable LocalTime end) {
         if (start == null && end == null) {
             return crud;
         }
@@ -563,8 +565,17 @@ public abstract class Where<T, SUD extends Where<T, SUD>> extends Crud<T, SUD> {
     }
 
     @NotNull
-    public SUD notBetween(@NotNull FieldGetter<T, LocalTime> field, @Nullable LocalTime start, @Nullable LocalTime end, boolean if0) {
+    public CRUD notBetween(@NotNull FieldGetter<T, LocalTime> field, @Nullable LocalTime start, @Nullable LocalTime end, boolean if0) {
         return if0 ? between(field, start, end) : crud;
     }
     //endregion
+
+    @NotNull
+    public CRUD or(@NotNull Consumer<WhereOr<T>> consumer) {
+        var where = new WhereOr<>(entityType);
+        consumer.accept(where);
+        addNode(new SqlOr());
+        nodes.addAll(where.nodes);
+        return crud;
+    }
 }
