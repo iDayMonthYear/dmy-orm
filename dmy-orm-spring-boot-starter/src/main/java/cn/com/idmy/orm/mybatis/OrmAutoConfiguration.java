@@ -54,7 +54,7 @@ public class OrmAutoConfiguration {
             }
         }
         bean.setConfiguration(configuration);
-        //bean.setPlugins(enumWatchInterceptor);
+        bean.setPlugins(enumWatchInterceptor);
         bean.setMapperLocations(props.resolveMapperLocations());
 
         var factory = bean.getObject();
