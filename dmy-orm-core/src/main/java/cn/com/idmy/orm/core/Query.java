@@ -145,16 +145,16 @@ public class Query<T> extends Where<T, Query<T>> {
     }
 
     @NotNull
-    public Query<T> entity(@Nullable Object entity) {
-        if (entity != null) {
-            var createdAtArr = FieldUtil.getFieldValue(entity, DefaultConfig.createdAt + "s");
+    public Query<T> param(@Nullable Object param) {
+        if (param != null) {
+            var createdAtArr = FieldUtil.getFieldValue(param, DefaultConfig.createdAt + "s");
             if (createdAtArr instanceof Object[] ats && ArrayUtil.isNotEmpty(ats) && ats.length == 2) {
                 var createdAt = getColumnName(entityType, DefaultConfig.createdAt);
                 if (createdAt != null) {
                     addNode(new SqlCond(createdAt, Op.BETWEEN, ats));
                 }
             }
-            var updatedAtArr = FieldUtil.getFieldValue(entity, DefaultConfig.updatedAt + "s");
+            var updatedAtArr = FieldUtil.getFieldValue(param, DefaultConfig.updatedAt + "s");
             if (updatedAtArr instanceof Object[] ats && ArrayUtil.isNotEmpty(ats) && ats.length == 2) {
                 var createdAt = getColumnName(entityType, DefaultConfig.createdAt);
                 if (createdAt != null) {
@@ -163,11 +163,11 @@ public class Query<T> extends Where<T, Query<T>> {
             }
 
             var idField = getIdField(entityType);
-            var idVal = FieldUtil.getFieldValue(entity, idField);
+            var idVal = FieldUtil.getFieldValue(param, idField);
             if (idVal != null) {
                 addNode(new SqlCond(getIdName(entityType), Op.EQ, idVal));
             } else {
-                var ids = FieldUtil.getFieldValue(entity, idField.getName() + "s");
+                var ids = FieldUtil.getFieldValue(param, idField.getName() + "s");
                 if (ObjUtil.isNotEmpty(ids)) {
                     addNode(new SqlCond(getIdName(entityType), Op.IN, ids));
                 }
