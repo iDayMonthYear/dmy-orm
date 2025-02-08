@@ -36,6 +36,7 @@ public class Query<T> extends Where<T, Query<T>> {
     @Setter
     @Nullable
     protected Integer limit;
+    protected boolean hasParam;
 
     protected Query(@NotNull Class<T> entityType) {
         super(entityType);
@@ -146,16 +147,17 @@ public class Query<T> extends Where<T, Query<T>> {
 
     @NotNull
     public Query<T> param(@Nullable Object param) {
-        if (param != null) {
-            var createdAtArr = FieldUtil.getFieldValue(param, DefaultConfig.createdAt + "s");
-            if (createdAtArr instanceof Object[] ats && ArrayUtil.isNotEmpty(ats) && ats.length == 2) {
+        if (!hasParam && param != null) {
+            hasParam = true;
+            var cats = FieldUtil.getFieldValue(param, DefaultConfig.createdAt + "s");
+            if (cats instanceof Object[] ats && ArrayUtil.isNotEmpty(ats) && ats.length == 2) {
                 var createdAt = getColumnName(entityType, DefaultConfig.createdAt);
                 if (createdAt != null) {
                     addNode(new SqlCond(createdAt, Op.BETWEEN, ats));
                 }
             }
-            var updatedAtArr = FieldUtil.getFieldValue(param, DefaultConfig.updatedAt + "s");
-            if (updatedAtArr instanceof Object[] ats && ArrayUtil.isNotEmpty(ats) && ats.length == 2) {
+            var uats = FieldUtil.getFieldValue(param, DefaultConfig.updatedAt + "s");
+            if (uats instanceof Object[] ats && ArrayUtil.isNotEmpty(ats) && ats.length == 2) {
                 var createdAt = getColumnName(entityType, DefaultConfig.createdAt);
                 if (createdAt != null) {
                     addNode(new SqlCond(createdAt, Op.BETWEEN, ats));
