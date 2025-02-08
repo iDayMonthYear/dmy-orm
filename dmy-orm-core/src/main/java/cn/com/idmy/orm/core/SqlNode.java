@@ -67,7 +67,7 @@ public class SqlNode {
                 column = Tables.getColumnName(entityType, field);
             } else {
                 var col = Tables.getColum(entityType, field);
-                if (ObjUtil.isNotEmpty(expr)) {
+                if (ObjUtil.isNotEmpty(expr) && op != Op.IS_NULL && op != Op.IS_NOT_NULL) {
                     var type1 = col.field().getType();
                     var type2 = expr.getClass();
                     if (expr instanceof Object[] arr) {

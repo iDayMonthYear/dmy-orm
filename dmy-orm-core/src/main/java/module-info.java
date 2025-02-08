@@ -3,6 +3,7 @@ module cn.com.idmy.orm {
     exports cn.com.idmy.orm.core; // 公开的包
     exports cn.com.idmy.orm.annotation; // 公开的包
 
+    requires java.base;
     requires lombok;
     requires org.jetbrains.annotations;
     requires org.slf4j;

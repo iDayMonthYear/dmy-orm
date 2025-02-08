@@ -283,7 +283,13 @@ public abstract class Where<T, CRUD extends Where<T, CRUD>> extends Crud<T, CRUD
     //region 包含操作
     // IN
     @NotNull
-    public CRUD in(@NotNull FieldGetter<T, ?> field, @Nullable Object... vals) {
+    public CRUD in(@NotNull FieldGetter<T, ?> field, @NotNull Object val, @Nullable Object... vals) {
+        var arr = ArrayUtil.isEmpty(vals) ? new Object[]{val} : ArrayUtil.addAll(new Object[]{val}, vals);
+        return ArrayUtil.isEmpty(vals) ? crud : addNode(new SqlCond(entityType, field, Op.IN, arr));
+    }
+
+    @NotNull
+    public CRUD in(@NotNull FieldGetter<T, ?> field, @Nullable Object[] vals) {
         return ArrayUtil.isEmpty(vals) ? crud : addNode(new SqlCond(entityType, field, Op.IN, vals));
     }
 
@@ -305,7 +311,13 @@ public abstract class Where<T, CRUD extends Where<T, CRUD>> extends Crud<T, CRUD
     // NOT IN
 
     @NotNull
-    public CRUD notIn(@NotNull FieldGetter<T, ?> field, @Nullable Object... vals) {
+    public CRUD notIn(@NotNull FieldGetter<T, ?> field, @NotNull Object val, @Nullable Object... vals) {
+        var arr = ArrayUtil.isEmpty(vals) ? new Object[]{val} : ArrayUtil.addAll(new Object[]{val}, vals);
+        return ArrayUtil.isEmpty(vals) ? crud : addNode(new SqlCond(entityType, field, Op.NOT_IN, arr));
+    }
+
+    @NotNull
+    public CRUD notIn(@NotNull FieldGetter<T, ?> field, @Nullable Object[] vals) {
         return ArrayUtil.isEmpty(vals) ? crud : addNode(new SqlCond(entityType, field, Op.NOT_IN, vals));
     }
 
