@@ -39,7 +39,7 @@ public class OrmAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     @Lazy
-    SqlSessionFactory sqlSessionFactory(OrmProps props, DataSource dataSource, ApplicationContext ctx, EnumWatchInterceptor enumWatchInterceptor) throws Exception {
+    SqlSessionFactory sqlSessionFactory(OrmProps props, DataSource dataSource, ApplicationContext ctx) throws Exception {
         OrmConfig cfg = OrmConfig.config();
         cfg.enableIEnumValue(props.isEnableIEnumValue());
         var bean = new SqlSessionFactoryBean();
@@ -54,7 +54,6 @@ public class OrmAutoConfiguration {
             }
         }
         bean.setConfiguration(configuration);
-        bean.setPlugins(enumWatchInterceptor);
         bean.setMapperLocations(props.resolveMapperLocations());
 
         var factory = bean.getObject();

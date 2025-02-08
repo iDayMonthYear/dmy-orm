@@ -100,7 +100,7 @@ public abstract class SqlGenerator {
     protected String genCond(@NonNull Op op, @NonNull Object val) {
         var placeholder = new StringBuilder();
         if (op == Op.IS_NULL || op == Op.IS_NOT_NULL) {
-            return PLACEHOLDER;
+            return EMPTY;
         } else if (op == Op.BETWEEN || op == Op.NOT_BETWEEN) {
             Object[] arr = (Object[]) val;
             if (arr.length == 2) {

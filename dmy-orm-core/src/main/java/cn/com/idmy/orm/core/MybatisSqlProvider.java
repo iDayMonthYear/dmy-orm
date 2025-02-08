@@ -178,6 +178,10 @@ public class MybatisSqlProvider {
 
     @NotNull
     public String getNullable(@NotNull Map<String, Object> params) {
+        var q = (Query<?>) params.get(CRUD);
+        if (q.limit == null) {
+            q.limit = 1;
+        }
         return genCommonSql(params);
     }
 
