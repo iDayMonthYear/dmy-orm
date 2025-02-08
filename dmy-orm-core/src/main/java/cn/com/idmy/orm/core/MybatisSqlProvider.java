@@ -1,7 +1,6 @@
 package cn.com.idmy.orm.core;
 
 import cn.com.idmy.base.model.Page;
-import cn.com.idmy.base.model.Param;
 import cn.com.idmy.orm.OrmException;
 import cn.com.idmy.orm.core.SqlNode.SqlCond;
 import cn.com.idmy.orm.core.SqlNode.SqlSet;
@@ -148,11 +147,6 @@ public class MybatisSqlProvider {
         q.limit = page.pageSize();
         q.offset = page.offset();
         q.orderBy(page.sorts());
-
-        var params = page.params();
-        if (params instanceof Param<?> param) {
-            q.param(param);
-        }
         var hasTotal = page.hasTotal() == null || page.hasTotal();
         long total = -1;
         if (hasTotal) {
