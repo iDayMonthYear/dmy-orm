@@ -1,8 +1,6 @@
 package cn.com.idmy.orm.core;
 
 import cn.com.idmy.base.config.DefaultConfig;
-import cn.com.idmy.base.model.At;
-import cn.com.idmy.base.model.Model;
 import cn.com.idmy.base.model.Pair;
 import cn.com.idmy.orm.OrmException;
 import cn.com.idmy.orm.core.SqlNode.*;
@@ -11,9 +9,10 @@ import lombok.Setter;
 import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.hutool.core.array.ArrayUtil;
-import org.dromara.hutool.core.collection.CollUtil;
 import org.dromara.hutool.core.lang.Console;
+import org.dromara.hutool.core.reflect.FieldUtil;
 import org.dromara.hutool.core.text.StrUtil;
+import org.dromara.hutool.core.util.ObjUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -21,6 +20,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static cn.com.idmy.orm.core.Tables.getColumnName;
+import static cn.com.idmy.orm.core.Tables.getIdField;
 import static cn.com.idmy.orm.core.Tables.getIdName;
 
 @Slf4j
@@ -147,37 +147,29 @@ public class Query<T> extends Where<T, Query<T>> {
     @NotNull
     public Query<T> param(@Nullable Object param) {
         if (param != null) {
-            if (param instanceof At at) {
-                var createdAts = at.getCreatedAts();
-                if (ArrayUtil.isNotEmpty(createdAts) && createdAts.length == 2) {
-                    var createdAt = getColumnName(entityType, DefaultConfig.createdAt);
-                    if (createdAt != null) {
-                        addNode(new SqlCond(createdAt, Op.BETWEEN, createdAts));
-                    }
+            var createdAtArr = FieldUtil.getFieldValue(param, DefaultConfig.createdAt + "s");
+            if (createdAtArr instanceof Object[] ats && ArrayUtil.isNotEmpty(ats) && ats.length == 2) {
+                var createdAt = getColumnName(entityType, DefaultConfig.createdAt);
+                if (createdAt != null) {
+                    addNode(new SqlCond(createdAt, Op.BETWEEN, ats));
                 }
-                var updatedAts = at.getUpdatedAts();
-                if (ArrayUtil.isNotEmpty(updatedAts) && updatedAts.length == 2) {
-                    var updatedAt = getColumnName(entityType, DefaultConfig.updatedAt);
-                    if (updatedAt != null) {
-                        addNode(new SqlCond(updatedAt, Op.BETWEEN, createdAts));
-                    }
+            }
+            var updatedAtArr = FieldUtil.getFieldValue(param, DefaultConfig.updatedAt + "s");
+            if (updatedAtArr instanceof Object[] ats && ArrayUtil.isNotEmpty(ats) && ats.length == 2) {
+                var createdAt = getColumnName(entityType, DefaultConfig.createdAt);
+                if (createdAt != null) {
+                    addNode(new SqlCond(createdAt, Op.BETWEEN, ats));
                 }
             }
 
-            if (param instanceof Model<?> model) {
-                var id = model.getId();
-                if (id != null) {
-                    addNode(new SqlCond(getIdName(entityType), Op.EQ, id));
-                } else {
-                    var ids = model.getIds();
-                    if (CollUtil.isNotEmpty(ids)) {
-                        addNode(new SqlCond(getIdName(entityType), Op.IN, ids));
-                    } else {
-                        var notIds = model.getNotIds();
-                        if (CollUtil.isNotEmpty(notIds)) {
-                            addNode(new SqlCond(getIdName(entityType), Op.NOT_IN, notIds));
-                        }
-                    }
+            var idField = getIdField(entityType);
+            var idVal = FieldUtil.getFieldValue(param, idField);
+            if (idVal != null) {
+                addNode(new SqlCond(getIdName(entityType), Op.EQ, idVal));
+            } else {
+                var ids = FieldUtil.getFieldValue(param, idField.getName() + "s");
+                if (ObjUtil.isNotEmpty(ids)) {
+                    addNode(new SqlCond(getIdName(entityType), Op.IN, ids));
                 }
             }
         }
