@@ -2,9 +2,7 @@ package cn.com.idmy.orm.mybatis;
 
 import cn.com.idmy.orm.core.MybatisSqlProvider;
 import cn.com.idmy.orm.core.Tables;
-import cn.com.idmy.orm.mybatis.handler.EnumTypeHandler;
-import cn.com.idmy.orm.mybatis.handler.JsonArrayTypeHandler;
-import cn.com.idmy.orm.mybatis.handler.JsonObjectTypeHandler;
+import cn.com.idmy.orm.mybatis.handler.*;
 import org.apache.ibatis.executor.keygen.NoKeyGenerator;
 import org.apache.ibatis.executor.parameter.ParameterHandler;
 import org.apache.ibatis.mapping.BoundSql;
@@ -27,6 +25,9 @@ class MybatisConfiguration extends Configuration {
         registry.setDefaultEnumTypeHandler(EnumTypeHandler.class);
         registry.register(JsonObjectTypeHandler.class);
         registry.register(JsonArrayTypeHandler.class);
+        registry.register(ListIntegerTypeHandler.class);
+        registry.register(ListLongTypeHandler.class);
+        registry.register(ListStringTypeHandler.class);
     }
 
     public void register(@NotNull TypeHandler<?> handler) {
