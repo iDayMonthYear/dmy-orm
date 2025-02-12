@@ -2,9 +2,9 @@ package cn.com.idmy.orm.core;
 
 import cn.com.idmy.base.model.Pair;
 import cn.com.idmy.orm.OrmException;
-import cn.com.idmy.orm.core.SqlNode.SqlCond;
-import cn.com.idmy.orm.core.SqlNode.SqlNodeType;
-import cn.com.idmy.orm.core.SqlNode.SqlOr;
+import cn.com.idmy.orm.core.SqlNode.Cond;
+import cn.com.idmy.orm.core.SqlNode.Or;
+import cn.com.idmy.orm.core.SqlNode.Type;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.experimental.Accessors;
@@ -115,7 +115,7 @@ public abstract class SqlGenerator {
         }
     }
 
-    protected void genCond(@NonNull SqlCond cond) {
+    protected void genCond(@NonNull SqlNode.Cond cond) {
         var col = cond.column;
         String str;
         Object expr = cond.expr;
@@ -128,16 +128,16 @@ public abstract class SqlGenerator {
     }
 
     protected void genCondOr(@NonNull SqlNode node) {
-        if (node instanceof SqlOr) {
+        if (node instanceof Or) {
             sql.append(OR);
-        } else if (node instanceof SqlCond cond) {
+        } else if (node instanceof Cond cond) {
             genCond(cond);
         }
     }
 
     protected static void skipAdjoinOr(@NonNull SqlNode node, @NonNull List<SqlNode> wheres) {
         if (CollUtil.isNotEmpty(wheres)) {
-            if (wheres.getLast().type == SqlNodeType.OR) {
+            if (wheres.getLast().type == Type.OR) {
                 if (log.isDebugEnabled()) {
                     log.warn("存在相邻的 or，已自动移除");
                 }
@@ -148,7 +148,7 @@ public abstract class SqlGenerator {
     }
 
     protected static void removeLastOr(@NonNull List<SqlNode> ls) {
-        if (CollUtil.isNotEmpty(ls) && ls.getLast() instanceof SqlOr) {
+        if (CollUtil.isNotEmpty(ls) && ls.getLast() instanceof Or) {
             ls.removeLast();
             if (log.isDebugEnabled()) {
                 log.warn("where 条件最后存在 or，已自动移除");
@@ -168,7 +168,7 @@ public abstract class SqlGenerator {
                 genCondOr(node);
                 out = false;
                 if (i < size - 1) {
-                    if (ls.get(i + 1).type == SqlNodeType.COND && node.type != SqlNodeType.OR) {
+                    if (ls.get(i + 1).type == Type.COND && node.type != Type.OR) {
                         sql.append(AND);
                     }
                 }

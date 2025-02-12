@@ -24,19 +24,19 @@ class QuerySqlGenerator extends SqlGenerator {
 
     @Override
     protected @NotNull Pair<String, List<Object>> doGen() {
-        var selects = new ArrayList<SqlSelectColumn>(1);
+        var selects = new ArrayList<SelectColumn>(1);
         var wheres = new ArrayList<SqlNode>(nodes.size());
-        var groups = new ArrayList<SqlGroupBy>(1);
-        var orders = new ArrayList<SqlOrderBy>(2);
-        SqlDistinct distinct = null;
+        var groups = new ArrayList<GroupBy>(1);
+        var orders = new ArrayList<OrderBy>(2);
+        Distinct distinct = null;
         for (int i = 0, size = nodes.size(); i < size; i++) {
             switch (nodes.get(i)) {
-                case SqlCond cond -> wheres.add(cond);
-                case SqlSelectColumn select -> selects.add(select);
-                case SqlGroupBy groupBy -> groups.add(groupBy);
-                case SqlOrderBy orderBy -> orders.add(orderBy);
-                case SqlOr or -> skipAdjoinOr(or, wheres);
-                case SqlDistinct d -> distinct = d;
+                case Cond cond -> wheres.add(cond);
+                case SelectColumn select -> selects.add(select);
+                case GroupBy groupBy -> groups.add(groupBy);
+                case OrderBy orderBy -> orders.add(orderBy);
+                case Or or -> skipAdjoinOr(or, wheres);
+                case Distinct d -> distinct = d;
                 case null, default -> {
                 }
             }
@@ -66,7 +66,7 @@ class QuerySqlGenerator extends SqlGenerator {
         return Pair.of(sql.toString(), params);
     }
 
-    protected void genDistinct(SqlDistinct d) {
+    protected void genDistinct(Distinct d) {
         var col = d.column;
         if (StrUtil.isBlank(col)) {
             sql.append(DISTINCT);
@@ -75,7 +75,7 @@ class QuerySqlGenerator extends SqlGenerator {
         }
     }
 
-    protected String genSelectColumn(SqlSelectColumn sc) {
+    protected String genSelectColumn(SelectColumn sc) {
         var col = keyword(sc.column);
         if (sc.expr == null) {
             sql.append(col);
@@ -98,7 +98,7 @@ class QuerySqlGenerator extends SqlGenerator {
         return sc.column;
     }
 
-    protected void genSelectColumn(List<SqlSelectColumn> ls) {
+    protected void genSelectColumn(List<SelectColumn> ls) {
         if (ls.isEmpty()) {
             var table = Tables.getTable(entityType);
             var cols = table.columns();
@@ -118,7 +118,7 @@ class QuerySqlGenerator extends SqlGenerator {
                     throw new OrmException("select {} 列名重复会导致映射到实体类异常", col);
                 } else {
                     set.add(col);
-                    if (i < size - 1 && ls.get(i + 1).type == SqlNodeType.SELECT_COLUMN) {
+                    if (i < size - 1 && ls.get(i + 1).type == Type.SELECT_COLUMN) {
                         sql.append(DELIMITER);
                     }
                 }
@@ -126,32 +126,32 @@ class QuerySqlGenerator extends SqlGenerator {
         }
     }
 
-    protected void genGroupBy(SqlGroupBy g) {
+    protected void genGroupBy(GroupBy g) {
         sql.append(keyword(g.column));
     }
 
-    protected void genGroupBy(List<SqlGroupBy> ls) {
+    protected void genGroupBy(List<GroupBy> ls) {
         if (!ls.isEmpty()) {
             sql.append(GROUP_BY);
             for (int i = 0, size = ls.size(); i < size; i++) {
                 genGroupBy(ls.get(i));
-                if (i < size - 1 && ls.get(i + 1).type == SqlNodeType.GROUP_BY) {
+                if (i < size - 1 && ls.get(i + 1).type == Type.GROUP_BY) {
                     sql.append(DELIMITER);
                 }
             }
         }
     }
 
-    protected void genOrderBy(SqlOrderBy o) {
+    protected void genOrderBy(OrderBy o) {
         sql.append(keyword(o.column)).append(o.desc ? DESC : EMPTY);
     }
 
-    private void genOrderBy(List<SqlOrderBy> ls) {
+    private void genOrderBy(List<OrderBy> ls) {
         if (!ls.isEmpty()) {
             sql.append(ORDER_BY);
             for (int i = 0, size = ls.size(); i < size; i++) {
                 genOrderBy(ls.get(i));
-                if (i < size - 1 && ls.get(i + 1).type == SqlNodeType.ORDER_BY) {
+                if (i < size - 1 && ls.get(i + 1).type == Type.ORDER_BY) {
                     sql.append(DELIMITER);
                 }
             }

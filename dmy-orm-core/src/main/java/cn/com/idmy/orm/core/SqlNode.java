@@ -22,7 +22,7 @@ import static cn.com.idmy.orm.core.SqlFnName.COUNT;
 @Accessors(fluent = true)
 @RequiredArgsConstructor
 public class SqlNode {
-    public enum SqlNodeType {
+    public enum Type {
         COND,
         WHERE,
         ORDER_BY,
@@ -35,16 +35,16 @@ public class SqlNode {
     }
 
     @NotNull
-    final SqlNodeType type;
+    final SqlNode.Type type;
 
-    public interface SqlColumn {
+    public interface Column {
         @NotNull
         String column();
     }
 
     @Getter
     @Accessors(fluent = true)
-    public static class SqlCond extends SqlNode implements SqlColumn {
+    public static class Cond extends SqlNode implements Column {
         @NotNull
         final String column;
         @NotNull
@@ -52,15 +52,15 @@ public class SqlNode {
         @NotNull
         final Object expr;
 
-        public SqlCond(@NotNull String col, @NonNull Op op, @NotNull Object expr) {
-            super(SqlNodeType.COND);
+        public Cond(@NotNull String col, @NonNull Op op, @NotNull Object expr) {
+            super(Type.COND);
             this.column = SqlUtil.checkColumn(col);
             this.op = op;
             this.expr = expr;
         }
 
-        public <T> SqlCond(Class<T> entityType, FieldGetter<T, ?> field, @NonNull Op op, @NotNull Object expr) {
-            super(SqlNodeType.COND);
+        public <T> Cond(Class<T> entityType, FieldGetter<T, ?> field, @NonNull Op op, @NotNull Object expr) {
+            super(Type.COND);
             this.op = op;
             this.expr = expr;
             if (expr instanceof SqlOpExpr) {
@@ -87,40 +87,40 @@ public class SqlNode {
         }
     }
 
-    public static class SqlOr extends SqlNode {
-        public SqlOr() {
-            super(SqlNodeType.OR);
+    public static class Or extends SqlNode {
+        public Or() {
+            super(Type.OR);
         }
     }
 
     @Getter
     @Accessors(fluent = true)
-    public static class SqlSet extends SqlNode implements SqlColumn {
+    public static class Set extends SqlNode implements Column {
         @NotNull
         final String column;
         @Nullable
         final Object expr;
 
-        public SqlSet(@NotNull String col, @Nullable Object expr) {
-            super(SqlNodeType.SET);
+        public Set(@NotNull String col, @Nullable Object expr) {
+            super(Type.SET);
             this.column = SqlUtil.checkColumn(col);
             this.expr = expr;
         }
 
-        public SqlSet(@NotNull String col, @NonNull SqlOpExpr expr) {
-            super(SqlNodeType.SET);
+        public Set(@NotNull String col, @NonNull SqlOpExpr expr) {
+            super(Type.SET);
             this.column = SqlUtil.checkColumn(col);
             this.expr = expr;
         }
 
-        public SqlSet(TableColumn col, @Nullable Object val) {
-            super(SqlNodeType.SET);
+        public Set(TableColumn col, @Nullable Object val) {
+            super(Type.SET);
             check(col, val);
             this.expr = val;
             this.column = col.name();
         }
 
-        public <T> SqlSet(Class<T> entityType, FieldGetter<T, ?> field, @Nullable Object val) {
+        public <T> Set(Class<T> entityType, FieldGetter<T, ?> field, @Nullable Object val) {
             this(Tables.getColum(entityType, field), val);
         }
 
@@ -145,25 +145,25 @@ public class SqlNode {
 
     @Getter
     @Accessors(fluent = true)
-    public static class SqlGroupBy extends SqlNode implements SqlColumn {
+    public static class GroupBy extends SqlNode implements Column {
         @NotNull
         final String column;
 
-        public SqlGroupBy(@NotNull String col) {
-            super(SqlNodeType.GROUP_BY);
+        public GroupBy(@NotNull String col) {
+            super(Type.GROUP_BY);
             this.column = SqlUtil.checkColumn(col);
         }
     }
 
     @Getter
     @Accessors(fluent = true)
-    public static class SqlOrderBy extends SqlNode implements SqlColumn {
+    public static class OrderBy extends SqlNode implements Column {
         @NotNull
         final String column;
         final boolean desc;
 
-        public SqlOrderBy(@NotNull String col, boolean desc) {
-            super(SqlNodeType.ORDER_BY);
+        public OrderBy(@NotNull String col, boolean desc) {
+            super(Type.ORDER_BY);
             this.column = SqlUtil.checkColumn(col);
             this.desc = desc;
         }
@@ -171,26 +171,26 @@ public class SqlNode {
 
     @Getter
     @Accessors(fluent = true)
-    public static class SqlSelectColumn extends SqlNode implements SqlColumn {
+    public static class SelectColumn extends SqlNode implements Column {
         @NotNull
         String column;
         @Nullable
         SqlFnExpr<?> expr;
 
-        public SqlSelectColumn(@NotNull String col) {
-            super(SqlNodeType.SELECT_COLUMN);
+        public SelectColumn(@NotNull String col) {
+            super(Type.SELECT_COLUMN);
             this.column = SqlUtil.checkColumn(col);
         }
 
-        public SqlSelectColumn(@NonNull SqlFnExpr<?> expr) {
-            super(SqlNodeType.SELECT_COLUMN);
+        public SelectColumn(@NonNull SqlFnExpr<?> expr) {
+            super(Type.SELECT_COLUMN);
             this.expr = expr;
             var fn = expr.get();
             var name = fn.name();
             column = name == COUNT ? "*" : fn.column();
         }
 
-        public SqlSelectColumn(@NonNull SqlFnExpr<?> expr, @NotNull String alias) {
+        public SelectColumn(@NonNull SqlFnExpr<?> expr, @NotNull String alias) {
             this(expr);
             column = SqlUtil.checkColumn(alias);
         }
@@ -198,16 +198,16 @@ public class SqlNode {
 
     @Getter
     @Accessors(fluent = true)
-    public static class SqlDistinct extends SqlNode implements SqlColumn {
+    public static class Distinct extends SqlNode implements Column {
         @NotNull
         String column;
 
-        public SqlDistinct() {
-            super(SqlNodeType.DISTINCT);
+        public Distinct() {
+            super(Type.DISTINCT);
             this.column = "";
         }
 
-        public SqlDistinct(@NotNull String col) {
+        public Distinct(@NotNull String col) {
             this();
             this.column = SqlUtil.checkColumn(col);
         }

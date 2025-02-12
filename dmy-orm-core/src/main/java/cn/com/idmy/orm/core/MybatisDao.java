@@ -3,7 +3,7 @@ package cn.com.idmy.orm.core;
 import cn.com.idmy.base.model.Page;
 import cn.com.idmy.base.util.Assert;
 import cn.com.idmy.orm.OrmException;
-import cn.com.idmy.orm.core.SqlNode.SqlCond;
+import cn.com.idmy.orm.core.SqlNode.Cond;
 import lombok.NonNull;
 import org.apache.ibatis.annotations.*;
 import org.dromara.hutool.core.array.ArrayUtil;
@@ -60,7 +60,7 @@ public interface MybatisDao<T, ID> {
     default boolean exists(@NonNull ID id) {
         var q = q();
         q.sqlParamsSize = 1;
-        q.addNode(new SqlCond(Tables.getIdName(this), Op.EQ, id));
+        q.addNode(new Cond(Tables.getIdName(this), Op.EQ, id));
         return exists(q);
     }
 
@@ -118,7 +118,7 @@ public interface MybatisDao<T, ID> {
         } else {
             var q = q();
             q.sqlParamsSize = 1;
-            q.addNode(new SqlCond(Tables.getIdName(this), Op.IN, ids));
+            q.addNode(new Cond(Tables.getIdName(this), Op.IN, ids));
             return list(q);
         }
     }
@@ -135,7 +135,7 @@ public interface MybatisDao<T, ID> {
         } else {
             var q = q().select(field);
             q.sqlParamsSize = 1;
-            q.addNode(new SqlCond(Tables.getIdName(this), Op.IN, ids));
+            q.addNode(new Cond(Tables.getIdName(this), Op.IN, ids));
             return list(q).stream().map(field::get).toList();
         }
     }
@@ -172,7 +172,7 @@ public interface MybatisDao<T, ID> {
     default T getNullable(@NonNull ID id) {
         var q = q();
         q.sqlParamsSize = 1;
-        q.addNode(new SqlCond(Tables.getIdName(this), Op.EQ, id));
+        q.addNode(new Cond(Tables.getIdName(this), Op.EQ, id));
         return getNullable(q);
     }
 
@@ -185,7 +185,7 @@ public interface MybatisDao<T, ID> {
     default <R> R getNullable(@NotNull FieldGetter<T, R> field, @NonNull ID id) {
         var q = q().select(field);
         q.sqlParamsSize = 1;
-        q.addNode(new SqlCond(Tables.getIdName(this), Op.EQ, id));
+        q.addNode(new Cond(Tables.getIdName(this), Op.EQ, id));
         T t = getNullable(q);
         return t == null ? null : field.get(t);
     }
@@ -355,7 +355,7 @@ public interface MybatisDao<T, ID> {
     default int delete(@NonNull ID id) {
         var d = d();
         d.sqlParamsSize = 1;
-        d.addNode(new SqlCond(Tables.getIdName(this), Op.EQ, id));
+        d.addNode(new Cond(Tables.getIdName(this), Op.EQ, id));
         return delete(d);
     }
 
@@ -365,7 +365,7 @@ public interface MybatisDao<T, ID> {
         } else {
             var d = d();
             d.sqlParamsSize = 1;
-            d.addNode(new SqlCond(Tables.getIdName(this), Op.IN, ids));
+            d.addNode(new Cond(Tables.getIdName(this), Op.IN, ids));
             return delete(d);
         }
     }

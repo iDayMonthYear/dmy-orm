@@ -51,29 +51,29 @@ public class Query<T> extends Where<T, Query<T>> {
     @NotNull
     public Query<T> distinct() {
         hasSelectColumn = true;
-        return addNode(new SqlDistinct());
+        return addNode(new Distinct());
     }
 
     @NotNull
     public Query<T> distinct(@NotNull FieldGetter<T, ?> field) {
         hasSelectColumn = true;
-        return addNode(new SqlDistinct(getColumnName(entityType, field)));
+        return addNode(new Distinct(getColumnName(entityType, field)));
     }
 
     protected void clearSelectColumns() {
-        nodes = nodes.stream().filter(node -> node.type != SqlNodeType.SELECT_COLUMN && node.type != SqlNodeType.DISTINCT).collect(Collectors.toList());
+        nodes = nodes.stream().filter(node -> node.type != Type.SELECT_COLUMN && node.type != Type.DISTINCT).collect(Collectors.toList());
     }
 
     @NotNull
     public Query<T> select(@NotNull SqlFnExpr<T> expr) {
         hasSelectColumn = true;
-        return addNode(new SqlSelectColumn(expr));
+        return addNode(new SelectColumn(expr));
     }
 
     @NotNull
     public Query<T> select(@NotNull SqlFnExpr<T> expr, @NotNull FieldGetter<T, ?> alias) {
         hasSelectColumn = true;
-        return addNode(new SqlSelectColumn(expr, getColumnName(entityType, alias)));
+        return addNode(new SelectColumn(expr, getColumnName(entityType, alias)));
     }
 
     @SafeVarargs
@@ -82,7 +82,7 @@ public class Query<T> extends Where<T, Query<T>> {
         if (ArrayUtil.isNotEmpty(fields)) {
             hasSelectColumn = true;
             for (var field : fields) {
-                addNode(new SqlSelectColumn(getColumnName(entityType, field)));
+                addNode(new SelectColumn(getColumnName(entityType, field)));
             }
         }
         return this;
@@ -90,36 +90,36 @@ public class Query<T> extends Where<T, Query<T>> {
 
     @NotNull
     public Query<T> groupBy(@NotNull FieldGetter<T, ?> field) {
-        return addNode(new SqlGroupBy(getColumnName(entityType, field)));
+        return addNode(new GroupBy(getColumnName(entityType, field)));
     }
 
     @NotNull
     @SafeVarargs
     public final Query<T> groupBy(@NotNull FieldGetter<T, ?>... fields) {
         for (var field : fields) {
-            addNode(new SqlGroupBy(getColumnName(entityType, field)));
+            addNode(new GroupBy(getColumnName(entityType, field)));
         }
         return this;
     }
 
     @NotNull
     public Query<T> orderBy(@NotNull FieldGetter<T, ?> field) {
-        return addNode(new SqlOrderBy(getColumnName(entityType, field), false));
+        return addNode(new OrderBy(getColumnName(entityType, field), false));
     }
 
     @NotNull
     public Query<T> orderBy(@NotNull FieldGetter<T, ?> field, boolean desc) {
-        return addNode(new SqlOrderBy(getColumnName(entityType, field), desc));
+        return addNode(new OrderBy(getColumnName(entityType, field), desc));
     }
 
     @NotNull
     public Query<T> orderBy(@NotNull FieldGetter<T, ?> field1, boolean desc1, @NotNull FieldGetter<T, ?> field2, boolean desc2) {
-        return addNode(new SqlOrderBy(getColumnName(entityType, field1), desc1)).addNode(new SqlOrderBy(getColumnName(entityType, field2), desc2));
+        return addNode(new OrderBy(getColumnName(entityType, field1), desc1)).addNode(new OrderBy(getColumnName(entityType, field2), desc2));
     }
 
     @NotNull
     public Query<T> orderBy(@NotNull FieldGetter<T, ?> field1, boolean desc1, @NotNull FieldGetter<T, ?> field2, boolean desc2, @NotNull FieldGetter<T, ?> field3, boolean desc3) {
-        return addNode(new SqlOrderBy(getColumnName(entityType, field1), desc1)).addNode(new SqlOrderBy(getColumnName(entityType, field2), desc2)).addNode(new SqlOrderBy(getColumnName(entityType, field3), desc3));
+        return addNode(new OrderBy(getColumnName(entityType, field1), desc1)).addNode(new OrderBy(getColumnName(entityType, field2), desc2)).addNode(new OrderBy(getColumnName(entityType, field3), desc3));
     }
 
     @NotNull
@@ -139,7 +139,7 @@ public class Query<T> extends Where<T, Query<T>> {
                 }
                 var order = orders[i + 1];
                 var desc = StrUtil.equalsIgnoreCase(order, "desc");
-                addNode(new SqlOrderBy(columnName, desc));
+                addNode(new OrderBy(columnName, desc));
             }
         }
         return this;
@@ -153,25 +153,25 @@ public class Query<T> extends Where<T, Query<T>> {
             if (cats instanceof Object[] ats && ArrayUtil.isNotEmpty(ats) && ats.length == 2) {
                 var createdAt = getColumnName(entityType, DefaultConfig.createdAt);
                 if (createdAt != null) {
-                    addNode(new SqlCond(createdAt, Op.BETWEEN, ats));
+                    addNode(new Cond(createdAt, Op.BETWEEN, ats));
                 }
             }
             var uats = FieldUtil.getFieldValue(param, DefaultConfig.updatedAt + "s");
             if (uats instanceof Object[] ats && ArrayUtil.isNotEmpty(ats) && ats.length == 2) {
                 var createdAt = getColumnName(entityType, DefaultConfig.createdAt);
                 if (createdAt != null) {
-                    addNode(new SqlCond(createdAt, Op.BETWEEN, ats));
+                    addNode(new Cond(createdAt, Op.BETWEEN, ats));
                 }
             }
 
             var idField = getIdField(entityType);
             var idVal = FieldUtil.getFieldValue(param, idField);
             if (idVal != null) {
-                addNode(new SqlCond(getIdName(entityType), Op.EQ, idVal));
+                addNode(new Cond(getIdName(entityType), Op.EQ, idVal));
             } else {
                 var ids = FieldUtil.getFieldValue(param, idField.getName() + "s");
                 if (ObjUtil.isNotEmpty(ids)) {
-                    addNode(new SqlCond(getIdName(entityType), Op.IN, ids));
+                    addNode(new Cond(getIdName(entityType), Op.IN, ids));
                 }
             }
         }

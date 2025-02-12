@@ -1,9 +1,9 @@
 package cn.com.idmy.orm.core;
 
 import cn.com.idmy.base.model.Pair;
-import cn.com.idmy.orm.core.SqlNode.SqlColumn;
-import cn.com.idmy.orm.core.SqlNode.SqlNodeType;
-import cn.com.idmy.orm.core.SqlNode.SqlOr;
+import cn.com.idmy.orm.core.SqlNode.Column;
+import cn.com.idmy.orm.core.SqlNode.Or;
+import cn.com.idmy.orm.util.OrmUtil;
 import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
@@ -46,23 +46,17 @@ abstract class Crud<T, CRUD extends Crud<T, CRUD>> {
         return crud;
     }
 
-    protected boolean hasColumn(@NotNull String column, @NotNull SqlNodeType type) {
-        return nodes.stream().anyMatch(n -> {
-            if (n instanceof SqlColumn col) {
-                return Objects.equals(col.column(), column) && n.type() == type;
-            } else {
-                return false;
-            }
-        });
+    protected boolean hasColumn(@NotNull String column, @NotNull SqlNode.Type type) {
+        return OrmUtil.hasColumn(nodes, column, type);
     }
 
     @NotNull
     protected List<SqlNode> columns(@NotNull String column) {
-        return nodes.stream().filter(n -> n instanceof SqlColumn col && Objects.equals(col.column(), column)).toList();
+        return nodes.stream().filter(n -> n instanceof Column col && Objects.equals(col.column(), column)).toList();
     }
 
     @NotNull
     public CRUD or() {
-        return addNode(new SqlOr());
+        return addNode(new Or());
     }
 }
