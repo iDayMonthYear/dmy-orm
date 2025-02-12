@@ -2,9 +2,9 @@ package cn.com.idmy.orm.core;
 
 import cn.com.idmy.base.model.Pair;
 import cn.com.idmy.orm.OrmException;
-import cn.com.idmy.orm.core.SqlNode.Cond;
-import cn.com.idmy.orm.core.SqlNode.Or;
-import cn.com.idmy.orm.core.SqlNode.Set;
+import cn.com.idmy.orm.core.SqlNode.SqlCond;
+import cn.com.idmy.orm.core.SqlNode.SqlOr;
+import cn.com.idmy.orm.core.SqlNode.SqlSet;
 import cn.com.idmy.orm.core.SqlNode.Type;
 import cn.com.idmy.orm.mybatis.handler.TypeHandlerValue;
 import lombok.NonNull;
@@ -27,15 +27,15 @@ class UpdateSqlGenerator extends SqlGenerator {
 
     @Override
     protected @NotNull Pair<String, List<Object>> doGen() {
-        var sets = new ArrayList<Set>(nodes.size());
+        var sets = new ArrayList<SqlSet>(nodes.size());
         var wheres = new ArrayList<SqlNode>(nodes.size() - 1);
         for (int i = 0, size = nodes.size(); i < size; i++) {
             var node = nodes.get(i);
-            if (node instanceof Set set) {
+            if (node instanceof SqlSet set) {
                 sets.add(set);
-            } else if (node instanceof Cond cond) {
+            } else if (node instanceof SqlCond cond) {
                 wheres.add(cond);
-            } else if (node instanceof Or) {
+            } else if (node instanceof SqlOr) {
                 skipAdjoinOr(node, wheres);
             }
         }
@@ -71,7 +71,7 @@ class UpdateSqlGenerator extends SqlGenerator {
         return PLACEHOLDER;
     }
 
-    protected void genSet(@NotNull SqlNode.Set set) {
+    protected void genSet(@NotNull SqlNode.SqlSet set) {
         var col = set.column;
         var expr = genSet(col, set.expr);
         var colum = Tables.getColum(entityType, col);

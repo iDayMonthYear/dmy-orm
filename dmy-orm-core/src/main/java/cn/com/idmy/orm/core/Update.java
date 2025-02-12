@@ -2,7 +2,7 @@ package cn.com.idmy.orm.core;
 
 import cn.com.idmy.base.model.Pair;
 import cn.com.idmy.base.util.SqlUtil;
-import cn.com.idmy.orm.core.SqlNode.Set;
+import cn.com.idmy.orm.core.SqlNode.SqlSet;
 import lombok.NonNull;
 import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
@@ -31,12 +31,12 @@ public class Update<T> extends Where<T, Update<T>> {
 
     @NotNull
     public Update<T> set(@NotNull FieldGetter<T, ?> field, @Nullable Object val) {
-        return addNode(new Set(entityType, field, val));
+        return addNode(new SqlSet(entityType, field, val));
     }
 
     @NotNull
     public Update<T> set(@NotNull FieldGetter<T, ?> field, @Nullable SqlOpExpr expr) {
-        return addNode(new Set(entityType, field, expr));
+        return addNode(new SqlSet(entityType, field, expr));
     }
 
     @NotNull

@@ -2,8 +2,8 @@ package cn.com.idmy.orm.core;
 
 import cn.com.idmy.base.model.Pair;
 import cn.com.idmy.orm.OrmException;
-import cn.com.idmy.orm.core.SqlNode.Cond;
-import cn.com.idmy.orm.core.SqlNode.Or;
+import cn.com.idmy.orm.core.SqlNode.SqlCond;
+import cn.com.idmy.orm.core.SqlNode.SqlOr;
 import cn.com.idmy.orm.core.SqlNode.Type;
 import lombok.Getter;
 import lombok.NonNull;
@@ -115,7 +115,7 @@ public abstract class SqlGenerator {
         }
     }
 
-    protected void genCond(@NonNull SqlNode.Cond cond) {
+    protected void genCond(@NonNull SqlNode.SqlCond cond) {
         var col = cond.column;
         String str;
         Object expr = cond.expr;
@@ -128,9 +128,9 @@ public abstract class SqlGenerator {
     }
 
     protected void genCondOr(@NonNull SqlNode node) {
-        if (node instanceof Or) {
+        if (node instanceof SqlOr) {
             sql.append(OR);
-        } else if (node instanceof Cond cond) {
+        } else if (node instanceof SqlCond cond) {
             genCond(cond);
         }
     }
@@ -148,7 +148,7 @@ public abstract class SqlGenerator {
     }
 
     protected static void removeLastOr(@NonNull List<SqlNode> ls) {
-        if (CollUtil.isNotEmpty(ls) && ls.getLast() instanceof Or) {
+        if (CollUtil.isNotEmpty(ls) && ls.getLast() instanceof SqlOr) {
             ls.removeLast();
             if (log.isDebugEnabled()) {
                 log.warn("where 条件最后存在 or，已自动移除");

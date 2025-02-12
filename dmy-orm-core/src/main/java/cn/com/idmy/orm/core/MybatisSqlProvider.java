@@ -2,8 +2,8 @@ package cn.com.idmy.orm.core;
 
 import cn.com.idmy.base.model.Page;
 import cn.com.idmy.orm.OrmException;
-import cn.com.idmy.orm.core.SqlNode.Cond;
-import cn.com.idmy.orm.core.SqlNode.Set;
+import cn.com.idmy.orm.core.SqlNode.SqlCond;
+import cn.com.idmy.orm.core.SqlNode.SqlSet;
 import cn.com.idmy.orm.mybatis.MybatisUtil;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -90,7 +90,7 @@ public class MybatisSqlProvider {
         if (idValue == null) {
             throw new OrmException("主键不能为空");
         }
-        var u = dao.u().addNode(new Cond(id.name(), Op.EQ, idValue));
+        var u = dao.u().addNode(new SqlCond(id.name(), Op.EQ, idValue));
         var cols = table.columns();
         int size = cols.length;
         for (int i = 0; i < size; i++) {
@@ -99,7 +99,7 @@ public class MybatisSqlProvider {
             if (field != idField) {
                 var value = FieldUtil.getFieldValue(entity, field);
                 if (!ignoreNull || value != null) {
-                    u.addNode(new Set(column, value));
+                    u.addNode(new SqlSet(column, value));
                 }
             }
         }
@@ -138,7 +138,7 @@ public class MybatisSqlProvider {
     static <T, ID> Map<ID, T> map(@NotNull MybatisDao<T, ID> dao, @NonNull Object ids) {
         var q = dao.q();
         q.sqlParamsSize = 1;
-        q.addNode(new Cond(getIdName(dao), Op.IN, ids));
+        q.addNode(new SqlCond(getIdName(dao), Op.IN, ids));
         return CollStreamUtil.toIdentityMap(dao.list(q), Tables::getIdValue);
     }
 

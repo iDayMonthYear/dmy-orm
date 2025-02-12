@@ -1,7 +1,7 @@
 package cn.com.idmy.orm.util;
 
 import cn.com.idmy.orm.core.SqlNode;
-import cn.com.idmy.orm.core.SqlNode.Column;
+import cn.com.idmy.orm.core.SqlNode.SqlColumn;
 import lombok.experimental.UtilityClass;
 import org.jetbrains.annotations.NotNull;
 
@@ -12,7 +12,7 @@ import java.util.Objects;
 public class OrmUtil {
     public boolean hasColumn(List<SqlNode> nodes, @NotNull String column, @NotNull SqlNode.Type type) {
         return nodes.stream().anyMatch(n -> {
-            if (n instanceof Column col) {
+            if (n instanceof SqlColumn col) {
                 return Objects.equals(col.column(), column) && n.type() == type;
             } else {
                 return false;
