@@ -108,7 +108,9 @@ public interface MybatisDao<T, ID> {
 
     @NotNull
     default List<T> all() {
-        return list(q());
+        Query<T> q = q();
+        q.force();
+        return list(q);
     }
 
     @NotNull
@@ -225,7 +227,6 @@ public interface MybatisDao<T, ID> {
         R r = getNullable(field, q);
         if (r == null) {
             var col = Tables.getColum(entityType(), field);
-            assert col != null;
             throw new OrmException("根据主键「查询条件」找不到「{}」", Optional.ofNullable(col.title()).orElse(col.name()));
         } else {
             return r;

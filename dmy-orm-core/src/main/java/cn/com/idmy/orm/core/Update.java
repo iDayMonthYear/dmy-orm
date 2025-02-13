@@ -39,10 +39,8 @@ public class Update<T> extends Where<T, Update<T>> {
         return addNode(new SqlSet(entityType, field, expr));
     }
 
-    @NotNull
-    public Update<T> force() {
+    public void force() {
         force = true;
-        return this;
     }
 
     public boolean update(@NonNull Serializable id) {

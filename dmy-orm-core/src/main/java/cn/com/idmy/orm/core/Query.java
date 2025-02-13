@@ -49,10 +49,8 @@ public class Query<T> extends Where<T, Query<T>> {
         return new Query<>(dao.entityType());
     }
 
-    @NotNull
-    public Query<T> force() {
+    public void force() {
         force = true;
-        return this;
     }
 
     @NotNull

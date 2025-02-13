@@ -29,10 +29,8 @@ public class Delete<T> extends Where<T, Delete<T>> {
         return new Delete<>(dao);
     }
 
-    @NotNull
-    public Delete<T> force() {
+    public void force() {
         force = true;
-        return this;
     }
 
     public boolean delete(@NonNull Serializable id) {
