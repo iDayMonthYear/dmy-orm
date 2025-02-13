@@ -48,7 +48,7 @@ public abstract class Where<T, CRUD extends Where<T, CRUD>> extends Crud<T, CRUD
     // 等于
     @NotNull
     public CRUD eq(@NonNull Object id) {
-       return ObjUtil.isEmpty(id) ? crud : addNode(new SqlCond(Tables.getIdName(entityType), Op.EQ, id));
+        return ObjUtil.isEmpty(id) ? crud : addNode(new SqlCond(Tables.getIdName(entityType), Op.EQ, id));
     }
 
     @NotNull
@@ -73,7 +73,7 @@ public abstract class Where<T, CRUD extends Where<T, CRUD>> extends Crud<T, CRUD
 
     @NotNull
     public CRUD eq(@NotNull FieldGetter<T, ?> field, @Nullable String val) {
-        return ObjUtil.isEmpty(val) ? addNode(new SqlCond(entityType, field, Op.EQ, val)) : crud;
+        return ObjUtil.isEmpty(val) ? crud : addNode(new SqlCond(entityType, field, Op.EQ, val));
     }
 
     // 不等于
