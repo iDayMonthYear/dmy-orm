@@ -37,6 +37,7 @@ public class Query<T> extends Where<T, Query<T>> {
     @Nullable
     protected Integer limit;
     protected boolean hasParam;
+    protected boolean force;
 
     protected Query(@NotNull Class<T> entityType) {
         super(entityType);
@@ -46,6 +47,12 @@ public class Query<T> extends Where<T, Query<T>> {
     public static <T, ID> Query<T> of(@NotNull MybatisDao<T, ID> dao) {
         Console.log(dao.entityType());
         return new Query<>(dao.entityType());
+    }
+
+    @NotNull
+    public Query<T> force() {
+        force = true;
+        return this;
     }
 
     @NotNull
