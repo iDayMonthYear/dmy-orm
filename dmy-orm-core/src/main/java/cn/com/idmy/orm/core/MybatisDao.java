@@ -109,7 +109,7 @@ public interface MybatisDao<T, ID> {
     @NotNull
     default List<T> all() {
         Query<T> q = q();
-        q.force();
+        q.force = true;
         return list(q);
     }
 
