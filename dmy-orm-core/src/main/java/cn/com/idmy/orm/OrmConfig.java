@@ -1,5 +1,6 @@
 package cn.com.idmy.orm;
 
+import cn.com.idmy.base.annotation.Table;
 import cn.com.idmy.base.annotation.Table.IdType;
 import cn.com.idmy.orm.core.*;
 import lombok.Getter;
@@ -33,7 +34,7 @@ public class OrmConfig {
 
     @Setter
     @NotNull
-    private IdType defaultIdType = IdType.AUTO;
+    private Table.IdType defaultIdType = IdType.AUTO;
     @NotNull
     private NameStrategy tableNameStrategy = NameStrategy.DEFAULT;
     @NotNull

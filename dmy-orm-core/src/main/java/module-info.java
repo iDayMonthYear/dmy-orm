@@ -3,14 +3,12 @@ module cn.com.idmy.orm {
     exports cn.com.idmy.orm.core; // 公开的包
     exports cn.com.idmy.orm.annotation; // 公开的包
 
-    requires java.base;
-    requires lombok;
-    requires org.jetbrains.annotations;
-    requires org.slf4j;
-    requires dmy.base;
     requires org.mybatis;
+    requires cn.com.idmy.base;
+    requires static lombok;
     requires org.dromara.hutool.core;
-    requires jakarta.validation;
+    requires org.slf4j;
+    requires org.jetbrains.annotations;
     requires java.sql;
     requires com.alibaba.fastjson2;
 }

@@ -152,16 +152,18 @@ public class Query<T> extends Where<T, Query<T>> {
     public Query<T> param(@Nullable Object param) {
         if (!hasParam && param != null) {
             hasParam = true;
-            var cats = FieldUtil.getFieldValue(param, DefaultConfig.createdAt + "s");
+            var createdAtName = DefaultConfig.createdAtName;
+            var cats = FieldUtil.getFieldValue(param, createdAtName + "s");
             if (cats instanceof Object[] ats && ArrayUtil.isNotEmpty(ats) && ats.length == 2) {
-                var createdAt = getColumnName(entityType, DefaultConfig.createdAt);
+                var createdAt = getColumnName(entityType, createdAtName);
                 if (createdAt != null) {
                     addNode(new SqlCond(createdAt, Op.BETWEEN, ats));
                 }
             }
-            var uats = FieldUtil.getFieldValue(param, DefaultConfig.updatedAt + "s");
+            var updatedAtName = DefaultConfig.updatedAtName;
+            var uats = FieldUtil.getFieldValue(param, updatedAtName + "s");
             if (uats instanceof Object[] ats && ArrayUtil.isNotEmpty(ats) && ats.length == 2) {
-                var createdAt = getColumnName(entityType, DefaultConfig.createdAt);
+                var createdAt = getColumnName(entityType, updatedAtName);
                 if (createdAt != null) {
                     addNode(new SqlCond(createdAt, Op.BETWEEN, ats));
                 }
