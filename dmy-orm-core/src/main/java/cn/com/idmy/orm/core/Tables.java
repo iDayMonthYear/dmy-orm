@@ -117,10 +117,10 @@ public class Tables {
                 if (StrUtil.isBlank(title)) {
                     title = null;
                 }
-                if (!columnMap.containsKey(name)) {
-                    TableColumn tableColumn = new TableColumn(field, name, large, title);
+                if (!columnMap.containsKey(field.getName())) {
+                    var tableColumn = new TableColumn(field, name, large, title);
                     columns.add(tableColumn);
-                    columnMap.put(name, tableColumn);
+                    columnMap.put(field.getName(), tableColumn);
                 }
             }
         }
@@ -182,8 +182,8 @@ public class Tables {
         if (CollUtil.isEmpty(columnMap)) {
             throw new OrmException("实体类「{}」中不存在字段「{}」", entityType.getName(), field);
         } else {
-            String fieldName = LambdaUtil.getFieldName(field);
-            TableColumn tableColumn = columnMap.get(fieldName);
+            var fieldName = LambdaUtil.getFieldName(field);
+            var tableColumn = columnMap.get(fieldName);
             if (tableColumn == null) {
                 throw new OrmException("实体类「{}」中不存在字段「{}」", entityType.getName(), fieldName);
             } else {
@@ -194,7 +194,7 @@ public class Tables {
 
     @Nullable
     public static String getColumnName(@NotNull Class<?> entityType, @NotNull String fieldName) {
-        TableColumn colum = getColum(entityType, fieldName);
+        var colum = getColum(entityType, fieldName);
         if (colum == null) {
             return null;
         } else {

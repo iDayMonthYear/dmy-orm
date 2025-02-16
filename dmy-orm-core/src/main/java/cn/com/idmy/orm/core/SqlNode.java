@@ -14,6 +14,7 @@ import org.dromara.hutool.core.util.ObjUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.lang.reflect.Field;
 import java.util.Collection;
 
 import static cn.com.idmy.orm.core.SqlFnName.COUNT;
@@ -96,11 +97,13 @@ public class SqlNode {
     @Getter
     @Accessors(fluent = true)
     public static class SqlSet extends SqlNode implements SqlColumn {
+        Field field;
         @NotNull
         final String column;
         @Nullable
         final Object expr;
 
+        /*
         public SqlSet(@NotNull String col, @Nullable Object expr) {
             super(Type.SET);
             this.column = SqlUtil.checkColumn(col);
@@ -112,12 +115,14 @@ public class SqlNode {
             this.column = SqlUtil.checkColumn(col);
             this.expr = expr;
         }
+        */
 
         public SqlSet(TableColumn col, @Nullable Object val) {
             super(Type.SET);
             check(col, val);
             this.expr = val;
             this.column = col.name();
+            this.field = col.field();
         }
 
         public <T> SqlSet(Class<T> entityType, FieldGetter<T, ?> field, @Nullable Object val) {

@@ -74,13 +74,9 @@ class UpdateSqlGenerator extends SqlGenerator {
     protected void genSet(@NotNull SqlNode.SqlSet set) {
         var col = set.column;
         var expr = genSet(col, set.expr);
-        var colum = Tables.getColum(entityType, col);
-        if (colum != null) {
-            var th = Tables.getTypeHandler(colum.field());
-            if (th != null) {
-                var val = params.removeLast();
-                params.add(new TypeHandlerValue(th, val));
-            }
+        var th = Tables.getTypeHandler(set.field());
+        if (th != null) {
+            params.add(new TypeHandlerValue(th, params.removeLast()));
         }
         sql.append(keyword(col)).append(EQUAL).append(expr);
     }
