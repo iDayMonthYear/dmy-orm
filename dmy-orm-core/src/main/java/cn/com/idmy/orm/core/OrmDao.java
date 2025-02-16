@@ -234,11 +234,19 @@ public interface OrmDao<T, ID> {
     }
 
     @Nullable
-    default T getNullable(@NotNull Query<T> q, @NotNull FieldGetter<T, ?> field, FieldGetter<T, ?>... fields) {
+    default T getNullable(@NotNull Query<T> q, @NotNull FieldGetter<T, ?> field, @NotNull FieldGetter<T, ?>... fields) {
         SqlProvider.clearSelectColumns(q);
         q.select(field);
         q.select(fields);
         return getNullable(q);
+    }
+
+    @NotNull
+    default T get(@NotNull Query<T> q, @NotNull FieldGetter<T, ?> field, @NotNull FieldGetter<T, ?>... fields) {
+        SqlProvider.clearSelectColumns(q);
+        q.select(field);
+        q.select(fields);
+        return get(q);
     }
 
     @NotNull
