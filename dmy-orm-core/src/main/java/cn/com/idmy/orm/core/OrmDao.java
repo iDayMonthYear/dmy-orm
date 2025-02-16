@@ -150,7 +150,7 @@ public interface OrmDao<T, ID> {
     }
 
     @NotNull
-    default List<T> list(@NotNull Query<T> q, @NotNull FieldGetter<T, ?> field, FieldGetter<T, ?>... fields) {
+    default List<T> list(@NotNull Query<T> q, @NotNull FieldGetter<T, ?> field, @NotNull FieldGetter<T, ?>... fields) {
         q.select(field);
         q.select(fields);
         return list(q);
