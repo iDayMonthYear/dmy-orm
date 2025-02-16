@@ -16,16 +16,16 @@ import java.util.List;
 @Getter
 @Accessors(fluent = true, chain = false)
 public class Delete<T> extends Where<T, Delete<T>> {
-    protected MybatisDao<T, ?> dao;
+    protected OrmDao<T, ?> dao;
     protected boolean force;
 
-    protected Delete(@NotNull MybatisDao<T, ?> dao) {
+    protected Delete(@NotNull OrmDao<T, ?> dao) {
         super(dao.entityType());
         this.dao = dao;
     }
 
     @NotNull
-    public static <T, ID> Delete<T> of(@NotNull MybatisDao<T, ID> dao) {
+    public static <T, ID> Delete<T> of(@NotNull OrmDao<T, ID> dao) {
         return new Delete<>(dao);
     }
 

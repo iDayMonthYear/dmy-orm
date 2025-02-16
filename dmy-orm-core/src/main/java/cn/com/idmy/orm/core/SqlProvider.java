@@ -30,7 +30,7 @@ import static cn.com.idmy.orm.core.Tables.getTableByMapperClass;
 @Slf4j
 @Accessors(fluent = true)
 @RequiredArgsConstructor
-public class MybatisSqlProvider {
+public class SqlProvider {
     @Setter
     private static SqlSessionFactory sqlSessionFactory;
 
@@ -82,7 +82,7 @@ public class MybatisSqlProvider {
         return (Collection<Object>) params.get(ENTITIES);
     }
 
-    public static <T, ID> int update(@NotNull MybatisDao<T, ID> dao, @NotNull T entity, boolean ignoreNull) {
+    public static <T, ID> int update(@NotNull OrmDao<T, ID> dao, @NotNull T entity, boolean ignoreNull) {
         var table = Tables.getTable(entity.getClass());
         var id = table.id();
         var idField = id.field();
@@ -107,7 +107,7 @@ public class MybatisSqlProvider {
         return dao.updateBySql(sql.left, sql.right);
     }
 
-    public static <T, ID> int[] update(@NotNull MybatisDao<T, ID> dao, @NotNull Collection<T> ls, int size, boolean ignoreNull) {
+    public static <T, ID> int[] update(@NotNull OrmDao<T, ID> dao, @NotNull Collection<T> ls, int size, boolean ignoreNull) {
         var interfaces = ClassUtil.getInterfaces(dao.getClass());
         if (CollUtil.isEmpty(interfaces)) {
             throw new OrmException("dao must be interface");
@@ -116,7 +116,7 @@ public class MybatisSqlProvider {
         }
     }
 
-    public static <T, ID> int creates(@NotNull MybatisDao<T, ID> dao, @Nullable Collection<T> ls, int size) {
+    public static <T, ID> int creates(@NotNull OrmDao<T, ID> dao, @Nullable Collection<T> ls, int size) {
         if (CollUtil.isEmpty(ls)) {
             return -1;
         } else {
@@ -135,7 +135,7 @@ public class MybatisSqlProvider {
     }
 
     @NotNull
-    static <T, ID> Map<ID, T> map(@NotNull MybatisDao<T, ID> dao, @NonNull Object ids) {
+    static <T, ID> Map<ID, T> map(@NotNull OrmDao<T, ID> dao, @NonNull Object ids) {
         var q = dao.q();
         q.sqlParamsSize = 1;
         q.addNode(new SqlCond(getIdName(dao), Op.IN, ids));
@@ -143,7 +143,7 @@ public class MybatisSqlProvider {
     }
 
     @NotNull
-    public static <T, ID, R> Page<T> page(@NotNull MybatisDao<T, ID> dao, @NotNull Page<R> page, @NotNull Query<T> q) {
+    public static <T, ID, R> Page<T> page(@NotNull OrmDao<T, ID> dao, @NotNull Page<R> page, @NotNull Query<T> q) {
         q.limit = page.pageSize();
         q.offset = page.offset();
         q.orderBy(page.sorts());

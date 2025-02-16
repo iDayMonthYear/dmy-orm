@@ -1,7 +1,7 @@
 package cn.com.idmy.orm.mybatis;
 
 import cn.com.idmy.orm.OrmException;
-import cn.com.idmy.orm.core.MybatisSqlProvider;
+import cn.com.idmy.orm.core.SqlProvider;
 import cn.com.idmy.orm.mybatis.handler.TypeHandlerValue;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.mapping.BoundSql;
@@ -33,7 +33,7 @@ class MybatisParameterHandler extends DefaultParameterHandler {
     public void setParameters(@NotNull PreparedStatement ps) {
         try {
             var params = (Map<String, Object>) getParameterObject();
-            var sqlParams = (List<Object>) params.get(MybatisSqlProvider.SQL_PARAMS);
+            var sqlParams = (List<Object>) params.get(SqlProvider.SQL_PARAMS);
             if (sqlParams == null) {
                 super.setParameters(ps);
             } else {

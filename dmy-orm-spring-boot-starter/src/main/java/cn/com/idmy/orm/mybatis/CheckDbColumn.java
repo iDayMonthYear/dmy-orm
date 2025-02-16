@@ -1,7 +1,7 @@
 package cn.com.idmy.orm.mybatis;
 
 import cn.com.idmy.base.annotation.Table;
-import cn.com.idmy.orm.core.MybatisDao;
+import cn.com.idmy.orm.core.OrmDao;
 import cn.com.idmy.orm.core.TableInfo;
 import cn.com.idmy.orm.core.Tables;
 import lombok.RequiredArgsConstructor;
@@ -32,7 +32,7 @@ class CheckDbColumn {
 
     private void scanDao() throws Exception {
         try (var conn = sqlSessionFactory.openSession().getConnection()) {
-            var mappers = ctx.getBeanNamesForType(MybatisDao.class);
+            var mappers = ctx.getBeanNamesForType(OrmDao.class);
             for (var mapper : mappers) {
                 var mapperType = ctx.getType(mapper);
                 var entityType = ClassUtil.getTypeArgument(mapperType);

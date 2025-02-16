@@ -43,7 +43,7 @@ public class Query<T> extends Where<T, Query<T>> {
     }
 
     @NotNull
-    public static <T, ID> Query<T> of(@NotNull MybatisDao<T, ID> dao) {
+    public static <T, ID> Query<T> of(@NotNull OrmDao<T, ID> dao) {
         return new Query<>(dao.entityType());
     }
 

@@ -17,7 +17,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
-public interface MybatisDao<T, ID> {
+public interface OrmDao<T, ID> {
     @NotNull
     @SuppressWarnings("unchecked")
     default Class<T> entityType() {
@@ -50,8 +50,8 @@ public interface MybatisDao<T, ID> {
         return Delete.of(this);
     }
 
-    @SelectProvider(type = MybatisSqlProvider.class, method = MybatisSqlProvider.count)
-    long count(@NotNull @Param(MybatisSqlProvider.CRUD) Query<T> q);
+    @SelectProvider(type = SqlProvider.class, method = SqlProvider.count)
+    long count(@NotNull @Param(SqlProvider.CRUD) Query<T> q);
 
     default boolean exists(@NotNull Query<T> q) {
         return count(q) > 0;
@@ -97,8 +97,8 @@ public interface MybatisDao<T, ID> {
     }
 
     @Nullable
-    @SelectProvider(type = MybatisSqlProvider.class, method = MybatisSqlProvider.list0)
-    List<T> list0(@NotNull @Param(MybatisSqlProvider.CRUD) Query<T> q);
+    @SelectProvider(type = SqlProvider.class, method = SqlProvider.list0)
+    List<T> list0(@NotNull @Param(SqlProvider.CRUD) Query<T> q);
 
     @NotNull
     default List<T> list(@NotNull Query<T> q) {
@@ -144,7 +144,7 @@ public interface MybatisDao<T, ID> {
 
     @NotNull
     default <R> List<R> list(@NotNull FieldGetter<T, R> field, @NotNull Query<T> q) {
-        MybatisSqlProvider.clearSelectColumns(q);
+        SqlProvider.clearSelectColumns(q);
         var ts = list(q.select(field));
         return CollStreamUtil.toList(ts, field::get);
     }
@@ -157,8 +157,8 @@ public interface MybatisDao<T, ID> {
     }
 
     @Nullable
-    @SelectProvider(type = MybatisSqlProvider.class, method = MybatisSqlProvider.getNullable)
-    T getNullable(@NotNull @Param(MybatisSqlProvider.CRUD) Query<T> q);
+    @SelectProvider(type = SqlProvider.class, method = SqlProvider.getNullable)
+    T getNullable(@NotNull @Param(SqlProvider.CRUD) Query<T> q);
 
     @NotNull
     default T get(@NotNull Query<T> q, @NotNull String msg, @NotNull Object... params) {
@@ -210,7 +210,7 @@ public interface MybatisDao<T, ID> {
 
     @Nullable
     default <R> R getNullable(@NotNull FieldGetter<T, R> field, @NotNull Query<T> q) {
-        MybatisSqlProvider.clearSelectColumns(q);
+        SqlProvider.clearSelectColumns(q);
         q.limit = 1;
         q.select(field);
         T t = getNullable(q);
@@ -235,7 +235,7 @@ public interface MybatisDao<T, ID> {
 
     @Nullable
     default T getNullable(@NotNull Query<T> q, @NotNull FieldGetter<T, ?> field, FieldGetter<T, ?>... fields) {
-        MybatisSqlProvider.clearSelectColumns(q);
+        SqlProvider.clearSelectColumns(q);
         q.select(field);
         q.select(fields);
         return getNullable(q);
@@ -243,12 +243,12 @@ public interface MybatisDao<T, ID> {
 
     @NotNull
     default Map<ID, T> map(@Nullable ID... ids) {
-        return ArrayUtil.isEmpty(ids) ? Collections.emptyMap() : MybatisSqlProvider.map(this, ids);
+        return ArrayUtil.isEmpty(ids) ? Collections.emptyMap() : SqlProvider.map(this, ids);
     }
 
     @NotNull
     default Map<ID, T> map(@Nullable Collection<ID> ids) {
-        return CollUtil.isEmpty(ids) ? Collections.emptyMap() : MybatisSqlProvider.map(this, ids);
+        return CollUtil.isEmpty(ids) ? Collections.emptyMap() : SqlProvider.map(this, ids);
     }
 
     @NotNull
@@ -258,7 +258,7 @@ public interface MybatisDao<T, ID> {
 
     @NotNull
     default <IN> Page<T> page(@NonNull Page<IN> page, @NotNull Query<T> q) {
-        return MybatisSqlProvider.page(this, page, q);
+        return SqlProvider.page(this, page, q);
     }
 
     @Nullable
@@ -266,7 +266,7 @@ public interface MybatisDao<T, ID> {
         if (name == SqlFnName.IF_NULL) {
             throw new OrmException("不支持ifnull");
         } else {
-            MybatisSqlProvider.clearSelectColumns(q);
+            SqlProvider.clearSelectColumns(q);
             q.limit = 1;
             T t = getNullable(q.select(() -> new SqlFn<>(name, field)));
             return t == null ? null : field.get(t);
@@ -305,14 +305,14 @@ public interface MybatisDao<T, ID> {
         }
     }
 
-    @InsertProvider(type = MybatisSqlProvider.class, method = MybatisSqlProvider.create)
-    int create(@NonNull @Param(MybatisSqlProvider.ENTITY) T entity);
+    @InsertProvider(type = SqlProvider.class, method = SqlProvider.create)
+    int create(@NonNull @Param(SqlProvider.ENTITY) T entity);
 
-    @InsertProvider(type = MybatisSqlProvider.class, method = MybatisSqlProvider.creates)
-    int creates(@NonNull @Param(MybatisSqlProvider.ENTITIES) Collection<T> entities);
+    @InsertProvider(type = SqlProvider.class, method = SqlProvider.creates)
+    int creates(@NonNull @Param(SqlProvider.ENTITIES) Collection<T> entities);
 
     default int creates(@Nullable Collection<T> entities, int size) {
-        return MybatisSqlProvider.creates(this, entities, size);
+        return SqlProvider.creates(this, entities, size);
     }
 
     default int createOrUpdate(@NonNull T entity, boolean ignoreNull) {
@@ -320,7 +320,7 @@ public interface MybatisDao<T, ID> {
         if (idVal == null) {
             return create(entity);
         } else {
-            return exists(idVal) ? MybatisSqlProvider.update(this, entity, ignoreNull) : create(entity);
+            return exists(idVal) ? SqlProvider.update(this, entity, ignoreNull) : create(entity);
         }
     }
 
@@ -328,30 +328,30 @@ public interface MybatisDao<T, ID> {
         return createOrUpdate(entity, true);
     }
 
-    @UpdateProvider(type = MybatisSqlProvider.class, method = MybatisSqlProvider.update)
-    int update(@NotNull @Param(MybatisSqlProvider.CRUD) Update<T> update);
+    @UpdateProvider(type = SqlProvider.class, method = SqlProvider.update)
+    int update(@NotNull @Param(SqlProvider.CRUD) Update<T> update);
 
     default int update(@NonNull T entity) {
         return update(entity, true);
     }
 
     default int update(@NonNull T entity, boolean ignoreNull) {
-        return MybatisSqlProvider.update(this, entity, ignoreNull);
+        return SqlProvider.update(this, entity, ignoreNull);
     }
 
     default int[] update(@Nullable Collection<T> entities, int size, boolean ignoreNull) {
         if (entities == null) {
             return new int[]{0};
         } else {
-            return MybatisSqlProvider.update(this, entities, size, ignoreNull);
+            return SqlProvider.update(this, entities, size, ignoreNull);
         }
     }
 
-    @UpdateProvider(type = MybatisSqlProvider.class, method = MybatisSqlProvider.updateBySql)
-    int updateBySql(@NonNull @Param(MybatisSqlProvider.CRUD) String sql, @NonNull @Param(MybatisSqlProvider.SQL_PARAMS) List<Object> params);
+    @UpdateProvider(type = SqlProvider.class, method = SqlProvider.updateBySql)
+    int updateBySql(@NonNull @Param(SqlProvider.CRUD) String sql, @NonNull @Param(SqlProvider.SQL_PARAMS) List<Object> params);
 
-    @DeleteProvider(type = MybatisSqlProvider.class, method = MybatisSqlProvider.delete)
-    int delete(@NotNull @Param(MybatisSqlProvider.CRUD) Delete<T> d);
+    @DeleteProvider(type = SqlProvider.class, method = SqlProvider.delete)
+    int delete(@NotNull @Param(SqlProvider.CRUD) Delete<T> d);
 
     default int delete(@NonNull ID id) {
         var d = d();

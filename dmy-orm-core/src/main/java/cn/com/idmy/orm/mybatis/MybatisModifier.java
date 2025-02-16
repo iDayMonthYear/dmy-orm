@@ -1,6 +1,6 @@
 package cn.com.idmy.orm.mybatis;
 
-import cn.com.idmy.orm.core.MybatisSqlProvider;
+import cn.com.idmy.orm.core.SqlProvider;
 import cn.com.idmy.orm.core.TableInfo;
 import cn.com.idmy.orm.core.TableInfo.TableId;
 import cn.com.idmy.orm.core.Tables;
@@ -23,7 +23,7 @@ class MybatisModifier {
         var selectId = ms.getId() + SelectKeyGenerator.SELECT_KEY_SUFFIX;
         var idField = id.field();
         var sqlSource = ms.getLang().createSqlSource(cfg, seq.trim(), idField.getType());
-        var keyProperty = MybatisSqlProvider.ENTITY + "." + idField.getName();
+        var keyProperty = SqlProvider.ENTITY + "." + idField.getName();
         var idResultMaps = List.of(new ResultMap.Builder(cfg, selectId + "-Inline", idField.getType(), new ArrayList<>(), null).build());
         var newMs = new MappedStatement
                 .Builder(cfg, selectId, sqlSource, SqlCommandType.SELECT)
@@ -54,12 +54,12 @@ class MybatisModifier {
             return ms;
         }
 
-        if (ms.getId().endsWith(MybatisSqlProvider.creates)) {
+        if (ms.getId().endsWith(SqlProvider.creates)) {
             generator = new EntitiesIdGenerator(generator);
         }
 
         var cfg = ms.getConfiguration();
-        var keyProperty = MybatisSqlProvider.ENTITY + "." + table.id().field().getName();
+        var keyProperty = SqlProvider.ENTITY + "." + table.id().field().getName();
         var resultSet = ms.getResultSets() == null ? null : String.join(",", ms.getResultSets());
         var sqlCommandType = ms.getSqlCommandType();
         var sqlSource = ms.getSqlSource();

@@ -1,6 +1,6 @@
 package cn.com.idmy.orm.mybatis;
 
-import cn.com.idmy.orm.core.MybatisSqlProvider;
+import cn.com.idmy.orm.core.SqlProvider;
 import cn.com.idmy.orm.core.Tables;
 import cn.com.idmy.orm.mybatis.handler.*;
 import org.apache.ibatis.executor.keygen.NoKeyGenerator;
@@ -37,7 +37,7 @@ class MybatisConfiguration extends Configuration {
     @Override
     public ParameterHandler newParameterHandler(@NotNull MappedStatement ms, @NotNull Object param, @NotNull BoundSql boundSql) {
         if (!ms.getId().endsWith(SELECT_KEY_SUFFIX)) {
-            if (param instanceof Map<?, ?> map && map.containsKey(MybatisSqlProvider.SQL_PARAMS)) {
+            if (param instanceof Map<?, ?> map && map.containsKey(SqlProvider.SQL_PARAMS)) {
                 var handler = new MybatisParameterHandler(ms, param, boundSql);
                 return (ParameterHandler) interceptorChain.pluginAll(handler);
             }
@@ -49,11 +49,11 @@ class MybatisConfiguration extends Configuration {
     public void addMappedStatement(@NotNull MappedStatement ms) {
         var table = Tables.getTable(ms.getId().substring(0, ms.getId().lastIndexOf(DOT)));
         var msId = ms.getId();
-        if (StrUtil.endWithAny(msId, DOT + MybatisSqlProvider.create, DOT + MybatisSqlProvider.creates) && ms.getKeyGenerator() == NoKeyGenerator.INSTANCE) {
+        if (StrUtil.endWithAny(msId, DOT + SqlProvider.create, DOT + SqlProvider.creates) && ms.getKeyGenerator() == NoKeyGenerator.INSTANCE) {
             ms = MybatisModifier.replaceIdGenerator(ms, table);
-        } else if (StrUtil.endWith(msId, DOT + MybatisSqlProvider.count)) {
+        } else if (StrUtil.endWith(msId, DOT + SqlProvider.count)) {
             ms = MybatisModifier.replaceCountAsteriskResultMap(ms);
-        } else if (StrUtil.endWithAny(msId, DOT + MybatisSqlProvider.getNullable, DOT + MybatisSqlProvider.list0)) {
+        } else if (StrUtil.endWithAny(msId, DOT + SqlProvider.getNullable, DOT + SqlProvider.list0)) {
             ms = MybatisModifier.replaceQueryResultMap(ms, table);
         } else if (ms.getSqlCommandType() == SqlCommandType.SELECT) {
 

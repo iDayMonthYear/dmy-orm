@@ -16,16 +16,16 @@ import java.util.List;
 @Slf4j
 @Accessors(fluent = true, chain = false)
 public class Update<T> extends Where<T, Update<T>> {
-    protected MybatisDao<T, ?> dao;
+    protected OrmDao<T, ?> dao;
     protected boolean force;
 
-    protected Update(@NotNull MybatisDao<T, ?> dao) {
+    protected Update(@NotNull OrmDao<T, ?> dao) {
         super(dao.entityType());
         this.dao = dao;
     }
 
     @NotNull
-    public static <T, ID> Update<T> of(@NotNull MybatisDao<T, ID> dao) {
+    public static <T, ID> Update<T> of(@NotNull OrmDao<T, ID> dao) {
         return new Update<>(dao);
     }
 

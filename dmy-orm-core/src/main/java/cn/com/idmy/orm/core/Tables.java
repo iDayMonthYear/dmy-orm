@@ -148,7 +148,7 @@ public class Tables {
     }
 
     @NotNull
-    public static String getIdName(@NotNull MybatisDao<?, ?> dao) {
+    public static String getIdName(@NotNull OrmDao<?, ?> dao) {
         return getId(dao.entityType()).name();
     }
 

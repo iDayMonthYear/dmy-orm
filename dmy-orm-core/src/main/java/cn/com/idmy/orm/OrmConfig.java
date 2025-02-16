@@ -42,7 +42,7 @@ public class OrmConfig {
 
     public void defaultBatchSize(int size) {
         if (size > 10) {
-            MybatisSqlProvider.DEFAULT_BATCH_SIZE = size;
+            SqlProvider.DEFAULT_BATCH_SIZE = size;
         }
     }
 

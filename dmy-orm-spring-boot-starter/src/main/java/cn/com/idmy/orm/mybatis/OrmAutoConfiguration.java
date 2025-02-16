@@ -1,7 +1,7 @@
 package cn.com.idmy.orm.mybatis;
 
 import cn.com.idmy.orm.OrmConfig;
-import cn.com.idmy.orm.core.MybatisSqlProvider;
+import cn.com.idmy.orm.core.SqlProvider;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.ibatis.type.TypeHandler;
 import org.mybatis.spring.SqlSessionFactoryBean;
@@ -22,8 +22,8 @@ import java.util.List;
 public class OrmAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
-    MybatisSqlProvider mybatisSqlProvider() {
-        return new MybatisSqlProvider();
+    SqlProvider mybatisSqlProvider() {
+        return new SqlProvider();
     }
 
     @Bean
@@ -57,7 +57,7 @@ public class OrmAutoConfiguration {
         bean.setMapperLocations(props.resolveMapperLocations());
 
         var factory = bean.getObject();
-        MybatisSqlProvider.sqlSessionFactory(factory);
+        SqlProvider.sqlSessionFactory(factory);
         if (props.isCheckDbColumn()) {
             new CheckDbColumn(ctx, factory).scan();
         }
