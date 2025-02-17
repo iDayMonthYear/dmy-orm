@@ -31,21 +31,21 @@ public class EnumTypeHandler<E extends Enum<E>> extends BaseTypeHandler<E> {
         this.type = type;
         this.isIEnum = IEnum.class.isAssignableFrom(type);
         this.enableIEnumValue = OrmConfig.config().enableIEnumValue();
-        this.valueField = (!isIEnum || !enableIEnumValue) ? getEnumValueField(type) : null;
+        this.valueField = getEnumValueField(type);
     }
 
     @Override
     public void setNonNullParameter(@NotNull PreparedStatement ps, int idx, @NotNull E param, @NotNull JdbcType jdbcType) throws SQLException {
-        if (isIEnum && enableIEnumValue) {
-            ps.setObject(idx, ((IEnum<?>) param).value());
-        } else if (valueField == null) {
-            ps.setObject(idx, param.name());
-        } else {
+        if (valueField != null) {
             try {
                 ps.setObject(idx, valueField.get(param));
             } catch (IllegalAccessException e) {
                 throw new SQLException(e);
             }
+        } else if (isIEnum && enableIEnumValue) {
+            ps.setObject(idx, ((IEnum<?>) param).value());
+        } else {
+            ps.setObject(idx, param.name());
         }
     }
 
@@ -79,7 +79,7 @@ public class EnumTypeHandler<E extends Enum<E>> extends BaseTypeHandler<E> {
         }
     }
 
-    private Field getEnumValueField(@NotNull Class<E> type) {
+    private @Nullable Field getEnumValueField(@NotNull Class<E> type) {
         return enumValueFieldCache.computeIfAbsent(type, $ -> {
             for (Field field : type.getDeclaredFields()) {
                 if (field.isAnnotationPresent(EnumValue.class)) {

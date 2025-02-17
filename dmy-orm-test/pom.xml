@@ -42,7 +42,7 @@
         </dependency>
         <dependency>
             <groupId>cn.com.idmy.cloud</groupId>
-            <artifactId>dmy-cloud-web</artifactId>
+            <artifactId>dmy-cloud-web-spring</artifactId>
             <exclusions>
                 <exclusion>
                     <groupId>cn.com.idmy.cloud</groupId>
