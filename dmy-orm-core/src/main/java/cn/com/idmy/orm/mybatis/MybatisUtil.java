@@ -1,6 +1,6 @@
 package cn.com.idmy.orm.mybatis;
 
-import cn.com.idmy.base.annotation.Table.IdType;
+import cn.com.idmy.base.annotation.IdType;
 import cn.com.idmy.orm.OrmException;
 import cn.com.idmy.orm.core.TableInfo;
 import lombok.NoArgsConstructor;

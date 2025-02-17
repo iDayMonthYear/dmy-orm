@@ -1,5 +1,6 @@
 package cn.com.idmy.orm.core;
 
+import cn.com.idmy.base.FieldGetter;
 import cn.com.idmy.base.util.SqlUtil;
 import cn.com.idmy.orm.OrmException;
 import cn.com.idmy.orm.core.TableInfo.TableColumn;
@@ -23,6 +24,9 @@ import static cn.com.idmy.orm.core.SqlFnName.COUNT;
 @Accessors(fluent = true)
 @RequiredArgsConstructor
 public class SqlNode {
+    @NotNull
+    final SqlNode.Type type;
+
     public enum Type {
         COND,
         WHERE,
@@ -34,9 +38,6 @@ public class SqlNode {
         SELECT_COLUMN,
         DISTINCT
     }
-
-    @NotNull
-    final SqlNode.Type type;
 
     public interface SqlColumn {
         @NotNull
@@ -97,11 +98,11 @@ public class SqlNode {
     @Getter
     @Accessors(fluent = true)
     public static class SqlSet extends SqlNode implements SqlColumn {
-        Field field;
         @NotNull
         final String column;
         @Nullable
         final Object expr;
+        Field field;
 
         /*
         public SqlSet(@NotNull String col, @Nullable Object expr) {

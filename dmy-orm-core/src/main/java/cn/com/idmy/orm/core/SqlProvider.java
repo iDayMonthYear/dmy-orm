@@ -31,17 +31,11 @@ import static cn.com.idmy.orm.core.Tables.getTableByMapperClass;
 @Accessors(fluent = true)
 @RequiredArgsConstructor
 public class SqlProvider {
-    @Setter
-    private static SqlSessionFactory sqlSessionFactory;
-
-    public static int DEFAULT_BATCH_SIZE = 1000;
     public static final String CRUD = "$crud$";
     public static final String SQL_PARAMS = "$sqlParams$";
-
     public static final String ENTITY = "$entity$";
     public static final String ENTITIES = "$entities$";
     public static final String ENTITY_TYPE = "$$entityType$";
-
     public static final String getNullable = "getNullable";
     public static final String list0 = "list0";
     public static final String delete = "delete";
@@ -50,8 +44,11 @@ public class SqlProvider {
     public static final String create = "create";
     public static final String creates = "creates";
     public static final String updateBySql = "updateBySql";
+    public static int DEFAULT_BATCH_SIZE = 1000;
+    @Setter
+    private static SqlSessionFactory sqlSessionFactory;
 
-    protected static void clearSelectColumns(@NotNull Query<?> q) {
+    protected static void clearSelectColumns(@NotNull Query<?, ?> q) {
         if (q.hasSelectColumn) {
             q.clearSelectColumns();
             log.error("select ... from 中间不能有字段或者函数");
@@ -60,7 +57,7 @@ public class SqlProvider {
 
     @NotNull
     private static String genCommonSql(@NotNull Map<String, Object> params) {
-        var where = (Crud<?, ?>) params.get(CRUD);
+        var where = (Crud<?, ?, ?>) params.get(CRUD);
         putEntityType(params, where.entityType);
         var pair = where.sql();
         params.put(SQL_PARAMS, pair.right);
@@ -143,7 +140,7 @@ public class SqlProvider {
     }
 
     @NotNull
-    public static <T, ID, R> Page<T> page(@NotNull OrmDao<T, ID> dao, @NotNull Page<R> page, @NotNull Query<T> q) {
+    public static <T, ID, R> Page<T> page(@NotNull OrmDao<T, ID> dao, @NotNull Page<R> page, @NotNull Query<T, ID> q) {
         q.limit = page.pageSize();
         q.offset = page.offset();
         q.orderBy(page.sorts());
@@ -172,7 +169,7 @@ public class SqlProvider {
 
     @NotNull
     public String getNullable(@NotNull Map<String, Object> params) {
-        var q = (Query<?>) params.get(CRUD);
+        var q = (Query<?, ?>) params.get(CRUD);
         if (q.limit == null) {
             q.limit = 1;
         }
@@ -196,7 +193,7 @@ public class SqlProvider {
 
     @NotNull
     public String count(@NotNull Map<String, Object> params) {
-        var q = (Query<?>) params.get(CRUD);
+        var q = (Query<?, ?>) params.get(CRUD);
         clearSelectColumns(q);
         q.limit = null;
         q.offset = null;

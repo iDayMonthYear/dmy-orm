@@ -1,6 +1,6 @@
 package cn.com.idmy.orm.mybatis;
 
-import cn.com.idmy.base.model.IEnum;
+import cn.com.idmy.base.IEnum;
 import cn.com.idmy.orm.annotation.WatchEnum.Action;
 import cn.com.idmy.orm.annotation.WatchEnum.Timing;
 import cn.com.idmy.orm.listener.EnumWatchEvent;

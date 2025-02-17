@@ -65,10 +65,6 @@ public abstract class SqlGenerator {
         tableName = Tables.getTableName(entityType);
     }
 
-    protected String keyword(@NonNull String val) {
-        return STRESS_MARK + val + STRESS_MARK;
-    }
-
     protected static StringBuilder genPlaceholder(@NonNull Object val, @NonNull StringBuilder ph) {
         if (val instanceof Collection<?> ls) {
             genPlaceholder(ph, ls.size());
@@ -89,6 +85,31 @@ public abstract class SqlGenerator {
             }
         }
         ph.append(BRACKET_RIGHT);
+    }
+
+    protected static void skipAdjoinOr(@NonNull SqlNode node, @NonNull List<SqlNode> wheres) {
+        if (CollUtil.isNotEmpty(wheres)) {
+            if (wheres.getLast().type == Type.OR) {
+                if (log.isDebugEnabled()) {
+                    log.warn("存在相邻的 or，已自动移除");
+                }
+            } else {
+                wheres.add(node);
+            }
+        }
+    }
+
+    protected static void removeLastOr(@NonNull List<SqlNode> ls) {
+        if (CollUtil.isNotEmpty(ls) && ls.getLast() instanceof SqlOr) {
+            ls.removeLast();
+            if (log.isDebugEnabled()) {
+                log.warn("where 条件最后存在 or，已自动移除");
+            }
+        }
+    }
+
+    protected String keyword(@NonNull String val) {
+        return STRESS_MARK + val + STRESS_MARK;
     }
 
     protected String genCond(@NonNull String col, @NonNull SqlOpExpr expr) {
@@ -132,27 +153,6 @@ public abstract class SqlGenerator {
             sql.append(OR);
         } else if (node instanceof SqlCond cond) {
             genCond(cond);
-        }
-    }
-
-    protected static void skipAdjoinOr(@NonNull SqlNode node, @NonNull List<SqlNode> wheres) {
-        if (CollUtil.isNotEmpty(wheres)) {
-            if (wheres.getLast().type == Type.OR) {
-                if (log.isDebugEnabled()) {
-                    log.warn("存在相邻的 or，已自动移除");
-                }
-            } else {
-                wheres.add(node);
-            }
-        }
-    }
-
-    protected static void removeLastOr(@NonNull List<SqlNode> ls) {
-        if (CollUtil.isNotEmpty(ls) && ls.getLast() instanceof SqlOr) {
-            ls.removeLast();
-            if (log.isDebugEnabled()) {
-                log.warn("where 条件最后存在 or，已自动移除");
-            }
         }
     }
 

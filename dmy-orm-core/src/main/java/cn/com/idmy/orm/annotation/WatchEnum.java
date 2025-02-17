@@ -1,6 +1,6 @@
 package cn.com.idmy.orm.annotation;
 
-import cn.com.idmy.base.model.IEnum;
+import cn.com.idmy.base.IEnum;
 
 import java.lang.annotation.*;
 

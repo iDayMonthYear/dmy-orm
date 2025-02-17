@@ -1,8 +1,11 @@
 package cn.com.idmy.orm;
 
-import cn.com.idmy.base.annotation.Table;
-import cn.com.idmy.base.annotation.Table.IdType;
-import cn.com.idmy.orm.core.*;
+import cn.com.idmy.base.FieldGetter;
+import cn.com.idmy.base.annotation.IdType;
+import cn.com.idmy.orm.core.CrudInterceptor;
+import cn.com.idmy.orm.core.CrudInterceptors;
+import cn.com.idmy.orm.core.SqlProvider;
+import cn.com.idmy.orm.core.Tables;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -16,29 +19,23 @@ import org.jetbrains.annotations.NotNull;
 public class OrmConfig {
     @Getter
     private final static OrmConfig config = new OrmConfig();
-
-    @Accessors(fluent = false)
-    @Getter
-    @RequiredArgsConstructor
-    public enum NameStrategy {
-        DEFAULT("默认"),
-        LOWER("小写"),
-        UPPER("大写"),
-        LOWER_UNDERLINE("小写下划线"),
-        UPPER_UNDERLINE("大写下划线");
-        private final String name;
-    }
-
     @Setter
     private boolean enableIEnumValue;
-
     @Setter
     @NotNull
-    private Table.IdType defaultIdType = IdType.AUTO;
+    private IdType defaultIdType = IdType.AUTO;
     @NotNull
     private NameStrategy tableNameStrategy = NameStrategy.DEFAULT;
     @NotNull
     private NameStrategy columnNameStrategy = NameStrategy.DEFAULT;
+
+    public static <T, R> void register(@NotNull Class<T> entityType, @NotNull FieldGetter<T, R> col, @NotNull TypeHandler<?> handler) {
+        Tables.bindTypeHandler(entityType, col, handler);
+    }
+
+    public static void register(@NotNull CrudInterceptor interceptor) {
+        CrudInterceptors.addInterceptor(interceptor);
+    }
 
     public void defaultBatchSize(int size) {
         if (size > 10) {
@@ -67,11 +64,15 @@ public class OrmConfig {
         return nameStrategy(name, columnNameStrategy);
     }
 
-    public static <T, R> void register(@NotNull Class<T> entityType, @NotNull FieldGetter<T, R> col, @NotNull TypeHandler<?> handler) {
-        Tables.bindTypeHandler(entityType, col, handler);
-    }
-
-    public static void register(@NotNull CrudInterceptor interceptor) {
-        CrudInterceptors.addInterceptor(interceptor);
+    @Accessors(fluent = false)
+    @Getter
+    @RequiredArgsConstructor
+    public enum NameStrategy {
+        DEFAULT("默认"),
+        LOWER("小写"),
+        UPPER("大写"),
+        LOWER_UNDERLINE("小写下划线"),
+        UPPER_UNDERLINE("大写下划线");
+        private final String name;
     }
 }

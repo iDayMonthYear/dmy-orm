@@ -14,12 +14,12 @@ import java.util.Objects;
 
 @Slf4j
 @Accessors(fluent = true, chain = true)
-abstract class Crud<T, CRUD extends Crud<T, CRUD>> {
-    @NotNull
-    protected List<SqlNode> nodes = new ArrayList<>();
+abstract class Crud<T, ID, CRUD extends Crud<T, ID, CRUD>> {
     @SuppressWarnings({"unchecked"})
     @NotNull
     protected final CRUD crud = (CRUD) this;
+    @NotNull
+    protected List<SqlNode> nodes = new ArrayList<>();
     @NotNull
     protected Class<T> entityType;
     protected int sqlParamsSize;

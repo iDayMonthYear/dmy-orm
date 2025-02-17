@@ -6,13 +6,13 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 import java.util.function.Consumer;
 
-public class WhereOr<T> extends Where<T, WhereOr<T>> {
+public class WhereOr<T, ID> extends Where<T, ID, WhereOr<T, ID>> {
     protected WhereOr(@NotNull Class<T> entityType) {
         super(entityType);
     }
 
     @Override
-    public @NotNull WhereOr<T> or(@NotNull Consumer<WhereOr<T>> consumer) {
+    public @NotNull WhereOr<T, ID> or(@NotNull Consumer<WhereOr<T, ID>> consumer) {
         throw new UnsupportedOperationException("不支持");
     }
 

@@ -1,8 +1,8 @@
 package cn.com.idmy.ts.server.model.entity;
 
+import cn.com.idmy.base.annotation.Id;
+import cn.com.idmy.base.annotation.IdType;
 import cn.com.idmy.base.annotation.Table;
-import cn.com.idmy.base.annotation.Table.Id;
-import cn.com.idmy.base.annotation.Table.IdType;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;

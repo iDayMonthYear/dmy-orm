@@ -8,24 +8,23 @@ import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.Serializable;
 import java.util.List;
 
 
 @Slf4j
 @Getter
 @Accessors(fluent = true, chain = false)
-public class Delete<T> extends Where<T, Delete<T>> {
-    protected OrmDao<T, ?> dao;
+public class Delete<T, ID> extends Where<T, ID, Delete<T, ID>> {
+    protected OrmDao<T, ID> dao;
     protected boolean force;
 
-    protected Delete(@NotNull OrmDao<T, ?> dao) {
+    protected Delete(@NotNull OrmDao<T, ID> dao) {
         super(dao.entityType());
         this.dao = dao;
     }
 
     @NotNull
-    public static <T, ID> Delete<T> of(@NotNull OrmDao<T, ID> dao) {
+    public static <T, ID> Delete<T, ID> of(@NotNull OrmDao<T, ID> dao) {
         return new Delete<>(dao);
     }
 
@@ -33,7 +32,7 @@ public class Delete<T> extends Where<T, Delete<T>> {
         force = true;
     }
 
-    public boolean delete(@NonNull Serializable id) {
+    public boolean delete(@NonNull ID id) {
         eq(id);
         return SqlUtil.toBoolean(dao.delete(this));
     }

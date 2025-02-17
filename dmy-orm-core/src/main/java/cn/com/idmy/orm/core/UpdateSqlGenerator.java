@@ -18,9 +18,9 @@ import java.util.List;
 
 @Slf4j
 class UpdateSqlGenerator extends SqlGenerator {
-    protected final Update<?> update;
+    protected final Update<?, ?> update;
 
-    protected UpdateSqlGenerator(Update<?> u) {
+    protected UpdateSqlGenerator(Update<?, ?> u) {
         super(u.entityType, u.nodes);
         this.update = u;
     }

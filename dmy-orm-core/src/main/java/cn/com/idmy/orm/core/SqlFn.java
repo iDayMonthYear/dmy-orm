@@ -1,5 +1,6 @@
 package cn.com.idmy.orm.core;
 
+import cn.com.idmy.base.FieldGetter;
 import cn.com.idmy.base.util.LambdaUtil;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

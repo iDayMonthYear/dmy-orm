@@ -1,7 +1,7 @@
 package cn.com.idmy.orm.mybatis.handler;
 
+import cn.com.idmy.base.IEnum;
 import cn.com.idmy.base.annotation.EnumValue;
-import cn.com.idmy.base.model.IEnum;
 import cn.com.idmy.orm.OrmConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.type.BaseTypeHandler;

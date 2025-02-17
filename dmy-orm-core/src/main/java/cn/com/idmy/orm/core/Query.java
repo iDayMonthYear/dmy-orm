@@ -1,5 +1,6 @@
 package cn.com.idmy.orm.core;
 
+import cn.com.idmy.base.FieldGetter;
 import cn.com.idmy.base.config.DefaultConfig;
 import cn.com.idmy.base.model.Pair;
 import cn.com.idmy.orm.OrmException;
@@ -9,6 +10,7 @@ import lombok.Setter;
 import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.hutool.core.array.ArrayUtil;
+import org.dromara.hutool.core.bean.BeanUtil;
 import org.dromara.hutool.core.reflect.FieldUtil;
 import org.dromara.hutool.core.text.StrUtil;
 import org.dromara.hutool.core.util.ObjUtil;
@@ -24,27 +26,32 @@ import static cn.com.idmy.orm.core.Tables.getIdName;
 
 @Slf4j
 @Accessors(fluent = true, chain = false)
-public class Query<T> extends Where<T, Query<T>> {
-    boolean hasSelectColumn;
+public class Query<T, ID> extends Where<T, ID, Query<T, ID>> {
     @Getter
     @Setter
     @Nullable
     protected Integer offset;
-
     @Getter
     @Setter
     @Nullable
     protected Integer limit;
     protected boolean hasParam;
     protected boolean force;
+    boolean hasSelectColumn;
+    protected OrmDao<T, ID> dao;
 
     protected Query(@NotNull Class<T> entityType) {
         super(entityType);
     }
 
+    protected Query(@NotNull OrmDao<T, ID> dao) {
+        this(dao.entityType());
+        this.dao = dao;
+    }
+
     @NotNull
-    public static <T, ID> Query<T> of(@NotNull OrmDao<T, ID> dao) {
-        return new Query<>(dao.entityType());
+    public static <T, ID> Query<T, ID> of(@NotNull OrmDao<T, ID> dao) {
+        return new Query<>(dao);
     }
 
     public void force() {
@@ -52,13 +59,13 @@ public class Query<T> extends Where<T, Query<T>> {
     }
 
     @NotNull
-    public Query<T> distinct() {
+    public Query<T, ID> distinct() {
         hasSelectColumn = true;
         return addNode(new SqlDistinct());
     }
 
     @NotNull
-    public Query<T> distinct(@NotNull FieldGetter<T, ?> field) {
+    public Query<T, ID> distinct(@NotNull FieldGetter<T, ?> field) {
         hasSelectColumn = true;
         return addNode(new SqlDistinct(getColumnName(entityType, field)));
     }
@@ -68,20 +75,20 @@ public class Query<T> extends Where<T, Query<T>> {
     }
 
     @NotNull
-    public Query<T> select(@NotNull SqlFnExpr<T> expr) {
+    public Query<T, ID> select(@NotNull SqlFnExpr<T> expr) {
         hasSelectColumn = true;
         return addNode(new SelectSqlColumn(expr));
     }
 
     @NotNull
-    public Query<T> select(@NotNull SqlFnExpr<T> expr, @NotNull FieldGetter<T, ?> alias) {
+    public Query<T, ID> select(@NotNull SqlFnExpr<T> expr, @NotNull FieldGetter<T, ?> alias) {
         hasSelectColumn = true;
         return addNode(new SelectSqlColumn(expr, getColumnName(entityType, alias)));
     }
 
     @SafeVarargs
     @NotNull
-    public final Query<T> select(@NotNull FieldGetter<T, ?>... fields) {
+    public final Query<T, ID> select(@NotNull FieldGetter<T, ?>... fields) {
         if (ArrayUtil.isNotEmpty(fields)) {
             hasSelectColumn = true;
             for (var field : fields) {
@@ -92,13 +99,13 @@ public class Query<T> extends Where<T, Query<T>> {
     }
 
     @NotNull
-    public Query<T> groupBy(@NotNull FieldGetter<T, ?> field) {
+    public Query<T, ID> groupBy(@NotNull FieldGetter<T, ?> field) {
         return addNode(new SqlGroupBy(getColumnName(entityType, field)));
     }
 
     @NotNull
     @SafeVarargs
-    public final Query<T> groupBy(@NotNull FieldGetter<T, ?>... fields) {
+    public final Query<T, ID> groupBy(@NotNull FieldGetter<T, ?>... fields) {
         for (var field : fields) {
             addNode(new SqlGroupBy(getColumnName(entityType, field)));
         }
@@ -106,27 +113,27 @@ public class Query<T> extends Where<T, Query<T>> {
     }
 
     @NotNull
-    public Query<T> orderBy(@NotNull FieldGetter<T, ?> field) {
+    public Query<T, ID> orderBy(@NotNull FieldGetter<T, ?> field) {
         return addNode(new SqlOrderBy(getColumnName(entityType, field), false));
     }
 
     @NotNull
-    public Query<T> orderBy(@NotNull FieldGetter<T, ?> field, boolean desc) {
+    public Query<T, ID> orderBy(@NotNull FieldGetter<T, ?> field, boolean desc) {
         return addNode(new SqlOrderBy(getColumnName(entityType, field), desc));
     }
 
     @NotNull
-    public Query<T> orderBy(@NotNull FieldGetter<T, ?> field1, boolean desc1, @NotNull FieldGetter<T, ?> field2, boolean desc2) {
+    public Query<T, ID> orderBy(@NotNull FieldGetter<T, ?> field1, boolean desc1, @NotNull FieldGetter<T, ?> field2, boolean desc2) {
         return addNode(new SqlOrderBy(getColumnName(entityType, field1), desc1)).addNode(new SqlOrderBy(getColumnName(entityType, field2), desc2));
     }
 
     @NotNull
-    public Query<T> orderBy(@NotNull FieldGetter<T, ?> field1, boolean desc1, @NotNull FieldGetter<T, ?> field2, boolean desc2, @NotNull FieldGetter<T, ?> field3, boolean desc3) {
+    public Query<T, ID> orderBy(@NotNull FieldGetter<T, ?> field1, boolean desc1, @NotNull FieldGetter<T, ?> field2, boolean desc2, @NotNull FieldGetter<T, ?> field3, boolean desc3) {
         return addNode(new SqlOrderBy(getColumnName(entityType, field1), desc1)).addNode(new SqlOrderBy(getColumnName(entityType, field2), desc2)).addNode(new SqlOrderBy(getColumnName(entityType, field3), desc3));
     }
 
     @NotNull
-    public Query<T> orderBy(@Nullable String[] orders) {
+    public Query<T, ID> orderBy(@Nullable String[] orders) {
         if (ArrayUtil.isNotEmpty(orders)) {
             if (orders.length % 2 != 0) {
                 throw new OrmException("排序列名不成对，必须为：['name', 'asc', 'gender', 'desc']");
@@ -149,7 +156,7 @@ public class Query<T> extends Where<T, Query<T>> {
     }
 
     @NotNull
-    public Query<T> param(@Nullable Object param) {
+    public Query<T, ID> param(@Nullable Object param) {
         if (!hasParam && param != null) {
             hasParam = true;
             var createdAtName = DefaultConfig.createdAtName;
@@ -181,6 +188,16 @@ public class Query<T> extends Where<T, Query<T>> {
             }
         }
         return this;
+    }
+
+    public <E> List<E> list(Class<E> type) {
+        List<T> ls = dao.list(this);
+        return BeanUtil.copyToList(ls, type);
+    }
+
+    public <E> E get(Class<E> type) {
+        T t = dao.get(this);
+        return BeanUtil.copyProperties(t, type);
     }
 
     @NotNull

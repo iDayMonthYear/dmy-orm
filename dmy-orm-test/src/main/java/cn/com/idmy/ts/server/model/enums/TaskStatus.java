@@ -1,6 +1,6 @@
 package cn.com.idmy.ts.server.model.enums;
 
-import cn.com.idmy.base.model.IEnum;
+import cn.com.idmy.base.IEnum;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.Accessors;

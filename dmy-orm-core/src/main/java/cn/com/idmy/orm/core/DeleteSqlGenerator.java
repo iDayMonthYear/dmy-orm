@@ -14,9 +14,9 @@ import java.util.List;
 @Slf4j
 class DeleteSqlGenerator extends SqlGenerator {
     @NotNull
-    protected Delete<?> delete;
+    protected Delete<?, ?> delete;
 
-    protected DeleteSqlGenerator(@NotNull Delete<?> d) {
+    protected DeleteSqlGenerator(@NotNull Delete<?, ?> d) {
         super(d.entityType, d.nodes);
         this.delete = d;
     }

@@ -1,9 +1,10 @@
 package cn.com.idmy.orm.core;
 
+import cn.com.idmy.base.FieldGetter;
+import cn.com.idmy.base.annotation.Column;
+import cn.com.idmy.base.annotation.Id;
+import cn.com.idmy.base.annotation.IdType;
 import cn.com.idmy.base.annotation.Table;
-import cn.com.idmy.base.annotation.Table.Column;
-import cn.com.idmy.base.annotation.Table.Id;
-import cn.com.idmy.base.annotation.Table.IdType;
 import cn.com.idmy.base.util.LambdaUtil;
 import cn.com.idmy.orm.OrmConfig;
 import cn.com.idmy.orm.OrmException;
@@ -104,11 +105,9 @@ public class Tables {
             if (!field.isAnnotationPresent(Column.class) || !field.getAnnotation(Column.class).ignore()) {
                 Column column = field.getAnnotation(Column.class);
                 String name = null;
-                boolean large = false;
                 String title = null;
                 if (column != null) {
                     name = column.name();
-                    large = column.large();
                     title = column.value();
                 }
                 if (StrUtil.isBlank(name)) {
@@ -118,7 +117,7 @@ public class Tables {
                     title = null;
                 }
                 if (!columnMap.containsKey(field.getName())) {
-                    var tableColumn = new TableColumn(field, name, large, title);
+                    var tableColumn = new TableColumn(field, name, title);
                     columns.add(tableColumn);
                     columnMap.put(field.getName(), tableColumn);
                 }

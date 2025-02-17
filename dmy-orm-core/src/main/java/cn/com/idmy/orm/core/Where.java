@@ -1,5 +1,6 @@
 package cn.com.idmy.orm.core;
 
+import cn.com.idmy.base.FieldGetter;
 import cn.com.idmy.orm.core.SqlNode.SqlCond;
 import cn.com.idmy.orm.core.SqlNode.SqlOr;
 import lombok.NonNull;
@@ -20,7 +21,7 @@ import java.util.function.Consumer;
 
 @Slf4j
 @Accessors(fluent = true, chain = false)
-public abstract class Where<T, CRUD extends Where<T, CRUD>> extends Crud<T, CRUD> {
+public abstract class Where<T, ID, CRUD extends Where<T, ID, CRUD>> extends Crud<T, ID, CRUD> {
     protected Where(@NotNull Class<T> entityType) {
         super(entityType);
     }
@@ -47,7 +48,7 @@ public abstract class Where<T, CRUD extends Where<T, CRUD>> extends Crud<T, CRUD
     //region 比较操作
     // 等于
     @NotNull
-    public CRUD eq(@NonNull Object id) {
+    public CRUD eq(@NonNull ID id) {
         return ObjUtil.isEmpty(id) ? crud : addNode(new SqlCond(Tables.getIdName(entityType), Op.EQ, id));
     }
 
@@ -77,6 +78,11 @@ public abstract class Where<T, CRUD extends Where<T, CRUD>> extends Crud<T, CRUD
     }
 
     // 不等于
+    @NotNull
+    public CRUD ne(@NonNull ID id) {
+        return ObjUtil.isEmpty(id) ? crud : addNode(new SqlCond(Tables.getIdName(entityType), Op.EQ, id));
+    }
+
     @NotNull
     public CRUD ne(@NotNull FieldGetter<T, ?> field, @Nullable Object val) {
         return ObjUtil.isEmpty(val) ? crud : addNode(new SqlCond(entityType, field, Op.NE, val));
@@ -583,8 +589,8 @@ public abstract class Where<T, CRUD extends Where<T, CRUD>> extends Crud<T, CRUD
     //endregion
 
     @NotNull
-    public CRUD or(@NotNull Consumer<WhereOr<T>> consumer) {
-        var where = new WhereOr<>(entityType);
+    public CRUD or(@NotNull Consumer<WhereOr<T, ID>> consumer) {
+        var where = new WhereOr<T, ID>(entityType);
         consumer.accept(where);
         addNode(new SqlOr());
         nodes.addAll(where.nodes);
