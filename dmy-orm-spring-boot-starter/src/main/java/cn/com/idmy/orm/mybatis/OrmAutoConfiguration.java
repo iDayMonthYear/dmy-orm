@@ -41,7 +41,9 @@ public class OrmAutoConfiguration {
     @Lazy
     SqlSessionFactory sqlSessionFactory(OrmProps props, DataSource dataSource, ApplicationContext ctx) throws Exception {
         OrmConfig cfg = OrmConfig.config();
-        cfg.enableIEnumValue(props.isEnableIEnumValue());
+        if (props.getEnableIEnumValue() != null) {
+            cfg.enableIEnumValue(props.getEnableIEnumValue());
+        }
         var bean = new SqlSessionFactoryBean();
         bean.setDataSource(dataSource);
         var configuration = new MybatisConfiguration();
@@ -58,7 +60,7 @@ public class OrmAutoConfiguration {
 
         var factory = bean.getObject();
         SqlProvider.sqlSessionFactory(factory);
-        if (props.isCheckDbColumn()) {
+        if (Boolean.TRUE.equals(props.getCheckDbColumn())) {
             new CheckDbColumn(ctx, factory).scan();
         }
         return factory;

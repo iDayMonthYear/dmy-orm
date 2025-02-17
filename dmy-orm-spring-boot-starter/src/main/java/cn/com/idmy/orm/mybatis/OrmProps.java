@@ -14,8 +14,8 @@ import java.util.stream.Stream;
 @ConfigurationProperties(prefix = "orm")
 public class OrmProps {
     private static final ResourcePatternResolver resourceResolver = new PathMatchingResourcePatternResolver();
-    private boolean checkDbColumn = false;
-    private boolean enableIEnumValue = false;
+    private Boolean checkDbColumn;
+    private Boolean enableIEnumValue;
     private String[] mapperLocations = new String[]{"classpath*:/dao/**/*.xml"};
 
     private Resource[] resources(String location) {

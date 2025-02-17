@@ -3,6 +3,7 @@ package cn.com.idmy.orm.mybatis.handler;
 import cn.com.idmy.base.IEnum;
 import cn.com.idmy.base.annotation.EnumValue;
 import cn.com.idmy.orm.OrmConfig;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.type.BaseTypeHandler;
 import org.apache.ibatis.type.JdbcType;
@@ -34,15 +35,12 @@ public class EnumTypeHandler<E extends Enum<E>> extends BaseTypeHandler<E> {
         this.valueField = getEnumValueField(type);
     }
 
+    @SneakyThrows
     @Override
-    public void setNonNullParameter(@NotNull PreparedStatement ps, int idx, @NotNull E param, @NotNull JdbcType jdbcType) throws SQLException {
+    public void setNonNullParameter(@NotNull PreparedStatement ps, int idx, @NotNull E param, @NotNull JdbcType jdbcType) {
         if (valueField != null) {
-            try {
-                ps.setObject(idx, valueField.get(param));
-            } catch (IllegalAccessException e) {
-                throw new SQLException(e);
-            }
-        } else if (isIEnum && enableIEnumValue) {
+            ps.setObject(idx, valueField.get(param));
+        } else if (enableIEnumValue && isIEnum) {
             ps.setObject(idx, ((IEnum<?>) param).value());
         } else {
             ps.setObject(idx, param.name());
