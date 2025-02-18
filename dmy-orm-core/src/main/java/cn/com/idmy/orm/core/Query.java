@@ -2,6 +2,7 @@ package cn.com.idmy.orm.core;
 
 import cn.com.idmy.base.FieldGetter;
 import cn.com.idmy.base.config.DefaultConfig;
+import cn.com.idmy.base.model.Page;
 import cn.com.idmy.base.model.Pair;
 import cn.com.idmy.orm.OrmException;
 import cn.com.idmy.orm.core.SqlNode.*;
@@ -191,13 +192,34 @@ public class Query<T, ID> extends Where<T, ID, Query<T, ID>> {
     }
 
     public <E> List<E> list(Class<E> type) {
-        List<T> ls = dao.list(this);
-        return BeanUtil.copyToList(ls, type);
+        if (type == entityType) {
+            throw new OrmException("不能查询为当前实体");
+        } else {
+            var ls = dao.list(this);
+            return BeanUtil.copyToList(ls, type);
+        }
     }
 
     public <E> E get(Class<E> type) {
-        T t = dao.get(this);
-        return BeanUtil.copyProperties(t, type);
+        if (type == entityType) {
+            throw new OrmException("不能查询为当前实体");
+        } else {
+            T t = dao.get(this);
+            return BeanUtil.copyProperties(t, type);
+        }
+    }
+
+    public <E> Page<E> page(Page<?> in, Class<E> type) {
+        if (type == entityType) {
+            throw new OrmException("不能查询为当前实体");
+        } else {
+            Page<T> page = dao.page(in, this);
+            if (page.isEmpty()) {
+                return Page.empty();
+            } else {
+                return page.convert(t -> BeanUtil.copyProperties(t, type));
+            }
+        }
     }
 
     @NotNull
