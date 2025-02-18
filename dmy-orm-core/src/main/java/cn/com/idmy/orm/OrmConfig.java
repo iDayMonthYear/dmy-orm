@@ -29,11 +29,11 @@ public class OrmConfig {
     @NotNull
     private NameStrategy columnNameStrategy = NameStrategy.DEFAULT;
 
-    public static <T, R> void register(@NotNull Class<T> entityType, @NotNull FieldGetter<T, R> col, @NotNull TypeHandler<?> handler) {
+    public static <T, R> void registerTypeHandler(@NotNull Class<T> entityType, @NotNull FieldGetter<T, R> col, @NotNull TypeHandler<?> handler) {
         Tables.bindTypeHandler(entityType, col, handler);
     }
 
-    public static void register(@NotNull CrudInterceptor interceptor) {
+    public static void registerCrudInterceptor(@NotNull CrudInterceptor interceptor) {
         CrudInterceptors.addInterceptor(interceptor);
     }
 
