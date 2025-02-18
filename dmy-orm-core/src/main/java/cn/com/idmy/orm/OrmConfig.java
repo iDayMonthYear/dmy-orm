@@ -33,7 +33,7 @@ public class OrmConfig {
         Tables.bindTypeHandler(entityType, col, handler);
     }
 
-    public static void registerCrudInterceptor(@NotNull CrudInterceptor interceptor) {
+    public static void registerInterceptor(@NotNull CrudInterceptor interceptor) {
         CrudInterceptors.addInterceptor(interceptor);
     }
 

@@ -19,8 +19,8 @@ import org.springframework.scheduling.annotation.EnableAsync;
 @MapperScan("cn.com.idmy.ts.server.dao")
 public class Application {
     public static void main(String[] args) {
-        OrmConfig.registerCrudInterceptor(new QueryInterceptor());
-        OrmConfig.registerCrudInterceptor(new AuditInterceptor());
+        OrmConfig.registerInterceptor(new QueryInterceptor());
+        OrmConfig.registerInterceptor(new AuditInterceptor());
         SpringApplication.run(Application.class, args);
     }
 }

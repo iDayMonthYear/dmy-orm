@@ -17,7 +17,6 @@ import org.dromara.hutool.core.reflect.FieldUtil;
 import org.dromara.hutool.core.text.StrUtil;
 import org.jetbrains.annotations.NotNull;
 
-import java.lang.reflect.Field;
 import java.sql.Statement;
 import java.util.Map;
 
@@ -25,14 +24,16 @@ public class CustomIdGenerator implements KeyGenerator {
     protected final Configuration configuration;
     protected final TableInfo table;
     protected final TableId id;
-    @NotNull
-    protected IdGenerator<Object> idGenerator;
+    protected IdGenerator<?> idGenerator;
 
     public CustomIdGenerator(@NotNull Configuration cfg, @NotNull TableInfo table) {
         this.configuration = cfg;
         this.table = table;
         this.id = table.id();
-        var value = this.id.value();
+    }
+
+    protected void loadIdGenerator() {
+        String value = id.value();
         if (StrUtil.isBlank(value)) {
             value = "DB";
         }
@@ -46,11 +47,14 @@ public class CustomIdGenerator implements KeyGenerator {
 
     @Override
     public void processBefore(Executor executor, MappedStatement ms, Statement st, Object parameter) {
-        Object entity = ((Map<?, ?>) parameter).get(SqlProvider.ENTITY);
+        var entity = ((Map<?, ?>) parameter).get(SqlProvider.ENTITY);
         try {
-            Field field = id.field();
-            Object existId = FieldUtil.getFieldValue(entity, field.getName());
+            var field = id.field();
+            var existId = FieldUtil.getFieldValue(entity, field.getName());
             if (existId == null || (existId instanceof String str && StrUtil.isNotBlank(str))) {
+                if (idGenerator == null) {
+                    loadIdGenerator();
+                }
                 var newId = ConvertUtil.convert(field.getType(), idGenerator.gen(entity.getClass()));
                 var metaObject = configuration.newMetaObject(parameter).metaObjectForProperty(SqlProvider.ENTITY);
                 this.setValue(metaObject, field.getName(), newId);
@@ -66,10 +70,10 @@ public class CustomIdGenerator implements KeyGenerator {
     }
 
     private void setValue(MetaObject metaParam, String fieldName, Object value) {
-        if (!metaParam.hasSetter(fieldName)) {
-            throw new ExecutorException("No setter found for the keyProperty '" + fieldName + "' in " + metaParam.getOriginalObject().getClass().getName() + ".");
-        } else {
+        if (metaParam.hasSetter(fieldName)) {
             metaParam.setValue(fieldName, value);
+        } else {
+            throw new ExecutorException("No setter found for the keyProperty '" + fieldName + "' in " + metaParam.getOriginalObject().getClass().getName() + ".");
         }
     }
 }
