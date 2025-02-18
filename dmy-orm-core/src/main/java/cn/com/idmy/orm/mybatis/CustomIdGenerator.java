@@ -1,6 +1,7 @@
 package cn.com.idmy.orm.mybatis;
 
 
+import cn.com.idmy.base.IdGenerator;
 import cn.com.idmy.orm.OrmException;
 import cn.com.idmy.orm.core.SqlProvider;
 import cn.com.idmy.orm.core.TableInfo;
@@ -11,10 +12,12 @@ import org.apache.ibatis.executor.keygen.KeyGenerator;
 import org.apache.ibatis.mapping.MappedStatement;
 import org.apache.ibatis.reflection.MetaObject;
 import org.apache.ibatis.session.Configuration;
+import org.dromara.hutool.core.convert.ConvertUtil;
 import org.dromara.hutool.core.reflect.FieldUtil;
 import org.dromara.hutool.core.text.StrUtil;
 import org.jetbrains.annotations.NotNull;
 
+import java.lang.reflect.Field;
 import java.sql.Statement;
 import java.util.Map;
 
@@ -45,11 +48,12 @@ public class CustomIdGenerator implements KeyGenerator {
     public void processBefore(Executor executor, MappedStatement ms, Statement st, Object parameter) {
         Object entity = ((Map<?, ?>) parameter).get(SqlProvider.ENTITY);
         try {
-            Object existId = FieldUtil.getFieldValue(entity, id.field().getName());
+            Field field = id.field();
+            Object existId = FieldUtil.getFieldValue(entity, field.getName());
             if (existId == null || (existId instanceof String str && StrUtil.isNotBlank(str))) {
-                var newId = idGenerator.generate(entity, id.name());
+                var newId = ConvertUtil.convert(field.getType(), idGenerator.gen(field.getType(), entity.getClass()));
                 var metaObject = configuration.newMetaObject(parameter).metaObjectForProperty(SqlProvider.ENTITY);
-                this.setValue(metaObject, id.field().getName(), newId);
+                this.setValue(metaObject, field.getName(), newId);
             }
         } catch (Exception e) {
             throw new OrmException("获取自定义ID异常：{}", e.getMessage(), e);

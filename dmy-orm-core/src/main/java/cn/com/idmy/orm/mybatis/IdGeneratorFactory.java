@@ -1,6 +1,7 @@
 package cn.com.idmy.orm.mybatis;
 
 
+import cn.com.idmy.base.IdGenerator;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
@@ -10,7 +11,7 @@ import java.util.Map;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class IdGeneratorFactory {
-    private static final Map<String, IdGenerator> idGenerator = new HashMap<>();
+    private static final Map<String, IdGenerator> idGenerator = new HashMap<>(1);
 
     public static IdGenerator getGenerator(@NonNull String key) {
         return idGenerator.get(key.trim());
