@@ -11,13 +11,13 @@ import java.util.Map;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class IdGeneratorFactory {
-    private static final Map<String, IdGenerator> idGenerator = new HashMap<>(1);
+    private static final Map<String, IdGenerator<Object>> idGenerator = new HashMap<>(1);
 
-    public static IdGenerator getGenerator(@NonNull String key) {
+    public static IdGenerator<Object> getGenerator(@NonNull String key) {
         return idGenerator.get(key.trim());
     }
 
-    public static void register(String key, IdGenerator generator) {
+    public static void register(String key, IdGenerator<Object> generator) {
         idGenerator.put(key.trim(), generator);
     }
 }

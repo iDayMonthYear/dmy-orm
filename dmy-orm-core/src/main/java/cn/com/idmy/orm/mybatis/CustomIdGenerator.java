@@ -26,7 +26,7 @@ public class CustomIdGenerator implements KeyGenerator {
     protected final TableInfo table;
     protected final TableId id;
     @NotNull
-    protected IdGenerator idGenerator;
+    protected IdGenerator<Object> idGenerator;
 
     public CustomIdGenerator(@NotNull Configuration cfg, @NotNull TableInfo table) {
         this.configuration = cfg;
@@ -51,7 +51,7 @@ public class CustomIdGenerator implements KeyGenerator {
             Field field = id.field();
             Object existId = FieldUtil.getFieldValue(entity, field.getName());
             if (existId == null || (existId instanceof String str && StrUtil.isNotBlank(str))) {
-                var newId = ConvertUtil.convert(field.getType(), idGenerator.gen(field.getType(), entity.getClass()));
+                var newId = ConvertUtil.convert(field.getType(), idGenerator.gen(entity.getClass()));
                 var metaObject = configuration.newMetaObject(parameter).metaObjectForProperty(SqlProvider.ENTITY);
                 this.setValue(metaObject, field.getName(), newId);
             }

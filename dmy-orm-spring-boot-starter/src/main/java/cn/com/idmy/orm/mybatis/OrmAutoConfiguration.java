@@ -21,24 +21,27 @@ import java.util.List;
 @EnableConfigurationProperties(OrmProps.class)
 public class OrmAutoConfiguration {
     @Bean
+    @Lazy
     @ConditionalOnMissingBean
     SqlProvider mybatisSqlProvider() {
         return new SqlProvider();
     }
 
     @Bean
+    @Lazy
     EnumWatchListener enumWatchListener(ApplicationContext ctx) {
         return new EnumWatchListener(ctx);
     }
 
     @Bean
+    @Lazy
     EnumWatchInterceptor enumWatchInterceptor(ApplicationContext ctx) {
         return new EnumWatchInterceptor(ctx);
     }
 
     @Bean
-    @ConditionalOnMissingBean
     @Lazy
+    @ConditionalOnMissingBean
     SqlSessionFactory sqlSessionFactory(OrmProps props, DataSource dataSource, ApplicationContext ctx) throws Exception {
         OrmConfig cfg = OrmConfig.config();
         if (props.getEnableIEnumValue() != null) {
