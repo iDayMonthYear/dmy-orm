@@ -56,6 +56,11 @@ public class Query<T, ID> extends Where<T, ID, Query<T, ID>> {
         return new Query<>(dao, nullable);
     }
 
+    @NotNull
+    public static <T, ID> Query<T, ID> of(@NotNull OrmDao<T, ID> dao) {
+        return new Query<>(dao, true);
+    }
+
     public void force() {
         force = true;
     }
