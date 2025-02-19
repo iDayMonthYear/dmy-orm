@@ -8,7 +8,6 @@ import lombok.NonNull;
 import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.hutool.core.array.ArrayUtil;
-import org.dromara.hutool.core.collection.CollUtil;
 import org.dromara.hutool.core.text.StrUtil;
 import org.dromara.hutool.core.util.ObjUtil;
 import org.jetbrains.annotations.NotNull;
@@ -370,11 +369,7 @@ public abstract class Where<T, ID, CRUD extends Where<T, ID, CRUD>> extends Crud
     // BETWEEN - 通用类型
     @NotNull
     public CRUD between(@NotNull FieldGetter<T, ?> field, @Nullable Object[] pair) {
-        if (pair == null || pair.length != 2) {
-            return crud;
-        } else {
-            return addNode(new SqlCond(entityType, field, Op.BETWEEN, pair));
-        }
+        return addNode(new SqlCond(entityType, field, Op.BETWEEN, pair));
     }
 
     @NotNull
@@ -400,7 +395,7 @@ public abstract class Where<T, ID, CRUD extends Where<T, ID, CRUD>> extends Crud
     @NotNull
     public CRUD between(@NotNull FieldGetter<T, LocalDateTime> field, @Nullable LocalDateTime start, @Nullable LocalDateTime end) {
         if (start == null && end == null) {
-            return crud;
+            return between(field, null);
         }
         var a = start;
         var b = end;
@@ -428,7 +423,7 @@ public abstract class Where<T, ID, CRUD extends Where<T, ID, CRUD>> extends Crud
     @NotNull
     public CRUD between(@NotNull FieldGetter<T, LocalDate> field, @Nullable LocalDate start, @Nullable LocalDate end) {
         if (start == null && end == null) {
-            return crud;
+            return between(field, null);
         }
         var a = start;
         var b = end;
@@ -450,7 +445,7 @@ public abstract class Where<T, ID, CRUD extends Where<T, ID, CRUD>> extends Crud
     @NotNull
     public CRUD between(@NotNull FieldGetter<T, LocalTime> field, @Nullable LocalTime start, @Nullable LocalTime end) {
         if (start == null && end == null) {
-            return crud;
+            return between(field, null);
         }
         var a = start;
         var b = end;
@@ -475,20 +470,12 @@ public abstract class Where<T, ID, CRUD extends Where<T, ID, CRUD>> extends Crud
     // NOT BETWEEN - 通用类型
     @NotNull
     public CRUD notBetween(@NotNull FieldGetter<T, ?> field, @Nullable Object[] pair) {
-        if (pair == null || pair.length != 2) {
-            return crud;
-        } else {
-            return addNode(new SqlCond(entityType, field, Op.NOT_BETWEEN, pair));
-        }
+        return addNode(new SqlCond(entityType, field, Op.NOT_BETWEEN, pair));
     }
 
     @NotNull
     public CRUD notBetween(@NotNull FieldGetter<T, ?> field, @Nullable Object start, @Nullable Object end) {
-        if (start == null || end == null) {
-            return crud;
-        } else {
-            return addNode(new SqlCond(entityType, field, Op.NOT_BETWEEN, new Object[]{start, end}));
-        }
+        return addNode(new SqlCond(entityType, field, Op.NOT_BETWEEN, new Object[]{start, end}));
     }
 
     @NotNull
@@ -505,7 +492,7 @@ public abstract class Where<T, ID, CRUD extends Where<T, ID, CRUD>> extends Crud
     @NotNull
     public CRUD notBetween(@NotNull FieldGetter<T, LocalDateTime> field, @Nullable LocalDateTime start, @Nullable LocalDateTime end) {
         if (start == null && end == null) {
-            return crud;
+            return notBetween(field, null);
         }
         var a = start;
         var b = end;
@@ -533,7 +520,7 @@ public abstract class Where<T, ID, CRUD extends Where<T, ID, CRUD>> extends Crud
     @NotNull
     public CRUD notBetween(@NotNull FieldGetter<T, LocalDate> field, @Nullable LocalDate start, @Nullable LocalDate end) {
         if (start == null && end == null) {
-            return crud;
+            return notBetween(field, null);
         }
         var a = start;
         var b = end;
@@ -555,7 +542,7 @@ public abstract class Where<T, ID, CRUD extends Where<T, ID, CRUD>> extends Crud
     @NotNull
     public CRUD notBetween(@NotNull FieldGetter<T, LocalTime> field, @Nullable LocalTime start, @Nullable LocalTime end) {
         if (start == null && end == null) {
-            return crud;
+            return notBetween(field, null);
         }
         var a = start;
         var b = end;
