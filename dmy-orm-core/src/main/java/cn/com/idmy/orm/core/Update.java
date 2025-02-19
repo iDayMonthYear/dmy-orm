@@ -19,14 +19,15 @@ public class Update<T, ID> extends Where<T, ID, Update<T, ID>> {
     protected OrmDao<T, ID> dao;
     protected boolean force;
 
-    protected Update(@NotNull OrmDao<T, ID> dao) {
+    protected Update(@NotNull OrmDao<T, ID> dao, boolean nullable) {
         super(dao.entityType());
+        this.nullable = nullable;
         this.dao = dao;
     }
 
     @NotNull
-    public static <T, ID> Update<T, ID> of(@NotNull OrmDao<T, ID> dao) {
-        return new Update<>(dao);
+    public static <T, ID> Update<T, ID> of(@NotNull OrmDao<T, ID> dao, boolean nullable) {
+        return new Update<>(dao, nullable);
     }
 
     @NotNull

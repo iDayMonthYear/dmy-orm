@@ -18,14 +18,15 @@ public class Delete<T, ID> extends Where<T, ID, Delete<T, ID>> {
     protected OrmDao<T, ID> dao;
     protected boolean force;
 
-    protected Delete(@NotNull OrmDao<T, ID> dao) {
+    protected Delete(@NotNull OrmDao<T, ID> dao, boolean nullable) {
         super(dao.entityType());
+        this.nullable = nullable;
         this.dao = dao;
     }
 
     @NotNull
-    public static <T, ID> Delete<T, ID> of(@NotNull OrmDao<T, ID> dao) {
-        return new Delete<>(dao);
+    public static <T, ID> Delete<T, ID> of(@NotNull OrmDao<T, ID> dao, boolean nullable) {
+        return new Delete<>(dao, nullable);
     }
 
     public void force() {

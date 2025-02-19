@@ -38,17 +38,32 @@ public interface OrmDao<T, ID> {
 
     @NotNull
     default Query<T, ID> q() {
-        return Query.of(this);
+        return Query.of(this, true);
+    }
+
+    @NotNull
+    default Query<T, ID> q(boolean nullable) {
+        return Query.of(this, nullable);
     }
 
     @NotNull
     default Update<T, ID> u() {
-        return Update.of(this);
+        return Update.of(this, false);
+    }
+
+    @NotNull
+    default Update<T, ID> u(boolean nullable) {
+        return Update.of(this, nullable);
     }
 
     @NotNull
     default Delete<T, ID> d() {
-        return Delete.of(this);
+        return Delete.of(this, false);
+    }
+
+    @NotNull
+    default Delete<T, ID> d(boolean nullable) {
+        return Delete.of(this, nullable);
     }
 
     @SelectProvider(type = SqlProvider.class, method = SqlProvider.count)

@@ -41,18 +41,19 @@ public class Query<T, ID> extends Where<T, ID, Query<T, ID>> {
     boolean hasSelectColumn;
     protected OrmDao<T, ID> dao;
 
-    protected Query(@NotNull Class<T> entityType) {
+    protected Query(@NotNull Class<T> entityType, boolean nullable) {
         super(entityType);
+        this.nullable = nullable;
     }
 
-    protected Query(@NotNull OrmDao<T, ID> dao) {
-        this(dao.entityType());
+    protected Query(@NotNull OrmDao<T, ID> dao, boolean nullable) {
+        this(dao.entityType(), nullable);
         this.dao = dao;
     }
 
     @NotNull
-    public static <T, ID> Query<T, ID> of(@NotNull OrmDao<T, ID> dao) {
-        return new Query<>(dao);
+    public static <T, ID> Query<T, ID> of(@NotNull OrmDao<T, ID> dao, boolean nullable) {
+        return new Query<>(dao, nullable);
     }
 
     public void force() {

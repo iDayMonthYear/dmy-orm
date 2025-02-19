@@ -10,6 +10,7 @@ import lombok.NonNull;
 import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.hutool.core.collection.CollUtil;
+import org.dromara.hutool.core.util.ObjUtil;
 
 import java.util.Collection;
 import java.util.List;
@@ -123,12 +124,18 @@ public abstract class SqlGenerator {
         if (op == Op.IS_NULL || op == Op.IS_NOT_NULL) {
             return EMPTY;
         } else if (op == Op.BETWEEN || op == Op.NOT_BETWEEN) {
-            Object[] arr = (Object[]) val;
+            var arr = (Object[]) val;
             if (arr.length == 2) {
+                if (ObjUtil.isEmpty(arr[0])) {
+                    throw new OrmException("between 第一个参数不能为空");
+                }
+                if (ObjUtil.isEmpty(arr[1])) {
+                    throw new OrmException("between 第二个参数不能为空");
+                }
                 params.add(val);
                 return BETWEEN;
             } else {
-                throw new OrmException("between 参数必须为2个元素");
+                throw new OrmException("between 参数必须为 2 个元素");
             }
         } else {
             params.add(val);

@@ -23,10 +23,12 @@ abstract class Crud<T, ID, CRUD extends Crud<T, ID, CRUD>> {
     @NotNull
     protected Class<T> entityType;
     protected int sqlParamsSize;
+    protected boolean nullable;
 
     protected Crud(@NotNull Class<T> entityType) {
         this.entityType = entityType;
     }
+
 
     @NotNull
     public abstract Pair<String, List<Object>> sql();

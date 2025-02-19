@@ -1,6 +1,7 @@
 package cn.com.idmy.orm.core;
 
 import cn.com.idmy.base.FieldGetter;
+import cn.com.idmy.orm.OrmException;
 import cn.com.idmy.orm.core.SqlNode.SqlCond;
 import cn.com.idmy.orm.core.SqlNode.SqlOr;
 import lombok.NonNull;
@@ -28,18 +29,11 @@ public abstract class Where<T, ID, CRUD extends Where<T, ID, CRUD>> extends Crud
 
     @NotNull
     public CRUD addNode(@NotNull SqlNode.SqlCond node) {
-        switch (node.expr) {
-            case Collection<?> ls -> {
-                if (ls.isEmpty()) {
-                    return crud;
-                }
-            }
-            case Object[] arr -> {
-                if (arr.length == 0) {
-                    return crud;
-                }
-            }
-            default -> {
+        if (ObjUtil.isEmpty(node.expr)) {
+            if (nullable) {
+                return crud;
+            } else {
+                throw new OrmException("表达式【{}】参数【{}】不能为空", node.type, node.column);
             }
         }
         return super.addNode(node);
@@ -49,12 +43,12 @@ public abstract class Where<T, ID, CRUD extends Where<T, ID, CRUD>> extends Crud
     // 等于
     @NotNull
     public CRUD eq(@NonNull ID id) {
-        return ObjUtil.isEmpty(id) ? crud : addNode(new SqlCond(Tables.getIdName(entityType), Op.EQ, id));
+        return addNode(new SqlCond(Tables.getIdName(entityType), Op.EQ, id));
     }
 
     @NotNull
     public CRUD eq(@NotNull FieldGetter<T, ?> field, @Nullable Object val) {
-        return ObjUtil.isEmpty(val) ? crud : addNode(new SqlCond(entityType, field, Op.EQ, val));
+        return addNode(new SqlCond(entityType, field, Op.EQ, val));
     }
 
     @NotNull
@@ -74,18 +68,18 @@ public abstract class Where<T, ID, CRUD extends Where<T, ID, CRUD>> extends Crud
 
     @NotNull
     public CRUD eq(@NotNull FieldGetter<T, ?> field, @Nullable String val) {
-        return ObjUtil.isEmpty(val) ? crud : addNode(new SqlCond(entityType, field, Op.EQ, val));
+        return addNode(new SqlCond(entityType, field, Op.EQ, val));
     }
 
     // 不等于
     @NotNull
     public CRUD ne(@NonNull ID id) {
-        return ObjUtil.isEmpty(id) ? crud : addNode(new SqlCond(Tables.getIdName(entityType), Op.EQ, id));
+        return addNode(new SqlCond(Tables.getIdName(entityType), Op.EQ, id));
     }
 
     @NotNull
     public CRUD ne(@NotNull FieldGetter<T, ?> field, @Nullable Object val) {
-        return ObjUtil.isEmpty(val) ? crud : addNode(new SqlCond(entityType, field, Op.NE, val));
+        return addNode(new SqlCond(entityType, field, Op.NE, val));
     }
 
     @NotNull
@@ -105,13 +99,13 @@ public abstract class Where<T, ID, CRUD extends Where<T, ID, CRUD>> extends Crud
 
     @NotNull
     public CRUD ne(@NotNull FieldGetter<T, ?> field, @Nullable String val) {
-        return ObjUtil.isEmpty(val) ? crud : addNode(new SqlCond(entityType, field, Op.NE, val));
+        return addNode(new SqlCond(entityType, field, Op.NE, val));
     }
 
     // 大于
     @NotNull
     public CRUD gt(@NotNull FieldGetter<T, ?> field, @Nullable Object val) {
-        return ObjUtil.isEmpty(val) ? crud : addNode(new SqlCond(entityType, field, Op.GT, val));
+        return addNode(new SqlCond(entityType, field, Op.GT, val));
     }
 
     @NotNull
@@ -121,12 +115,10 @@ public abstract class Where<T, ID, CRUD extends Where<T, ID, CRUD>> extends Crud
 
     @NotNull
     public CRUD gt(@NotNull FieldGetter<T, ?> field, @Nullable LocalDateTime val) {
-        if (ObjUtil.isEmpty(val)) {
-            return crud;
-        } else {
-            var at = val.withHour(0).withMinute(0).withSecond(0).withNano(0);
-            return addNode(new SqlCond(entityType, field, Op.GT, at));
+        if (val != null) {
+            val = val.withHour(0).withMinute(0).withSecond(0).withNano(0);
         }
+        return addNode(new SqlCond(entityType, field, Op.GT, val));
     }
 
     @NotNull
@@ -147,7 +139,7 @@ public abstract class Where<T, ID, CRUD extends Where<T, ID, CRUD>> extends Crud
     // 大于等于
     @NotNull
     public CRUD ge(@NotNull FieldGetter<T, ?> field, @Nullable Object val) {
-        return ObjUtil.isEmpty(val) ? crud : addNode(new SqlCond(entityType, field, Op.GE, val));
+        return addNode(new SqlCond(entityType, field, Op.GE, val));
     }
 
     @NotNull
@@ -168,7 +160,7 @@ public abstract class Where<T, ID, CRUD extends Where<T, ID, CRUD>> extends Crud
     // 小于
     @NotNull
     public CRUD lt(@NotNull FieldGetter<T, ?> field, @Nullable Object val) {
-        return ObjUtil.isEmpty(val) ? crud : addNode(new SqlCond(entityType, field, Op.LT, val));
+        return addNode(new SqlCond(entityType, field, Op.LT, val));
     }
 
     @NotNull
@@ -178,12 +170,10 @@ public abstract class Where<T, ID, CRUD extends Where<T, ID, CRUD>> extends Crud
 
     @NotNull
     public CRUD lt(@NotNull FieldGetter<T, ?> field, @Nullable LocalDateTime val) {
-        if (ObjUtil.isEmpty(val)) {
-            return crud;
-        } else {
-            var at = val.withHour(23).withMinute(59).withSecond(59).withNano(999_999_999);
-            return addNode(new SqlCond(entityType, field, Op.LT, at));
+        if (val != null) {
+            val = val.withHour(23).withMinute(59).withSecond(59).withNano(999_999_999);
         }
+        return addNode(new SqlCond(entityType, field, Op.LT, val));
     }
 
     @NotNull
@@ -204,7 +194,7 @@ public abstract class Where<T, ID, CRUD extends Where<T, ID, CRUD>> extends Crud
     // 小于等于
     @NotNull
     public CRUD le(@NotNull FieldGetter<T, ?> field, @Nullable Object val) {
-        return ObjUtil.isEmpty(val) ? crud : addNode(new SqlCond(entityType, field, Op.LE, val));
+        return addNode(new SqlCond(entityType, field, Op.LE, val));
     }
 
     @NotNull
@@ -291,17 +281,17 @@ public abstract class Where<T, ID, CRUD extends Where<T, ID, CRUD>> extends Crud
     @NotNull
     public CRUD in(@NotNull FieldGetter<T, ?> field, @NotNull Object val, @Nullable Object... vals) {
         var arr = ArrayUtil.isEmpty(vals) ? new Object[]{val} : ArrayUtil.addAll(new Object[]{val}, vals);
-        return ArrayUtil.isEmpty(vals) ? crud : addNode(new SqlCond(entityType, field, Op.IN, arr));
+        return addNode(new SqlCond(entityType, field, Op.IN, arr));
     }
 
     @NotNull
     public CRUD in(@NotNull FieldGetter<T, ?> field, @Nullable Object[] vals) {
-        return ArrayUtil.isEmpty(vals) ? crud : addNode(new SqlCond(entityType, field, Op.IN, vals));
+        return addNode(new SqlCond(entityType, field, Op.IN, vals));
     }
 
     @NotNull
     public CRUD in(@NotNull FieldGetter<T, ?> field, @Nullable Collection<?> vals) {
-        return CollUtil.isEmpty(vals) ? crud : addNode(new SqlCond(entityType, field, Op.IN, vals));
+        return addNode(new SqlCond(entityType, field, Op.IN, vals));
     }
 
     @NotNull
@@ -319,17 +309,17 @@ public abstract class Where<T, ID, CRUD extends Where<T, ID, CRUD>> extends Crud
     @NotNull
     public CRUD notIn(@NotNull FieldGetter<T, ?> field, @NotNull Object val, @Nullable Object... vals) {
         var arr = ArrayUtil.isEmpty(vals) ? new Object[]{val} : ArrayUtil.addAll(new Object[]{val}, vals);
-        return ArrayUtil.isEmpty(vals) ? crud : addNode(new SqlCond(entityType, field, Op.NOT_IN, arr));
+        return addNode(new SqlCond(entityType, field, Op.NOT_IN, arr));
     }
 
     @NotNull
     public CRUD notIn(@NotNull FieldGetter<T, ?> field, @Nullable Object[] vals) {
-        return ArrayUtil.isEmpty(vals) ? crud : addNode(new SqlCond(entityType, field, Op.NOT_IN, vals));
+        return addNode(new SqlCond(entityType, field, Op.NOT_IN, vals));
     }
 
     @NotNull
     public CRUD notIn(@NotNull FieldGetter<T, ?> field, @Nullable Collection<?> vals) {
-        return CollUtil.isEmpty(vals) ? crud : addNode(new SqlCond(entityType, field, Op.NOT_IN, vals));
+        return addNode(new SqlCond(entityType, field, Op.NOT_IN, vals));
     }
 
     @NotNull
