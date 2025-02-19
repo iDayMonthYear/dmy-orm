@@ -6,22 +6,20 @@ import cn.com.idmy.orm.core.CrudInterceptor;
 import cn.com.idmy.orm.core.CrudInterceptors;
 import cn.com.idmy.orm.core.SqlProvider;
 import cn.com.idmy.orm.core.Tables;
+import lombok.Data;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import lombok.Setter;
 import lombok.experimental.Accessors;
 import org.apache.ibatis.type.TypeHandler;
 import org.dromara.hutool.core.text.StrUtil;
 import org.jetbrains.annotations.NotNull;
 
-@Getter
+@Data
 @Accessors(fluent = true)
 public class OrmConfig {
     @Getter
     private final static OrmConfig config = new OrmConfig();
-    @Setter
     private boolean enableIEnumValue;
-    @Setter
     @NotNull
     private IdType defaultIdType = IdType.AUTO;
     @NotNull
