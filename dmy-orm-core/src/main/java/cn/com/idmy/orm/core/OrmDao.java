@@ -227,7 +227,6 @@ public interface OrmDao<T, ID> {
     @Nullable
     default <R> R getNullable(@NotNull FieldGetter<T, R> field, @NotNull Query<T, ID> q) {
         SqlProvider.clearSelectColumns(q);
-        q.limit = 1;
         q.select(field);
         T t = getNullable(q);
         return t == null ? null : field.get(t);
