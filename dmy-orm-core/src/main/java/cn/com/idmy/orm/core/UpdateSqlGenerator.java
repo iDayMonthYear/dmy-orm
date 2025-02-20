@@ -40,7 +40,7 @@ class UpdateSqlGenerator extends SqlGenerator {
             }
         }
 
-        sql.append(UPDATE).append(STRESS_MARK).append(tableName).append(STRESS_MARK).append(SET);
+        sql.append(UPDATE).append(tableInfo.schema()).append(STRESS_MARK).append(tableInfo.name()).append(STRESS_MARK).append(SET);
         params = new ArrayList<>(update.sqlParamsSize);
 
         if (!sets.isEmpty()) {

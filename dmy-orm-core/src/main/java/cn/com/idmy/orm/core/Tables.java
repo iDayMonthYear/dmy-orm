@@ -127,7 +127,7 @@ public class Tables {
         if (tableId == null) {
             throw new OrmException("实体类「{}」中不存在主键", entityType.getName());
         } else {
-            return new TableInfo(entityType, tableName, tableId, tableTitle, columns.toArray(new TableColumn[0]), columnMap);
+            return new TableInfo(entityType, table == null ? "" : table.schema() + ".", tableName, tableId, tableTitle, columns.toArray(new TableColumn[0]), columnMap);
         }
     }
 

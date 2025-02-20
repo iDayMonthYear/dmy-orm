@@ -33,7 +33,7 @@ class DeleteSqlGenerator extends SqlGenerator {
             }
         }
 
-        sql.append(DELETE_FROM).append(STRESS_MARK).append(tableName).append(STRESS_MARK);
+        sql.append(DELETE_FROM).append(tableInfo.schema()).append(STRESS_MARK).append(tableInfo.name()).append(STRESS_MARK);
         params = new ArrayList<>(delete.sqlParamsSize);
 
         boolean empty = genWhere(wheres);

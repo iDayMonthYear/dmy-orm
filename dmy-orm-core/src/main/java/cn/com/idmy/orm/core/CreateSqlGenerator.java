@@ -43,7 +43,7 @@ class CreateSqlGenerator extends SqlGenerator {
     }
 
     private void genInsertHeader() {
-        sql.append(INSERT_INTO).append(STRESS_MARK).append(tableName).append(STRESS_MARK).append(BLANK).append(BRACKET_LEFT);
+        sql.append(INSERT_INTO).append(tableInfo.schema()).append(STRESS_MARK).append(tableInfo.name()).append(STRESS_MARK).append(BLANK).append(BRACKET_LEFT);
     }
 
     @NotNull

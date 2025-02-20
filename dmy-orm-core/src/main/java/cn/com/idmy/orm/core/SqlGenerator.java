@@ -53,7 +53,7 @@ public abstract class SqlGenerator {
     @NonNull
     protected final Class<?> entityType;
     @NonNull
-    protected final String tableName;
+    protected final TableInfo tableInfo;
     @NonNull
     protected final List<SqlNode> nodes;
     @NonNull
@@ -63,7 +63,7 @@ public abstract class SqlGenerator {
     public SqlGenerator(@NonNull Class<?> entityType, @NonNull List<SqlNode> notes) {
         this.entityType = entityType;
         this.nodes = notes;
-        tableName = Tables.getTableName(entityType);
+        tableInfo = Tables.getTable(entityType);
     }
 
     protected static StringBuilder genPlaceholder(@NonNull Object val, @NonNull StringBuilder ph) {
