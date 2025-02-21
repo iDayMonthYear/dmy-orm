@@ -96,7 +96,21 @@ public class Tables {
                     if (idType == IdType.DEFAULT) {
                         idType = config.defaultIdType();
                     }
-                    tableId = new TableId(field, name, idType, id.value(), id.before(), id.title());
+                    var key = id.key();
+                    if (StrUtil.isNotBlank(key)) {
+                        idType = IdType.GENERATOR;
+                    }
+                    if (StrUtil.isBlank(key)) {
+                        key = null;
+                    }
+                    if (StrUtil.isBlank(key)) {
+                        key = null;
+                    }
+                    var value = id.value();
+                    if (StrUtil.isNotBlank(value)) {
+                        value = null;
+                    }
+                    tableId = new TableId(field, name, idType, value, key, id.before(), id.title());
                 } else if (field.getClass() == entityType) {
                     throw new OrmException("实体类「{}」中存在多个主键", entityType.getName());
                 }

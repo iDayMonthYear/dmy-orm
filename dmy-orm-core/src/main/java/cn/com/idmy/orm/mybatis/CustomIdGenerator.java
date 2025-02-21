@@ -33,13 +33,13 @@ public class CustomIdGenerator implements KeyGenerator {
     }
 
     protected void loadIdGenerator() {
-        String value = id.value();
-        if (StrUtil.isBlank(value)) {
-            value = "DB";
+        String key = id.key();
+        if (StrUtil.isBlank(key)) {
+            key = "DB";
         }
-        var generator = IdGeneratorFactory.getGenerator(value);
+        var generator = IdGeneratorFactory.getGenerator(key);
         if (generator == null) {
-            throw new OrmException("未找到ID生成器：{}", value);
+            throw new OrmException("未找到 ID 生成器：{}", key);
         } else {
             this.idGenerator = generator;
         }
@@ -55,7 +55,7 @@ public class CustomIdGenerator implements KeyGenerator {
                 if (idGenerator == null) {
                     loadIdGenerator();
                 }
-                var newId = ConvertUtil.convert(field.getType(), idGenerator.gen(entity.getClass()));
+                var newId = ConvertUtil.convert(field.getType(), idGenerator.generate(entity.getClass(), id.value()));
                 var metaObject = configuration.newMetaObject(parameter).metaObjectForProperty(SqlProvider.ENTITY);
                 this.setValue(metaObject, field.getName(), newId);
             }
