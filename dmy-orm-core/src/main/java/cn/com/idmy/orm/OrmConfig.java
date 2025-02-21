@@ -19,7 +19,7 @@ import org.jetbrains.annotations.NotNull;
 public class OrmConfig {
     @Getter
     private final static OrmConfig config = new OrmConfig();
-    private boolean enableIEnumValue;
+    private boolean iEnumValueEnabled;
     @NotNull
     private IdType defaultIdType = IdType.AUTO;
     @NotNull

@@ -26,12 +26,12 @@ public class EnumTypeHandler<E extends Enum<E>> extends BaseTypeHandler<E> {
     @Nullable
     private final Field valueField;
     private final boolean isIEnum;
-    private final boolean enableIEnumValue;
+    private final boolean iEnumValueEnabled;
 
     public EnumTypeHandler(@NotNull Class<E> type) {
         this.type = type;
         this.isIEnum = IEnum.class.isAssignableFrom(type);
-        this.enableIEnumValue = OrmConfig.config().enableIEnumValue();
+        this.iEnumValueEnabled = OrmConfig.config().iEnumValueEnabled();
         this.valueField = getEnumValueField(type);
     }
 
@@ -40,7 +40,7 @@ public class EnumTypeHandler<E extends Enum<E>> extends BaseTypeHandler<E> {
     public void setNonNullParameter(@NotNull PreparedStatement ps, int idx, @NotNull E param, @NotNull JdbcType jdbcType) {
         if (valueField != null) {
             ps.setObject(idx, valueField.get(param));
-        } else if (enableIEnumValue && isIEnum) {
+        } else if (iEnumValueEnabled && isIEnum) {
             ps.setObject(idx, ((IEnum<?>) param).value());
         } else {
             ps.setObject(idx, param.name());
@@ -90,7 +90,7 @@ public class EnumTypeHandler<E extends Enum<E>> extends BaseTypeHandler<E> {
     }
 
     private E valueOf(Object value) throws SQLException {
-        if (isIEnum && enableIEnumValue) {
+        if (isIEnum && iEnumValueEnabled) {
             for (E enumConstant : type.getEnumConstants()) {
                 if (Objects.equals(value, ((IEnum<?>) enumConstant).value())) {
                     return enumConstant;

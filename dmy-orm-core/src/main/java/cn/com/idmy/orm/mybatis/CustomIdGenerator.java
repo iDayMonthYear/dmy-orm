@@ -30,6 +30,7 @@ public class CustomIdGenerator implements KeyGenerator {
         this.configuration = cfg;
         this.table = table;
         this.id = table.id();
+        loadIdGenerator();
     }
 
     protected void loadIdGenerator() {
@@ -52,9 +53,6 @@ public class CustomIdGenerator implements KeyGenerator {
             var field = id.field();
             var existId = FieldUtil.getFieldValue(entity, field.getName());
             if (existId == null || (existId instanceof String str && StrUtil.isNotBlank(str))) {
-                if (idGenerator == null) {
-                    loadIdGenerator();
-                }
                 var newId = ConvertUtil.convert(field.getType(), idGenerator.generate(entity.getClass(), id.value()));
                 var metaObject = configuration.newMetaObject(parameter).metaObjectForProperty(SqlProvider.ENTITY);
                 this.setValue(metaObject, field.getName(), newId);

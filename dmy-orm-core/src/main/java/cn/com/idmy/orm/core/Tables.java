@@ -103,9 +103,6 @@ public class Tables {
                     if (StrUtil.isBlank(key)) {
                         key = null;
                     }
-                    if (StrUtil.isBlank(key)) {
-                        key = null;
-                    }
                     var value = id.value();
                     if (StrUtil.isNotBlank(value)) {
                         value = null;
