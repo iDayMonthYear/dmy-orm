@@ -7,7 +7,6 @@ import cn.com.idmy.base.model.Pair;
 import cn.com.idmy.orm.OrmException;
 import cn.com.idmy.orm.core.SqlNode.*;
 import lombok.Getter;
-import lombok.Setter;
 import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.hutool.core.array.ArrayUtil;
@@ -21,19 +20,15 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static cn.com.idmy.orm.core.Tables.getColumnName;
-import static cn.com.idmy.orm.core.Tables.getIdField;
-import static cn.com.idmy.orm.core.Tables.getIdName;
+import static cn.com.idmy.orm.core.Tables.*;
 
 @Slf4j
 @Accessors(fluent = true, chain = false)
 public class Query<T, ID> extends Where<T, ID, Query<T, ID>> {
     @Getter
-    @Setter
     @Nullable
     protected Integer offset;
     @Getter
-    @Setter
     @Nullable
     protected Integer limit;
     protected boolean hasParam;
@@ -63,6 +58,18 @@ public class Query<T, ID> extends Where<T, ID, Query<T, ID>> {
 
     public void force() {
         force = true;
+    }
+
+    @NotNull
+    public Query<T, ID> limit(int limit) {
+        this.limit = limit;
+        return crud;
+    }
+
+    @NotNull
+    public Query<T, ID> offset(int offset) {
+        this.limit = offset;
+        return crud;
     }
 
     @NotNull
