@@ -47,8 +47,8 @@ public class OrmConfig {
             case DEFAULT -> name;
             case LOWER -> name.toLowerCase();
             case UPPER -> name.toUpperCase();
-            case LOWER_UNDERLINE -> StrUtil.toUnderlineCase(name).toUpperCase();
-            case UPPER_UNDERLINE -> StrUtil.toUnderlineCase(name).toLowerCase();
+            case LOWER_UNDERLINE -> StrUtil.toUnderlineCase(name).toLowerCase();
+            case UPPER_UNDERLINE -> StrUtil.toUnderlineCase(name).toUpperCase();
         };
     }
 
