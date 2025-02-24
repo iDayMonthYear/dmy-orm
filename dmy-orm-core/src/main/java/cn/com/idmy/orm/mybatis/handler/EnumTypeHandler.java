@@ -37,7 +37,7 @@ public class EnumTypeHandler<E extends Enum<E>> extends BaseTypeHandler<E> {
 
     @SneakyThrows
     @Override
-    public void setNonNullParameter(@NotNull PreparedStatement ps, int idx, @NotNull E param, @NotNull JdbcType jdbcType) {
+    public void setNonNullParameter(@NotNull PreparedStatement ps, int idx, @NotNull E param, JdbcType jdbcType) {
         if (valueField != null) {
             ps.setObject(idx, valueField.get(param));
         } else if (iEnumValueEnabled && isIEnum) {
