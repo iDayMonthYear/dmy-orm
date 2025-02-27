@@ -3,9 +3,9 @@ package cn.com.idmy.orm.core;
 import cn.com.idmy.base.model.Pair;
 import cn.com.idmy.orm.OrmException;
 import cn.com.idmy.orm.core.SqlNode.*;
-import jakarta.validation.constraints.NotNull;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.hutool.core.text.StrUtil;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.HashSet;

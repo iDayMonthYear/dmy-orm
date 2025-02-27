@@ -4,11 +4,11 @@ import cn.com.idmy.base.IEnum;
 import cn.com.idmy.orm.annotation.WatchEnum.Action;
 import cn.com.idmy.orm.annotation.WatchEnum.Timing;
 import cn.com.idmy.orm.listener.EnumWatchEvent;
-import jakarta.annotation.Nullable;
 import lombok.RequiredArgsConstructor;
 import org.apache.ibatis.executor.Executor;
 import org.apache.ibatis.mapping.MappedStatement;
 import org.apache.ibatis.plugin.*;
+import org.jetbrains.annotations.Nullable;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.util.ReflectionUtils;
 

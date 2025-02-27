@@ -5,13 +5,13 @@ import cn.com.idmy.orm.core.SqlProvider;
 import cn.com.idmy.orm.core.TableInfo;
 import cn.com.idmy.orm.core.TableInfo.TableId;
 import cn.com.idmy.orm.core.Tables;
-import jakarta.validation.constraints.NotNull;
 import lombok.NoArgsConstructor;
 import org.apache.ibatis.executor.keygen.NoKeyGenerator;
 import org.apache.ibatis.executor.keygen.SelectKeyGenerator;
 import org.apache.ibatis.mapping.*;
 import org.apache.ibatis.mapping.ResultMapping.Builder;
 import org.apache.ibatis.session.Configuration;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;

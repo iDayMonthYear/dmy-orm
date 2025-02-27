@@ -4,8 +4,6 @@ import cn.com.idmy.base.FieldGetter;
 import cn.com.idmy.base.util.SqlUtil;
 import cn.com.idmy.orm.OrmException;
 import cn.com.idmy.orm.core.TableInfo.TableColumn;
-import jakarta.annotation.Nullable;
-import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.Getter;
 import lombok.NonNull;
@@ -14,6 +12,8 @@ import lombok.experimental.Accessors;
 import org.dromara.hutool.core.collection.iter.IterUtil;
 import org.dromara.hutool.core.convert.ConvertUtil;
 import org.dromara.hutool.core.util.ObjUtil;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Field;
 import java.util.Collection;

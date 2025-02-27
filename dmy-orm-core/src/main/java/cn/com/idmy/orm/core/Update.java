@@ -4,11 +4,11 @@ import cn.com.idmy.base.FieldGetter;
 import cn.com.idmy.base.model.Pair;
 import cn.com.idmy.base.util.SqlUtil;
 import cn.com.idmy.orm.core.SqlNode.SqlSet;
-import jakarta.annotation.Nullable;
-import jakarta.validation.constraints.NotNull;
 import lombok.NonNull;
 import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 

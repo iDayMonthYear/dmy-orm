@@ -11,5 +11,5 @@ module cn.com.idmy.orm {
     requires java.sql;
     requires com.alibaba.fastjson2;
     requires jakarta.validation;
-    requires jakarta.annotation;
+    requires org.jetbrains.annotations;
 }

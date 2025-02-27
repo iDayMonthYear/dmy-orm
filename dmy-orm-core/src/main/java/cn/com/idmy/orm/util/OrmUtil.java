@@ -2,8 +2,8 @@ package cn.com.idmy.orm.util;
 
 import cn.com.idmy.orm.core.SqlNode;
 import cn.com.idmy.orm.core.SqlNode.SqlColumn;
-import jakarta.validation.constraints.NotNull;
 import lombok.experimental.UtilityClass;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.Objects;

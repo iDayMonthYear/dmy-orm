@@ -1,8 +1,8 @@
 package cn.com.idmy.orm.core;
 
 import cn.com.idmy.base.annotation.IdType;
-import jakarta.annotation.Nullable;
-import jakarta.validation.constraints.NotNull;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Field;
 import java.util.Map;

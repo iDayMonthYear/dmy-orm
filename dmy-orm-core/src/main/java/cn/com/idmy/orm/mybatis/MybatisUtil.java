@@ -3,7 +3,6 @@ package cn.com.idmy.orm.mybatis;
 import cn.com.idmy.base.annotation.IdType;
 import cn.com.idmy.orm.OrmException;
 import cn.com.idmy.orm.core.TableInfo;
-import jakarta.validation.constraints.NotNull;
 import lombok.NoArgsConstructor;
 import org.apache.ibatis.executor.keygen.Jdbc3KeyGenerator;
 import org.apache.ibatis.executor.keygen.KeyGenerator;
@@ -12,6 +11,7 @@ import org.apache.ibatis.mapping.MappedStatement;
 import org.apache.ibatis.session.ExecutorType;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.dromara.hutool.core.text.StrUtil;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 import java.util.function.BiConsumer;

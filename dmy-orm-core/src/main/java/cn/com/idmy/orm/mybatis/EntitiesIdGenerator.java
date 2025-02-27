@@ -1,12 +1,12 @@
 package cn.com.idmy.orm.mybatis;
 
 import cn.com.idmy.orm.core.SqlProvider;
-import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.apache.ibatis.executor.Executor;
 import org.apache.ibatis.executor.keygen.KeyGenerator;
 import org.apache.ibatis.mapping.MappedStatement;
 import org.dromara.hutool.core.collection.CollUtil;
+import org.jetbrains.annotations.NotNull;
 
 import java.sql.Statement;
 import java.util.Map;

@@ -3,7 +3,6 @@ package cn.com.idmy.orm.mybatis;
 import cn.com.idmy.orm.core.SqlProvider;
 import cn.com.idmy.orm.core.Tables;
 import cn.com.idmy.orm.mybatis.handler.*;
-import jakarta.validation.constraints.NotNull;
 import org.apache.ibatis.executor.keygen.NoKeyGenerator;
 import org.apache.ibatis.executor.parameter.ParameterHandler;
 import org.apache.ibatis.mapping.BoundSql;
@@ -12,6 +11,7 @@ import org.apache.ibatis.mapping.SqlCommandType;
 import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.type.TypeHandler;
 import org.dromara.hutool.core.text.StrUtil;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
 

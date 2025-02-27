@@ -5,7 +5,7 @@ import cn.com.idmy.orm.core.CrudType;
 import cn.com.idmy.orm.core.Op;
 import cn.com.idmy.orm.core.SqlNode;
 import cn.com.idmy.orm.core.SqlNode.SqlCond;
-import jakarta.validation.constraints.NotNull;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.EnumSet;
 import java.util.List;

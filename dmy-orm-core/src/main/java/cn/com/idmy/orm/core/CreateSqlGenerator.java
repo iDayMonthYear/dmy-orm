@@ -4,9 +4,9 @@ import cn.com.idmy.base.model.Pair;
 import cn.com.idmy.orm.OrmException;
 import cn.com.idmy.orm.core.TableInfo.TableColumn;
 import cn.com.idmy.orm.mybatis.handler.TypeHandlerValue;
-import jakarta.annotation.Nullable;
-import jakarta.validation.constraints.NotNull;
 import org.dromara.hutool.core.reflect.FieldUtil;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collection;

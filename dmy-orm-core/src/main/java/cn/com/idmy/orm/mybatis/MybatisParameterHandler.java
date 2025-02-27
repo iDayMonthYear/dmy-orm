@@ -3,14 +3,14 @@ package cn.com.idmy.orm.mybatis;
 import cn.com.idmy.orm.OrmException;
 import cn.com.idmy.orm.core.SqlProvider;
 import cn.com.idmy.orm.mybatis.handler.TypeHandlerValue;
-import jakarta.annotation.Nullable;
-import jakarta.validation.constraints.NotNull;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.mapping.BoundSql;
 import org.apache.ibatis.mapping.MappedStatement;
 import org.apache.ibatis.scripting.defaults.DefaultParameterHandler;
 import org.apache.ibatis.type.TypeHandler;
 import org.apache.ibatis.type.TypeHandlerRegistry;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;

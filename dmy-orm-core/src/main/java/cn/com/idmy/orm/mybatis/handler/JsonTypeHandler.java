@@ -2,12 +2,12 @@ package cn.com.idmy.orm.mybatis.handler;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.TypeReference;
-import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.apache.ibatis.type.BaseTypeHandler;
 import org.apache.ibatis.type.JdbcType;
 import org.apache.ibatis.type.MappedJdbcTypes;
 import org.apache.ibatis.type.MappedTypes;
+import org.jetbrains.annotations.NotNull;
 
 import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
