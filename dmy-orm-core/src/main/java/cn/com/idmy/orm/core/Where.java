@@ -56,12 +56,12 @@ public abstract class Where<T, ID, CRUD extends Where<T, ID, CRUD>> extends Crud
     }
 
     @NotNull
-    public CRUD eq(@NotNull FieldGetter<T, ?> field, @Nullable Object val, boolean if0) {
+    public CRUD eq(boolean if0, @NotNull FieldGetter<T, ?> field, @Nullable Object val) {
         return if0 ? eq(field, val) : crud;
     }
 
     @NotNull
-    public CRUD eq(@NotNull FieldGetter<T, ?> field, @NotNull SqlOpExpr expr, boolean if0) {
+    public CRUD eq(boolean if0, @NotNull FieldGetter<T, ?> field, @NotNull SqlOpExpr expr) {
         return if0 ? eq(field, expr) : crud;
     }
 
@@ -87,12 +87,12 @@ public abstract class Where<T, ID, CRUD extends Where<T, ID, CRUD>> extends Crud
     }
 
     @NotNull
-    public CRUD ne(@NotNull FieldGetter<T, ?> field, @Nullable Object val, boolean if0) {
+    public CRUD ne(boolean if0, @NotNull FieldGetter<T, ?> field, @Nullable Object val) {
         return if0 ? ne(field, val) : crud;
     }
 
     @NotNull
-    public CRUD ne(@NotNull FieldGetter<T, ?> field, @NotNull SqlOpExpr expr, boolean if0) {
+    public CRUD ne(boolean if0, @NotNull FieldGetter<T, ?> field, @NotNull SqlOpExpr expr) {
         return if0 ? ne(field, expr) : crud;
     }
 
@@ -121,17 +121,17 @@ public abstract class Where<T, ID, CRUD extends Where<T, ID, CRUD>> extends Crud
     }
 
     @NotNull
-    public CRUD gt(@NotNull FieldGetter<T, ?> field, @Nullable Object val, boolean if0) {
+    public CRUD gt(boolean if0, @NotNull FieldGetter<T, ?> field, @Nullable Object val) {
         return if0 ? gt(field, val) : crud;
     }
 
     @NotNull
-    public CRUD gt(@NotNull FieldGetter<T, ?> field, @NotNull SqlOpExpr expr, boolean if0) {
+    public CRUD gt(boolean if0, @NotNull FieldGetter<T, ?> field, @NotNull SqlOpExpr expr) {
         return if0 ? gt(field, expr) : crud;
     }
 
     @NotNull
-    public CRUD gt(@NotNull FieldGetter<T, ?> field, @Nullable LocalDateTime val, boolean if0) {
+    public CRUD gt(boolean if0, @NotNull FieldGetter<T, ?> field, @Nullable LocalDateTime val) {
         return if0 ? gt(field, val) : crud;
     }
 
@@ -147,12 +147,12 @@ public abstract class Where<T, ID, CRUD extends Where<T, ID, CRUD>> extends Crud
     }
 
     @NotNull
-    public CRUD ge(@NotNull FieldGetter<T, ?> field, @Nullable Object val, boolean if0) {
+    public CRUD ge(boolean if0, @NotNull FieldGetter<T, ?> field, @Nullable Object val) {
         return if0 ? ge(field, val) : crud;
     }
 
     @NotNull
-    public CRUD ge(@NotNull FieldGetter<T, ?> field, @NotNull SqlOpExpr expr, boolean if0) {
+    public CRUD ge(boolean if0, @NotNull FieldGetter<T, ?> field, @NotNull SqlOpExpr expr) {
         return if0 ? ge(field, expr) : crud;
     }
 
@@ -176,17 +176,17 @@ public abstract class Where<T, ID, CRUD extends Where<T, ID, CRUD>> extends Crud
     }
 
     @NotNull
-    public CRUD lt(@NotNull FieldGetter<T, ?> field, @Nullable Object val, boolean if0) {
+    public CRUD lt(boolean if0, @NotNull FieldGetter<T, ?> field, @Nullable Object val) {
         return if0 ? lt(field, val) : crud;
     }
 
     @NotNull
-    public CRUD lt(@NotNull FieldGetter<T, ?> field, SqlOpExpr expr, boolean if0) {
+    public CRUD lt(boolean if0, @NotNull FieldGetter<T, ?> field, SqlOpExpr expr) {
         return if0 ? lt(field, expr) : crud;
     }
 
     @NotNull
-    public CRUD lt(@NotNull FieldGetter<T, ?> field, LocalDateTime val, boolean if0) {
+    public CRUD lt(boolean if0, @NotNull FieldGetter<T, ?> field, LocalDateTime val) {
         return if0 ? lt(field, val) : crud;
     }
 
@@ -202,12 +202,12 @@ public abstract class Where<T, ID, CRUD extends Where<T, ID, CRUD>> extends Crud
     }
 
     @NotNull
-    public CRUD le(@NotNull FieldGetter<T, ?> field, @Nullable Object val, boolean if0) {
+    public CRUD le(boolean if0, @NotNull FieldGetter<T, ?> field, @Nullable Object val) {
         return if0 ? le(field, val) : crud;
     }
 
     @NotNull
-    public CRUD le(@NotNull FieldGetter<T, ?> field, SqlOpExpr expr, boolean if0) {
+    public CRUD le(boolean if0, @NotNull FieldGetter<T, ?> field, SqlOpExpr expr) {
         return if0 ? le(field, expr) : crud;
     }
     //endregion
@@ -220,7 +220,7 @@ public abstract class Where<T, ID, CRUD extends Where<T, ID, CRUD>> extends Crud
     }
 
     @NotNull
-    public CRUD like(@NotNull FieldGetter<T, String> field, @Nullable String val, boolean if0) {
+    public CRUD like(boolean if0, @NotNull FieldGetter<T, String> field, @Nullable String val) {
         return if0 ? like(field, val) : crud;
     }
 
@@ -230,7 +230,7 @@ public abstract class Where<T, ID, CRUD extends Where<T, ID, CRUD>> extends Crud
     }
 
     @NotNull
-    public CRUD startsWith(@NotNull FieldGetter<T, String> field, @Nullable String val, boolean if0) {
+    public CRUD startsWith(boolean if0, @NotNull FieldGetter<T, String> field, @Nullable String val) {
         return if0 ? startsWith(field, val) : crud;
     }
 
@@ -240,7 +240,7 @@ public abstract class Where<T, ID, CRUD extends Where<T, ID, CRUD>> extends Crud
     }
 
     @NotNull
-    public CRUD endsWith(@NotNull FieldGetter<T, String> field, @Nullable String val, boolean if0) {
+    public CRUD endsWith(boolean if0, @NotNull FieldGetter<T, String> field, @Nullable String val) {
         return if0 ? endsWith(field, val) : crud;
     }
 
@@ -250,7 +250,7 @@ public abstract class Where<T, ID, CRUD extends Where<T, ID, CRUD>> extends Crud
     }
 
     @NotNull
-    public CRUD notLike(@NotNull FieldGetter<T, String> field, @Nullable String val, boolean if0) {
+    public CRUD notLike(boolean if0, @NotNull FieldGetter<T, String> field, @Nullable String val) {
         return if0 ? notLike(field, val) : crud;
     }
 
@@ -260,7 +260,7 @@ public abstract class Where<T, ID, CRUD extends Where<T, ID, CRUD>> extends Crud
     }
 
     @NotNull
-    public CRUD notStartsWith(@NotNull FieldGetter<T, String> field, @Nullable String val, boolean if0) {
+    public CRUD notStartsWith(boolean if0, @NotNull FieldGetter<T, String> field, @Nullable String val) {
         return if0 ? notStartsWith(field, val) : crud;
     }
 
@@ -270,7 +270,7 @@ public abstract class Where<T, ID, CRUD extends Where<T, ID, CRUD>> extends Crud
     }
 
     @NotNull
-    public CRUD notEndsWith(@NotNull FieldGetter<T, String> field, @Nullable String val, boolean if0) {
+    public CRUD notEndsWith(boolean if0, @NotNull FieldGetter<T, String> field, @Nullable String val) {
         return if0 ? notEndsWith(field, val) : crud;
     }
     //endregion
@@ -294,12 +294,12 @@ public abstract class Where<T, ID, CRUD extends Where<T, ID, CRUD>> extends Crud
     }
 
     @NotNull
-    public CRUD in(@NotNull FieldGetter<T, ?> field, @Nullable Collection<?> vals, boolean if0) {
+    public CRUD in(boolean if0, @NotNull FieldGetter<T, ?> field, @Nullable Collection<?> vals) {
         return if0 ? in(field, vals) : crud;
     }
 
     @NotNull
-    public CRUD in(@NotNull FieldGetter<T, ?> field, @Nullable Object[] vals, boolean if0) {
+    public CRUD in(boolean if0, @NotNull FieldGetter<T, ?> field, @Nullable Object[] vals) {
         return if0 ? in(field, vals) : crud;
     }
 
@@ -322,12 +322,12 @@ public abstract class Where<T, ID, CRUD extends Where<T, ID, CRUD>> extends Crud
     }
 
     @NotNull
-    public CRUD notIn(@NotNull FieldGetter<T, ?> field, @Nullable Collection<?> vals, boolean if0) {
+    public CRUD notIn(boolean if0, @NotNull FieldGetter<T, ?> field, @Nullable Collection<?> vals) {
         return if0 ? in(field, vals) : crud;
     }
 
     @NotNull
-    public CRUD notIn(@NotNull FieldGetter<T, ?> field, @Nullable Object[] vals, boolean if0) {
+    public CRUD notIn(boolean if0, @NotNull FieldGetter<T, ?> field, @Nullable Object[] vals) {
         return if0 ? in(field, vals) : crud;
     }
     //endregion
@@ -350,7 +350,7 @@ public abstract class Where<T, ID, CRUD extends Where<T, ID, CRUD>> extends Crud
     }
 
     @NotNull
-    public CRUD isNull(@NotNull FieldGetter<T, ?> field, boolean if0) {
+    public CRUD isNull(boolean if0, @NotNull FieldGetter<T, ?> field) {
         return nulls(field, if0 ? true : null);
     }
 
@@ -360,7 +360,7 @@ public abstract class Where<T, ID, CRUD extends Where<T, ID, CRUD>> extends Crud
     }
 
     @NotNull
-    public CRUD isNotNull(@NotNull FieldGetter<T, ?> field, boolean if0) {
+    public CRUD isNotNull(boolean if0, @NotNull FieldGetter<T, ?> field) {
         return nulls(field, if0 ? false : null);
     }
     //endregion
@@ -382,12 +382,12 @@ public abstract class Where<T, ID, CRUD extends Where<T, ID, CRUD>> extends Crud
     }
 
     @NotNull
-    public CRUD between(@NotNull FieldGetter<T, ?> field, @Nullable Object[] pair, boolean if0) {
+    public CRUD between(boolean if0, @NotNull FieldGetter<T, ?> field, @Nullable Object[] pair) {
         return if0 ? between(field, pair) : crud;
     }
 
     @NotNull
-    public CRUD between(@NotNull FieldGetter<T, ?> field, @Nullable Object start, @Nullable Object end, boolean if0) {
+    public CRUD between(boolean if0, @NotNull FieldGetter<T, ?> field, @Nullable Object start, @Nullable Object end) {
         return if0 ? between(field, start, end) : crud;
     }
 
@@ -415,7 +415,7 @@ public abstract class Where<T, ID, CRUD extends Where<T, ID, CRUD>> extends Crud
     }
 
     @NotNull
-    public CRUD between(@NotNull FieldGetter<T, LocalDateTime> field, @Nullable LocalDateTime start, @Nullable LocalDateTime end, boolean if0) {
+    public CRUD between(boolean if0, @NotNull FieldGetter<T, LocalDateTime> field, @Nullable LocalDateTime start, @Nullable LocalDateTime end) {
         return if0 ? between(field, start, end) : crud;
     }
 
@@ -437,7 +437,7 @@ public abstract class Where<T, ID, CRUD extends Where<T, ID, CRUD>> extends Crud
     }
 
     @NotNull
-    public CRUD between(@NotNull FieldGetter<T, LocalDate> field, @Nullable LocalDate start, @Nullable LocalDate end, boolean if0) {
+    public CRUD between(boolean if0, @NotNull FieldGetter<T, LocalDate> field, @Nullable LocalDate start, @Nullable LocalDate end) {
         return if0 ? between(field, start, end) : crud;
     }
 
@@ -463,7 +463,7 @@ public abstract class Where<T, ID, CRUD extends Where<T, ID, CRUD>> extends Crud
     }
 
     @NotNull
-    public CRUD between(@NotNull FieldGetter<T, LocalTime> field, @Nullable LocalTime start, @Nullable LocalTime end, boolean if0) {
+    public CRUD between(boolean if0, @NotNull FieldGetter<T, LocalTime> field, @Nullable LocalTime start, @Nullable LocalTime end) {
         return if0 ? between(field, start, end) : crud;
     }
 
@@ -479,12 +479,12 @@ public abstract class Where<T, ID, CRUD extends Where<T, ID, CRUD>> extends Crud
     }
 
     @NotNull
-    public CRUD notBetween(@NotNull FieldGetter<T, ?> field, @Nullable Object[] pair, boolean if0) {
+    public CRUD notBetween(boolean if0, @NotNull FieldGetter<T, ?> field, @Nullable Object[] pair) {
         return if0 ? between(field, pair) : crud;
     }
 
     @NotNull
-    public CRUD notBetween(@NotNull FieldGetter<T, ?> field, @Nullable Object start, @Nullable Object end, boolean if0) {
+    public CRUD notBetween(boolean if0, @NotNull FieldGetter<T, ?> field, @Nullable Object start, @Nullable Object end) {
         return if0 ? between(field, start, end) : crud;
     }
 
@@ -512,7 +512,7 @@ public abstract class Where<T, ID, CRUD extends Where<T, ID, CRUD>> extends Crud
     }
 
     @NotNull
-    public CRUD notBetween(@NotNull FieldGetter<T, LocalDateTime> field, @Nullable LocalDateTime start, @Nullable LocalDateTime end, boolean if0) {
+    public CRUD notBetween(boolean if0, @NotNull FieldGetter<T, LocalDateTime> field, @Nullable LocalDateTime start, @Nullable LocalDateTime end) {
         return if0 ? between(field, start, end) : crud;
     }
 
@@ -534,7 +534,7 @@ public abstract class Where<T, ID, CRUD extends Where<T, ID, CRUD>> extends Crud
     }
 
     @NotNull
-    public CRUD notBetween(@NotNull FieldGetter<T, LocalDate> field, @Nullable LocalDate start, @Nullable LocalDate end, boolean if0) {
+    public CRUD notBetween(boolean if0, @NotNull FieldGetter<T, LocalDate> field, @Nullable LocalDate start, @Nullable LocalDate end) {
         return if0 ? between(field, start, end) : crud;
     }
 
@@ -560,10 +560,15 @@ public abstract class Where<T, ID, CRUD extends Where<T, ID, CRUD>> extends Crud
     }
 
     @NotNull
-    public CRUD notBetween(@NotNull FieldGetter<T, LocalTime> field, @Nullable LocalTime start, @Nullable LocalTime end, boolean if0) {
+    public CRUD notBetween(boolean if0, @NotNull FieldGetter<T, LocalTime> field, @Nullable LocalTime start, @Nullable LocalTime end) {
         return if0 ? between(field, start, end) : crud;
     }
     //endregion
+
+    @NotNull
+    public CRUD or(boolean if0, @NotNull Consumer<WhereOr<T, ID>> consumer) {
+        return if0 ? or(consumer) : crud;
+    }
 
     @NotNull
     public CRUD or(@NotNull Consumer<WhereOr<T, ID>> consumer) {
