@@ -7,10 +7,10 @@ import cn.com.idmy.orm.core.SqlNode.SqlOr;
 import cn.com.idmy.orm.core.SqlNode.SqlSet;
 import cn.com.idmy.orm.core.SqlNode.Type;
 import cn.com.idmy.orm.mybatis.handler.TypeHandlerValue;
+import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.NotNull;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
