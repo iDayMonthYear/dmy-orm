@@ -1,5 +1,6 @@
 package cn.com.idmy.orm.mybatis;
 
+import cn.com.idmy.base.util.Assert;
 import cn.com.idmy.orm.core.SqlProvider;
 import cn.com.idmy.orm.core.TableInfo;
 import cn.com.idmy.orm.core.TableInfo.TableId;
@@ -19,7 +20,7 @@ import java.util.List;
 class MybatisModifier {
     static SelectKeyGenerator getSelectKeyGenerator(@NotNull MappedStatement ms, @NotNull TableId id) {
         var cfg = ms.getConfiguration();
-        var seq = id.value();
+        var seq = Assert.notNull(id.value(), "序列不能为空");
         var selectId = ms.getId() + SelectKeyGenerator.SELECT_KEY_SUFFIX;
         var idField = id.field();
         var sqlSource = ms.getLang().createSqlSource(cfg, seq.trim(), idField.getType());
