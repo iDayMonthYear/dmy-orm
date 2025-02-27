@@ -1,9 +1,7 @@
 package cn.com.idmy.orm.core;
 
 import cn.com.idmy.base.model.Pair;
-import cn.com.idmy.base.util.SqlUtil;
 import lombok.Getter;
-import lombok.NonNull;
 import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
@@ -31,15 +29,6 @@ public class Delete<T, ID> extends Where<T, ID, Delete<T, ID>> {
 
     public void force() {
         force = true;
-    }
-
-    public boolean delete(@NonNull ID id) {
-        eq(id);
-        return SqlUtil.toBoolean(dao.delete(this));
-    }
-
-    public boolean delete() {
-        return SqlUtil.toBoolean(dao.delete(this));
     }
 
     @NotNull

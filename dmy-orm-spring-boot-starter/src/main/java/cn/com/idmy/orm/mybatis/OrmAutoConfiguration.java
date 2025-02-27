@@ -16,10 +16,10 @@ import org.springframework.core.annotation.Order;
 
 import javax.sql.DataSource;
 
+@Order
 @AutoConfiguration
 @ConditionalOnClass({SqlSessionFactory.class})
 @EnableConfigurationProperties(OrmProps.class)
-@Order
 public class OrmAutoConfiguration {
     @Bean
     @Lazy

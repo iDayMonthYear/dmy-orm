@@ -2,9 +2,7 @@ package cn.com.idmy.orm.core;
 
 import cn.com.idmy.base.FieldGetter;
 import cn.com.idmy.base.model.Pair;
-import cn.com.idmy.base.util.SqlUtil;
 import cn.com.idmy.orm.core.SqlNode.SqlSet;
-import lombok.NonNull;
 import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
@@ -42,15 +40,6 @@ public class Update<T, ID> extends Where<T, ID, Update<T, ID>> {
 
     public void force() {
         force = true;
-    }
-
-    public boolean update(@NonNull ID id) {
-        eq(id);
-        return SqlUtil.toBoolean(dao.update(this));
-    }
-
-    public boolean update() {
-        return SqlUtil.toBoolean(dao.update(this));
     }
 
     @NotNull

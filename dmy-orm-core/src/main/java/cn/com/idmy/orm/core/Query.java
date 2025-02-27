@@ -139,6 +139,11 @@ public class Query<T, ID> extends Where<T, ID, Query<T, ID>> {
     }
 
     @NotNull
+    public Query<T, ID> orderByDesc(@NotNull FieldGetter<T, ?> field) {
+        return orderBy(field, true);
+    }
+
+    @NotNull
     public Query<T, ID> orderBy(@NotNull FieldGetter<T, ?> field1, boolean desc1, @NotNull FieldGetter<T, ?> field2, boolean desc2) {
         return addNode(new SqlOrderBy(getColumnName(entityType, field1), desc1)).addNode(new SqlOrderBy(getColumnName(entityType, field2), desc2));
     }
