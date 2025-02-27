@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="JavaProjectCodeInsightSettings">
+    <excluded-names>
+      <name>jakarta.validation.constraints.NotNull</name>
+      <name>jakarta.annotation.Nullable</name>
+      <name>com.mybatisflex.core.paginate</name>
+      <name>org.dromara.hutool.core.lang.Assert</name>
+      <name>io.jsonwebtoken.lang.Assert</name>
+      <name>org.springframework.util.Assert</name>
+      <name>io.micrometer.common.lang.Nullable</name>
+      <name>org.checkerframework.checker.nullness.qual.Nullable</name>
+      <name>org.springframework.lang.Nullable</name>
+      <name>java.sql.Date</name>
+      <name>org.apache.poi.hpsf.Date</name>
+      <name>org.lealone.storage.aose.btree.page.Page</name>
+      <name>org.springframework.data.domain.Page</name>
+    </excluded-names>
+  </component>
+</project>
