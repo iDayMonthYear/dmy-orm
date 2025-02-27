@@ -16,7 +16,7 @@
 
     <dependencies>
         <dependency>
-            <groupId>cn.com.idmy</groupId>
+            <groupId>cn.com.idmy.base</groupId>
             <artifactId>dmy-base</artifactId>
         </dependency>
         <dependency>
