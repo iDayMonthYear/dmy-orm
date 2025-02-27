@@ -38,6 +38,16 @@ public class Update<T, ID> extends Where<T, ID, Update<T, ID>> {
         return addNode(new SqlSet(entityType, field, expr));
     }
 
+    @NotNull
+    public Update<T, ID> set(boolean if0, @NotNull FieldGetter<T, ?> field, @Nullable Object val) {
+        return if0 ? set(field, val) : crud;
+    }
+
+    @NotNull
+    public Update<T, ID> set(boolean if0, @NotNull FieldGetter<T, ?> field, @Nullable SqlOpExpr expr) {
+        return if0 ? set(field, expr) : crud;
+    }
+
     public void force() {
         force = true;
     }
