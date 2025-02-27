@@ -1,6 +1,6 @@
 package cn.com.idmy.orm.core;
 
-import org.jetbrains.annotations.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 public interface SqlFnExpr<T> {
     @NotNull

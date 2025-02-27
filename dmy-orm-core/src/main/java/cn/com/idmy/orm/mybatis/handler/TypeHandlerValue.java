@@ -1,8 +1,8 @@
 package cn.com.idmy.orm.mybatis.handler;
 
+import jakarta.validation.constraints.NotNull;
 import org.apache.ibatis.type.JdbcType;
 import org.apache.ibatis.type.TypeHandler;
-import org.jetbrains.annotations.NotNull;
 
 import java.io.Serializable;
 import java.sql.PreparedStatement;

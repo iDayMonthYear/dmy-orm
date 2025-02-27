@@ -1,8 +1,8 @@
 package cn.com.idmy.orm.core;
 
 
+import jakarta.validation.constraints.NotNull;
 import lombok.NonNull;
-import org.jetbrains.annotations.NotNull;
 
 @FunctionalInterface
 public interface SqlOpExpr {

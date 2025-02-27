@@ -5,6 +5,7 @@ import cn.com.idmy.base.model.Page;
 import cn.com.idmy.base.util.Assert;
 import cn.com.idmy.orm.OrmException;
 import cn.com.idmy.orm.core.SqlNode.SqlCond;
+import jakarta.validation.constraints.NotNull;
 import lombok.NonNull;
 import org.apache.ibatis.annotations.*;
 import org.dromara.hutool.core.array.ArrayUtil;
@@ -13,7 +14,6 @@ import org.dromara.hutool.core.collection.CollUtil;
 import org.dromara.hutool.core.convert.ConvertUtil;
 import org.dromara.hutool.core.reflect.ClassUtil;
 import org.dromara.hutool.core.reflect.TypeUtil;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;

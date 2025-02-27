@@ -2,12 +2,12 @@ package cn.com.idmy.orm.core;
 
 import cn.com.idmy.base.FieldGetter;
 import cn.com.idmy.base.util.LambdaUtil;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.experimental.Accessors;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 @Getter

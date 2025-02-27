@@ -1,12 +1,12 @@
 package cn.com.idmy.orm.core;
 
 
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.experimental.Accessors;
-import org.jetbrains.annotations.NotNull;
 
 @Getter
 @NoArgsConstructor

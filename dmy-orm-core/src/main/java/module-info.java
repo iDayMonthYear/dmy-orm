@@ -8,7 +8,7 @@ module cn.com.idmy.orm {
     requires static lombok;
     requires org.dromara.hutool.core;
     requires org.slf4j;
-    requires org.jetbrains.annotations;
     requires java.sql;
     requires com.alibaba.fastjson2;
+    requires jakarta.validation;
 }

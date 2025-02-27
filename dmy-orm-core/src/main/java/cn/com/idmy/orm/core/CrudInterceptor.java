@@ -1,6 +1,6 @@
 package cn.com.idmy.orm.core;
 
-import org.jetbrains.annotations.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 import java.util.Collection;
 import java.util.List;

@@ -4,9 +4,9 @@ import cn.com.idmy.base.model.Pair;
 import cn.com.idmy.orm.core.SqlNode.SqlColumn;
 import cn.com.idmy.orm.core.SqlNode.SqlOr;
 import cn.com.idmy.orm.util.OrmUtil;
+import jakarta.validation.constraints.NotNull;
 import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;

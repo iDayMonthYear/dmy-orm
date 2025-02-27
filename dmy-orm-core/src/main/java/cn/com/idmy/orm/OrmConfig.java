@@ -6,13 +6,13 @@ import cn.com.idmy.orm.core.CrudInterceptor;
 import cn.com.idmy.orm.core.CrudInterceptors;
 import cn.com.idmy.orm.core.SqlProvider;
 import cn.com.idmy.orm.core.Tables;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.Accessors;
 import org.apache.ibatis.type.TypeHandler;
 import org.dromara.hutool.core.text.StrUtil;
-import org.jetbrains.annotations.NotNull;
 
 @Data
 @Accessors(fluent = true)

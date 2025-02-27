@@ -3,11 +3,11 @@ package cn.com.idmy.orm.mybatis.handler;
 import cn.com.idmy.base.IEnum;
 import cn.com.idmy.base.annotation.EnumValue;
 import cn.com.idmy.orm.OrmConfig;
+import jakarta.validation.constraints.NotNull;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.type.BaseTypeHandler;
 import org.apache.ibatis.type.JdbcType;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Field;
