@@ -154,6 +154,26 @@ public class Query<T, ID> extends Where<T, ID, Query<T, ID>> {
     }
 
     @NotNull
+    public Query<T, ID> orderBy(@NotNull FieldGetter<T, ?> field1, @NotNull FieldGetter<T, ?> field2) {
+        return orderBy(field1, false, field2, false);
+    }
+
+    @NotNull
+    public Query<T, ID> orderBy(@NotNull FieldGetter<T, ?> field1, @NotNull FieldGetter<T, ?> field2, @NotNull FieldGetter<T, ?> field3) {
+        return orderBy(field1, false, field2, false, field3, false);
+    }
+
+    @NotNull
+    public Query<T, ID> orderByDesc(@NotNull FieldGetter<T, ?> field1, @NotNull FieldGetter<T, ?> field2) {
+        return orderBy(field1, true, field2, true);
+    }
+
+    @NotNull
+    public Query<T, ID> orderByDesc(@NotNull FieldGetter<T, ?> field1, @NotNull FieldGetter<T, ?> field2, @NotNull FieldGetter<T, ?> field3) {
+        return orderBy(field1, true, field2, true, field3, true);
+    }
+
+    @NotNull
     public Query<T, ID> orderBy(@Nullable String[] orders) {
         if (ArrayUtil.isNotEmpty(orders)) {
             if (orders.length % 2 != 0) {
