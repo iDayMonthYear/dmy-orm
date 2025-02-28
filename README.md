@@ -462,9 +462,41 @@ userDao.u(true)   // 允许空值的更新
 userDao.d(true)   // 允许空值的删除
 ```
 
+### 全空条件处理
+
+当查询条件中设置 `nullable=true` 且实际上所有条件都为空值且 `force=false` 时，框架会采取特殊处理，以防止意外的全表扫描：
+
+```java
+// 当所有条件都为null时的行为
+String name = null;
+Integer age = null;
+
+// 对于单条记录查询，返回null
+User user = userDao.get(
+        userDao.q()
+                .eq(User::getName, name)      // name为null，条件被跳过
+                .gt(User::getAge, age)        // age为null，条件被跳过
+);  // 结果：没有任何有效条件且force=false，直接返回null
+
+// 对于列表查询，返回空列表
+List<User> users = userDao.list(
+        userDao.q()
+                .eq(User::getName, name)      // name为null，条件被跳过
+                .gt(User::getAge, age)        // age为null，条件被跳过
+);  // 结果：没有任何有效条件且force=false，直接返回空列表
+
+// 如果需要执行全表查询，必须使用force()
+List<User> allUsers = userDao.list(
+        userDao.q()
+                .force()                      // 显式声明允许无条件查询
+);
+```
+
+这种设计可以有效防止因条件值全为空导致的意外全表查询，提高了查询操作的安全性。
+
 ### force 参数
 
-`force` 参数用于控制无条件更新/删除的安全机制：
+`force` 参数用于控制无条件更新/删除/查询的安全机制：
 
 ```java
 // 默认情况：无条件更新会抛出异常

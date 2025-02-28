@@ -20,12 +20,12 @@ class AppController {
     }
 
     @PostMapping("/get/{id}")
-    public App get(@PathVariable long id) {
+    public App get(@PathVariable Long[] id) {
         return appService.get(id);
     }
 
     @PostMapping("/find")
-    public List<App> find(@RequestBody Collection<Long> ids) {
+    public List<App> find(@RequestBody Collection<Long[]> ids) {
         return appService.find(ids);
     }
 

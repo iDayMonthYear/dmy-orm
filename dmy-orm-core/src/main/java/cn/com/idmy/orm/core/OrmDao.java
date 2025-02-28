@@ -112,15 +112,9 @@ public interface OrmDao<T, ID> {
         }
     }
 
-    @Nullable
-    @SelectProvider(type = SqlProvider.class, method = SqlProvider.list0)
-    List<T> list0(@NotNull @Param(SqlProvider.CRUD) Query<T, ID> q);
-
     @NotNull
-    default List<T> list(@NotNull Query<T, ID> q) {
-        List<T> ts = list0(q);
-        return ts == null ? new ArrayList<>(0) : ts;
-    }
+    @SelectProvider(type = SqlProvider.class, method = SqlProvider.list)
+    List<T> list(@NotNull @Param(SqlProvider.CRUD) Query<T, ID> q);
 
     @NotNull
     default List<T> list(@NotNull Query<T, ID> q, @NotNull String msg, @NotNull Object... params) {

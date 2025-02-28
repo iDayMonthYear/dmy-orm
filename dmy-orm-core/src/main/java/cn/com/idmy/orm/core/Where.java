@@ -5,6 +5,7 @@ import cn.com.idmy.base.exception.BizException;
 import cn.com.idmy.orm.OrmException;
 import cn.com.idmy.orm.core.SqlNode.SqlCond;
 import cn.com.idmy.orm.core.SqlNode.SqlOr;
+import lombok.Getter;
 import lombok.NonNull;
 import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
@@ -21,8 +22,10 @@ import java.util.Collection;
 import java.util.function.Consumer;
 
 @Slf4j
+@Getter
 @Accessors(fluent = true, chain = false)
 public abstract class Where<T, ID, CRUD extends Where<T, ID, CRUD>> extends Crud<T, ID, CRUD> {
+    protected boolean hasCond = false;
     protected Where(@NotNull Class<T> entityType) {
         super(entityType);
     }
@@ -36,6 +39,7 @@ public abstract class Where<T, ID, CRUD extends Where<T, ID, CRUD>> extends Crud
                 throw new OrmException("表达式【{}】参数【{}】不能为空", node.type, node.column);
             }
         }
+        hasCond = true;
         return super.addNode(node);
     }
 
