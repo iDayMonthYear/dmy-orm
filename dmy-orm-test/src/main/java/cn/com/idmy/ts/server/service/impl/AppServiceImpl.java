@@ -24,12 +24,12 @@ public class AppServiceImpl implements AppService {
     }
 
     @Override
-    public App get(Long id) {
+    public App get(Long[] id) {
         return dao.getNullable(id);
     }
 
     @Override
-    public List<App> find(Collection<Long> ids) {
+    public List<App> find(Collection<Long[]> ids) {
         return dao.list(ids);
     }
 
@@ -103,9 +103,9 @@ public class AppServiceImpl implements AppService {
         Console.error(app);
 //        dao.update(App.builder().id(3344L).key(System.currentTimeMillis() + "").build(), false);
 
-        Query<App, Long> q = Query.of(dao).eq(App::getId, 1);
+        Query<App, Long[]> q = Query.of(dao).eq(App::getId, 1);
 
-        Update<App, Long> u = dao.u();
+        Update<App, Long[]> u = dao.u();
         u.set(App::getName, 1);
         return null;
     }

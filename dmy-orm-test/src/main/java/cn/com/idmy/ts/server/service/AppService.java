@@ -9,9 +9,9 @@ import java.util.List;
 public interface AppService  {
     List<App> all();
 
-    App get(Long id);
+    App get(Long[] id);
 
-    List<App> find(Collection<Long> ids);
+    List<App> find(Collection<Long[]> ids);
     
     Page<App> testCrud();
     
