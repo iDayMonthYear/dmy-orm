@@ -171,6 +171,7 @@ public interface OrmDao<T, ID> {
     }
 
     @NotNull
+    @SuppressWarnings({"unchecked", "varargs"})
     default List<T> list(@NotNull Query<T, ID> q, @NotNull FieldGetter<T, ?> field, @NotNull FieldGetter<T, ?>... fields) {
         q.select(field);
         q.select(fields);
@@ -254,6 +255,7 @@ public interface OrmDao<T, ID> {
     }
 
     @Nullable
+    @SuppressWarnings({"unchecked", "varargs"})
     default T getNullable(@NotNull Query<T, ID> q, @NotNull FieldGetter<T, ?> field, @NotNull FieldGetter<T, ?>... fields) {
         SqlProvider.clearSelectColumns(q);
         q.select(field);
@@ -262,6 +264,7 @@ public interface OrmDao<T, ID> {
     }
 
     @NotNull
+    @SuppressWarnings({"unchecked", "varargs"})
     default T get(@NotNull Query<T, ID> q, @NotNull FieldGetter<T, ?> field, @NotNull FieldGetter<T, ?>... fields) {
         SqlProvider.clearSelectColumns(q);
         q.select(field);
@@ -270,6 +273,7 @@ public interface OrmDao<T, ID> {
     }
 
     @NotNull
+    @SuppressWarnings({"unchecked", "varargs"})
     default Map<ID, T> map(@Nullable ID... ids) {
         return ArrayUtil.isEmpty(ids) ? Collections.emptyMap() : SqlProvider.map(this, ids);
     }
