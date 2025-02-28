@@ -1,6 +1,7 @@
 package cn.com.idmy.orm.core;
 
 import cn.com.idmy.base.FieldGetter;
+import cn.com.idmy.base.exception.BizException;
 import cn.com.idmy.orm.OrmException;
 import cn.com.idmy.orm.core.SqlNode.SqlCond;
 import cn.com.idmy.orm.core.SqlNode.SqlOr;
@@ -42,7 +43,11 @@ public abstract class Where<T, ID, CRUD extends Where<T, ID, CRUD>> extends Crud
     // 等于
     @NotNull
     public CRUD eq(@NonNull ID id) {
-        return addNode(new SqlCond(Tables.getIdName(entityType), Op.EQ, id));
+        if (ObjUtil.isEmpty(id)) {
+            throw new BizException("主键不能为空");
+        } else {
+            return addNode(new SqlCond(Tables.getIdName(entityType), Op.EQ, id));
+        }
     }
 
     @NotNull
@@ -73,7 +78,11 @@ public abstract class Where<T, ID, CRUD extends Where<T, ID, CRUD>> extends Crud
     // 不等于
     @NotNull
     public CRUD ne(@NonNull ID id) {
-        return addNode(new SqlCond(Tables.getIdName(entityType), Op.EQ, id));
+        if (ObjUtil.isEmpty(id)) {
+            throw new BizException("主键不能为空");
+        } else {
+            return addNode(new SqlCond(Tables.getIdName(entityType), Op.EQ, id));
+        }
     }
 
     @NotNull
