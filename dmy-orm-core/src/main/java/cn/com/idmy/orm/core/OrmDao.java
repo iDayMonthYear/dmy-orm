@@ -123,6 +123,11 @@ public interface OrmDao<T, ID> {
     }
 
     @NotNull
+    default List<T> list(@NotNull Query<T, ID> q, @NotNull String msg, @NotNull Object... params) {
+        return Assert.notEmpty(list(q), msg, params);
+    }
+
+    @NotNull
     default List<T> all() {
         Query<T, ID> q = q();
         q.force = true;
