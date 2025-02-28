@@ -5,7 +5,6 @@ import cn.com.idmy.orm.OrmException;
 import cn.com.idmy.orm.core.SqlNode.SqlCond;
 import cn.com.idmy.orm.core.SqlNode.SqlSet;
 import cn.com.idmy.orm.mybatis.MybatisUtil;
-import cn.com.idmy.orm.mybatis.SkipEmptyQueryInterceptor;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.Accessors;
@@ -36,9 +35,6 @@ public class SqlProvider {
     public static final String ENTITY = "$entity$";
     public static final String ENTITIES = "$entities$";
     public static final String ENTITY_TYPE = "$$entityType$";
-    public static final String SKIP_EXECUTION = "$skipExecution$";
-    public static final String RETURN_NULL_SQL = "-- SKIP GET--";
-    public static final String RETURN_EMPTY_LIST_SQL = "-- SKIP LIST --";
     public static final String getNullable = "getNullable";
     public static final String list = "list";
     public static final String delete = "delete";
@@ -52,7 +48,6 @@ public class SqlProvider {
 
     public static void sqlSessionFactory(@NotNull SqlSessionFactory factory) {
         sqlSessionFactory = factory;
-        sqlSessionFactory.getConfiguration().addInterceptor(new SkipEmptyQueryInterceptor());
     }
 
     protected static void clearSelectColumns(@NotNull Query<?, ?> q) {
@@ -176,27 +171,11 @@ public class SqlProvider {
 
     @NotNull
     public String getNullable(@NotNull Map<String, Object> params) {
-        var q = (Query<?, ?>) params.get(CRUD);
-        if (!q.force) {
-            if (q.nodes.isEmpty() || !q.hasCond) {
-                params.put(SQL_PARAMS, new ArrayList<>(1));
-                params.put(SKIP_EXECUTION, Boolean.TRUE);
-                return RETURN_NULL_SQL;
-            }
-        }
         return genCommonSql(params);
     }
 
     @NotNull
     public String list(@NotNull Map<String, Object> params) {
-        var q = (Query<?, ?>) params.get(CRUD);
-        if (!q.force) {
-            if (q.nodes.isEmpty() || !q.hasCond) {
-                params.put(SQL_PARAMS, new ArrayList<>(1));
-                params.put(SKIP_EXECUTION, Boolean.TRUE);
-                return RETURN_EMPTY_LIST_SQL;
-            }
-        }
         return genCommonSql(params);
     }
 

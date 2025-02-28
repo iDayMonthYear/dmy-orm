@@ -15,6 +15,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.core.annotation.Order;
 
 import javax.sql.DataSource;
+import java.util.Objects;
 
 @Order
 @AutoConfiguration
@@ -53,7 +54,7 @@ public class OrmAutoConfiguration {
         bean.setMapperLocations(props.resolveMapperLocations());
 
         var factory = bean.getObject();
-        SqlProvider.sqlSessionFactory(factory);
+        SqlProvider.sqlSessionFactory(Objects.requireNonNull(factory));
         if (Boolean.TRUE.equals(props.getCheckDbColumn())) {
             new CheckDbColumn(ctx, factory).scan();
         }
