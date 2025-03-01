@@ -54,6 +54,10 @@ public abstract class Where<T, ID, CRUD extends Where<T, ID, CRUD>> extends Crud
         }
     }
 
+    public @NotNull CRUD eqZero(@NotNull FieldGetter<T, ?> field) {
+        return addNode(new SqlCond(entityType, field, Op.EQ, 0));
+    }
+
     public @NotNull CRUD eq(@NotNull FieldGetter<T, ?> field, @Nullable Object val) {
         return addNode(new SqlCond(entityType, field, Op.EQ, val));
     }
@@ -83,6 +87,10 @@ public abstract class Where<T, ID, CRUD extends Where<T, ID, CRUD>> extends Crud
         }
     }
 
+    public @NotNull CRUD neZero(@NotNull FieldGetter<T, ?> field) {
+        return addNode(new SqlCond(entityType, field, Op.NE, 0));
+    }
+
     public @NotNull CRUD ne(@NotNull FieldGetter<T, ?> field, @Nullable Object val) {
         return addNode(new SqlCond(entityType, field, Op.NE, val));
     }
@@ -104,6 +112,10 @@ public abstract class Where<T, ID, CRUD extends Where<T, ID, CRUD>> extends Crud
     }
 
     // 大于
+    public @NotNull CRUD gtZero(@NotNull FieldGetter<T, ?> field) {
+        return addNode(new SqlCond(entityType, field, Op.GT, 0));
+    }
+
     public @NotNull CRUD gt(@NotNull FieldGetter<T, ?> field, @Nullable Object val) {
         return addNode(new SqlCond(entityType, field, Op.GT, val));
     }
@@ -132,6 +144,10 @@ public abstract class Where<T, ID, CRUD extends Where<T, ID, CRUD>> extends Crud
     }
 
     // 大于等于
+    public @NotNull CRUD geZero(@NotNull FieldGetter<T, ?> field) {
+        return addNode(new SqlCond(entityType, field, Op.GE, 0));
+    }
+
     public @NotNull CRUD ge(@NotNull FieldGetter<T, ?> field, @Nullable Object val) {
         return addNode(new SqlCond(entityType, field, Op.GE, val));
     }
@@ -149,6 +165,10 @@ public abstract class Where<T, ID, CRUD extends Where<T, ID, CRUD>> extends Crud
     }
 
     // 小于
+    public @NotNull CRUD ltZero(@NotNull FieldGetter<T, ?> field) {
+        return addNode(new SqlCond(entityType, field, Op.LT, 0));
+    }
+
     public @NotNull CRUD lt(@NotNull FieldGetter<T, ?> field, @Nullable Object val) {
         return addNode(new SqlCond(entityType, field, Op.LT, val));
     }
@@ -177,6 +197,10 @@ public abstract class Where<T, ID, CRUD extends Where<T, ID, CRUD>> extends Crud
     }
 
     // 小于等于
+    public @NotNull CRUD leZero(@NotNull FieldGetter<T, ?> field) {
+        return addNode(new SqlCond(entityType, field, Op.LE, 0));
+    }
+
     public @NotNull CRUD le(@NotNull FieldGetter<T, ?> field, @Nullable Object val) {
         return addNode(new SqlCond(entityType, field, Op.LE, val));
     }
