@@ -83,34 +83,31 @@ public class Tables {
             tableTitle = null;
         }
 
-        TableId tableId = null;
+        var ids = new ArrayList<TableId>();
         var fields = FieldUtil.getFields(entityType);
         var columns = new ArrayList<TableColumn>();
         var columnMap = new HashMap<String, TableColumn>();
         for (var field : fields) {
             if (field.isAnnotationPresent(Id.class)) {
-                if (tableId == null) {
-                    var id = field.getAnnotation(Id.class);
-                    var name = StrUtil.isBlank(id.name()) ? config.toColumnName(field.getName()) : id.name();
-                    var idType = table == null || table.idType() == IdType.DEFAULT ? id.type() : table.idType();
-                    if (idType == IdType.DEFAULT) {
-                        idType = config.defaultIdType();
-                    }
-                    var key = id.key();
-                    if (StrUtil.isNotBlank(key)) {
-                        idType = IdType.GENERATOR;
-                    }
-                    if (StrUtil.isBlank(key)) {
-                        key = null;
-                    }
-                    var value = id.value();
-                    if (StrUtil.isNotBlank(value)) {
-                        value = null;
-                    }
-                    tableId = new TableId(field, name, idType, value, key, id.before(), id.title());
-                } else if (field.getClass() == entityType) {
-                    throw new OrmException("实体类「{}」中存在多个主键", entityType.getName());
+                var id = field.getAnnotation(Id.class);
+                var name = StrUtil.isBlank(id.name()) ? config.toColumnName(field.getName()) : id.name();
+                var idType = table == null || table.idType() == IdType.DEFAULT ? id.type() : table.idType();
+                if (idType == IdType.DEFAULT) {
+                    idType = config.defaultIdType();
                 }
+                var key = id.key();
+                if (StrUtil.isNotBlank(key)) {
+                    idType = IdType.GENERATOR;
+                }
+                if (StrUtil.isBlank(key)) {
+                    key = null;
+                }
+                var value = id.value();
+                if (StrUtil.isBlank(value)) {
+                    value = null;
+                }
+                var tableId = new TableId(field, name, idType, value, key, id.before(), id.title());
+                ids.add(tableId);
             }
 
             if (!field.isAnnotationPresent(Column.class) || !field.getAnnotation(Column.class).ignore()) {
@@ -135,11 +132,13 @@ public class Tables {
             }
         }
 
-        if (tableId == null) {
+        if (ids.isEmpty()) {
             throw new OrmException("实体类「{}」中不存在主键", entityType.getName());
         } else {
             var schema = table == null ? "" : StrUtil.isBlank(table.schema()) ? "" : table.schema() + ".";
-            return new TableInfo(entityType, schema, tableName, tableId, tableTitle, columns.toArray(new TableColumn[0]), columnMap);
+            var idArr = ids.toArray(new TableId[0]);
+            var primaryId = idArr[0];
+            return new TableInfo(entityType, schema, tableName, primaryId, idArr.length == 1 ? null : idArr, tableTitle, columns.toArray(new TableColumn[0]), columnMap);
         }
     }
 
@@ -153,13 +152,17 @@ public class Tables {
         return getTable(entityType).id();
     }
 
+    public static boolean isMultiIds(@NotNull Class<?> entityType) {
+        return getTable(entityType).isMultiIds();
+    }
+
     @NotNull
-    public static String getIdName(@NotNull Class<?> entityType) {
+    public static String getIdColumnName(@NotNull Class<?> entityType) {
         return getId(entityType).name();
     }
 
     @NotNull
-    public static String getIdName(@NotNull OrmDao<?, ?> dao) {
+    public static String getIdColumnName(@NotNull OrmDao<?, ?> dao) {
         return getId(dao.entityType()).name();
     }
 
@@ -173,6 +176,35 @@ public class Tables {
     @NotNull
     public static Field getIdField(@NotNull Class<?> entityType) {
         return getTable(entityType).id().field();
+    }
+
+    @Nullable
+    public static Field[] listIdFields(@NotNull Class<?> entityType) {
+        var ids = getTable(entityType).ids();
+        if (ids == null) {
+            return null;
+        } else {
+            var fields = new Field[ids.length];
+            for (int i = 0; i < ids.length; i++) {
+                fields[i] = ids[i].field();
+            }
+            return fields;
+        }
+    }
+
+    @Nullable
+    public static Object[] listIdValues(@NotNull Object entity) {
+        var table = getTable(entity.getClass());
+        var ids = table.ids();
+        if (ids == null) {
+            return null;
+        } else {
+            var values = new Object[ids.length];
+            for (int i = 0; i < ids.length; i++) {
+                values[i] = FieldUtil.getFieldValue(entity, ids[i].field());
+            }
+            return values;
+        }
     }
 
     @Nullable

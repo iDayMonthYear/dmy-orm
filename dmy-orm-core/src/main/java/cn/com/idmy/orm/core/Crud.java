@@ -4,6 +4,7 @@ import cn.com.idmy.base.model.Pair;
 import cn.com.idmy.orm.core.SqlNode.SqlColumn;
 import cn.com.idmy.orm.core.SqlNode.SqlOr;
 import cn.com.idmy.orm.util.OrmUtil;
+import lombok.Getter;
 import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
@@ -21,6 +22,7 @@ abstract class Crud<T, ID, CRUD extends Crud<T, ID, CRUD>> {
     @NotNull
     protected List<SqlNode> nodes = new ArrayList<>();
     @NotNull
+    @Getter
     protected Class<T> entityType;
     protected int sqlParamsSize;
     protected boolean nullable;
@@ -41,7 +43,7 @@ abstract class Crud<T, ID, CRUD extends Crud<T, ID, CRUD>> {
     @Override
     public String toString() {
         try {
-            return sql().left;
+            return sql().l;
         } catch (Exception e) {
             return "异常：" + e.getMessage();
         }

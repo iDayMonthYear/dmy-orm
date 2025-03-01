@@ -11,6 +11,7 @@ public record TableInfo(@NotNull Class<?> entityType,
                         @Nullable String schema,
                         @NotNull String name,
                         @NotNull TableId id,
+                        @Nullable TableId[] ids,
                         @Nullable String title,
                         @NotNull TableColumn[] columns,
                         @NotNull Map<String, TableColumn> columnMap) {
@@ -25,5 +26,9 @@ public record TableInfo(@NotNull Class<?> entityType,
     }
 
     public record TableColumn(@NotNull Field field, @NotNull String name, @Nullable String title) {
+    }
+
+    public boolean isMultiIds() {
+        return ids != null && ids.length > 1;
     }
 }

@@ -1,7 +1,13 @@
 package cn.com.idmy.orm.util;
 
+import cn.com.idmy.base.model.Pair;
+import cn.com.idmy.base.model.Triple;
+import cn.com.idmy.orm.core.Op;
 import cn.com.idmy.orm.core.SqlNode;
 import cn.com.idmy.orm.core.SqlNode.SqlColumn;
+import cn.com.idmy.orm.core.SqlNode.SqlCond;
+import cn.com.idmy.orm.core.Tables;
+import cn.com.idmy.orm.core.Where;
 import lombok.experimental.UtilityClass;
 import org.jetbrains.annotations.NotNull;
 
@@ -18,5 +24,34 @@ public class OrmUtil {
                 return false;
             }
         });
+    }
+
+    public static <T, ID> void multiIdsEqHandle(@NotNull ID id, Where<T, ID, ?> where) {
+        var entityType = where.entityType();
+        var table = Tables.getTable(entityType);
+        if (table.isMultiIds()) {
+            var ids = table.ids();
+            switch (id) {
+                case Pair<?, ?> pair -> {
+                    where.addNode(new SqlCond(ids[0].name(), Op.EQ, pair.l));
+                    where.addNode(new SqlCond(ids[1].name(), Op.EQ, pair.r));
+                }
+                case Triple<?, ?, ?> triple -> {
+                    where.addNode(new SqlCond(ids[0].name(), Op.EQ, triple.l));
+                    where.addNode(new SqlCond(ids[1].name(), Op.EQ, triple.m));
+                    where.addNode(new SqlCond(ids[2].name(), Op.EQ, triple.r));
+                }
+                case Object[] arr -> {
+                    for (int i = 0, len = ids.length; i < len; i++) {
+                        var tmp = ids[i];
+                        where.addNode(new SqlCond(tmp.name(), Op.EQ, arr[i]));
+                    }
+                }
+                default -> {
+                }
+            }
+        } else {
+            where.addNode(new SqlCond(Tables.getIdColumnName(entityType), Op.EQ, id));
+        }
     }
 }

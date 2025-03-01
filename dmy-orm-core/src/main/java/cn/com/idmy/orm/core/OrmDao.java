@@ -76,7 +76,7 @@ public interface OrmDao<T, ID> {
     default boolean exists(@NonNull ID id) {
         var q = q();
         q.sqlParamsSize = 1;
-        q.addNode(new SqlCond(Tables.getIdName(this), Op.EQ, id));
+        q.addNode(new SqlCond(Tables.getIdColumnName(this), Op.EQ, id));
         return exists(q);
     }
 
@@ -123,9 +123,7 @@ public interface OrmDao<T, ID> {
 
     @NotNull
     default List<T> all() {
-        Query<T, ID> q = q();
-        q.force = true;
-        return list(q);
+        return list(q().force());
     }
 
     @NotNull
@@ -135,7 +133,7 @@ public interface OrmDao<T, ID> {
         } else {
             var q = q();
             q.sqlParamsSize = 1;
-            q.addNode(new SqlCond(Tables.getIdName(this), Op.IN, ids));
+            q.addNode(new SqlCond(Tables.getIdColumnName(this), Op.IN, ids));
             return list(q);
         }
     }
@@ -152,7 +150,7 @@ public interface OrmDao<T, ID> {
         } else {
             var q = q().select(field);
             q.sqlParamsSize = 1;
-            q.addNode(new SqlCond(Tables.getIdName(this), Op.IN, ids));
+            q.addNode(new SqlCond(Tables.getIdColumnName(this), Op.IN, ids));
             return list(q).stream().map(field::get).toList();
         }
     }
@@ -190,7 +188,7 @@ public interface OrmDao<T, ID> {
     default T getNullable(@NonNull ID id) {
         var q = q();
         q.sqlParamsSize = 1;
-        q.addNode(new SqlCond(Tables.getIdName(this), Op.EQ, id));
+        q.addNode(new SqlCond(Tables.getIdColumnName(this), Op.EQ, id));
         return getNullable(q);
     }
 
@@ -203,7 +201,7 @@ public interface OrmDao<T, ID> {
     default <R> R getNullable(@NotNull FieldGetter<T, R> field, @NonNull ID id) {
         var q = q().select(field);
         q.sqlParamsSize = 1;
-        q.addNode(new SqlCond(Tables.getIdName(this), Op.EQ, id));
+        q.addNode(new SqlCond(Tables.getIdColumnName(this), Op.EQ, id));
         T t = getNullable(q);
         return t == null ? null : field.get(t);
     }
@@ -382,7 +380,7 @@ public interface OrmDao<T, ID> {
     default int delete(@NonNull ID id) {
         var d = d();
         d.sqlParamsSize = 1;
-        d.addNode(new SqlCond(Tables.getIdName(this), Op.EQ, id));
+        d.addNode(new SqlCond(Tables.getIdColumnName(this), Op.EQ, id));
         return delete(d);
     }
 
@@ -392,7 +390,7 @@ public interface OrmDao<T, ID> {
         } else {
             var d = d();
             d.sqlParamsSize = 1;
-            d.addNode(new SqlCond(Tables.getIdName(this), Op.IN, ids));
+            d.addNode(new SqlCond(Tables.getIdColumnName(this), Op.IN, ids));
             return delete(d);
         }
     }

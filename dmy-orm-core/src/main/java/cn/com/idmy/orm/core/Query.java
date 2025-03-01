@@ -22,7 +22,6 @@ import java.util.stream.Collectors;
 
 import static cn.com.idmy.orm.core.Tables.getColumnName;
 import static cn.com.idmy.orm.core.Tables.getIdField;
-import static cn.com.idmy.orm.core.Tables.getIdName;
 
 @Slf4j
 @Accessors(fluent = true, chain = false)
@@ -214,11 +213,11 @@ public class Query<T, ID> extends Where<T, ID, Query<T, ID>> {
             var idField = getIdField(entityType);
             var idVal = FieldUtil.getFieldValue(param, idField);
             if (idVal != null) {
-                addNode(new SqlCond(getIdName(entityType), Op.EQ, idVal));
+                addNode(new SqlCond(Tables.getIdColumnName(entityType), Op.EQ, idVal));
             } else {
                 var ids = FieldUtil.getFieldValue(param, idField.getName() + "s");
                 if (ObjUtil.isNotEmpty(ids)) {
-                    addNode(new SqlCond(getIdName(entityType), Op.IN, ids));
+                    addNode(new SqlCond(Tables.getIdColumnName(entityType), Op.IN, ids));
                 }
             }
         }

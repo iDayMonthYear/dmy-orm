@@ -50,7 +50,7 @@ public abstract class Where<T, ID, CRUD extends Where<T, ID, CRUD>> extends Crud
         if (ObjUtil.isEmpty(id)) {
             throw new BizException("主键不能为空");
         } else {
-            return addNode(new SqlCond(Tables.getIdName(entityType), Op.EQ, id));
+            return addNode(new SqlCond(Tables.getIdColumnName(entityType), Op.EQ, id));
         }
     }
 
@@ -79,7 +79,7 @@ public abstract class Where<T, ID, CRUD extends Where<T, ID, CRUD>> extends Crud
         if (ObjUtil.isEmpty(id)) {
             throw new BizException("主键不能为空");
         } else {
-            return addNode(new SqlCond(Tables.getIdName(entityType), Op.EQ, id));
+            return addNode(new SqlCond(Tables.getIdColumnName(entityType), Op.EQ, id));
         }
     }
 

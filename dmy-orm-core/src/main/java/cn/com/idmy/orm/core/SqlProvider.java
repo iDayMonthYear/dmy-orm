@@ -23,7 +23,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-import static cn.com.idmy.orm.core.Tables.getIdName;
+import static cn.com.idmy.orm.core.Tables.getIdColumnName;
 import static cn.com.idmy.orm.core.Tables.getTableByMapperClass;
 
 @Slf4j
@@ -62,8 +62,8 @@ public class SqlProvider {
         var where = (Crud<?, ?, ?>) params.get(CRUD);
         putEntityType(params, where.entityType);
         var pair = where.sql();
-        params.put(SQL_PARAMS, pair.right);
-        return pair.left;
+        params.put(SQL_PARAMS, pair.r);
+        return pair.l;
     }
 
     public static void putEntityType(@NotNull Map<String, Object> params, @NotNull Class<?> entityType) {
@@ -103,7 +103,7 @@ public class SqlProvider {
             }
         }
         var sql = u.sql();
-        return dao.updateBySql(sql.left, sql.right);
+        return dao.updateBySql(sql.l, sql.r);
     }
 
     public static <T, ID> int[] update(@NotNull OrmDao<T, ID> dao, @NotNull Collection<T> ls, int size, boolean ignoreNull) {
@@ -137,7 +137,7 @@ public class SqlProvider {
     static <T, ID> Map<ID, T> map(@NotNull OrmDao<T, ID> dao, @NonNull Object ids) {
         var q = dao.q();
         q.sqlParamsSize = 1;
-        q.addNode(new SqlCond(getIdName(dao), Op.IN, ids));
+        q.addNode(new SqlCond(getIdColumnName(dao), Op.IN, ids));
         return CollStreamUtil.toIdentityMap(dao.list(q), Tables::getIdValue);
     }
 
@@ -198,8 +198,8 @@ public class SqlProvider {
         q.select(SqlFn::count);
         putEntityType(params, q.entityType);
         var pair = q.sql();
-        params.put(SQL_PARAMS, pair.right);
-        return pair.left;
+        params.put(SQL_PARAMS, pair.r);
+        return pair.l;
     }
 
     @NotNull
@@ -208,9 +208,9 @@ public class SqlProvider {
         var entityType = entity.getClass();
         var generator = new CreateSqlGenerator(entityType, entity);
         var pair = generator.generate();
-        params.put(SQL_PARAMS, pair.right);
+        params.put(SQL_PARAMS, pair.r);
         putEntityType(params, entityType);
-        return pair.left;
+        return pair.l;
     }
 
     @NotNull
@@ -222,9 +222,9 @@ public class SqlProvider {
             var entityType = ls.iterator().next().getClass();
             var generator = new CreateSqlGenerator(entityType, ls);
             var pair = generator.generate();
-            params.put(SQL_PARAMS, pair.right);
+            params.put(SQL_PARAMS, pair.r);
             putEntityType(params, entityType);
-            return pair.left;
+            return pair.l;
         }
     }
 
