@@ -34,32 +34,22 @@ public class Query<T, ID> extends Where<T, ID, Query<T, ID>> {
     @Nullable
     protected Integer limit;
     protected boolean hasParam;
-    protected boolean force;
-    boolean hasSelectColumn;
-    protected OrmDao<T, ID> dao;
+    protected boolean hasSelectColumn;
+    protected boolean hasAggregate;
 
-    protected Query(@NotNull Class<T> entityType, boolean nullable) {
-        super(entityType);
+    protected Query(@NotNull OrmDao<T, ID> dao, boolean nullable) {
+        super(dao);
         this.nullable = nullable;
     }
 
-    protected Query(@NotNull OrmDao<T, ID> dao, boolean nullable) {
-        this(dao.entityType(), nullable);
-        this.dao = dao;
-    }
-
     @NotNull
-    public static <T, ID> Query<T, ID> of(@NotNull OrmDao<T, ID> dao, boolean nullable) {
+    protected static <T, ID> Query<T, ID> of(@NotNull OrmDao<T, ID> dao, boolean nullable) {
         return new Query<>(dao, nullable);
     }
 
     @NotNull
-    public static <T, ID> Query<T, ID> of(@NotNull OrmDao<T, ID> dao) {
+    protected static <T, ID> Query<T, ID> of(@NotNull OrmDao<T, ID> dao) {
         return new Query<>(dao, true);
-    }
-
-    public void force() {
-        force = true;
     }
 
     @NotNull
@@ -93,12 +83,14 @@ public class Query<T, ID> extends Where<T, ID, Query<T, ID>> {
     @NotNull
     public Query<T, ID> select(@NotNull SqlFnExpr<T> expr) {
         hasSelectColumn = true;
+        hasAggregate = true;
         return addNode(new SelectSqlColumn(expr));
     }
 
     @NotNull
     public Query<T, ID> select(@NotNull SqlFnExpr<T> expr, @NotNull FieldGetter<T, ?> alias) {
         hasSelectColumn = true;
+        hasAggregate = true;
         return addNode(new SelectSqlColumn(expr, getColumnName(entityType, alias)));
     }
 
@@ -116,12 +108,14 @@ public class Query<T, ID> extends Where<T, ID, Query<T, ID>> {
 
     @NotNull
     public Query<T, ID> groupBy(@NotNull FieldGetter<T, ?> field) {
+        hasAggregate = true;
         return addNode(new SqlGroupBy(getColumnName(entityType, field)));
     }
 
     @NotNull
     @SafeVarargs
     public final Query<T, ID> groupBy(@NotNull FieldGetter<T, ?>... fields) {
+        hasAggregate = true;
         for (var field : fields) {
             addNode(new SqlGroupBy(getColumnName(entityType, field)));
         }

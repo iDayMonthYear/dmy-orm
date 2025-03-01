@@ -7,8 +7,8 @@ import java.util.List;
 import java.util.function.Consumer;
 
 public class WhereOr<T, ID> extends Where<T, ID, WhereOr<T, ID>> {
-    protected WhereOr(@NotNull Class<T> entityType) {
-        super(entityType);
+    protected WhereOr(@NotNull OrmDao<T, ID> dao) {
+        super(dao);
     }
 
     @Override

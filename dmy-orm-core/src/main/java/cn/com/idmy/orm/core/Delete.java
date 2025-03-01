@@ -13,22 +13,15 @@ import java.util.List;
 @Getter
 @Accessors(fluent = true, chain = false)
 public class Delete<T, ID> extends Where<T, ID, Delete<T, ID>> {
-    protected OrmDao<T, ID> dao;
-    protected boolean force;
 
     protected Delete(@NotNull OrmDao<T, ID> dao, boolean nullable) {
-        super(dao.entityType());
+        super(dao);
         this.nullable = nullable;
-        this.dao = dao;
     }
 
     @NotNull
-    public static <T, ID> Delete<T, ID> of(@NotNull OrmDao<T, ID> dao, boolean nullable) {
+    protected static <T, ID> Delete<T, ID> of(@NotNull OrmDao<T, ID> dao, boolean nullable) {
         return new Delete<>(dao, nullable);
-    }
-
-    public void force() {
-        force = true;
     }
 
     @NotNull

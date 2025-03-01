@@ -103,7 +103,7 @@ public class AppServiceImpl implements AppService {
         Console.error(app);
 //        dao.update(App.builder().id(3344L).key(System.currentTimeMillis() + "").build(), false);
 
-        Query<App, Long[]> q = Query.of(dao).eq(App::getId, 1);
+        Query<App, Long[]> q = dao.q().eq(App::getId, 1);
 
         Update<App, Long[]> u = dao.u();
         u.set(App::getName, 1);

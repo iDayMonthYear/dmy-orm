@@ -27,6 +27,9 @@ class UpdateSqlGenerator extends SqlGenerator {
 
     @Override
     protected @NotNull Pair<String, List<Object>> doGen() {
+        if (!update.hasCond && !update.force) {
+            throw new OrmException("更新语句没有条件！使用 force() 强制更新全部数据");
+        }
         var sets = new ArrayList<SqlSet>(nodes.size());
         var wheres = new ArrayList<SqlNode>(nodes.size() - 1);
         for (int i = 0, size = nodes.size(); i < size; i++) {
@@ -51,13 +54,8 @@ class UpdateSqlGenerator extends SqlGenerator {
                 }
             }
         }
-
-        boolean empty = genWhere(wheres);
-        if (empty && !update.force) {
-            throw new OrmException("更新语句没有条件！可使用 force 强制执行");
-        } else {
-            return Pair.of(sql.toString(), params);
-        }
+        genWhere(wheres);
+        return Pair.of(sql.toString(), params);
     }
 
     protected String genSet(@NonNull String col, @NonNull SqlOpExpr expr) {

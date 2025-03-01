@@ -14,17 +14,14 @@ import java.util.List;
 @Slf4j
 @Accessors(fluent = true, chain = false)
 public class Update<T, ID> extends Where<T, ID, Update<T, ID>> {
-    protected OrmDao<T, ID> dao;
-    protected boolean force;
 
     protected Update(@NotNull OrmDao<T, ID> dao, boolean nullable) {
-        super(dao.entityType());
+        super(dao);
         this.nullable = nullable;
-        this.dao = dao;
     }
 
     @NotNull
-    public static <T, ID> Update<T, ID> of(@NotNull OrmDao<T, ID> dao, boolean nullable) {
+    protected static <T, ID> Update<T, ID> of(@NotNull OrmDao<T, ID> dao, boolean nullable) {
         return new Update<>(dao, nullable);
     }
 
@@ -46,10 +43,6 @@ public class Update<T, ID> extends Where<T, ID, Update<T, ID>> {
     @NotNull
     public Update<T, ID> set(boolean if0, @NotNull FieldGetter<T, ?> field, @Nullable SqlOpExpr expr) {
         return if0 ? set(field, expr) : crud;
-    }
-
-    public void force() {
-        force = true;
     }
 
     @NotNull

@@ -24,6 +24,13 @@ class QuerySqlGenerator extends SqlGenerator {
 
     @Override
     protected @NotNull Pair<String, List<Object>> doGen() {
+        if (!query.hasCond && !query.force) {
+            if (query.limit == null && query.offset == null) {
+                if (!query.hasAggregate) {
+                    throw new OrmException("查询语句没有条件！使用 force() 强制查询全部数据");
+                }
+            }
+        }
         var selects = new ArrayList<SelectSqlColumn>(1);
         var wheres = new ArrayList<SqlNode>(nodes.size());
         var groups = new ArrayList<SqlGroupBy>(1);

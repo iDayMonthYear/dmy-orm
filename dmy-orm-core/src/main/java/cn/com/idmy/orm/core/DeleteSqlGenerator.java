@@ -23,6 +23,9 @@ class DeleteSqlGenerator extends SqlGenerator {
 
     @Override
     protected @NotNull Pair<String, List<Object>> doGen() {
+        if (!delete.hasCond && !delete.force) {
+            throw new OrmException("删除语句没有条件！使用 force() 强制删除全部数据");
+        }
         var wheres = new ArrayList<SqlNode>(nodes.size());
         for (int i = 0, size = nodes.size(); i < size; i++) {
             var node = nodes.get(i);
@@ -36,11 +39,7 @@ class DeleteSqlGenerator extends SqlGenerator {
         sql.append(DELETE_FROM).append(tableInfo.schema()).append(STRESS_MARK).append(tableInfo.name()).append(STRESS_MARK);
         params = new ArrayList<>(delete.sqlParamsSize);
 
-        boolean empty = genWhere(wheres);
-        if (empty && !delete.force) {
-            throw new OrmException("删除语句没有条件！可使用 force 强制执行");
-        } else {
-            return Pair.of(sql.toString(), params);
-        }
+        genWhere(wheres);
+        return Pair.of(sql.toString(), params);
     }
 }

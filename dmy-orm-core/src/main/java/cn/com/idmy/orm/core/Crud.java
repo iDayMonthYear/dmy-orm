@@ -24,14 +24,19 @@ abstract class Crud<T, ID, CRUD extends Crud<T, ID, CRUD>> {
     protected Class<T> entityType;
     protected int sqlParamsSize;
     protected boolean nullable;
+    protected boolean hasCond;
+    protected boolean force;
 
     protected Crud(@NotNull Class<T> entityType) {
         this.entityType = entityType;
     }
 
+    public @NotNull CRUD force() {
+        this.force = true;
+        return crud;
+    }
 
-    @NotNull
-    public abstract Pair<String, List<Object>> sql();
+    public abstract @NotNull Pair<String, List<Object>> sql();
 
     @Override
     public String toString() {
@@ -42,8 +47,7 @@ abstract class Crud<T, ID, CRUD extends Crud<T, ID, CRUD>> {
         }
     }
 
-    @NotNull
-    protected CRUD addNode(@NotNull SqlNode node) {
+    protected @NotNull CRUD addNode(@NotNull SqlNode node) {
         nodes.add(node);
         return crud;
     }
@@ -52,13 +56,11 @@ abstract class Crud<T, ID, CRUD extends Crud<T, ID, CRUD>> {
         return OrmUtil.hasColumn(nodes, column, type);
     }
 
-    @NotNull
-    protected List<SqlNode> columns(@NotNull String column) {
+    protected @NotNull List<SqlNode> columns(@NotNull String column) {
         return nodes.stream().filter(n -> n instanceof SqlColumn col && Objects.equals(col.column(), column)).toList();
     }
 
-    @NotNull
-    public CRUD or() {
+    public @NotNull CRUD or() {
         return addNode(new SqlOr());
     }
 }
