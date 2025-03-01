@@ -11,6 +11,7 @@ import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.hutool.core.collection.CollUtil;
 import org.dromara.hutool.core.util.ObjUtil;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 import java.util.List;
@@ -163,29 +164,24 @@ public abstract class SqlGenerator {
         }
     }
 
-    protected boolean genWhere(@NonNull List<SqlNode> ls) {
+    protected void genWhere(@NonNull List<SqlNode> ls) {
         if (ls.isEmpty()) {
-            return true;
-        } else {
-            boolean out = true;
-            removeLastOr(ls);
-            sql.append(WHERE);
-            for (int i = 0, size = ls.size(); i < size; i++) {
-                var node = ls.get(i);
-                genCondOr(node);
-                out = false;
-                if (i < size - 1) {
-                    if (ls.get(i + 1).type == Type.COND && node.type != Type.OR) {
-                        sql.append(AND);
-                    }
+            return;
+        }
+        removeLastOr(ls);
+        sql.append(WHERE);
+        for (int i = 0, size = ls.size(); i < size; i++) {
+            var node = ls.get(i);
+            genCondOr(node);
+            if (i < size - 1) {
+                if (ls.get(i + 1).type == Type.COND && node.type != Type.OR) {
+                    sql.append(AND);
                 }
             }
-            return out;
         }
     }
 
-    @NonNull
-    protected Pair<String, List<Object>> gen() {
+    protected @NotNull Pair<String, List<Object>> generate() {
         switch (this) {
             case UpdateSqlGenerator ignored -> CrudInterceptors.interceptUpdate(entityType, nodes);
             case DeleteSqlGenerator ignored -> CrudInterceptors.interceptDelete(entityType, nodes);
@@ -193,9 +189,9 @@ public abstract class SqlGenerator {
             default -> {
             }
         }
-        return doGen();
+        return doGenerate();
     }
 
-    @NonNull
-    protected abstract Pair<String, List<Object>> doGen();
+    @NotNull
+    protected abstract Pair<String, List<Object>> doGenerate();
 }

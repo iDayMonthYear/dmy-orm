@@ -1,6 +1,7 @@
 package cn.com.idmy.orm.core;
 
 import cn.com.idmy.base.model.Pair;
+import cn.com.idmy.base.util.Assert;
 import cn.com.idmy.orm.OrmException;
 import cn.com.idmy.orm.core.SqlNode.*;
 import lombok.extern.slf4j.Slf4j;
@@ -23,7 +24,7 @@ class QuerySqlGenerator extends SqlGenerator {
     }
 
     @Override
-    protected @NotNull Pair<String, List<Object>> doGen() {
+    protected @NotNull Pair<String, List<Object>> doGenerate() {
         if (!query.hasCond && !query.force) {
             if (query.limit == null && query.offset == null) {
                 if (!query.hasAggregate) {
@@ -68,6 +69,7 @@ class QuerySqlGenerator extends SqlGenerator {
             sql.append(LIMIT).append(query.limit);
         }
         if (query.offset != null) {
+            Assert.notNull(query.limit, "offset 必须与 limit 一起使用");
             sql.append(OFFSET).append(query.offset);
         }
         return Pair.of(sql.toString(), params);

@@ -48,6 +48,6 @@ public class Update<T, ID> extends Where<T, ID, Update<T, ID>> {
     @NotNull
     @Override
     public Pair<String, List<Object>> sql() {
-        return new UpdateSqlGenerator(this).gen();
+        return new UpdateSqlGenerator(this).generate();
     }
 }

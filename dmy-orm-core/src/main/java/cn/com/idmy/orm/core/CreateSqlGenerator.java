@@ -22,7 +22,7 @@ class CreateSqlGenerator extends SqlGenerator {
     }
 
     @Override
-    protected @NotNull Pair<String, List<Object>> doGen() {
+    protected @NotNull Pair<String, List<Object>> doGenerate() {
         if (input instanceof Collection<?> ls) {
             CrudInterceptors.interceptCreate(ls);
             return genInsert(ls);

@@ -60,7 +60,7 @@ public class Query<T, ID> extends Where<T, ID, Query<T, ID>> {
 
     @NotNull
     public Query<T, ID> offset(int offset) {
-        this.limit = offset;
+        this.offset = offset;
         return crud;
     }
 
@@ -259,6 +259,6 @@ public class Query<T, ID> extends Where<T, ID, Query<T, ID>> {
     @NotNull
     @Override
     public Pair<String, List<Object>> sql() {
-        return new QuerySqlGenerator(this).gen();
+        return new QuerySqlGenerator(this).generate();
     }
 }

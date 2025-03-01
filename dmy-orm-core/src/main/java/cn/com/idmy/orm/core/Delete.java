@@ -27,6 +27,6 @@ public class Delete<T, ID> extends Where<T, ID, Delete<T, ID>> {
     @NotNull
     @Override
     public Pair<String, List<Object>> sql() {
-        return new DeleteSqlGenerator(this).gen();
+        return new DeleteSqlGenerator(this).generate();
     }
 }

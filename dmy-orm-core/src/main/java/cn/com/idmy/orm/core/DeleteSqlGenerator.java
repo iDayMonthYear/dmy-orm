@@ -22,7 +22,7 @@ class DeleteSqlGenerator extends SqlGenerator {
     }
 
     @Override
-    protected @NotNull Pair<String, List<Object>> doGen() {
+    protected @NotNull Pair<String, List<Object>> doGenerate() {
         if (!delete.hasCond && !delete.force) {
             throw new OrmException("删除语句没有条件！使用 force() 强制删除全部数据");
         }

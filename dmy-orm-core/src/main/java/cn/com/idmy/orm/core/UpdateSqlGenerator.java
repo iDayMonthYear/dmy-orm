@@ -26,7 +26,7 @@ class UpdateSqlGenerator extends SqlGenerator {
     }
 
     @Override
-    protected @NotNull Pair<String, List<Object>> doGen() {
+    protected @NotNull Pair<String, List<Object>> doGenerate() {
         if (!update.hasCond && !update.force) {
             throw new OrmException("更新语句没有条件！使用 force() 强制更新全部数据");
         }

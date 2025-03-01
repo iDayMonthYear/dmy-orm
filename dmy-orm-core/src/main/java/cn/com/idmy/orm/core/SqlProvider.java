@@ -207,7 +207,7 @@ public class SqlProvider {
         var entity = params.get(ENTITY);
         var entityType = entity.getClass();
         var generator = new CreateSqlGenerator(entityType, entity);
-        var pair = generator.gen();
+        var pair = generator.generate();
         params.put(SQL_PARAMS, pair.right);
         putEntityType(params, entityType);
         return pair.left;
@@ -221,7 +221,7 @@ public class SqlProvider {
         } else {
             var entityType = ls.iterator().next().getClass();
             var generator = new CreateSqlGenerator(entityType, ls);
-            var pair = generator.gen();
+            var pair = generator.generate();
             params.put(SQL_PARAMS, pair.right);
             putEntityType(params, entityType);
             return pair.left;
