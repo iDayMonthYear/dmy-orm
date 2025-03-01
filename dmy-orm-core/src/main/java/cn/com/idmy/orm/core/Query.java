@@ -64,6 +64,12 @@ public class Query<T, ID> extends Where<T, ID, Query<T, ID>> {
     }
 
     @NotNull
+    public Query<T, ID> one() {
+        limit = 1;
+        return crud;
+    }
+
+    @NotNull
     public Query<T, ID> distinct() {
         hasSelectColumn = true;
         return addNode(new SqlDistinct());
