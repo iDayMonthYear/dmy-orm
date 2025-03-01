@@ -15,7 +15,7 @@ public interface OrmMultiIdsDao<T, ID> extends OrmDao<T, ID> {
     default int delete(@NonNull ID id) {
         var d = d();
         d.sqlParamsSize = 1;
-        OrmUtil.multiIdsEqHandle(id, d);
+        OrmUtil.multiIdsAddEqNode(id, d);
         return delete(d);
     }
 
@@ -23,7 +23,7 @@ public interface OrmMultiIdsDao<T, ID> extends OrmDao<T, ID> {
     default boolean exists(@NonNull ID id) {
         var q = q();
         q.sqlParamsSize = 1;
-        OrmUtil.multiIdsEqHandle(id, q);
+        OrmUtil.multiIdsAddEqNode(id, q);
         return exists(q);
     }
 
@@ -31,7 +31,7 @@ public interface OrmMultiIdsDao<T, ID> extends OrmDao<T, ID> {
     default T getNullable(@NonNull ID id) {
         var q = q();
         q.sqlParamsSize = 1;
-        OrmUtil.multiIdsEqHandle(id, q);
+        OrmUtil.multiIdsAddEqNode(id, q);
         return getNullable(q);
     }
 

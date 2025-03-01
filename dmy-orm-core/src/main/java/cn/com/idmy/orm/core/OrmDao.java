@@ -5,13 +5,12 @@ import cn.com.idmy.base.model.Page;
 import cn.com.idmy.base.util.Assert;
 import cn.com.idmy.orm.OrmException;
 import cn.com.idmy.orm.core.SqlNode.SqlCond;
+import cn.com.idmy.orm.util.OrmUtil;
 import lombok.NonNull;
 import org.apache.ibatis.annotations.*;
 import org.dromara.hutool.core.array.ArrayUtil;
 import org.dromara.hutool.core.collection.CollStreamUtil;
 import org.dromara.hutool.core.collection.CollUtil;
-import org.dromara.hutool.core.convert.ConvertUtil;
-import org.dromara.hutool.core.reflect.ClassUtil;
 import org.dromara.hutool.core.reflect.TypeUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -114,7 +113,16 @@ public interface OrmDao<T, ID> {
 
     @NotNull
     @SelectProvider(type = SqlProvider.class, method = SqlProvider.list)
-    List<T> list(@NotNull @Param(SqlProvider.CRUD) Query<T, ID> q);
+    List<T> list0(@NotNull @Param(SqlProvider.CRUD) Query<T, ID> q);
+
+    @NotNull
+    default List<T> list(@NotNull Query<T, ID> q) {
+        if (!q.hasCond && !q.hasAggregate && !q.force) {
+            return new ArrayList<>(0);
+        } else {
+            return list0(q);
+        }
+    }
 
     @NotNull
     default List<T> list(@NotNull Query<T, ID> q, @NotNull String msg, @NotNull Object... params) {
@@ -172,7 +180,15 @@ public interface OrmDao<T, ID> {
 
     @Nullable
     @SelectProvider(type = SqlProvider.class, method = SqlProvider.getNullable)
-    T getNullable(@NotNull @Param(SqlProvider.CRUD) Query<T, ID> q);
+    T getNullable0(@NotNull @Param(SqlProvider.CRUD) Query<T, ID> q);
+
+    default T getNullable(@NotNull Query<T, ID> q) {
+        if (!q.hasCond && !q.hasAggregate && !q.force) {
+            return null;
+        } else {
+            return getNullable0(q);
+        }
+    }
 
     @NotNull
     default T get(@NotNull Query<T, ID> q, @NotNull String msg, @NotNull Object... params) {
@@ -287,7 +303,9 @@ public interface OrmDao<T, ID> {
 
     @Nullable
     default <R extends Number> R sqlFn(@NotNull SqlFnName name, @NotNull FieldGetter<T, R> field, @NotNull Query<T, ID> q) {
-        if (name == SqlFnName.IF_NULL) {
+        if (!q.force && !q.hasCond) {
+            return null;
+        } else if (name == SqlFnName.IF_NULL) {
             throw new OrmException("不支持ifnull");
         } else {
             SqlProvider.clearSelectColumns(q);
@@ -319,14 +337,8 @@ public interface OrmDao<T, ID> {
 
     @NotNull
     default <R extends Number> R sum(@NotNull FieldGetter<T, R> field, @NotNull Query<T, ID> q) {
-        R result = sqlFn(SqlFnName.SUM, field, q);
-        if (result == null) {
-            var fieldType = ClassUtil.getTypeArgument(field.getClass());
-            @SuppressWarnings("unchecked") R zero = (R) ConvertUtil.convert(fieldType, 0);
-            return zero;
-        } else {
-            return result;
-        }
+        R tmp = sqlFn(SqlFnName.SUM, field, q);
+        return tmp == null ? OrmUtil.toZero(field) : tmp;
     }
 
     @InsertProvider(type = SqlProvider.class, method = SqlProvider.create)
