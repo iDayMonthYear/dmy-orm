@@ -37,6 +37,12 @@ public class Query<T, ID> extends Where<T, ID, Query<T, ID>> {
     protected boolean hasSelectColumn;
     protected boolean hasAggregate;
 
+    // 自定义SQL和参数，用于MySQL 8.0+分页查询
+    @Nullable
+    protected String customSql;
+    @Nullable
+    protected List<Object> customParams;
+
     protected Query(@NotNull OrmDao<T, ID> dao, boolean nullable) {
         super(dao);
         this.nullable = nullable;
@@ -187,6 +193,20 @@ public class Query<T, ID> extends Where<T, ID, Query<T, ID>> {
             }
         }
         return crud;
+    }
+
+    /**
+     * 设置自定义SQL和参数
+     *
+     * @param sql    自定义SQL
+     * @param params SQL参数
+     * @return 查询对象
+     */
+    @NotNull
+    public Query<T, ID> customSql(@NotNull String sql, @NotNull List<Object> params) {
+        this.customSql = sql;
+        this.customParams = params;
+        return this;
     }
 
     @NotNull
