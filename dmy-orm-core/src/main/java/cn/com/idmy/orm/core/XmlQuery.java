@@ -2,7 +2,6 @@ package cn.com.idmy.orm.core;
 
 import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
-import org.dromara.hutool.core.text.StrUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -13,6 +12,12 @@ import org.jetbrains.annotations.Nullable;
 @Slf4j
 @Accessors(fluent = false, chain = true)
 public class XmlQuery<T, ID> extends Query<T, ID> {
+    /**
+     * 查询生成器缓存，避免重复生成
+     */
+    @Nullable
+    private transient XmlQueryGenerator queryGenerator;
+
     /**
      * 创建XmlQuery实例
      *
@@ -68,6 +73,19 @@ public class XmlQuery<T, ID> extends Query<T, ID> {
     }
 
     /**
+     * 获取查询生成器，如果缓存不存在则创建
+     *
+     * @return 查询生成器
+     */
+    @NotNull
+    private XmlQueryGenerator getQueryGenerator() {
+        if (queryGenerator == null) {
+            queryGenerator = XmlQueryGenerator.of(this);
+        }
+        return queryGenerator;
+    }
+
+    /**
      * 获取条件字符串，可在MyBatis XML中使用
      * <pre>
      * &lt;if test="xxx.cond != null"&gt;
@@ -79,8 +97,7 @@ public class XmlQuery<T, ID> extends Query<T, ID> {
      */
     @Nullable
     public String getCond() {
-        String condStr = QueryConditionConverter.toConditionString(this);
-        return StrUtil.isNotBlank(condStr) ? condStr : null;
+        return getQueryGenerator().getConditionString();
     }
 
     /**
@@ -95,8 +112,7 @@ public class XmlQuery<T, ID> extends Query<T, ID> {
      */
     @Nullable
     public String getOrderBy() {
-        String orderByStr = QueryConditionConverter.toOrderByString(this);
-        return StrUtil.isNotBlank(orderByStr) ? orderByStr : null;
+        return getQueryGenerator().getOrderByString();
     }
 
     /**
@@ -111,7 +127,17 @@ public class XmlQuery<T, ID> extends Query<T, ID> {
      */
     @Nullable
     public String getGroupBy() {
-        String groupByStr = QueryConditionConverter.toGroupByString(this);
-        return StrUtil.isNotBlank(groupByStr) ? groupByStr : null;
+        return getQueryGenerator().getGroupByString();
+    }
+
+    /**
+     * 重写父类方法，清除查询生成器缓存
+     */
+    @Override
+    @NotNull
+    public XmlQuery<T, ID> addNode(@NotNull SqlNode node) {
+        super.addNode(node);
+        this.queryGenerator = null;
+        return this;
     }
 } 

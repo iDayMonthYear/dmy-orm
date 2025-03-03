@@ -417,17 +417,6 @@ public interface OrmDao<T, ID> {
     }
 
     /**
-     * 将普通查询对象转换为XML查询对象
-     *
-     * @param query 查询对象
-     * @return XML查询对象
-     */
-    @NotNull
-    default XmlQuery<T, ID> toXmlQuery(@NotNull Query<T, ID> query) {
-        return XmlQuery.of(query);
-    }
-
-    /**
      * 使用XML查询对象查询列表
      *
      * @param query XML查询对象

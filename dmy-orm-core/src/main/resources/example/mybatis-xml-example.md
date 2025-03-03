@@ -232,4 +232,5 @@ public class UserService {
 
 4. 对于复杂的查询逻辑，可以结合 MyBatis 的动态 SQL 和 DMY-ORM 的链式查询条件，实现更灵活的查询。
 
-5. `XmlQuery` 类会在每次添加条件后自动更新条件字符串、排序字符串和分组字符串，无需手动调用方法。 
+5. `XmlQuery` 类使用 `XmlQueryGenerator` 一次性生成所有查询字符串，避免多次遍历查询条件，提高性能。它采用懒加载方式，只有在实际需要时（调用
+   `getCond()`、`getOrderBy()`或`getGroupBy()`方法）才会生成，并且会缓存结果以进一步提高性能。 
