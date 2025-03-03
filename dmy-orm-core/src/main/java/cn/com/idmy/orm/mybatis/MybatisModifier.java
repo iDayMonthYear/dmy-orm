@@ -54,11 +54,9 @@ class MybatisModifier {
         if (generator == NoKeyGenerator.INSTANCE) {
             return ms;
         }
-
         if (ms.getId().endsWith(SqlProvider.creates)) {
             generator = new EntitiesIdGenerator(generator);
         }
-
         var cfg = ms.getConfiguration();
         var keyProperty = SqlProvider.ENTITY + "." + table.id().field().getName();
         var resultSet = ms.getResultSets() == null ? null : String.join(",", ms.getResultSets());
@@ -110,7 +108,7 @@ class MybatisModifier {
 
     private static void replaceQueryResultMap(@NotNull Configuration cfg, @NotNull Class<?> entityType, @NotNull TableInfo table, @NotNull String resultMapId) {
         var id = table.id();
-        var resultMappings = new ArrayList<ResultMapping>() {{
+        var mappings = new ArrayList<ResultMapping>() {{
             add(new Builder(cfg, id.field().getName(), id.name(), id.field().getType()).flags(List.of(ResultFlag.ID)).build());
         }};
         for (var col : table.columns()) {
@@ -119,8 +117,8 @@ class MybatisModifier {
             if (handler != null) {
                 builder.typeHandler(handler);
             }
-            resultMappings.add(builder.build());
+            mappings.add(builder.build());
         }
-        cfg.addResultMap(new ResultMap.Builder(cfg, resultMapId, entityType, resultMappings).build());
+        cfg.addResultMap(new ResultMap.Builder(cfg, resultMapId, entityType, mappings).build());
     }
 }

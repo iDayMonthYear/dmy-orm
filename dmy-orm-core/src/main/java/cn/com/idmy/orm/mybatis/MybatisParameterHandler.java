@@ -38,8 +38,8 @@ class MybatisParameterHandler extends DefaultParameterHandler {
                 super.setParameters(ps);
             } else {
                 int idx = 1;
-                for (var param : sqlParams) {
-                    idx = setParameter(ps, idx, param, params);
+                for (int i = 0, size = sqlParams.size(); i < size; i++) {
+                    idx = setParameter(ps, idx, sqlParams.get(i), params);
                 }
             }
         } catch (SQLException e) {

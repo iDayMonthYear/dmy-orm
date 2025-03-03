@@ -14,6 +14,7 @@ import java.util.Collections;
 import java.util.List;
 
 class CreateSqlGenerator extends SqlGenerator {
+    @NotNull
     protected final Object input;
 
     public CreateSqlGenerator(@NotNull Class<?> entityType, @NotNull Object input) {
@@ -91,16 +92,14 @@ class CreateSqlGenerator extends SqlGenerator {
         var colIndices = new ArrayList<Integer>();
         for (int i = 0; i < cols.length; i++) {
             var col = cols[i];
-            boolean hasNonNull = false;
-
-            for (Object entity : ls) {
+            boolean hasNotNull = false;
+            for (var entity : ls) {
                 if (FieldUtil.getFieldValue(entity, col.field()) != null) {
-                    hasNonNull = true;
+                    hasNotNull = true;
                     break;
                 }
             }
-
-            if (hasNonNull) {
+            if (hasNotNull) {
                 colIndices.add(i);
                 sql.append(STRESS_MARK).append(col.name()).append(STRESS_MARK).append(DELIMITER);
             }
@@ -108,9 +107,9 @@ class CreateSqlGenerator extends SqlGenerator {
         sql.setLength(sql.length() - DELIMITER.length());
         sql.append(BRACKET_RIGHT).append(VALUES);
         params = new ArrayList<>();
-        for (Object entity : ls) {
+        for (var entity : ls) {
             sql.append(BRACKET_LEFT);
-            for (int colIdx : colIndices) {
+            for (var colIdx : colIndices) {
                 var col = cols[colIdx];
                 var val = FieldUtil.getFieldValue(entity, col.field());
                 params.add(getTypeHandlerValue(col, val));

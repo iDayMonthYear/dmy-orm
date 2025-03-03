@@ -309,8 +309,7 @@ public interface OrmDao<T, ID> {
             throw new OrmException("不支持ifnull");
         } else {
             SqlProvider.clearSelectColumns(q);
-            q.limit = 1;
-            T t = getNullable(q.select(() -> new SqlFn<>(name, field)));
+            T t = getNullable(q.one().select(() -> new SqlFn<>(name, field)));
             return t == null ? null : field.get(t);
         }
     }

@@ -77,7 +77,7 @@ public class SqlProvider {
 
     @SuppressWarnings("unchecked")
     @NotNull
-    public static Collection<Object> listEntity(@NotNull Map<String, Object> params) {
+    public static Collection<Object> listEntities(@NotNull Map<String, Object> params) {
         return (Collection<Object>) params.get(ENTITIES);
     }
 
@@ -215,7 +215,7 @@ public class SqlProvider {
 
     @NotNull
     public String creates(@NotNull Map<String, Object> params) {
-        var ls = listEntity(params);
+        var ls = listEntities(params);
         if (ls.isEmpty()) {
             throw new OrmException("批量创建的实体集合不能为空");
         } else {
@@ -229,8 +229,8 @@ public class SqlProvider {
     }
 
     @NotNull
-    public String updateBySql(@NotNull Map<String, Object> params, @NotNull ProviderContext context) {
-        var table = getTableByMapperClass(context.getMapperType());
+    public String updateBySql(@NotNull Map<String, Object> params, @NotNull ProviderContext ctx) {
+        var table = getTableByMapperClass(ctx.getMapperType());
         putEntityType(params, table.entityType());
         return (String) params.get(CRUD);
     }

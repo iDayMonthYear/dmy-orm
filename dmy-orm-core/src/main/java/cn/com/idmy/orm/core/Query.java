@@ -4,6 +4,7 @@ import cn.com.idmy.base.FieldGetter;
 import cn.com.idmy.base.config.DefaultConfig;
 import cn.com.idmy.base.model.Page;
 import cn.com.idmy.base.model.Pair;
+import cn.com.idmy.base.util.Assert;
 import cn.com.idmy.orm.OrmException;
 import cn.com.idmy.orm.core.SqlNode.*;
 import lombok.Getter;
@@ -179,20 +180,13 @@ public class Query<T, ID> extends Where<T, ID, Query<T, ID>> {
                 throw new OrmException("排序列名不成对，必须为：['name', 'asc', 'gender', 'desc']");
             }
             for (int i = 0; i < orders.length; i = i + 2) {
-                var fieldName = orders[i];
-                if (StrUtil.isBlank(fieldName)) {
-                    throw new OrmException("排序字段名不能为空");
-                }
-                var columnName = getColumnName(entityType, fieldName);
-                if (StrUtil.isBlank(columnName)) {
-                    throw new OrmException("排序字段名不存在");
-                }
+                var fieldName = Assert.notBlank(orders[i], "排序字段名不能为空");
+                var columnName = Assert.notBlank(getColumnName(entityType, fieldName), "排序字段名不存在");
                 var order = orders[i + 1];
-                var desc = StrUtil.equalsIgnoreCase(order, "desc");
-                addNode(new SqlOrderBy(columnName, desc));
+                addNode(new SqlOrderBy(columnName, StrUtil.equalsIgnoreCase(order, "desc")));
             }
         }
-        return this;
+        return crud;
     }
 
     @NotNull
@@ -227,7 +221,7 @@ public class Query<T, ID> extends Where<T, ID, Query<T, ID>> {
                 }
             }
         }
-        return this;
+        return crud;
     }
 
     public <E> List<E> list(Class<E> type) {
@@ -252,7 +246,7 @@ public class Query<T, ID> extends Where<T, ID, Query<T, ID>> {
         if (type == entityType) {
             throw new OrmException("不能查询为当前实体");
         } else {
-            Page<T> page = dao.page(in, this);
+            var page = dao.page(in, this);
             if (page.isEmpty()) {
                 return Page.empty();
             } else {

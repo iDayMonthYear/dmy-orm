@@ -51,17 +51,17 @@ public abstract class SqlGenerator {
     protected static final String EQUAL = " = ";
     protected static final String BETWEEN = "? and ?";
 
-    @NonNull
+    @NotNull
     protected final Class<?> entityType;
-    @NonNull
+    @NotNull
     protected final TableInfo tableInfo;
-    @NonNull
+    @NotNull
     protected final List<SqlNode> nodes;
-    @NonNull
+    @NotNull
     protected final StringBuilder sql = new StringBuilder();
     protected List<Object> params;
 
-    public SqlGenerator(@NonNull Class<?> entityType, @NonNull List<SqlNode> notes) {
+    public SqlGenerator(@NotNull Class<?> entityType, @NotNull List<SqlNode> notes) {
         this.entityType = entityType;
         this.nodes = notes;
         tableInfo = Tables.getTable(entityType);

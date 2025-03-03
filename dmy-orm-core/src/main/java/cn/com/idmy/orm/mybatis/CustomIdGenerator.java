@@ -55,7 +55,7 @@ public class CustomIdGenerator implements KeyGenerator {
             if (existId == null || (existId instanceof String str && StrUtil.isNotBlank(str))) {
                 var newId = ConvertUtil.convert(field.getType(), idGenerator.generate(entity.getClass(), id.value()));
                 var metaObject = configuration.newMetaObject(parameter).metaObjectForProperty(SqlProvider.ENTITY);
-                this.setValue(metaObject, field.getName(), newId);
+                setValue(metaObject, field.getName(), newId);
             }
         } catch (Exception e) {
             throw new OrmException("获取自定义ID异常：{}", e.getMessage(), e);
