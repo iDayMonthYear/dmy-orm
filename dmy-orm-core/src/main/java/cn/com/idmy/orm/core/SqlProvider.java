@@ -5,6 +5,7 @@ import cn.com.idmy.orm.OrmException;
 import cn.com.idmy.orm.core.SqlNode.SqlCond;
 import cn.com.idmy.orm.core.SqlNode.SqlSet;
 import cn.com.idmy.orm.mybatis.MybatisUtil;
+import cn.com.idmy.orm.util.OrmUtil;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.Accessors;
@@ -149,146 +150,31 @@ public class SqlProvider {
         var hasTotal = page.hasTotal() == null || page.hasTotal();
         long total = -1;
 
-        // 检测数据库版本，决定使用哪种分页查询方式
-        boolean isMySQL8 = isMySQLVersion8OrHigher();
+        if (hasTotal && OrmUtil.isMySQL8(sqlSessionFactory)) {
 
-        if (hasTotal && isMySQL8) {
-            // MySQL 8.0+ 使用 SQL_CALC_FOUND_ROWS 和 FOUND_ROWS() 一次查询获取数据和总数
-            var rows = getMySql8PageResult(dao, q);
-            if (rows == null || rows.isEmpty()) {
-                return Page.empty();
-            } else {
-                // 获取总记录数
-                total = getFoundRows();
-                return Page.of(page.pageNo(), page.pageSize(), total, rows);
-            }
+        }
+
+        if (hasTotal) {
+            var limit = q.limit;
+            var offset = q.offset;
+            var nodes = q.nodes;
+            q.clearSelectColumns();
+            total = dao.count(q);
+            q.limit = limit;
+            q.offset = offset;
+            q.nodes = nodes;
+        }
+        if (total == 0) {
+            return Page.empty();
         } else {
-            // MySQL 5.x 或其他数据库使用传统的两次查询方式
-            if (hasTotal) {
-                var limit = q.limit;
-                var offset = q.offset;
-                var nodes = q.nodes;
-                q.clearSelectColumns();
-                total = dao.count(q);
-                q.limit = limit;
-                q.offset = offset;
-                q.nodes = nodes;
+            var rows = dao.list(q);
+            if (!hasTotal) {
+                total = rows.size();
             }
-
-            if (total == 0) {
-                return Page.empty();
-            } else {
-                var rows = dao.list(q);
-                if (!hasTotal) {
-                    total = rows.size();
-                }
-                return Page.of(page.pageNo(), page.pageSize(), total, rows);
-            }
+            return Page.of(page.pageNo(), page.pageSize(), total, rows);
         }
     }
 
-    /**
-     * 检查当前MySQL版本是否为8.0或更高
-     *
-     * @return 如果是MySQL 8.0或更高版本返回true，否则返回false
-     */
-    private static boolean isMySQLVersion8OrHigher() {
-        try {
-            if (sqlSessionFactory == null) {
-                return false;
-            }
-
-            var session = sqlSessionFactory.openSession();
-            try {
-                String versionQuery = "SELECT VERSION()";
-                String version = session.selectOne(versionQuery);
-
-                if (version != null && version.startsWith("8.")) {
-                    return true;
-                }
-
-                return false;
-            } finally {
-                session.close();
-            }
-        } catch (Exception e) {
-            log.warn("检查MySQL版本失败，将使用传统分页方式: {}", e.getMessage());
-            return false;
-        }
-    }
-
-    /**
-     * 使用MySQL 8.0+的方式获取分页数据
-     *
-     * @param dao 数据访问对象
-     * @param q   查询对象
-     * @return 分页数据列表
-     */
-    @SuppressWarnings("unchecked")
-    private static <T, ID> List<T> getMySql8PageResult(@NotNull OrmDao<T, ID> dao, @NotNull Query<T, ID> q) {
-        try {
-            if (sqlSessionFactory == null) {
-                return dao.list(q);
-            }
-
-            var session = sqlSessionFactory.openSession();
-            try {
-                // 生成带有SQL_CALC_FOUND_ROWS的SQL
-                var pair = q.sql();
-                String originalSql = pair.l;
-                List<Object> params = pair.r;
-
-                // 在SELECT后添加SQL_CALC_FOUND_ROWS
-                String calcFoundRowsSql = originalSql.replaceFirst("SELECT", "SELECT SQL_CALC_FOUND_ROWS");
-
-                // 执行查询
-                var mapper = session.getMapper(dao.getClass());
-                var method = mapper.getClass().getMethod("list0", Query.class);
-
-                // 创建一个新的Query对象，避免修改原始对象
-                var newQuery = Query.of(dao, q.nullable());
-                newQuery.limit = q.limit;
-                newQuery.offset = q.offset;
-                newQuery.nodes = q.nodes;
-                newQuery.sqlParamsSize = q.sqlParamsSize;
-                newQuery.force = q.force;
-
-                // 设置自定义SQL
-                FieldUtil.setFieldValue(newQuery, "customSql", calcFoundRowsSql);
-                FieldUtil.setFieldValue(newQuery, "customParams", params);
-
-                return (List<T>) method.invoke(mapper, newQuery);
-            } finally {
-                session.close();
-            }
-        } catch (Exception e) {
-            log.warn("使用MySQL 8.0+分页查询失败，回退到传统方式: {}", e.getMessage());
-            return dao.list(q);
-        }
-    }
-
-    /**
-     * 获取MySQL 8.0+的FOUND_ROWS()结果
-     *
-     * @return 总记录数
-     */
-    private static long getFoundRows() {
-        try {
-            if (sqlSessionFactory == null) {
-                return -1;
-            }
-
-            var session = sqlSessionFactory.openSession();
-            try {
-                return session.selectOne("SELECT FOUND_ROWS()");
-            } finally {
-                session.close();
-            }
-        } catch (Exception e) {
-            log.warn("获取FOUND_ROWS()失败: {}", e.getMessage());
-            return -1;
-        }
-    }
 
     @NotNull
     public String getNullable(@NotNull Map<String, Object> params) {
