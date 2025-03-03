@@ -405,4 +405,48 @@ public interface OrmDao<T, ID> {
             return delete(d);
         }
     }
+
+    /**
+     * 创建XML查询对象
+     *
+     * @return XML查询对象
+     */
+    @NotNull
+    default XmlQuery<T, ID> xq() {
+        return XmlQuery.of(this);
+    }
+
+    /**
+     * 将普通查询对象转换为XML查询对象
+     *
+     * @param query 查询对象
+     * @return XML查询对象
+     */
+    @NotNull
+    default XmlQuery<T, ID> toXmlQuery(@NotNull Query<T, ID> query) {
+        return XmlQuery.of(query);
+    }
+
+    /**
+     * 使用XML查询对象查询列表
+     *
+     * @param query XML查询对象
+     * @return 实体列表
+     */
+    @NotNull
+    default List<T> xmlList(@NotNull XmlQuery<T, ID> query) {
+        return list(query);
+    }
+
+    /**
+     * 使用XML查询对象分页查询
+     *
+     * @param page  分页参数
+     * @param query XML查询对象
+     * @return 分页结果
+     */
+    @NotNull
+    default Page<T> xmlPage(@NotNull Page<?> page, @NotNull XmlQuery<T, ID> query) {
+        return page(page, query);
+    }
 }

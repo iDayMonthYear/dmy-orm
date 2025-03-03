@@ -260,4 +260,52 @@ public class Query<T, ID> extends Where<T, ID, Query<T, ID>> {
     public Pair<String, List<Object>> sql() {
         return new QuerySqlGenerator(this).generate();
     }
+
+    /**
+     * 获取条件字符串，可在MyBatis XML中使用
+     * <pre>
+     * &lt;if test="xxx.cond != null"&gt;
+     *     ${xxx.cond}
+     * &lt;/if&gt;
+     * </pre>
+     *
+     * @return 条件字符串
+     */
+    @Nullable
+    public String getCond() {
+        String condStr = QueryConditionConverter.toConditionString(this);
+        return StrUtil.isNotBlank(condStr) ? condStr : null;
+    }
+
+    /**
+     * 获取排序字符串，可在MyBatis XML中使用
+     * <pre>
+     * &lt;if test="xxx.orderBy != null"&gt;
+     *     ${xxx.orderBy}
+     * &lt;/if&gt;
+     * </pre>
+     *
+     * @return 排序字符串
+     */
+    @Nullable
+    public String getOrderBy() {
+        String orderByStr = QueryConditionConverter.toOrderByString(this);
+        return StrUtil.isNotBlank(orderByStr) ? orderByStr : null;
+    }
+
+    /**
+     * 获取分组字符串，可在MyBatis XML中使用
+     * <pre>
+     * &lt;if test="xxx.groupBy != null"&gt;
+     *     ${xxx.groupBy}
+     * &lt;/if&gt;
+     * </pre>
+     *
+     * @return 分组字符串
+     */
+    @Nullable
+    public String getGroupBy() {
+        String groupByStr = QueryConditionConverter.toGroupByString(this);
+        return StrUtil.isNotBlank(groupByStr) ? groupByStr : null;
+    }
 }
