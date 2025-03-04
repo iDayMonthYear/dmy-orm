@@ -43,9 +43,7 @@ public class OrmAutoConfiguration {
 
     @Bean
     @Lazy
-    @ConditionalOnMissingBean
     protected SqlSessionFactory sqlSessionFactory(OrmProps props, DataSource dataSource, ApplicationContext ctx) throws Exception {
-        var cfg = OrmConfig.config();
         setConfig(props);
         var bean = new SqlSessionFactoryBean();
         bean.setDataSource(dataSource);

@@ -22,7 +22,7 @@ public class OrmProps {
     private NameStrategy tableNameStrategy;
     private NameStrategy columnNameStrategy;
     private List<CrudInterceptor> crudInterceptors;
-    private String[] mapperLocations = new String[]{"classpath*:/dao/**/*.xml"};
+    private String[] mapperLocations = {"classpath*:/dao/**/*.xml"};
 
     private Resource[] resources(String location) {
         try {
