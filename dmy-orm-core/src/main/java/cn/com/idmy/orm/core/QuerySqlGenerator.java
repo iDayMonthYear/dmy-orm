@@ -25,11 +25,6 @@ class QuerySqlGenerator extends SqlGenerator {
 
     @Override
     protected @NotNull Pair<String, List<Object>> doGenerate() {
-        // 如果有自定义SQL，直接返回
-        if (query.customSql != null && query.customParams != null) {
-            return Pair.of(query.customSql, query.customParams);
-        }
-        
         if (!query.hasCond && !query.force) {
             if (query.limit == null && query.offset == null) {
                 if (!query.hasAggregate) {
