@@ -55,21 +55,8 @@ public class XmlQuery<T, ID> extends Query<T, ID> {
      * @return XmlQuery实例
      */
     @NotNull
-    public static <T, ID> XmlQuery<T, ID> of(@NotNull OrmDao<T, ID> dao) {
-        return new XmlQuery<>(dao, true);
-    }
-
-    /**
-     * 将Query转换为XmlQuery
-     *
-     * @param query 查询对象
-     * @param <T>   实体类型
-     * @param <ID>  主键类型
-     * @return XmlQuery实例
-     */
-    @NotNull
-    public static <T, ID> XmlQuery<T, ID> of(@NotNull Query<T, ID> query) {
-        return new XmlQuery<>(query);
+    public static <T, ID> XmlQuery<T, ID> of(@NotNull OrmDao<T, ID> dao, boolean nullable) {
+        return new XmlQuery<>(dao, nullable);
     }
 
     /**

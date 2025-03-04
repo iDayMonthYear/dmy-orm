@@ -406,14 +406,14 @@ public interface OrmDao<T, ID> {
         }
     }
 
-    /**
-     * 创建XML查询对象
-     *
-     * @return XML查询对象
-     */
     @NotNull
     default XmlQuery<T, ID> xq() {
-        return XmlQuery.of(this);
+        return XmlQuery.of(this, true);
+    }
+
+    @NotNull
+    default XmlQuery<T, ID> xq(boolean nullable) {
+        return XmlQuery.of(this, nullable);
     }
 
     /**
