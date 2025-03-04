@@ -77,7 +77,7 @@ public class Tables {
             table = entityType.getAnnotation(Table.class);
             String name = table.name();
             tableName = StrUtil.isBlank(name) ? config.toTableName(entityType.getSimpleName()) : name;
-            tableTitle = StrUtil.isBlank(table.value()) ? null : table.value();
+            tableTitle = StrUtil.isBlank(table.title()) ? null : table.title();
         } else {
             tableName = config.toTableName(entityType.getSimpleName());
             tableTitle = null;
