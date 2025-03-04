@@ -18,7 +18,7 @@ import java.time.LocalDateTime;
 @SuperBuilder
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(value = "应用", name = "Dmy", idType = IdType.AUTO)
+@Table(title = "应用", name = "Dmy", idType = IdType.AUTO)
 public class App extends BaseApp {
     @Id(type = IdType.AUTO)
     protected Long id;
