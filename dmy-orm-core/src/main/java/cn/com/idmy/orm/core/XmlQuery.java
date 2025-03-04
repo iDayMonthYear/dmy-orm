@@ -5,9 +5,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Collections;
 import java.util.List;
 
+/**
+ * XML查询生成器，用于生成XML查询所需的条件、排序和分组字符串
+ */
 @Slf4j
 @Accessors(fluent = false, chain = true)
 public class XmlQuery<T, ID> extends Query<T, ID> {
@@ -78,6 +80,21 @@ public class XmlQuery<T, ID> extends Query<T, ID> {
     }
 
     /**
+     * 获取查询参数列表，可在MyBatis XML中使用
+     * <pre>
+     * &lt;if test="xxx.cond != null"&gt;
+     *     AND column = #{xxx.params[0]}
+     * &lt;/if&gt;
+     * </pre>
+     *
+     * @return 参数列表
+     */
+    @NotNull
+    public List<Object> getParams() {
+        return generator().params;
+    }
+
+    /**
      * 重写父类方法，清除查询生成器缓存
      */
     @Override
@@ -86,9 +103,5 @@ public class XmlQuery<T, ID> extends Query<T, ID> {
         super.addNode(node);
         this.generator = null;
         return this;
-    }
-
-    public @NotNull List<Object> params() {
-        return generator == null ? Collections.emptyList() : generator.params;
     }
 } 

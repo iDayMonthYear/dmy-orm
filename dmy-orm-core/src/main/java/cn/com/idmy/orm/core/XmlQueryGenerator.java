@@ -136,45 +136,44 @@ public class XmlQueryGenerator extends QuerySqlGenerator {
                 case IS_NULL, IS_NOT_NULL -> {
                     // 不需要添加占位符
                 }
-                case BETWEEN, NOT_BETWEEN -> sql.append("? and ?");
-                default -> {
-                    if (expr instanceof Object[] || expr instanceof java.util.Collection<?>) {
-                        sql.append(genPlaceholdersForXml(expr));
-                    } else {
-                        sql.append("?");
+                case BETWEEN, NOT_BETWEEN -> {
+                    if (expr instanceof Object[] arr && arr.length == 2) {
+                        sql.append("#{x.params[").append(params.size()).append("]} and #{x.params[").append(params.size() + 1).append("]}");
+                        params.add(arr[0]);
+                        params.add(arr[1]);
                     }
+                }
+                case IN, NOT_IN -> {
+                    if (expr instanceof Object[] arr) {
+                        sql.append("(");
+                        for (int i = 0; i < arr.length; i++) {
+                            sql.append("#{x.params[").append(params.size()).append("]}");
+                            params.add(arr[i]);
+                            if (i < arr.length - 1) {
+                                sql.append(DELIMITER);
+                            }
+                        }
+                        sql.append(")");
+                    } else if (expr instanceof java.util.Collection<?> coll) {
+                        sql.append("(");
+                        int i = 0;
+                        for (Object item : coll) {
+                            sql.append("#{x.params[").append(params.size()).append("]}");
+                            params.add(item);
+                            if (i < coll.size() - 1) {
+                                sql.append(DELIMITER);
+                            }
+                            i++;
+                        }
+                        sql.append(")");
+                    }
+                }
+                default -> {
+                    sql.append("#{x.params[").append(params.size()).append("]}");
+                    params.add(expr);
                 }
             }
         }
-    }
-
-    /**
-     * 生成XML占位符
-     */
-    private String genPlaceholdersForXml(Object val) {
-        StringBuilder ph = new StringBuilder();
-        if (val instanceof java.util.Collection<?> ls) {
-            genPlaceholderForXml(ph, ls.size());
-        } else if (val instanceof Object[] arr) {
-            genPlaceholderForXml(ph, arr.length);
-        } else {
-            ph.append("?");
-        }
-        return ph.toString();
-    }
-
-    /**
-     * 生成XML占位符
-     */
-    private void genPlaceholderForXml(@NotNull StringBuilder ph, int size) {
-        ph.append(BRACKET_LEFT);
-        for (int i = 0; i < size; i++) {
-            ph.append("?");
-            if (i != size - 1) {
-                ph.append(DELIMITER);
-            }
-        }
-        ph.append(BRACKET_RIGHT);
     }
 
     /**
