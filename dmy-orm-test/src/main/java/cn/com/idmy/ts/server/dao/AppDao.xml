@@ -2,49 +2,5 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="cn.com.idmy.ts.server.dao.AppDao">
-    <!-- 使用XML查询条件的示例 -->
-    <select id="findByCondition" resultType="cn.com.idmy.ts.server.model.entity.App">
-        SELECT *
-        FROM Dmy
-        <where>
-            <if test="cond != null">
-                ${cond}
-            </if>
-        </where>
-        <if test="groupBy != null">
-            GROUP BY ${groupBy}
-        </if>
-        <if test="orderBy != null">
-            ORDER BY ${orderBy}
-        </if>
-        <if test="limit != null">
-            LIMIT #{limit}
-            <if test="offset != null">
-                OFFSET #{offset}
-            </if>
-        </if>
-    </select>
 
-    <!-- 使用XML查询条件分页查询的示例 -->
-    <select id="pageByCondition" resultType="cn.com.idmy.ts.server.model.entity.App">
-        SELECT *
-        FROM Dmy
-        <where>
-            <if test="query.cond != null">
-                ${query.cond}
-            </if>
-        </where>
-        <if test="query.groupBy != null">
-            GROUP BY ${query.groupBy}
-        </if>
-        <if test="query.orderBy != null">
-            ORDER BY ${query.orderBy}
-        </if>
-        <if test="page.pageSize != null">
-            LIMIT #{page.pageSize}
-            <if test="page.offset != null">
-                OFFSET #{page.offset}
-            </if>
-        </if>
-    </select>
 </mapper> 
