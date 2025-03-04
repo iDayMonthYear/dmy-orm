@@ -9,7 +9,7 @@ import org.jetbrains.annotations.Nullable;
 @Accessors(fluent = false, chain = true)
 public class XmlQuery<T, ID> extends Query<T, ID> {
     @Nullable
-    private transient XmlQueryGenerator queryGenerator;
+    private transient XmlQueryGenerator generator;
 
     protected XmlQuery(@NotNull OrmDao<T, ID> dao, boolean nullable) {
         super(dao, nullable);
@@ -22,11 +22,11 @@ public class XmlQuery<T, ID> extends Query<T, ID> {
     }
 
     @NotNull
-    private XmlQueryGenerator getQueryGenerator() {
-        if (queryGenerator == null) {
-            queryGenerator = XmlQueryGenerator.of(this);
+    private XmlQueryGenerator generator() {
+        if (generator == null) {
+            generator = XmlQueryGenerator.of(this);
         }
-        return queryGenerator;
+        return generator;
     }
 
     /**
@@ -41,7 +41,7 @@ public class XmlQuery<T, ID> extends Query<T, ID> {
      */
     @Nullable
     public String getCond() {
-        return getQueryGenerator().getConditionString();
+        return generator().getConditionString();
     }
 
     /**
@@ -56,7 +56,7 @@ public class XmlQuery<T, ID> extends Query<T, ID> {
      */
     @Nullable
     public String getOrderBy() {
-        return getQueryGenerator().getOrderByString();
+        return generator().getOrderByString();
     }
 
     /**
@@ -71,7 +71,7 @@ public class XmlQuery<T, ID> extends Query<T, ID> {
      */
     @Nullable
     public String getGroupBy() {
-        return getQueryGenerator().getGroupByString();
+        return generator().getGroupByString();
     }
 
     /**
@@ -81,7 +81,7 @@ public class XmlQuery<T, ID> extends Query<T, ID> {
     @NotNull
     public XmlQuery<T, ID> addNode(@NotNull SqlNode node) {
         super.addNode(node);
-        this.queryGenerator = null;
+        this.generator = null;
         return this;
     }
 } 
