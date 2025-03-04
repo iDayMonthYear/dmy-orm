@@ -5,6 +5,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Collections;
+import java.util.List;
+
 @Slf4j
 @Accessors(fluent = false, chain = true)
 public class XmlQuery<T, ID> extends Query<T, ID> {
@@ -83,5 +86,9 @@ public class XmlQuery<T, ID> extends Query<T, ID> {
         super.addNode(node);
         this.generator = null;
         return this;
+    }
+
+    public @NotNull List<Object> params() {
+        return generator == null ? Collections.emptyList() : generator.params;
     }
 } 
