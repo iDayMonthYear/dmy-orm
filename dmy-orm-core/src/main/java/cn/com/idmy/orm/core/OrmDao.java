@@ -407,12 +407,12 @@ public interface OrmDao<T, ID> {
     }
 
     @NotNull
-    default XmlQuery xq(@NotNull Class<?> type, boolean nullable) {
-        return new XmlQuery(type, nullable);
+    default <E> XmlQuery<E> q(@NotNull Class<E> type, boolean nullable) {
+        return new XmlQuery<>(type, nullable);
     }
 
     @NotNull
-    default XmlQuery xq(@NotNull Class<?> type) {
-        return xq(type, true);
+    default <E> XmlQuery<E> q(@NotNull Class<E> type) {
+        return q(type, true);
     }
 }

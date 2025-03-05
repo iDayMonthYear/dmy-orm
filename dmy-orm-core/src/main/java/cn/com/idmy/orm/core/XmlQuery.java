@@ -9,11 +9,11 @@ import java.util.List;
 
 @Slf4j
 @Accessors(fluent = false, chain = true)
-public class XmlQuery extends Query {
+public class XmlQuery<T> extends Query<T> {
     @Nullable
     private transient XmlQueryGenerator generator;
 
-    protected XmlQuery(@NotNull Class<?> entityType, boolean nullable) {
+    protected XmlQuery(@NotNull Class<T> entityType, boolean nullable) {
         super(entityType, nullable);
         force = true;
     }
@@ -86,14 +86,11 @@ public class XmlQuery extends Query {
         return generator().params;
     }
 
-    /**
-     * 重写父类方法，清除查询生成器缓存
-     */
     @Override
     @NotNull
-    public XmlQuery addNode(@NotNull SqlNode node) {
+    public XmlQuery<T> addNode(@NotNull SqlNode node) {
         super.addNode(node);
         this.generator = null;
         return this;
     }
-} 
+}

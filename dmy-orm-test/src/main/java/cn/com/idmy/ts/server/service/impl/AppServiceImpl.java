@@ -1,13 +1,10 @@
 package cn.com.idmy.ts.server.service.impl;
 
 import cn.com.idmy.base.model.Page;
-import cn.com.idmy.orm.core.Query;
-import cn.com.idmy.orm.core.Update;
 import cn.com.idmy.ts.server.dao.AppDao;
 import cn.com.idmy.ts.server.model.entity.App;
 import cn.com.idmy.ts.server.service.AppService;
 import lombok.RequiredArgsConstructor;
-import org.dromara.hutool.core.lang.Console;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
@@ -97,16 +94,6 @@ public class AppServiceImpl implements AppService {
 //        List<App> apps = new ArrayList<>();
 //        apps.add(App.builder().id(null).key("1").build());
 //        apps.add(App.builder().key("2").build());
-
-        App app = App.builder().id(null).name("1").build();
-        dao.create(app);
-        Console.error(app);
-//        dao.update(App.builder().id(3344L).key(System.currentTimeMillis() + "").build(), false);
-
-        Query<App, Long[]> q = dao.q().eq(App::getId, 1);
-
-        Update<App, Long[]> u = dao.u();
-        u.set(App::getName, 1);
         return null;
     }
 
