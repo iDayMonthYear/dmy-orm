@@ -1,5 +1,7 @@
 package cn.com.idmy.orm.core;
 
+import lombok.Getter;
+import lombok.Setter;
 import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
@@ -8,10 +10,15 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 
 @Slf4j
-@Accessors(fluent = false, chain = true)
+@Accessors(fluent = true, chain = true)
 public class XmlQuery<T> extends Query<T> {
     @Nullable
     private transient XmlQueryGenerator generator;
+    @Getter
+    protected Boolean hasTotal;
+    @Getter
+    @Setter
+    protected long total;
 
     protected XmlQuery(@NotNull Class<T> entityType, boolean nullable) {
         super(entityType, nullable);

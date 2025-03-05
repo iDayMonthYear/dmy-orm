@@ -407,12 +407,19 @@ public interface OrmDao<T, ID> {
     }
 
     @NotNull
-    default <E> XmlQuery<E> q(@NotNull Class<E> type, boolean nullable) {
-        return new XmlQuery<>(type, nullable);
+    default <E> XmlQuery<E> q(@NotNull Page<E> page, boolean nullable) {
+        @SuppressWarnings({"unchecked"})
+        var outType = (Class<E>) page.params().getClass();
+        var q = new XmlQuery<>(outType, nullable);
+        q.param(page.params());
+        q.offset = page.offset();
+        q.limit = page.pageSize();
+        q.hasTotal = page.hasTotal();
+        return q;
     }
 
     @NotNull
-    default <E> XmlQuery<E> q(@NotNull Class<E> type) {
-        return q(type, true);
+    default <E> XmlQuery<E> q(@NotNull Page<E> page) {
+        return q(page, true);
     }
 }

@@ -114,7 +114,7 @@ public class XmlQueryGenerator extends QuerySqlGenerator {
                 }
                 case BETWEEN, NOT_BETWEEN -> {
                     if (expr instanceof Object[] arr && arr.length == 2) {
-                        sql.append("#{x.params[").append(params.size()).append("]} and #{x.params[").append(params.size() + 1).append("]}");
+                        sql.append("#{params[").append(params.size()).append("]} and #{params[").append(params.size() + 1).append("]}");
                         params.add(arr[0]);
                         params.add(arr[1]);
                     }
@@ -123,7 +123,7 @@ public class XmlQueryGenerator extends QuerySqlGenerator {
                     if (expr instanceof Object[] arr) {
                         sql.append("(");
                         for (int i = 0; i < arr.length; i++) {
-                            sql.append("#{x.params[").append(params.size()).append("]}");
+                            sql.append("#{params[").append(params.size()).append("]}");
                             params.add(arr[i]);
                             if (i < arr.length - 1) {
                                 sql.append(DELIMITER);
@@ -134,7 +134,7 @@ public class XmlQueryGenerator extends QuerySqlGenerator {
                         sql.append("(");
                         int i = 0;
                         for (Object item : coll) {
-                            sql.append("#{x.params[").append(params.size()).append("]}");
+                            sql.append("#{params[").append(params.size()).append("]}");
                             params.add(item);
                             if (i < coll.size() - 1) {
                                 sql.append(DELIMITER);
@@ -145,7 +145,7 @@ public class XmlQueryGenerator extends QuerySqlGenerator {
                     }
                 }
                 default -> {
-                    sql.append("#{x.params[").append(params.size()).append("]}");
+                    sql.append("#{params[").append(params.size()).append("]}");
                     params.add(expr);
                 }
             }

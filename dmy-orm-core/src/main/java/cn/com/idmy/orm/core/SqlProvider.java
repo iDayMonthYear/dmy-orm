@@ -171,7 +171,7 @@ public class SqlProvider {
             if (!hasTotal) {
                 total = rows.size();
             }
-            return Page.of(page.pageNo(), page.pageSize(), total, rows);
+            return Page.of(rows, page.pageNo(), page.pageSize(), total);
         }
     }
 

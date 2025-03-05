@@ -32,7 +32,6 @@ class MybatisConfiguration extends Configuration {
         registry.register(ListIntegerTypeHandler.class);
         registry.register(ListLongTypeHandler.class);
         registry.register(ListStringTypeHandler.class);
-        
         addInterceptor(new PageInterceptor());
     }
 
