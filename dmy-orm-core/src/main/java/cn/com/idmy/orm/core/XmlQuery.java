@@ -26,16 +26,6 @@ public class XmlQuery<T> extends Query<T> {
         return generator;
     }
 
-    /**
-     * 获取条件字符串，可在MyBatis XML中使用
-     * <pre>
-     * &lt;if test="x.cond != null"&gt;
-     *     ${x.cond}
-     * &lt;/if&gt;
-     * </pre>
-     *
-     * @return 条件字符串
-     */
     @Nullable
     public String getCond() {
         return generator().getConditionString();
@@ -56,31 +46,11 @@ public class XmlQuery<T> extends Query<T> {
         return generator().getOrderByString();
     }
 
-    /**
-     * 获取分组字符串，可在MyBatis XML中使用
-     * <pre>
-     * &lt;if test="x.groupBy != null"&gt;
-     *     GROUP BY ${x.groupBy}
-     * &lt;/if&gt;
-     * </pre>
-     *
-     * @return 分组字符串
-     */
     @Nullable
     public String getGroupBy() {
         return generator().getGroupByString();
     }
 
-    /**
-     * 获取查询参数列表，可在MyBatis XML中使用
-     * <pre>
-     * &lt;if test="x.cond != null"&gt;
-     *     AND column = #{x.params[0]}
-     * &lt;/if&gt;
-     * </pre>
-     *
-     * @return 参数列表
-     */
     @NotNull
     public List<Object> getParams() {
         return generator().params;
