@@ -4,16 +4,12 @@ import cn.com.idmy.base.annotation.Table;
 import cn.com.idmy.orm.core.SqlProvider;
 import cn.com.idmy.orm.core.Tables;
 import cn.com.idmy.orm.mybatis.handler.*;
-import org.apache.ibatis.executor.Executor;
 import org.apache.ibatis.executor.keygen.NoKeyGenerator;
 import org.apache.ibatis.executor.parameter.ParameterHandler;
-import org.apache.ibatis.executor.resultset.ResultSetHandler;
 import org.apache.ibatis.mapping.BoundSql;
 import org.apache.ibatis.mapping.MappedStatement;
 import org.apache.ibatis.mapping.SqlCommandType;
 import org.apache.ibatis.session.Configuration;
-import org.apache.ibatis.session.ResultHandler;
-import org.apache.ibatis.session.RowBounds;
 import org.dromara.hutool.core.text.StrUtil;
 import org.jetbrains.annotations.NotNull;
 
@@ -39,20 +35,14 @@ class MybatisConfiguration extends Configuration {
     }
 
     @Override
-    public ResultSetHandler newResultSetHandler(Executor executor, MappedStatement ms, RowBounds rbs, ParameterHandler ph, ResultHandler rh, BoundSql boundSql) {
-        var resultSetHandler = new PageResultSetHandler(executor, ms, ph, rh, boundSql, rbs);
-        return (ResultSetHandler) interceptorChain.pluginAll(resultSetHandler);
-    }
-
-    @Override
-    public ParameterHandler newParameterHandler(@NotNull MappedStatement ms, @NotNull Object param, @NotNull BoundSql boundSql) {
+    public ParameterHandler newParameterHandler(@NotNull MappedStatement ms, @NotNull Object param, @NotNull BoundSql sql) {
         if (!ms.getId().endsWith(SELECT_KEY_SUFFIX)) {
             if (param instanceof Map<?, ?> map && map.containsKey(SqlProvider.SQL_PARAMS)) {
-                var handler = new MybatisParameterHandler(ms, param, boundSql);
+                var handler = new MybatisParameterHandler(ms, param, sql);
                 return (ParameterHandler) interceptorChain.pluginAll(handler);
             }
         }
-        return super.newParameterHandler(ms, param, boundSql);
+        return super.newParameterHandler(ms, param, sql);
     }
 
     @Override
