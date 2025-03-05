@@ -14,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.dromara.hutool.core.convert.ConvertUtil;
 import org.dromara.hutool.core.reflect.ClassUtil;
+import org.dromara.hutool.core.text.StrUtil;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -30,8 +31,7 @@ public class OrmUtil {
         }
         try {
             try (var session = factory.openSession()) {
-                String version = session.selectOne("SELECT VERSION()");
-                isMySQL8 = version != null && version.startsWith("8.");
+                isMySQL8 = StrUtil.startWith(session.<String>selectOne("select version()"), "8.");
                 return isMySQL8;
             }
         } catch (Exception e) {
