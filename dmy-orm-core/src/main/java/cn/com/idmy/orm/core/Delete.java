@@ -12,16 +12,11 @@ import java.util.List;
 @Slf4j
 @Getter
 @Accessors(fluent = true, chain = false)
-public class Delete<T, ID> extends Where<T, ID, Delete<T, ID>> {
+public class Delete<T> extends Where<T, Delete<T>> {
 
-    protected Delete(@NotNull OrmDao<T, ID> dao, boolean nullable) {
-        super(dao);
+    protected Delete(@NotNull Class<T> entityType, boolean nullable) {
+        super(entityType);
         this.nullable = nullable;
-    }
-
-    @NotNull
-    protected static <T, ID> Delete<T, ID> of(@NotNull OrmDao<T, ID> dao, boolean nullable) {
-        return new Delete<>(dao, nullable);
     }
 
     @NotNull

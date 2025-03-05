@@ -24,15 +24,12 @@ import java.util.function.Consumer;
 @Slf4j
 @Getter
 @Accessors(fluent = true, chain = false)
-public abstract class Where<T, ID, CRUD extends Where<T, ID, CRUD>> extends Crud<T, ID, CRUD> {
-    protected OrmDao<T, ID> dao;
-
-    protected Where(@NotNull OrmDao<T, ID> dao) {
-        super(dao.entityType());
-        this.dao = dao;
+public abstract class Where<T, CRUD extends Where<T, CRUD>> extends Crud<T, CRUD> {
+    protected Where(@NotNull Class<T> entityType) {
+        super(entityType);
     }
 
-    public @NotNull CRUD addNode(@NotNull SqlNode.SqlCond node) {
+    public @NotNull CRUD addNode(@NotNull SqlCond node) {
         if (ObjUtil.isEmpty(node.expr)) {
             if (nullable) {
                 return crud;
@@ -46,7 +43,7 @@ public abstract class Where<T, ID, CRUD extends Where<T, ID, CRUD>> extends Crud
 
     //region 比较操作
     // 等于
-    public @NotNull CRUD eq(@NonNull ID id) {
+    public @NotNull CRUD eq(@NonNull Object id) {
         if (ObjUtil.isEmpty(id)) {
             throw new BizException("主键不能为空");
         } else {
@@ -79,7 +76,7 @@ public abstract class Where<T, ID, CRUD extends Where<T, ID, CRUD>> extends Crud
     }
 
     // 不等于
-    public @NotNull CRUD ne(@NonNull ID id) {
+    public @NotNull CRUD ne(@NonNull Object id) {
         if (ObjUtil.isEmpty(id)) {
             throw new BizException("主键不能为空");
         } else {
@@ -522,12 +519,12 @@ public abstract class Where<T, ID, CRUD extends Where<T, ID, CRUD>> extends Crud
     }
 
     //endregion
-    public @NotNull CRUD or(boolean if0, @NotNull Consumer<WhereOr<T, ID>> consumer) {
+    public @NotNull CRUD or(boolean if0, @NotNull Consumer<WhereOr<T>> consumer) {
         return if0 ? or(consumer) : crud;
     }
 
-    public @NotNull CRUD or(@NotNull Consumer<WhereOr<T, ID>> consumer) {
-        var where = new WhereOr<>(dao);
+    public @NotNull CRUD or(@NotNull Consumer<WhereOr<T>> consumer) {
+        var where = new WhereOr<T>(entityType);
         consumer.accept(where);
         addNode(new SqlOr());
         nodes.addAll(where.nodes);

@@ -16,9 +16,9 @@ import java.util.List;
 @Slf4j
 class QuerySqlGenerator extends SqlGenerator {
     @NotNull
-    protected final Query<?, ?> query;
+    protected final Query<?> query;
 
-    protected QuerySqlGenerator(@NotNull Query<?, ?> q) {
+    protected QuerySqlGenerator(@NotNull Query<?> q) {
         super(q.entityType, q.nodes);
         this.query = q;
     }

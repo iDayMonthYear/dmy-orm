@@ -12,34 +12,15 @@ import java.util.ArrayList;
  */
 @Slf4j
 public class XmlQueryGenerator extends QuerySqlGenerator {
-    /**
-     * 条件字符串
-     */
     private String conditionString;
-
-    /**
-     * 排序字符串
-     */
     private String orderByString;
-
-    /**
-     * 分组字符串
-     */
     private String groupByString;
 
-    /**
-     * 创建XML查询生成器
-     *
-     * @param query 查询对象
-     */
-    protected XmlQueryGenerator(@NotNull Query<?, ?> query) {
+    protected XmlQueryGenerator(@NotNull Query<?> query) {
         super(query);
         generateQueryStrings();
     }
 
-    /**
-     * 生成查询字符串
-     */
     private void generateQueryStrings() {
         // 收集条件节点
         var wheres = new ArrayList<SqlNode>(nodes.size());
@@ -110,9 +91,6 @@ public class XmlQueryGenerator extends QuerySqlGenerator {
         }
     }
 
-    /**
-     * 生成XML条件OR语句
-     */
     private void genCondOrForXml(@NotNull StringBuilder sql, @NotNull SqlNode node) {
         if (node instanceof SqlNode.SqlOr) {
             sql.append(OR);
@@ -121,9 +99,6 @@ public class XmlQueryGenerator extends QuerySqlGenerator {
         }
     }
 
-    /**
-     * 生成XML条件语句
-     */
     private void genCondForXml(@NotNull StringBuilder sql, @NotNull SqlNode.SqlCond cond) {
         var col = cond.column;
         sql.append(keyword(col)).append(BLANK).append(cond.op.getSymbol()).append(BLANK);
@@ -176,44 +151,23 @@ public class XmlQueryGenerator extends QuerySqlGenerator {
         }
     }
 
-    /**
-     * 获取条件字符串
-     *
-     * @return 条件字符串
-     */
     @Nullable
     public String getConditionString() {
         return StrUtil.isNotBlank(conditionString) ? conditionString : null;
     }
 
-    /**
-     * 获取排序字符串
-     *
-     * @return 排序字符串
-     */
     @Nullable
     public String getOrderByString() {
         return StrUtil.isNotBlank(orderByString) ? orderByString : null;
     }
 
-    /**
-     * 获取分组字符串
-     *
-     * @return 分组字符串
-     */
     @Nullable
     public String getGroupByString() {
         return StrUtil.isNotBlank(groupByString) ? groupByString : null;
     }
 
-    /**
-     * 创建XML查询生成器
-     *
-     * @param query 查询对象
-     * @return XML查询生成器
-     */
     @NotNull
-    public static XmlQueryGenerator of(@NotNull Query<?, ?> query) {
+    public static XmlQueryGenerator of(@NotNull Query<?> query) {
         return new XmlQueryGenerator(query);
     }
 } 

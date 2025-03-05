@@ -51,7 +51,7 @@ public class SqlProvider {
         sqlSessionFactory = factory;
     }
 
-    protected static void clearSelectColumns(@NotNull Query<?, ?> q) {
+    protected static void clearSelectColumns(@NotNull Query<?> q) {
         if (q.hasSelectColumn) {
             q.clearSelectColumns();
             log.error("select ... from 中间不能有字段或者函数");
@@ -60,7 +60,7 @@ public class SqlProvider {
 
     @NotNull
     private static String genCommonSql(@NotNull Map<String, Object> params) {
-        var where = (Crud<?, ?, ?>) params.get(CRUD);
+        var where = (Crud<?, ?>) params.get(CRUD);
         putEntityType(params, where.entityType);
         var pair = where.sql();
         params.put(SQL_PARAMS, pair.r);
@@ -143,7 +143,7 @@ public class SqlProvider {
     }
 
     @NotNull
-    public static <T, ID, R> Page<T> page(@NotNull OrmDao<T, ID> dao, @NotNull Page<R> page, @NotNull Query<T, ID> q) {
+    public static <T, ID, R> Page<T> page(@NotNull OrmDao<T, ID> dao, @NotNull Page<R> page, @NotNull Query<T> q) {
         q.limit = page.pageSize();
         q.offset = page.offset();
         q.orderBy(page.sorts());
@@ -198,7 +198,7 @@ public class SqlProvider {
 
     @NotNull
     public String count(@NotNull Map<String, Object> params) {
-        var q = (Query<?, ?>) params.get(CRUD);
+        var q = (Query<?>) params.get(CRUD);
         clearSelectColumns(q);
         q.limit = null;
         q.offset = null;

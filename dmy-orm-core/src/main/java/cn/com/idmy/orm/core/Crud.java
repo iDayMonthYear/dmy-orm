@@ -15,7 +15,7 @@ import java.util.Objects;
 
 @Slf4j
 @Accessors(fluent = true, chain = true)
-abstract class Crud<T, ID, CRUD extends Crud<T, ID, CRUD>> {
+abstract class Crud<T, CRUD extends Crud<T, CRUD>> {
     @SuppressWarnings({"unchecked"})
     @NotNull
     protected final CRUD crud = (CRUD) this;

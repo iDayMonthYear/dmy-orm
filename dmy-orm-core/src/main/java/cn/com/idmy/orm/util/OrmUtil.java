@@ -56,7 +56,7 @@ public class OrmUtil {
         return (R) ConvertUtil.convert(fieldType, 0);
     }
 
-    public static <T, ID> void multiIdsAddEqNode(@NotNull ID id, Where<T, ID, ?> where) {
+    public static <T> void multiIdsAddEqNode(@NotNull Object id, Where<T, ?> where) {
         var entityType = where.entityType();
         var table = Tables.getTable(entityType);
         if (table.isMultiIds()) {

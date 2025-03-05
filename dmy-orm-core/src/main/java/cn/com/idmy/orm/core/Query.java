@@ -26,7 +26,7 @@ import static cn.com.idmy.orm.core.Tables.getIdField;
 
 @Slf4j
 @Accessors(fluent = true, chain = false)
-public class Query<T, ID> extends Where<T, ID, Query<T, ID>> {
+public class Query<T> extends Where<T, Query<T>> {
     @Getter
     @Nullable
     protected Integer offset;
@@ -36,48 +36,44 @@ public class Query<T, ID> extends Where<T, ID, Query<T, ID>> {
     protected boolean hasParam;
     protected boolean hasSelectColumn;
     protected boolean hasAggregate;
+    protected OrmDao<T, ?> dao;
 
-    protected Query(@NotNull OrmDao<T, ID> dao, boolean nullable) {
-        super(dao);
+    protected Query(@NotNull Class<T> entityType, boolean nullable) {
+        super(entityType);
         this.nullable = nullable;
     }
 
-    @NotNull
-    protected static <T, ID> Query<T, ID> of(@NotNull OrmDao<T, ID> dao, boolean nullable) {
-        return new Query<>(dao, nullable);
+    protected Query(@NotNull OrmDao<T, ?> dao, boolean nullable) {
+        this(dao.entityType(), nullable);
+        this.dao = dao;
     }
 
     @NotNull
-    protected static <T, ID> Query<T, ID> of(@NotNull OrmDao<T, ID> dao) {
-        return new Query<>(dao, true);
-    }
-
-    @NotNull
-    public Query<T, ID> limit(int limit) {
+    public Query<T> limit(int limit) {
         this.limit = limit;
         return crud;
     }
 
     @NotNull
-    public Query<T, ID> offset(int offset) {
+    public Query<T> offset(int offset) {
         this.offset = offset;
         return crud;
     }
 
     @NotNull
-    public Query<T, ID> one() {
+    public Query<T> one() {
         limit = 1;
         return crud;
     }
 
     @NotNull
-    public Query<T, ID> distinct() {
+    public Query<T> distinct() {
         hasSelectColumn = true;
         return addNode(new SqlDistinct());
     }
 
     @NotNull
-    public Query<T, ID> distinct(@NotNull FieldGetter<T, ?> field) {
+    public Query<T> distinct(@NotNull FieldGetter<T, ?> field) {
         hasSelectColumn = true;
         return addNode(new SqlDistinct(getColumnName(entityType, field)));
     }
@@ -87,14 +83,14 @@ public class Query<T, ID> extends Where<T, ID, Query<T, ID>> {
     }
 
     @NotNull
-    public Query<T, ID> select(@NotNull SqlFnExpr<T> expr) {
+    public Query<T> select(@NotNull SqlFnExpr<T> expr) {
         hasSelectColumn = true;
         hasAggregate = true;
         return addNode(new SelectSqlColumn(expr));
     }
 
     @NotNull
-    public Query<T, ID> select(@NotNull SqlFnExpr<T> expr, @NotNull FieldGetter<T, ?> alias) {
+    public Query<T> select(@NotNull SqlFnExpr<T> expr, @NotNull FieldGetter<T, ?> alias) {
         hasSelectColumn = true;
         hasAggregate = true;
         return addNode(new SelectSqlColumn(expr, getColumnName(entityType, alias)));
@@ -102,7 +98,7 @@ public class Query<T, ID> extends Where<T, ID, Query<T, ID>> {
 
     @SafeVarargs
     @NotNull
-    public final Query<T, ID> select(@NotNull FieldGetter<T, ?>... fields) {
+    public final Query<T> select(@NotNull FieldGetter<T, ?>... fields) {
         if (ArrayUtil.isNotEmpty(fields)) {
             hasSelectColumn = true;
             for (var field : fields) {
@@ -113,14 +109,14 @@ public class Query<T, ID> extends Where<T, ID, Query<T, ID>> {
     }
 
     @NotNull
-    public Query<T, ID> groupBy(@NotNull FieldGetter<T, ?> field) {
+    public Query<T> groupBy(@NotNull FieldGetter<T, ?> field) {
         hasAggregate = true;
         return addNode(new SqlGroupBy(getColumnName(entityType, field)));
     }
 
     @NotNull
     @SafeVarargs
-    public final Query<T, ID> groupBy(@NotNull FieldGetter<T, ?>... fields) {
+    public final Query<T> groupBy(@NotNull FieldGetter<T, ?>... fields) {
         hasAggregate = true;
         for (var field : fields) {
             addNode(new SqlGroupBy(getColumnName(entityType, field)));
@@ -129,52 +125,52 @@ public class Query<T, ID> extends Where<T, ID, Query<T, ID>> {
     }
 
     @NotNull
-    public Query<T, ID> orderBy(@NotNull FieldGetter<T, ?> field) {
+    public Query<T> orderBy(@NotNull FieldGetter<T, ?> field) {
         return addNode(new SqlOrderBy(getColumnName(entityType, field), false));
     }
 
     @NotNull
-    public Query<T, ID> orderBy(@NotNull FieldGetter<T, ?> field, boolean desc) {
+    public Query<T> orderBy(@NotNull FieldGetter<T, ?> field, boolean desc) {
         return addNode(new SqlOrderBy(getColumnName(entityType, field), desc));
     }
 
     @NotNull
-    public Query<T, ID> orderByDesc(@NotNull FieldGetter<T, ?> field) {
+    public Query<T> orderByDesc(@NotNull FieldGetter<T, ?> field) {
         return orderBy(field, true);
     }
 
     @NotNull
-    public Query<T, ID> orderBy(@NotNull FieldGetter<T, ?> field1, boolean desc1, @NotNull FieldGetter<T, ?> field2, boolean desc2) {
+    public Query<T> orderBy(@NotNull FieldGetter<T, ?> field1, boolean desc1, @NotNull FieldGetter<T, ?> field2, boolean desc2) {
         return addNode(new SqlOrderBy(getColumnName(entityType, field1), desc1)).addNode(new SqlOrderBy(getColumnName(entityType, field2), desc2));
     }
 
     @NotNull
-    public Query<T, ID> orderBy(@NotNull FieldGetter<T, ?> field1, boolean desc1, @NotNull FieldGetter<T, ?> field2, boolean desc2, @NotNull FieldGetter<T, ?> field3, boolean desc3) {
+    public Query<T> orderBy(@NotNull FieldGetter<T, ?> field1, boolean desc1, @NotNull FieldGetter<T, ?> field2, boolean desc2, @NotNull FieldGetter<T, ?> field3, boolean desc3) {
         return addNode(new SqlOrderBy(getColumnName(entityType, field1), desc1)).addNode(new SqlOrderBy(getColumnName(entityType, field2), desc2)).addNode(new SqlOrderBy(getColumnName(entityType, field3), desc3));
     }
 
     @NotNull
-    public Query<T, ID> orderBy(@NotNull FieldGetter<T, ?> field1, @NotNull FieldGetter<T, ?> field2) {
+    public Query<T> orderBy(@NotNull FieldGetter<T, ?> field1, @NotNull FieldGetter<T, ?> field2) {
         return orderBy(field1, false, field2, false);
     }
 
     @NotNull
-    public Query<T, ID> orderBy(@NotNull FieldGetter<T, ?> field1, @NotNull FieldGetter<T, ?> field2, @NotNull FieldGetter<T, ?> field3) {
+    public Query<T> orderBy(@NotNull FieldGetter<T, ?> field1, @NotNull FieldGetter<T, ?> field2, @NotNull FieldGetter<T, ?> field3) {
         return orderBy(field1, false, field2, false, field3, false);
     }
 
     @NotNull
-    public Query<T, ID> orderByDesc(@NotNull FieldGetter<T, ?> field1, @NotNull FieldGetter<T, ?> field2) {
+    public Query<T> orderByDesc(@NotNull FieldGetter<T, ?> field1, @NotNull FieldGetter<T, ?> field2) {
         return orderBy(field1, true, field2, true);
     }
 
     @NotNull
-    public Query<T, ID> orderByDesc(@NotNull FieldGetter<T, ?> field1, @NotNull FieldGetter<T, ?> field2, @NotNull FieldGetter<T, ?> field3) {
+    public Query<T> orderByDesc(@NotNull FieldGetter<T, ?> field1, @NotNull FieldGetter<T, ?> field2, @NotNull FieldGetter<T, ?> field3) {
         return orderBy(field1, true, field2, true, field3, true);
     }
 
     @NotNull
-    public Query<T, ID> orderBy(@Nullable String[] orders) {
+    public Query<T> orderBy(@Nullable String[] orders) {
         if (ArrayUtil.isNotEmpty(orders)) {
             if (orders.length % 2 != 0) {
                 throw new OrmException("排序列名不成对，必须为：['name', 'asc', 'gender', 'desc']");
@@ -190,7 +186,7 @@ public class Query<T, ID> extends Where<T, ID, Query<T, ID>> {
     }
 
     @NotNull
-    public Query<T, ID> param(@Nullable Object param) {
+    public Query<T> param(@Nullable Object param) {
         if (!hasParam && param != null) {
             hasParam = true;
             var createdAtName = DefaultConfig.createdAtName;

@@ -7,23 +7,15 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-/**
- * XML查询生成器，用于生成XML查询所需的条件、排序和分组字符串
- */
 @Slf4j
 @Accessors(fluent = false, chain = true)
-public class XmlQuery<T, ID> extends Query<T, ID> {
+public class XmlQuery extends Query {
     @Nullable
     private transient XmlQueryGenerator generator;
 
-    protected XmlQuery(@NotNull OrmDao<T, ID> dao, boolean nullable) {
-        super(dao, nullable);
+    protected XmlQuery(@NotNull Class<?> entityType, boolean nullable) {
+        super(entityType, nullable);
         force = true;
-    }
-
-    @NotNull
-    public static <T, ID> XmlQuery<T, ID> of(@NotNull OrmDao<T, ID> dao, boolean nullable) {
-        return new XmlQuery<>(dao, nullable);
     }
 
     @NotNull
@@ -99,7 +91,7 @@ public class XmlQuery<T, ID> extends Query<T, ID> {
      */
     @Override
     @NotNull
-    public XmlQuery<T, ID> addNode(@NotNull SqlNode node) {
+    public XmlQuery addNode(@NotNull SqlNode node) {
         super.addNode(node);
         this.generator = null;
         return this;

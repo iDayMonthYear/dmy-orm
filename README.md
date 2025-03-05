@@ -149,28 +149,28 @@ Class<ID> idType();                          // 获取ID类型
 TableInfo table();                           // 获取表信息
 
 // 查询构建器快捷方法
-Query<T, ID> q();                           // 创建查询构建器 (nullable = true)
-Query<T, ID> q(boolean nullable);
-Update<T, ID> u();                          // 创建更新构建器 (nullable = false)
-Update<T, ID> u(boolean nullable);
-Delete<T, ID> d();                          // 创建删除构建器 (nullable = false)
-Delete<T, ID> d(boolean nullable);
+Query<T> q();                           // 创建查询构建器 (nullable = true)
+Query<T> q(boolean nullable);
+Update<T> u();                          // 创建更新构建器 (nullable = false)
+Update<T> u(boolean nullable);
+Delete<T> d();                          // 创建删除构建器 (nullable = false)
+Delete<T> d(boolean nullable);
 
 // 查询操作
-long count(Query<T, ID> q);                  // 统计查询
-boolean exists(Query<T, ID> q);              // 存在性检查
+long count(Query<T> q);                  // 统计查询
+boolean exists(Query<T> q);              // 存在性检查
 boolean exists(ID id);
-List<T> list(Query<T, ID> q);                // 列表查询
+List<T> list(Query<T> q);                // 列表查询
 List<T> list(Collection<ID> ids);
-T get(Query<T, ID> q);                       // 单条记录查询
+T get(Query<T> q);                       // 单条记录查询
 T get(ID id);
 
 // 增删改操作
 int create(T entity);                        // 创建记录
 int creates(Collection<T> entities);         // 批量创建
-int update(Update<T, ID> update);            // 更新记录
+int update(Update<T> update);            // 更新记录
 int update(T entity);
-int delete(Delete<T, ID> d);                 // 删除记录
+int delete(Delete<T> d);                 // 删除记录
 int delete(ID id);
 ```
 
