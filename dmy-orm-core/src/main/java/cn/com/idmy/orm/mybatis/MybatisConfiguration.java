@@ -4,12 +4,16 @@ import cn.com.idmy.base.annotation.Table;
 import cn.com.idmy.orm.core.SqlProvider;
 import cn.com.idmy.orm.core.Tables;
 import cn.com.idmy.orm.mybatis.handler.*;
+import org.apache.ibatis.executor.Executor;
 import org.apache.ibatis.executor.keygen.NoKeyGenerator;
 import org.apache.ibatis.executor.parameter.ParameterHandler;
+import org.apache.ibatis.executor.resultset.ResultSetHandler;
 import org.apache.ibatis.mapping.BoundSql;
 import org.apache.ibatis.mapping.MappedStatement;
 import org.apache.ibatis.mapping.SqlCommandType;
 import org.apache.ibatis.session.Configuration;
+import org.apache.ibatis.session.ResultHandler;
+import org.apache.ibatis.session.RowBounds;
 import org.dromara.hutool.core.text.StrUtil;
 import org.jetbrains.annotations.NotNull;
 
@@ -32,6 +36,12 @@ class MybatisConfiguration extends Configuration {
         registry.register(ListIntegerTypeHandler.class);
         registry.register(ListLongTypeHandler.class);
         registry.register(ListStringTypeHandler.class);
+    }
+
+    @Override
+    public ResultSetHandler newResultSetHandler(Executor executor, MappedStatement ms, RowBounds rbs, ParameterHandler ph, ResultHandler rh, BoundSql boundSql) {
+        var resultSetHandler = new PageResultSetHandler(executor, ms, ph, rh, boundSql, rbs);
+        return (ResultSetHandler) interceptorChain.pluginAll(resultSetHandler);
     }
 
     @Override
