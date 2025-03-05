@@ -29,8 +29,8 @@ public class XmlQuery<T> extends Query<T> {
     /**
      * 获取条件字符串，可在MyBatis XML中使用
      * <pre>
-     * &lt;if test="xxx.cond != null"&gt;
-     *     ${xxx.cond}
+     * &lt;if test="x.cond != null"&gt;
+     *     ${x.cond}
      * &lt;/if&gt;
      * </pre>
      *
@@ -59,8 +59,8 @@ public class XmlQuery<T> extends Query<T> {
     /**
      * 获取分组字符串，可在MyBatis XML中使用
      * <pre>
-     * &lt;if test="xxx.groupBy != null"&gt;
-     *     GROUP BY ${xxx.groupBy}
+     * &lt;if test="x.groupBy != null"&gt;
+     *     GROUP BY ${x.groupBy}
      * &lt;/if&gt;
      * </pre>
      *
@@ -74,8 +74,8 @@ public class XmlQuery<T> extends Query<T> {
     /**
      * 获取查询参数列表，可在MyBatis XML中使用
      * <pre>
-     * &lt;if test="xxx.cond != null"&gt;
-     *     AND column = #{xxx.params[0]}
+     * &lt;if test="x.cond != null"&gt;
+     *     AND column = #{x.params[0]}
      * &lt;/if&gt;
      * </pre>
      *
