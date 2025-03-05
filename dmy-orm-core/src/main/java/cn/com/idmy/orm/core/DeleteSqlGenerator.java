@@ -40,6 +40,6 @@ class DeleteSqlGenerator extends SqlGenerator {
         params = new ArrayList<>(delete.sqlParamsSize);
 
         genWhere(wheres);
-        return Pair.of(sql.toString(), params);
+        return new Pair<>(sql.toString(), params);
     }
 }

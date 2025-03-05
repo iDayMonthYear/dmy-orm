@@ -63,13 +63,13 @@ public class OrmUtil {
             var ids = table.ids();
             switch (id) {
                 case Pair<?, ?> pair -> {
-                    where.addNode(new SqlCond(ids[0].name(), Op.EQ, pair.l));
-                    where.addNode(new SqlCond(ids[1].name(), Op.EQ, pair.r));
+                    where.addNode(new SqlCond(ids[0].name(), Op.EQ, pair.l()));
+                    where.addNode(new SqlCond(ids[1].name(), Op.EQ, pair.r()));
                 }
                 case Triple<?, ?, ?> triple -> {
-                    where.addNode(new SqlCond(ids[0].name(), Op.EQ, triple.l));
-                    where.addNode(new SqlCond(ids[1].name(), Op.EQ, triple.m));
-                    where.addNode(new SqlCond(ids[2].name(), Op.EQ, triple.r));
+                    where.addNode(new SqlCond(ids[0].name(), Op.EQ, triple.l()));
+                    where.addNode(new SqlCond(ids[1].name(), Op.EQ, triple.m()));
+                    where.addNode(new SqlCond(ids[2].name(), Op.EQ, triple.r()));
                 }
                 case Object[] arr -> {
                     for (int i = 0, len = ids.length; i < len; i++) {

@@ -18,6 +18,7 @@ public class XmlQueryGenerator extends QuerySqlGenerator {
 
     protected XmlQueryGenerator(@NotNull Query<?> query) {
         super(query);
+        params = new ArrayList<>();
         generateQueryStrings();
     }
 

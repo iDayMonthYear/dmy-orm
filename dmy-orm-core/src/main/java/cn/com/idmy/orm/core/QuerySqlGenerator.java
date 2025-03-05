@@ -72,7 +72,7 @@ class QuerySqlGenerator extends SqlGenerator {
             Assert.notNull(query.limit, "offset 必须与 limit 一起使用");
             sql.append(OFFSET).append(query.offset);
         }
-        return Pair.of(sql.toString(), params);
+        return new Pair<>(sql.toString(), params);
     }
 
     protected void genDistinct(SqlDistinct d) {

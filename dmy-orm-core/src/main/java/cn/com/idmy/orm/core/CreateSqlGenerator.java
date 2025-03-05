@@ -76,7 +76,7 @@ class CreateSqlGenerator extends SqlGenerator {
         if (params.isEmpty()) {
             throw new OrmException("插入数据不能为空");
         } else {
-            return Pair.of(sql.toString(), params);
+            return new Pair<>(sql.toString(), params);
         }
     }
 
@@ -122,7 +122,7 @@ class CreateSqlGenerator extends SqlGenerator {
         if (params.isEmpty()) {
             throw new OrmException("插入数据不能为空");
         } else {
-            return Pair.of(sql.toString(), params);
+            return new Pair<>(sql.toString(), params);
         }
     }
 }

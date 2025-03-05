@@ -56,7 +56,7 @@ class UpdateSqlGenerator extends SqlGenerator {
             }
         }
         genWhere(wheres);
-        return Pair.of(sql.toString(), params);
+        return new Pair<>(sql.toString(), params);
     }
 
     protected String genSet(@NonNull String col, @NonNull SqlOpExpr expr) {
