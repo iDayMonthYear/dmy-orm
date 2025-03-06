@@ -37,9 +37,9 @@ class DeleteSqlGenerator extends SqlGenerator {
         }
 
         sql.append(DELETE_FROM).append(tableInfo.schema()).append(STRESS_MARK).append(tableInfo.name()).append(STRESS_MARK);
-        params = new ArrayList<>(delete.sqlParamsSize);
+        values = new ArrayList<>(delete.sqlParamsSize);
 
         genWhere(wheres);
-        return new Pair<>(sql.toString(), params);
+        return new Pair<>(sql.toString(), values);
     }
 }

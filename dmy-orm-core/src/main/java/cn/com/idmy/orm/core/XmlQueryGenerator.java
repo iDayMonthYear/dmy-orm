@@ -12,13 +12,13 @@ import java.util.ArrayList;
  */
 @Slf4j
 public class XmlQueryGenerator extends QuerySqlGenerator {
-    private String conditionString;
+    private String whereString;
     private String orderByString;
     private String groupByString;
 
     protected XmlQueryGenerator(@NotNull Query<?> query) {
         super(query);
-        params = new ArrayList<>();
+        values = new ArrayList<>();
         generateQueryStrings();
     }
 
@@ -46,7 +46,7 @@ public class XmlQueryGenerator extends QuerySqlGenerator {
                     }
                 }
             }
-            this.conditionString = condSql.toString();
+            this.whereString = condSql.toString();
         }
 
         // 收集排序节点
@@ -114,17 +114,17 @@ public class XmlQueryGenerator extends QuerySqlGenerator {
                 }
                 case BETWEEN, NOT_BETWEEN -> {
                     if (expr instanceof Object[] arr && arr.length == 2) {
-                        sql.append("#{params[").append(params.size()).append("]} and #{params[").append(params.size() + 1).append("]}");
-                        params.add(arr[0]);
-                        params.add(arr[1]);
+                        sql.append("#{values[").append(values.size()).append("]} and #{values[").append(values.size() + 1).append("]}");
+                        values.add(arr[0]);
+                        values.add(arr[1]);
                     }
                 }
                 case IN, NOT_IN -> {
                     if (expr instanceof Object[] arr) {
                         sql.append("(");
                         for (int i = 0; i < arr.length; i++) {
-                            sql.append("#{params[").append(params.size()).append("]}");
-                            params.add(arr[i]);
+                            sql.append("#{values[").append(values.size()).append("]}");
+                            values.add(arr[i]);
                             if (i < arr.length - 1) {
                                 sql.append(DELIMITER);
                             }
@@ -134,8 +134,8 @@ public class XmlQueryGenerator extends QuerySqlGenerator {
                         sql.append("(");
                         int i = 0;
                         for (Object item : coll) {
-                            sql.append("#{params[").append(params.size()).append("]}");
-                            params.add(item);
+                            sql.append("#{values[").append(values.size()).append("]}");
+                            values.add(item);
                             if (i < coll.size() - 1) {
                                 sql.append(DELIMITER);
                             }
@@ -145,16 +145,16 @@ public class XmlQueryGenerator extends QuerySqlGenerator {
                     }
                 }
                 default -> {
-                    sql.append("#{params[").append(params.size()).append("]}");
-                    params.add(expr);
+                    sql.append("#{values[").append(values.size()).append("]}");
+                    values.add(expr);
                 }
             }
         }
     }
 
     @Nullable
-    public String getConditionString() {
-        return StrUtil.isNotBlank(conditionString) ? conditionString : null;
+    public String getWhereString() {
+        return StrUtil.isNotBlank(whereString) ? whereString : null;
     }
 
     @Nullable

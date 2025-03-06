@@ -59,7 +59,7 @@ public abstract class SqlGenerator {
     protected final List<SqlNode> nodes;
     @NotNull
     protected final StringBuilder sql = new StringBuilder();
-    protected List<Object> params;
+    protected List<Object> values;
 
     public SqlGenerator(@NotNull Class<?> entityType, @NotNull List<SqlNode> notes) {
         this.entityType = entityType;
@@ -116,7 +116,7 @@ public abstract class SqlGenerator {
 
     protected String genCond(@NonNull String col, @NonNull SqlOpExpr expr) {
         var sqlOp = expr.op(new SqlOp<>());
-        params.add(sqlOp.value());
+        values.add(sqlOp.value());
         return keyword(col) + BLANK + sqlOp.op() + BLANK + PLACEHOLDER;
     }
 
@@ -133,13 +133,13 @@ public abstract class SqlGenerator {
                 if (ObjUtil.isEmpty(arr[1])) {
                     throw new OrmException("between 第二个参数不能为空");
                 }
-                params.add(val);
+                values.add(val);
                 return BETWEEN;
             } else {
                 throw new OrmException("between 参数必须为 2 个元素");
             }
         } else {
-            params.add(val);
+            values.add(val);
             return genPlaceholder(val, placeholder).toString();
         }
     }

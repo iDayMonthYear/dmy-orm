@@ -33,7 +33,7 @@ public class Query<T> extends Where<T, Query<T>> {
     @Getter
     @Nullable
     protected Integer limit;
-    protected boolean hasParam;
+    protected boolean hasCommon;
     protected boolean hasSelectColumn;
     protected boolean hasAggregate;
     protected OrmDao<T, ?> dao;
@@ -186,11 +186,11 @@ public class Query<T> extends Where<T, Query<T>> {
     }
 
     @NotNull
-    public Query<T> param(@Nullable Object param) {
-        if (!hasParam && param != null) {
-            hasParam = true;
+    public Query<T> common(@Nullable Object params) {
+        if (!hasCommon && params != null) {
+            hasCommon = true;
             var createdAtName = DefaultConfig.createdAtName;
-            var cats = FieldUtil.getFieldValue(param, createdAtName + "s");
+            var cats = FieldUtil.getFieldValue(params, createdAtName + "s");
             if (cats instanceof Object[] ats && ArrayUtil.isNotEmpty(ats) && ats.length == 2) {
                 var createdAt = getColumnName(entityType, createdAtName);
                 if (createdAt != null) {
@@ -198,7 +198,7 @@ public class Query<T> extends Where<T, Query<T>> {
                 }
             }
             var updatedAtName = DefaultConfig.updatedAtName;
-            var uats = FieldUtil.getFieldValue(param, updatedAtName + "s");
+            var uats = FieldUtil.getFieldValue(params, updatedAtName + "s");
             if (uats instanceof Object[] ats && ArrayUtil.isNotEmpty(ats) && ats.length == 2) {
                 var createdAt = getColumnName(entityType, updatedAtName);
                 if (createdAt != null) {
@@ -207,11 +207,11 @@ public class Query<T> extends Where<T, Query<T>> {
             }
 
             var idField = getIdField(entityType);
-            var idVal = FieldUtil.getFieldValue(param, idField);
+            var idVal = FieldUtil.getFieldValue(params, idField);
             if (idVal != null) {
                 addNode(new SqlCond(Tables.getIdColumnName(entityType), Op.EQ, idVal));
             } else {
-                var ids = FieldUtil.getFieldValue(param, idField.getName() + "s");
+                var ids = FieldUtil.getFieldValue(params, idField.getName() + "s");
                 if (ObjUtil.isNotEmpty(ids)) {
                     addNode(new SqlCond(Tables.getIdColumnName(entityType), Op.IN, ids));
                 }

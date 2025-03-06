@@ -45,7 +45,7 @@ class UpdateSqlGenerator extends SqlGenerator {
         }
 
         sql.append(UPDATE).append(tableInfo.schema()).append(STRESS_MARK).append(tableInfo.name()).append(STRESS_MARK).append(SET);
-        params = new ArrayList<>(update.sqlParamsSize);
+        values = new ArrayList<>(update.sqlParamsSize);
 
         if (!sets.isEmpty()) {
             for (int i = 0, size = sets.size(); i < size; i++) {
@@ -56,17 +56,17 @@ class UpdateSqlGenerator extends SqlGenerator {
             }
         }
         genWhere(wheres);
-        return new Pair<>(sql.toString(), params);
+        return new Pair<>(sql.toString(), values);
     }
 
     protected String genSet(@NonNull String col, @NonNull SqlOpExpr expr) {
         var sqlOp = expr.op(new SqlOp<>());
-        params.add(sqlOp.value());
+        values.add(sqlOp.value());
         return keyword(col) + BLANK + sqlOp.op() + BLANK + PLACEHOLDER;
     }
 
     protected String genSet(@NonNull String col, @Nullable Object val) {
-        params.add(val);
+        values.add(val);
         return PLACEHOLDER;
     }
 
@@ -75,7 +75,7 @@ class UpdateSqlGenerator extends SqlGenerator {
         var expr = genSet(col, set.expr);
         var th = Tables.getTypeHandler(set.field());
         if (th != null) {
-            params.add(new TypeHandlerValue(th, params.removeLast()));
+            values.add(new TypeHandlerValue(th, values.removeLast()));
         }
         sql.append(keyword(col)).append(EQUAL).append(expr);
     }

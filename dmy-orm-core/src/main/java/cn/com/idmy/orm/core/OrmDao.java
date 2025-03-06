@@ -411,10 +411,11 @@ public interface OrmDao<T, ID> {
         @SuppressWarnings({"unchecked"})
         var outType = (Class<E>) page.params().getClass();
         var q = new XmlQuery<>(outType, nullable);
-        q.param(page.params());
+        q.common(page.params());
         q.offset = page.offset();
         q.limit = page.pageSize();
         q.hasTotal = page.hasTotal();
+        q.params = page.params();
         return q;
     }
 

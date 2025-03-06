@@ -19,6 +19,7 @@ public class XmlQuery<T> extends Query<T> {
     @Getter
     @Setter
     protected long total;
+    protected Object params;
 
     protected XmlQuery(@NotNull Class<T> entityType, boolean nullable) {
         super(entityType, nullable);
@@ -34,8 +35,8 @@ public class XmlQuery<T> extends Query<T> {
     }
 
     @Nullable
-    public String getCond() {
-        return generator().getConditionString();
+    public String getWhere() {
+        return generator().getWhereString();
     }
 
     /**
@@ -59,8 +60,13 @@ public class XmlQuery<T> extends Query<T> {
     }
 
     @NotNull
-    public List<Object> getParams() {
-        return generator().params;
+    public List<Object> getValues() {
+        return generator().values;
+    }
+
+    @NotNull
+    public Object getParams() {
+        return params;
     }
 
     @Override

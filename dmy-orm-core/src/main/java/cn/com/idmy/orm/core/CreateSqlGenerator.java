@@ -56,7 +56,7 @@ class CreateSqlGenerator extends SqlGenerator {
         // 收集非空字段
         var cols = new ArrayList<String>();
         var vals = new ArrayList<String>();
-        params = new ArrayList<>();
+        values = new ArrayList<>();
 
         for (int i = 0, size = columns.length; i < size; i++) {
             var col = columns[i];
@@ -64,7 +64,7 @@ class CreateSqlGenerator extends SqlGenerator {
             if (val != null) {
                 cols.add(STRESS_MARK + col.name() + STRESS_MARK);
                 vals.add(PLACEHOLDER);
-                params.add(getTypeHandlerValue(col, val));
+                values.add(getTypeHandlerValue(col, val));
             }
         }
         sql.append(String.join(DELIMITER, cols))
@@ -73,10 +73,10 @@ class CreateSqlGenerator extends SqlGenerator {
                 .append(BRACKET_LEFT)
                 .append(String.join(DELIMITER, vals))
                 .append(BRACKET_RIGHT);
-        if (params.isEmpty()) {
+        if (values.isEmpty()) {
             throw new OrmException("插入数据不能为空");
         } else {
-            return new Pair<>(sql.toString(), params);
+            return new Pair<>(sql.toString(), values);
         }
     }
 
@@ -106,23 +106,23 @@ class CreateSqlGenerator extends SqlGenerator {
         }
         sql.setLength(sql.length() - DELIMITER.length());
         sql.append(BRACKET_RIGHT).append(VALUES);
-        params = new ArrayList<>();
+        values = new ArrayList<>();
         for (var entity : ls) {
             sql.append(BRACKET_LEFT);
             for (var colIdx : colIndices) {
                 var col = cols[colIdx];
                 var val = FieldUtil.getFieldValue(entity, col.field());
-                params.add(getTypeHandlerValue(col, val));
+                values.add(getTypeHandlerValue(col, val));
                 sql.append(PLACEHOLDER).append(DELIMITER);
             }
             sql.setLength(sql.length() - DELIMITER.length());
             sql.append(BRACKET_RIGHT).append(DELIMITER);
         }
         sql.setLength(sql.length() - DELIMITER.length());
-        if (params.isEmpty()) {
+        if (values.isEmpty()) {
             throw new OrmException("插入数据不能为空");
         } else {
-            return new Pair<>(sql.toString(), params);
+            return new Pair<>(sql.toString(), values);
         }
     }
 }
