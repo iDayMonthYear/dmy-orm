@@ -1,7 +1,7 @@
 package cn.com.idmy.orm.core;
 
+import cn.com.idmy.base.model.Page;
 import lombok.Getter;
-import lombok.Setter;
 import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
@@ -14,16 +14,26 @@ import java.util.List;
 public class XmlQuery<T> extends Query<T> {
     @Nullable
     private transient XmlQueryGenerator generator;
-    @Getter
     protected Boolean hasTotal;
     @Getter
-    @Setter
     protected long total;
     protected Object params;
+    @Nullable
+    protected Page<T> page;
 
     protected XmlQuery(@NotNull Class<T> entityType, boolean nullable) {
         super(entityType, nullable);
         force = true;
+    }
+
+    @SuppressWarnings({"unchecked"})
+    protected XmlQuery(@NotNull Page<T> page, boolean nullable) {
+        this((Class<T>) page.params().getClass(), nullable);
+        this.page = page;
+        params = page.params();
+        offset = page.offset();
+        limit = page.pageSize();
+        hasTotal = page.hasTotal();
     }
 
     @NotNull
@@ -39,16 +49,6 @@ public class XmlQuery<T> extends Query<T> {
         return generator().getWhereString();
     }
 
-    /**
-     * 获取排序字符串，可在MyBatis XML中使用
-     * <pre>
-     * &lt;if test="xxx.orderBy != null"&gt;
-     *     ORDER BY ${xxx.orderBy}
-     * &lt;/if&gt;
-     * </pre>
-     *
-     * @return 排序字符串
-     */
     @Nullable
     public String getOrderBy() {
         return generator().getOrderByString();

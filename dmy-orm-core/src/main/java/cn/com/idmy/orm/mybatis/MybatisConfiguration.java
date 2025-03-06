@@ -1,6 +1,6 @@
 package cn.com.idmy.orm.mybatis;
 
-import cn.com.idmy.base.annotation.Table;
+import cn.com.idmy.orm.core.PageInterceptor;
 import cn.com.idmy.orm.core.SqlProvider;
 import cn.com.idmy.orm.core.Tables;
 import cn.com.idmy.orm.mybatis.handler.*;
@@ -17,7 +17,6 @@ import java.util.Map;
 
 import static cn.com.idmy.orm.mybatis.MybatisModifier.replaceCountAsteriskResultMap;
 import static cn.com.idmy.orm.mybatis.MybatisModifier.replaceIdGenerator;
-import static cn.com.idmy.orm.mybatis.MybatisModifier.replaceNonEntityQueryResultMap;
 import static cn.com.idmy.orm.mybatis.MybatisModifier.replaceQueryResultMap;
 import static org.apache.ibatis.executor.keygen.SelectKeyGenerator.SELECT_KEY_SUFFIX;
 
@@ -60,11 +59,7 @@ class MybatisConfiguration extends Configuration {
             for (var resultMap : ms.getResultMaps()) {
                 var clazz = resultMap.getType();
                 if (isDefaultResultMap(stId, resultMap.getId())) {
-                    if (clazz.getDeclaredAnnotation(Table.class) == null) {
-                        ms = replaceNonEntityQueryResultMap(ms, clazz);
-                    } else {
-                        ms = replaceQueryResultMap(ms, Tables.getTable(clazz));
-                    }
+                    ms = replaceQueryResultMap(ms, Tables.getTable(clazz));
                 }
             }
         }

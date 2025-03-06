@@ -126,6 +126,7 @@ class MybatisModifier {
         cfg.addResultMap(new ResultMap.Builder(cfg, resultMapId, entityType, mappings).build());
     }
 
+    @Deprecated
     static MappedStatement replaceNonEntityQueryResultMap(@NotNull MappedStatement ms, @NotNull Class<?> clazz) {
         var cfg = ms.getConfiguration();
         var resultMapId = clazz.getName() + ".CustomResultMap";

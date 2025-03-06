@@ -39,7 +39,7 @@ public class XmlQueryGenerator extends QuerySqlGenerator {
             removeLastOr(wheres);
             for (int i = 0, size = wheres.size(); i < size; i++) {
                 var node = wheres.get(i);
-                genCondOrForXml(condSql, node);
+                genWhereForXml(condSql, node);
                 if (i < size - 1) {
                     if (wheres.get(i + 1).type != SqlNode.Type.OR && node.type != SqlNode.Type.OR) {
                         condSql.append(AND);
@@ -92,17 +92,18 @@ public class XmlQueryGenerator extends QuerySqlGenerator {
         }
     }
 
-    private void genCondOrForXml(@NotNull StringBuilder sql, @NotNull SqlNode node) {
+    private void genWhereForXml(@NotNull StringBuilder sql, @NotNull SqlNode node) {
         if (node instanceof SqlNode.SqlOr) {
             sql.append(OR);
         } else if (node instanceof SqlNode.SqlCond cond) {
-            genCondForXml(sql, cond);
+            genWhereForXml(sql, cond);
         }
     }
 
-    private void genCondForXml(@NotNull StringBuilder sql, @NotNull SqlNode.SqlCond cond) {
+    private void genWhereForXml(@NotNull StringBuilder sql, @NotNull SqlNode.SqlCond cond) {
         var col = cond.column;
-        sql.append(keyword(col)).append(BLANK).append(cond.op.getSymbol()).append(BLANK);
+
+        sql.append(keyword(tableInfo.name())).append(".").append(keyword(col)).append(BLANK).append(cond.op.getSymbol()).append(BLANK);
 
         Object expr = cond.expr;
         if (expr instanceof SqlOpExpr) {
