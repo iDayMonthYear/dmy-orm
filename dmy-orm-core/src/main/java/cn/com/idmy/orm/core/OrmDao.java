@@ -407,7 +407,7 @@ public interface OrmDao<T, ID> {
     }
 
     @NotNull
-    default <E> XmlQuery<E> q(@NotNull Page<E> page, boolean nullable) {
+    default <E> XmlQuery<E> xq(@NotNull Page<E> page, boolean nullable) {
         @SuppressWarnings({"unchecked"})
         var outType = (Class<E>) page.params().getClass();
         var q = new XmlQuery<>(outType, nullable);
@@ -420,7 +420,7 @@ public interface OrmDao<T, ID> {
     }
 
     @NotNull
-    default <E> XmlQuery<E> q(@NotNull Page<E> page) {
-        return q(page, true);
+    default <E> XmlQuery<E> qx(@NotNull Page<E> page) {
+        return xq(page, true);
     }
 }
