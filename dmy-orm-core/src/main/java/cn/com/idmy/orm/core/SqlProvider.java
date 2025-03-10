@@ -5,7 +5,6 @@ import cn.com.idmy.orm.OrmException;
 import cn.com.idmy.orm.core.SqlNode.SqlCond;
 import cn.com.idmy.orm.core.SqlNode.SqlSet;
 import cn.com.idmy.orm.mybatis.MybatisUtil;
-import cn.com.idmy.orm.util.OrmUtil;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.Accessors;
@@ -36,8 +35,8 @@ public class SqlProvider {
     public static final String ENTITY = "$entity$";
     public static final String ENTITIES = "$entities$";
     public static final String ENTITY_TYPE = "$$entityType$";
-    public static final String getNullable = "getNullable";
-    public static final String list = "list";
+    public static final String getNullable0 = "getNullable0";
+    public static final String list0 = "list0";
     public static final String delete = "delete";
     public static final String update = "update";
     public static final String count = "count";
@@ -150,10 +149,6 @@ public class SqlProvider {
         var hasTotal = page.hasTotal() == null || page.hasTotal();
         long total = -1;
 
-        if (hasTotal && OrmUtil.isMySQL8(sqlSessionFactory)) {
-
-        }
-
         if (hasTotal) {
             var limit = q.limit;
             var offset = q.offset;
@@ -177,12 +172,12 @@ public class SqlProvider {
 
 
     @NotNull
-    public String getNullable(@NotNull Map<String, Object> params) {
+    public String getNullable0(@NotNull Map<String, Object> params) {
         return genCommonSql(params);
     }
 
     @NotNull
-    public String list(@NotNull Map<String, Object> params) {
+    public String list0(@NotNull Map<String, Object> params) {
         return genCommonSql(params);
     }
 

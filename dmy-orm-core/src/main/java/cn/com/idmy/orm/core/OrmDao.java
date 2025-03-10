@@ -112,7 +112,7 @@ public interface OrmDao<T, ID> {
     }
 
     @NotNull
-    @SelectProvider(type = SqlProvider.class, method = SqlProvider.list)
+    @SelectProvider(type = SqlProvider.class, method = SqlProvider.list0)
     List<T> list0(@NotNull @Param(SqlProvider.CRUD) Query<T> q);
 
     @NotNull
@@ -179,7 +179,7 @@ public interface OrmDao<T, ID> {
     }
 
     @Nullable
-    @SelectProvider(type = SqlProvider.class, method = SqlProvider.getNullable)
+    @SelectProvider(type = SqlProvider.class, method = SqlProvider.getNullable0)
     T getNullable0(@NotNull @Param(SqlProvider.CRUD) Query<T> q);
 
     default T getNullable(@NotNull Query<T> q) {

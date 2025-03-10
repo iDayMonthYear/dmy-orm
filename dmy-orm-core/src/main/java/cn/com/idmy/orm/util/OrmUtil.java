@@ -11,10 +11,8 @@ import cn.com.idmy.orm.core.Tables;
 import cn.com.idmy.orm.core.Where;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.ibatis.session.SqlSessionFactory;
 import org.dromara.hutool.core.convert.ConvertUtil;
 import org.dromara.hutool.core.reflect.ClassUtil;
-import org.dromara.hutool.core.text.StrUtil;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -23,23 +21,6 @@ import java.util.Objects;
 @UtilityClass
 @Slf4j
 public class OrmUtil {
-    private static boolean isMySQL8 = false;
-
-    public static boolean isMySQL8(SqlSessionFactory factory) {
-        if (isMySQL8) {
-            return isMySQL8;
-        }
-        try {
-            try (var session = factory.openSession()) {
-                isMySQL8 = StrUtil.startWith(session.<String>selectOne("select version()"), "8.");
-                return isMySQL8;
-            }
-        } catch (Exception e) {
-            log.warn("检查MySQL版本失败，将使用传统分页方式: {}", e.getMessage());
-            return false;
-        }
-    }
-
     public boolean hasColumn(List<SqlNode> nodes, @NotNull String column, @NotNull SqlNode.Type type) {
         return nodes.stream().anyMatch(n -> {
             if (n instanceof SqlColumn col) {

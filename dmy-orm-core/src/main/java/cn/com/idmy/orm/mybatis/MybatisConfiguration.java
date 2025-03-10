@@ -53,7 +53,7 @@ class MybatisConfiguration extends Configuration {
             ms = replaceIdGenerator(ms, table);
         } else if (StrUtil.endWith(stId, DOT + SqlProvider.count)) {
             ms = replaceCountAsteriskResultMap(ms);
-        } else if (StrUtil.endWithAny(stId, DOT + SqlProvider.getNullable, DOT + SqlProvider.list)) {
+        } else if (StrUtil.endWithAny(stId, DOT + SqlProvider.getNullable0, DOT + SqlProvider.list0)) {
             ms = replaceQueryResultMap(ms, table);
         } else if (ms.getSqlCommandType() == SqlCommandType.SELECT) {
             for (var resultMap : ms.getResultMaps()) {
