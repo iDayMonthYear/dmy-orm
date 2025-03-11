@@ -10,6 +10,7 @@ import org.apache.ibatis.mapping.BoundSql;
 import org.apache.ibatis.mapping.MappedStatement;
 import org.apache.ibatis.mapping.SqlCommandType;
 import org.apache.ibatis.session.Configuration;
+import org.apache.ibatis.session.LocalCacheScope;
 import org.dromara.hutool.core.text.StrUtil;
 import org.jetbrains.annotations.NotNull;
 
@@ -32,6 +33,7 @@ class MybatisConfiguration extends Configuration {
         registry.register(ListLongTypeHandler.class);
         registry.register(ListStringTypeHandler.class);
         addInterceptor(new PageInterceptor());
+        setLocalCacheScope(LocalCacheScope.STATEMENT);
     }
 
     @Override
