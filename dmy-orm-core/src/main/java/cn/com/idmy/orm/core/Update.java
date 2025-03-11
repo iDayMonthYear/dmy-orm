@@ -2,8 +2,8 @@ package cn.com.idmy.orm.core;
 
 import cn.com.idmy.base.FieldGetter;
 import cn.com.idmy.base.model.Pair;
+import cn.com.idmy.base.util.Assert;
 import cn.com.idmy.orm.core.SqlNode.SqlSet;
-import lombok.NonNull;
 import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
@@ -21,22 +21,24 @@ public class Update<T> extends Where<T, Update<T>> {
     }
 
     @NotNull
-    public Update<T> set(@NotNull FieldGetter<T, ?> field, @NonNull Object val) {
+    public Update<T> set(@NotNull FieldGetter<T, ?> field, @NotNull Object val) {
+        Assert.notNull(val, "set 语句值不能为空，请使用 setNullable 方法设置 null 值");
         return addNode(new SqlSet(entityType, field, val));
     }
 
     @NotNull
-    public Update<T> set(@NotNull FieldGetter<T, ?> field, @NonNull SqlOpExpr expr) {
+    public Update<T> set(@NotNull FieldGetter<T, ?> field, @NotNull SqlOpExpr expr) {
+        Assert.notNull(expr, "set 语句值不能为空，请使用 setNullable 方法设置 null 值");
         return addNode(new SqlSet(entityType, field, expr));
     }
 
     @NotNull
-    public Update<T> set(boolean if0, @NotNull FieldGetter<T, ?> field, @NonNull Object val) {
+    public Update<T> set(boolean if0, @NotNull FieldGetter<T, ?> field, @NotNull Object val) {
         return if0 ? set(field, val) : crud;
     }
 
     @NotNull
-    public Update<T> set(boolean if0, @NotNull FieldGetter<T, ?> field, @NonNull SqlOpExpr expr) {
+    public Update<T> set(boolean if0, @NotNull FieldGetter<T, ?> field, @NotNull SqlOpExpr expr) {
         return if0 ? set(field, expr) : crud;
     }
 
@@ -52,12 +54,12 @@ public class Update<T> extends Where<T, Update<T>> {
 
     @NotNull
     public Update<T> setNullable(boolean if0, @NotNull FieldGetter<T, ?> field, @Nullable Object val) {
-        return if0 ? set(field, val) : crud;
+        return if0 ? setNullable(field, val) : crud;
     }
 
     @NotNull
     public Update<T> setNullable(boolean if0, @NotNull FieldGetter<T, ?> field, @Nullable SqlOpExpr expr) {
-        return if0 ? set(field, expr) : crud;
+        return if0 ? setNullable(field, expr) : crud;
     }
 
     @NotNull
