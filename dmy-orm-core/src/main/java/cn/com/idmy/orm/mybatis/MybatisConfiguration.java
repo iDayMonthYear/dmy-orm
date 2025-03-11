@@ -51,17 +51,19 @@ class MybatisConfiguration extends Configuration {
     public void addMappedStatement(@NotNull MappedStatement ms) {
         var stId = ms.getId();
         var table = Tables.getTable(stId.substring(0, stId.lastIndexOf(DOT)));
-        if (StrUtil.endWithAny(stId, DOT + SqlProvider.create, DOT + SqlProvider.creates) && ms.getKeyGenerator() == NoKeyGenerator.INSTANCE) {
-            ms = replaceIdGenerator(ms, table);
-        } else if (StrUtil.endWith(stId, DOT + SqlProvider.count)) {
-            ms = replaceCountAsteriskResultMap(ms);
-        } else if (StrUtil.endWithAny(stId, DOT + SqlProvider.getNullable0, DOT + SqlProvider.list0)) {
-            ms = replaceQueryResultMap(ms, table);
-        } else if (ms.getSqlCommandType() == SqlCommandType.SELECT) {
-            for (var resultMap : ms.getResultMaps()) {
-                var clazz = resultMap.getType();
-                if (isDefaultResultMap(stId, resultMap.getId())) {
-                    ms = replaceQueryResultMap(ms, Tables.getTable(clazz));
+        if (table != null) {
+            if (StrUtil.endWithAny(stId, DOT + SqlProvider.create, DOT + SqlProvider.creates) && ms.getKeyGenerator() == NoKeyGenerator.INSTANCE) {
+                ms = replaceIdGenerator(ms, table);
+            } else if (StrUtil.endWith(stId, DOT + SqlProvider.count)) {
+                ms = replaceCountAsteriskResultMap(ms);
+            } else if (StrUtil.endWithAny(stId, DOT + SqlProvider.getNullable0, DOT + SqlProvider.list0)) {
+                ms = replaceQueryResultMap(ms, table);
+            } else if (ms.getSqlCommandType() == SqlCommandType.SELECT) {
+                for (var resultMap : ms.getResultMaps()) {
+                    var clazz = resultMap.getType();
+                    if (isDefaultResultMap(stId, resultMap.getId())) {
+                        ms = replaceQueryResultMap(ms, Tables.getTable(clazz));
+                    }
                 }
             }
         }

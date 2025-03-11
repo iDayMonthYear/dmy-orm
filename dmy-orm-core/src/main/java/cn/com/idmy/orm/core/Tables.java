@@ -54,7 +54,7 @@ public class Tables {
         return entityTables.computeIfAbsent(entityType, Tables::init);
     }
 
-    @NotNull
+    @Nullable
     public static TableInfo getTable(@NotNull String className) {
         try {
             return getTableByMapperClass(Class.forName(className));
@@ -63,9 +63,16 @@ public class Tables {
         }
     }
 
-    @NotNull
+    @Nullable
     public static TableInfo getTableByMapperClass(@NotNull Class<?> mapperClass) {
-        return MapUtil.computeIfAbsent(mapperTables, mapperClass, key -> getTable(ClassUtil.getTypeArgument(mapperClass)));
+        return MapUtil.computeIfAbsent(mapperTables, mapperClass, key -> {
+            Class<?> typeArgument = ClassUtil.getTypeArgument(mapperClass);
+            if (typeArgument == null) {
+                return null;
+            } else {
+                return getTable(typeArgument);
+            }
+        });
     }
 
     @NotNull
