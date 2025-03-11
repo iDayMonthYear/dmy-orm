@@ -7,6 +7,7 @@ import cn.com.idmy.orm.util.OrmUtil;
 import lombok.Getter;
 import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
+import org.dromara.hutool.core.text.StrUtil;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -46,7 +47,7 @@ abstract class Crud<T, CRUD extends Crud<T, CRUD>> {
         try {
             return sql().l();
         } catch (Exception e) {
-            return e.getMessage();
+            return StrUtil.contains(e.getMessage(), "force") ? "" : e.getMessage();
         }
     }
 
