@@ -46,7 +46,7 @@ abstract class Crud<T, CRUD extends Crud<T, CRUD>> {
         try {
             return sql().l();
         } catch (Exception e) {
-            return "异常：" + e.getMessage();
+            return e.getMessage();
         }
     }
 

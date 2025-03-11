@@ -45,7 +45,7 @@ public abstract class Where<T, CRUD extends Where<T, CRUD>> extends Crud<T, CRUD
     // 等于
     public @NotNull CRUD eq(@NonNull Object id) {
         if (ObjUtil.isEmpty(id)) {
-            throw new BizException("主键不能为空");
+            throw new OrmException("主键不能为空");
         } else {
             return addNode(new SqlCond(Tables.getIdColumnName(entityType), Op.EQ, id));
         }
