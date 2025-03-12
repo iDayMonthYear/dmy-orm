@@ -142,7 +142,9 @@ public class SqlNode {
                         type1 = ConvertUtil.wrap(type1);
                     }
                     if (type1 != type2) {
-                        throw new OrmException("字段类型「{}」和参数类型「{}」不匹配", type1.getSimpleName(), type2.getSimpleName());
+                        if (!(Number.class.isAssignableFrom(type1) && Number.class.isAssignableFrom(type2))) {
+                            throw new OrmException("字段类型「{}」和参数类型「{}」不匹配", type1.getSimpleName(), type2.getSimpleName());
+                        }
                     }
                 }
             }
