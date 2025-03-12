@@ -81,7 +81,9 @@ public class SqlNode {
                         type1 = ConvertUtil.wrap(type1);
                     }
                     if (type1 != type2) {
-                        throw new OrmException("「{}」字段类型「{}」和参数类型「{}」不匹配", entityType.getSimpleName(), type1.getSimpleName(), type2.getSimpleName());
+                        if (!(Number.class.isAssignableFrom(type1) && Number.class.isAssignableFrom(type2))) {
+                            throw new OrmException("字段类型「{}」和参数类型「{}」不匹配", type1.getSimpleName(), type2.getSimpleName());
+                        }
                     }
                 }
                 column = col.name();
@@ -103,20 +105,6 @@ public class SqlNode {
         @Nullable
         final Object expr;
         Field field;
-
-        /*
-        public SqlSet(@NotNull String col, @Nullable Object expr) {
-            super(Type.SET);
-            this.column = SqlUtil.checkColumn(col);
-            this.expr = expr;
-        }
-
-        public SqlSet(@NotNull String col, @NonNull SqlOpExpr expr) {
-            super(Type.SET);
-            this.column = SqlUtil.checkColumn(col);
-            this.expr = expr;
-        }
-        */
 
         public SqlSet(TableColumn col, @Nullable Object val) {
             super(Type.SET);
