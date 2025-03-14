@@ -20,11 +20,11 @@ public interface OrmMultiIdsDao<T, ID> extends OrmDao<T, ID> {
     }
 
     @Override
-    default boolean exists(@NonNull ID id) {
+    default boolean has(@NonNull ID id) {
         var q = q();
         q.sqlParamsSize = 1;
         OrmUtil.multiIdsAddEqNode(id, q);
-        return exists(q);
+        return has(q);
     }
 
     @Nullable

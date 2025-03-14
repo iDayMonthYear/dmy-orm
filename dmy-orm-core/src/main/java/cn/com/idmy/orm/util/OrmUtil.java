@@ -1,6 +1,5 @@
 package cn.com.idmy.orm.util;
 
-import cn.com.idmy.base.FieldGetter;
 import cn.com.idmy.base.model.Pair;
 import cn.com.idmy.base.model.Triple;
 import cn.com.idmy.orm.core.Op;
@@ -11,8 +10,6 @@ import cn.com.idmy.orm.core.Tables;
 import cn.com.idmy.orm.core.Where;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
-import org.dromara.hutool.core.convert.ConvertUtil;
-import org.dromara.hutool.core.reflect.ClassUtil;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -29,12 +26,6 @@ public class OrmUtil {
                 return false;
             }
         });
-    }
-
-    @SuppressWarnings("unchecked")
-    public static @NotNull <T, R extends Number> R toZero(@NotNull FieldGetter<T, R> field) {
-        var fieldType = ClassUtil.getTypeArgument(field.getClass());
-        return (R) ConvertUtil.convert(fieldType, 0);
     }
 
     public static <T> void multiIdsAddEqNode(@NotNull Object id, Where<T, ?> where) {

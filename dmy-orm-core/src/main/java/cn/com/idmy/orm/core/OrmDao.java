@@ -5,7 +5,6 @@ import cn.com.idmy.base.model.Page;
 import cn.com.idmy.base.util.Assert;
 import cn.com.idmy.orm.OrmException;
 import cn.com.idmy.orm.core.SqlNode.SqlCond;
-import cn.com.idmy.orm.util.OrmUtil;
 import lombok.NonNull;
 import org.apache.ibatis.annotations.*;
 import org.dromara.hutool.core.array.ArrayUtil;
@@ -15,108 +14,98 @@ import org.dromara.hutool.core.reflect.TypeUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.math.BigDecimal;
 import java.util.*;
 
 public interface OrmDao<T, ID> {
-    @NotNull
     @SuppressWarnings("unchecked")
-    default Class<T> entityType() {
+    default @NotNull Class<T> entityType() {
         return (Class<T>) TypeUtil.getTypeArgument(getClass());
     }
 
-    @NotNull
     @SuppressWarnings("unchecked")
-    default Class<ID> idType() {
+    default @NotNull Class<ID> idType() {
         return (Class<ID>) TypeUtil.getTypeArgument(getClass(), 1);
     }
 
-    @NotNull
-    default TableInfo table() {
+    default @NotNull TableInfo table() {
         return Tables.getTable(entityType());
     }
 
-    @NotNull
-    default Query<T> q() {
+    default @NotNull Query<T> q() {
         return new Query<>(this, true);
     }
 
-    @NotNull
-    default Query<T> q(boolean nullable) {
+    default @NotNull Query<T> q(boolean nullable) {
         return new Query<>(this, nullable);
     }
 
-    @NotNull
-    default Update<T> u() {
+    default @NotNull Update<T> u() {
         return new Update<>(entityType(), false);
     }
 
-    @NotNull
-    default Update<T> u(boolean nullable) {
+    default @NotNull Update<T> u(boolean nullable) {
         return new Update<>(entityType(), nullable);
     }
 
-    @NotNull
-    default Delete<T> d() {
+    default @NotNull Delete<T> d() {
         return new Delete<>(entityType(), false);
     }
 
-    @NotNull
-    default Delete<T> d(boolean nullable) {
+    default @NotNull Delete<T> d(boolean nullable) {
         return new Delete<>(entityType(), nullable);
     }
 
     @SelectProvider(type = SqlProvider.class, method = SqlProvider.count)
     long count(@NotNull @Param(SqlProvider.CRUD) Query<T> q);
 
-    default boolean exists(@NotNull Query<T> q) {
+    default boolean has(@NotNull Query<T> q) {
         return count(q) > 0;
     }
 
-    default boolean exists(@NonNull ID id) {
+    default boolean has(@NonNull ID id) {
         var q = q();
         q.sqlParamsSize = 1;
         q.addNode(new SqlCond(Tables.getIdColumnName(this), Op.EQ, id));
-        return exists(q);
+        return has(q);
     }
 
-    default void exists(@NonNull ID id, @NotNull String msg, @NotNull Object... params) {
-        if (!exists(id)) {
+    default void has(@NonNull ID id, @NotNull String msg, @NotNull Object... params) {
+        if (!has(id)) {
             throw new IllegalStateException(String.format(msg, params));
         }
     }
 
-    default void exists(@NotNull Query<T> q, @NotNull String msg, @NotNull Object... params) {
-        if (!exists(q)) {
+    default void has(@NotNull Query<T> q, @NotNull String msg, @NotNull Object... params) {
+        if (!has(q)) {
             throw new IllegalStateException(String.format(msg, params));
         }
     }
 
-    default boolean notExists(@NotNull Query<T> q) {
-        return !exists(q);
+    default boolean notHas(@NotNull Query<T> q) {
+        return !has(q);
     }
 
-    default boolean notExists(@NonNull ID id) {
-        return !exists(id);
+    default boolean notHas(@NonNull ID id) {
+        return !has(id);
     }
 
-    default void notExists(@NonNull ID id, @NotNull String msg, @NotNull Object... params) {
-        if (!notExists(id)) {
+    default void notHas(@NonNull ID id, @NotNull String msg, @NotNull Object... params) {
+        if (!notHas(id)) {
             throw new IllegalStateException(String.format(msg, params));
         }
     }
 
-    default void notExists(@NotNull Query<T> q, @NotNull String msg, @NotNull Object... params) {
-        if (!notExists(q)) {
+    default void notHas(@NotNull Query<T> q, @NotNull String msg, @NotNull Object... params) {
+        if (!notHas(q)) {
             throw new IllegalStateException(String.format(msg, params));
         }
     }
 
-    @NotNull
     @SelectProvider(type = SqlProvider.class, method = SqlProvider.list0)
-    List<T> list0(@NotNull @Param(SqlProvider.CRUD) Query<T> q);
+    @NotNull List<T> list0(@NotNull @Param(SqlProvider.CRUD) Query<T> q);
 
-    @NotNull
-    default List<T> list(@NotNull Query<T> q) {
+    default @NotNull List<T> list(@NotNull Query<T> q) {
         if (!q.hasCond && !q.hasAggregate && !q.force) {
             return new ArrayList<>(0);
         } else {
@@ -124,18 +113,15 @@ public interface OrmDao<T, ID> {
         }
     }
 
-    @NotNull
-    default List<T> list(@NotNull Query<T> q, @NotNull String msg, @NotNull Object... params) {
+    default @NotNull List<T> list(@NotNull Query<T> q, @NotNull String msg, @NotNull Object... params) {
         return Assert.notEmpty(list(q), msg, params);
     }
 
-    @NotNull
-    default List<T> all() {
+    default @NotNull List<T> all() {
         return list(q().force());
     }
 
-    @NotNull
-    default List<T> list(@Nullable Collection<ID> ids) {
+    default @NotNull List<T> list(@Nullable Collection<ID> ids) {
         if (CollUtil.isEmpty(ids)) {
             return Collections.emptyList();
         } else {
@@ -146,13 +132,11 @@ public interface OrmDao<T, ID> {
         }
     }
 
-    @NotNull
-    default List<T> list(@NotNull Collection<ID> ids, @NotNull String msg, @NotNull Object... params) {
+    default @NotNull List<T> list(@NotNull Collection<ID> ids, @NotNull String msg, @NotNull Object... params) {
         return Assert.notEmpty(list(ids), msg, params);
     }
 
-    @NotNull
-    default <R> List<R> list(@NotNull FieldGetter<T, R> field, @Nullable Collection<ID> ids) {
+    default @NotNull <R> List<R> list(@NotNull FieldGetter<T, R> field, @Nullable Collection<ID> ids) {
         if (CollUtil.isEmpty(ids)) {
             return Collections.emptyList();
         } else {
@@ -163,26 +147,23 @@ public interface OrmDao<T, ID> {
         }
     }
 
-    @NotNull
-    default <R> List<R> list(@NotNull FieldGetter<T, R> field, @NotNull Query<T> q) {
+    default @NotNull <R> List<R> list(@NotNull FieldGetter<T, R> field, @NotNull Query<T> q) {
         SqlProvider.clearSelectColumns(q);
         var ts = list(q.select(field));
         return CollStreamUtil.toList(ts, field::get);
     }
 
-    @NotNull
     @SuppressWarnings({"unchecked", "varargs"})
-    default List<T> list(@NotNull Query<T> q, @NotNull FieldGetter<T, ?> field, @NotNull FieldGetter<T, ?>... fields) {
+    default @NotNull List<T> list(@NotNull Query<T> q, @NotNull FieldGetter<T, ?> field, @NotNull FieldGetter<T, ?>... fields) {
         q.select(field);
         q.select(fields);
         return list(q);
     }
 
-    @Nullable
     @SelectProvider(type = SqlProvider.class, method = SqlProvider.getNullable0)
-    T getNullable0(@NotNull @Param(SqlProvider.CRUD) Query<T> q);
+    @Nullable T getNullable0(@NotNull @Param(SqlProvider.CRUD) Query<T> q);
 
-    default T getNullable(@NotNull Query<T> q) {
+    default @Nullable T getNullable(@NotNull Query<T> q) {
         if (!q.hasCond && !q.hasAggregate && !q.force) {
             return null;
         } else {
@@ -190,31 +171,26 @@ public interface OrmDao<T, ID> {
         }
     }
 
-    @NotNull
-    default T get(@NotNull Query<T> q, @NotNull String msg, @NotNull Object... params) {
+    default @NotNull T get(@NotNull Query<T> q, @NotNull String msg, @NotNull Object... params) {
         return Assert.notNull(getNullable(q), msg, params);
     }
 
-    @NotNull
-    default T get(@NotNull Query<T> q) {
+    default @NotNull T get(@NotNull Query<T> q) {
         return get(q, "根据「查询条件」找不到「{}」", Optional.ofNullable(table().title()).orElse(table().name()));
     }
 
-    @Nullable
-    default T getNullable(@NonNull ID id) {
+    default @Nullable T getNullable(@NonNull ID id) {
         var q = q();
         q.sqlParamsSize = 1;
         q.addNode(new SqlCond(Tables.getIdColumnName(this), Op.EQ, id));
         return getNullable(q);
     }
 
-    @NotNull
-    default T get(@NonNull ID id) {
+    default @NotNull T get(@NonNull ID id) {
         return Assert.notNull(getNullable(id), "根据主键「{}」找不到「{}」", id, Optional.ofNullable(table().title()).orElse(table().name()));
     }
 
-    @Nullable
-    default <R> R getNullable(@NotNull FieldGetter<T, R> field, @NonNull ID id) {
+    default @Nullable <R> R getNullable(@NotNull FieldGetter<T, R> field, @NonNull ID id) {
         var q = q().select(field);
         q.sqlParamsSize = 1;
         q.addNode(new SqlCond(Tables.getIdColumnName(this), Op.EQ, id));
@@ -222,8 +198,7 @@ public interface OrmDao<T, ID> {
         return t == null ? null : field.get(t);
     }
 
-    @NotNull
-    default <R> R get(@NotNull FieldGetter<T, R> field, @NonNull ID id) {
+    default @NotNull <R> R get(@NotNull FieldGetter<T, R> field, @NonNull ID id) {
         R r = getNullable(field, id);
         if (r == null) {
             var colum = Tables.getColum(entityType(), field);
@@ -233,26 +208,22 @@ public interface OrmDao<T, ID> {
         }
     }
 
-    @NotNull
-    default <R> R get(@NotNull FieldGetter<T, R> field, @NonNull ID id, @NotNull String msg, @NotNull Object... params) {
+    default @NotNull <R> R get(@NotNull FieldGetter<T, R> field, @NonNull ID id, @NotNull String msg, @NotNull Object... params) {
         return Assert.notNull(getNullable(field, id), msg, params);
     }
 
-    @Nullable
-    default <R> R getNullable(@NotNull FieldGetter<T, R> field, @NotNull Query<T> q) {
+    default @Nullable <R> R getNullable(@NotNull FieldGetter<T, R> field, @NotNull Query<T> q) {
         SqlProvider.clearSelectColumns(q);
         q.select(field);
         T t = getNullable(q);
         return t == null ? null : field.get(t);
     }
 
-    @NotNull
-    default <R> R get(@NotNull FieldGetter<T, R> field, @NotNull Query<T> q, @NotNull String msg, @NotNull Object... params) {
+    default @NotNull <R> R get(@NotNull FieldGetter<T, R> field, @NotNull Query<T> q, @NotNull String msg, @NotNull Object... params) {
         return Assert.notNull(getNullable(field, q), msg, params);
     }
 
-    @NotNull
-    default <R> R get(@NotNull FieldGetter<T, R> field, @NotNull Query<T> q) {
+    default @NotNull <R> R get(@NotNull FieldGetter<T, R> field, @NotNull Query<T> q) {
         R r = getNullable(field, q);
         if (r == null) {
             var col = Tables.getColum(entityType(), field);
@@ -262,47 +233,40 @@ public interface OrmDao<T, ID> {
         }
     }
 
-    @Nullable
     @SuppressWarnings({"unchecked", "varargs"})
-    default T getNullable(@NotNull Query<T> q, @NotNull FieldGetter<T, ?> field, @NotNull FieldGetter<T, ?>... fields) {
+    default @Nullable T getNullable(@NotNull Query<T> q, @NotNull FieldGetter<T, ?> field, @NotNull FieldGetter<T, ?>... fields) {
         SqlProvider.clearSelectColumns(q);
         q.select(field);
         q.select(fields);
         return getNullable(q);
     }
 
-    @NotNull
     @SuppressWarnings({"unchecked", "varargs"})
-    default T get(@NotNull Query<T> q, @NotNull FieldGetter<T, ?> field, @NotNull FieldGetter<T, ?>... fields) {
+    default @NotNull T get(@NotNull Query<T> q, @NotNull FieldGetter<T, ?> field, @NotNull FieldGetter<T, ?>... fields) {
         SqlProvider.clearSelectColumns(q);
         q.select(field);
         q.select(fields);
         return get(q);
     }
 
-    @NotNull
     @SuppressWarnings({"unchecked", "varargs"})
-    default Map<ID, T> map(@Nullable ID... ids) {
+    default @NotNull Map<ID, T> map(@Nullable ID... ids) {
         return ArrayUtil.isEmpty(ids) ? Collections.emptyMap() : SqlProvider.map(this, ids);
     }
 
-    @NotNull
-    default Map<ID, T> map(@Nullable Collection<ID> ids) {
+    default @NotNull Map<ID, T> map(@Nullable Collection<ID> ids) {
         return CollUtil.isEmpty(ids) ? Collections.emptyMap() : SqlProvider.map(this, ids);
     }
 
-    @NotNull
-    default <R> Map<R, T> map(@NotNull FieldGetter<T, R> field, @NotNull Query<T> q) {
+    default @NotNull <R> Map<R, T> map(@NotNull FieldGetter<T, R> field, @NotNull Query<T> q) {
         return CollStreamUtil.toIdentityMap(list(q), field::get);
     }
 
-    @NotNull
-    default <IN> Page<T> page(@NonNull Page<IN> page, @NotNull Query<T> q) {
+    default @NotNull <IN> Page<T> page(@NonNull Page<IN> page, @NotNull Query<T> q) {
         return SqlProvider.page(this, page, q);
     }
 
-    @Nullable
-    default <R extends Number> R sqlFn(@NotNull SqlFnName name, @NotNull FieldGetter<T, R> field, @NotNull Query<T> q) {
+    default @Nullable <R extends Number> R sqlFn(@NotNull SqlFnName name, @NotNull FieldGetter<T, R> field, @NotNull Query<T> q) {
         if (!q.force && !q.hasCond) {
             return null;
         } else if (name == SqlFnName.IF_NULL) {
@@ -314,30 +278,35 @@ public interface OrmDao<T, ID> {
         }
     }
 
-    @Nullable
-    default <R extends Number> R abs(@NotNull FieldGetter<T, R> field, @NotNull Query<T> q) {
+    default @Nullable <R extends Number> R abs(@NotNull FieldGetter<T, R> field, @NotNull Query<T> q) {
         return sqlFn(SqlFnName.ABS, field, q);
     }
 
-    @Nullable
-    default <R extends Number> R avg(@NotNull FieldGetter<T, R> field, @NotNull Query<T> q) {
+    default @Nullable <R extends Number> R avg(@NotNull FieldGetter<T, R> field, @NotNull Query<T> q) {
         return sqlFn(SqlFnName.AVG, field, q);
     }
 
-    @Nullable
-    default <R extends Number> R max(@NotNull FieldGetter<T, R> field, @NotNull Query<T> q) {
+    default @Nullable <R extends Number> R max(@NotNull FieldGetter<T, R> field, @NotNull Query<T> q) {
         return sqlFn(SqlFnName.MAX, field, q);
     }
 
-    @Nullable
-    default <R extends Number> R min(@NotNull FieldGetter<T, R> field, @NotNull Query<T> q) {
+    default @Nullable <R extends Number> R min(@NotNull FieldGetter<T, R> field, @NotNull Query<T> q) {
         return sqlFn(SqlFnName.MIN, field, q);
     }
 
-    @NotNull
-    default <R extends Number> R sum(@NotNull FieldGetter<T, R> field, @NotNull Query<T> q) {
-        R tmp = sqlFn(SqlFnName.SUM, field, q);
-        return tmp == null ? OrmUtil.toZero(field) : tmp;
+    default @NotNull BigDecimal sum(@NotNull FieldGetter<T, BigDecimal> field, @NotNull Query<T> q) {
+        var r = sqlFn(SqlFnName.SUM, field, q);
+        return r == null ? BigDecimal.ZERO : r;
+    }
+
+    default long sumLong(@NotNull FieldGetter<T, Long> field, @NotNull Query<T> q) {
+        var r = sqlFn(SqlFnName.SUM, field, q);
+        return r == null ? 0 : r;
+    }
+
+    default int sumInt(@NotNull FieldGetter<T, Integer> field, @NotNull Query<T> q) {
+        var r = sqlFn(SqlFnName.SUM, field, q);
+        return r == null ? 0 : r;
     }
 
     @InsertProvider(type = SqlProvider.class, method = SqlProvider.create)
@@ -355,7 +324,7 @@ public interface OrmDao<T, ID> {
         if (idVal == null) {
             return create(entity);
         } else {
-            return exists(idVal) ? SqlProvider.update(this, entity, ignoreNull) : create(entity);
+            return has(idVal) ? SqlProvider.update(this, entity, ignoreNull) : create(entity);
         }
     }
 
@@ -407,17 +376,17 @@ public interface OrmDao<T, ID> {
     }
 
     @NotNull
-    default <E> XmlQuery<E> xq(@NotNull Page<E> page, boolean nullable) {
+    default <E> XmlQuery<E> xml(@NotNull Page<E> page, boolean nullable) {
         return new XmlQuery<>(page, nullable);
     }
 
     @NotNull
-    default <E> XmlQuery<E> xq(@NotNull Page<E> page) {
-        return xq(page, true);
+    default <E> XmlQuery<E> xml(@NotNull Page<E> page) {
+        return xml(page, true);
     }
 
     @NotNull
-    default <E> XmlQuery<E> xq(@NotNull E params, boolean nullable) {
+    default <E> XmlQuery<E> xml(@NotNull E params, boolean nullable) {
         @SuppressWarnings({"unchecked"})
         var outType = (Class<E>) params.getClass();
         var q = new XmlQuery<>(outType, nullable);
@@ -426,7 +395,7 @@ public interface OrmDao<T, ID> {
     }
 
     @NotNull
-    default <E> XmlQuery<E> xq(@NotNull E params) {
-        return xq(params, true);
+    default <E> XmlQuery<E> xml(@NotNull E params) {
+        return xml(params, true);
     }
 }
