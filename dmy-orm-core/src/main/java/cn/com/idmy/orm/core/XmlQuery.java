@@ -34,6 +34,7 @@ public class XmlQuery<T> extends Query<T> {
         offset = page.offset();
         limit = page.pageSize();
         hasTotal = page.hasTotal();
+        orderBy(page.sorts());
     }
 
     @NotNull

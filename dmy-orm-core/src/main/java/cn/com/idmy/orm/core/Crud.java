@@ -21,7 +21,7 @@ abstract class Crud<T, CRUD extends Crud<T, CRUD>> {
     @NotNull
     protected final CRUD crud = (CRUD) this;
     @NotNull
-    protected List<SqlNode> nodes = new ArrayList<>(5);
+    protected List<SqlNode> nodes = new ArrayList<>();
     @NotNull
     @Getter
     protected Class<T> entityType;
