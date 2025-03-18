@@ -147,6 +147,10 @@ public class SqlProvider {
         q.offset = page.offset();
         q.orderBy(page.sorts());
         var hasTotal = page.hasTotal() == null || page.hasTotal();
+        if (page.pageSize() == 1 && page.pageNo() == 1) {
+            hasTotal = false;
+        }
+
         long total = -1;
 
         if (hasTotal) {
