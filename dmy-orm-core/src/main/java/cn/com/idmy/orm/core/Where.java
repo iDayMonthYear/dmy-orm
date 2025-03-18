@@ -322,6 +322,10 @@ public abstract class Where<T, CRUD extends Where<T, CRUD>> extends Crud<T, CRUD
         }
     }
 
+    public @NotNull CRUD nulls(boolean if0, @NotNull FieldGetter<T, ?> field, @Nullable Boolean bol) {
+        return if0 ? nulls(field, bol) : crud;
+    }
+
     public @NotNull CRUD isNull(@NotNull FieldGetter<T, ?> field) {
         return nulls(field, true);
     }
