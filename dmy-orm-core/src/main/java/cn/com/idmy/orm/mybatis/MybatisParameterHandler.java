@@ -59,7 +59,8 @@ class MybatisParameterHandler extends DefaultParameterHandler {
                     throw new OrmException("空数组");
                 }
                 int curIdx = idx;
-                for (var item : arr) {
+                for (int i = 0, len = arr.length; i < len; i++) {
+                    var item = arr[i];
                     curIdx = setParameter(ps, curIdx, item, params);
                 }
                 return curIdx;

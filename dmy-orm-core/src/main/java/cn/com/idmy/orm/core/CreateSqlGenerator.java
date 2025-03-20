@@ -92,13 +92,7 @@ class CreateSqlGenerator extends SqlGenerator {
         var colIndices = new ArrayList<Integer>();
         for (int i = 0; i < cols.length; i++) {
             var col = cols[i];
-            boolean hasNotNull = false;
-            for (var entity : ls) {
-                if (FieldUtil.getFieldValue(entity, col.field()) != null) {
-                    hasNotNull = true;
-                    break;
-                }
-            }
+            var hasNotNull = ls.stream().anyMatch(entity -> FieldUtil.getFieldValue(entity, col.field()) != null);
             if (hasNotNull) {
                 colIndices.add(i);
                 sql.append(STRESS_MARK).append(col.name()).append(STRESS_MARK).append(DELIMITER);
@@ -109,8 +103,8 @@ class CreateSqlGenerator extends SqlGenerator {
         values = new ArrayList<>();
         for (var entity : ls) {
             sql.append(BRACKET_LEFT);
-            for (var colIdx : colIndices) {
-                var col = cols[colIdx];
+            for (int i = 0, size = colIndices.size(); i < size; i++) {
+                var col = cols[colIndices.get(i)];
                 var val = FieldUtil.getFieldValue(entity, col.field());
                 values.add(getTypeHandlerValue(col, val));
                 sql.append(PLACEHOLDER).append(DELIMITER);

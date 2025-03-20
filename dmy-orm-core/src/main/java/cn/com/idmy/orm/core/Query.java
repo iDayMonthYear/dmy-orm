@@ -101,8 +101,8 @@ public class Query<T> extends Where<T, Query<T>> {
     public final Query<T> select(@NotNull FieldGetter<T, ?>... fields) {
         if (ArrayUtil.isNotEmpty(fields)) {
             hasSelectColumn = true;
-            for (var field : fields) {
-                addNode(new SelectSqlColumn(getColumnName(entityType, field)));
+            for (int i = 0, len = fields.length; i < len; i++) {
+                addNode(new SelectSqlColumn(getColumnName(entityType, fields[i])));
             }
         }
         return this;
@@ -118,8 +118,8 @@ public class Query<T> extends Where<T, Query<T>> {
     @SafeVarargs
     public final Query<T> groupBy(@NotNull FieldGetter<T, ?>... fields) {
         hasAggregate = true;
-        for (var field : fields) {
-            addNode(new SqlGroupBy(getColumnName(entityType, field)));
+        for (int i = 0, len = fields.length; i < len; i++) {
+            addNode(new SqlGroupBy(getColumnName(entityType, fields[i])));
         }
         return this;
     }

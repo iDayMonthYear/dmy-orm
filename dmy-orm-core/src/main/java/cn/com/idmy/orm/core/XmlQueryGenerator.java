@@ -59,7 +59,7 @@ public class XmlQueryGenerator extends QuerySqlGenerator {
 
         // 生成排序字符串
         if (!orders.isEmpty()) {
-            StringBuilder orderSql = new StringBuilder();
+            var orderSql = new StringBuilder();
             for (int i = 0, size = orders.size(); i < size; i++) {
                 var orderBy = orders.get(i);
                 orderSql.append(keyword(orderBy.column)).append(orderBy.desc ? DESC : EMPTY);
@@ -80,10 +80,9 @@ public class XmlQueryGenerator extends QuerySqlGenerator {
 
         // 生成分组字符串
         if (!groups.isEmpty()) {
-            StringBuilder groupSql = new StringBuilder();
+            var groupSql = new StringBuilder();
             for (int i = 0, size = groups.size(); i < size; i++) {
-                var groupBy = groups.get(i);
-                groupSql.append(keyword(groupBy.column));
+                groupSql.append(keyword(groups.get(i).column));
                 if (i < size - 1) {
                     groupSql.append(DELIMITER);
                 }
@@ -134,7 +133,7 @@ public class XmlQueryGenerator extends QuerySqlGenerator {
                     } else if (expr instanceof java.util.Collection<?> coll) {
                         sql.append("(");
                         int i = 0;
-                        for (Object item : coll) {
+                        for (var item : coll) {
                             sql.append("#{values[").append(values.size()).append("]}");
                             values.add(item);
                             if (i < coll.size() - 1) {
