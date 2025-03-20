@@ -153,13 +153,6 @@ public interface OrmDao<T, ID> {
         return CollStreamUtil.toList(ts, field::get);
     }
 
-    @SuppressWarnings({"unchecked", "varargs"})
-    default @NotNull List<T> list(@NotNull Query<T> q, @NotNull FieldGetter<T, ?> field, @NotNull FieldGetter<T, ?>... fields) {
-        q.select(field);
-        q.select(fields);
-        return list(q);
-    }
-
     @SelectProvider(type = SqlProvider.class, method = SqlProvider.getNullable0)
     @Nullable T getNullable0(@NotNull @Param(SqlProvider.CRUD) Query<T> q);
 
@@ -233,24 +226,7 @@ public interface OrmDao<T, ID> {
         }
     }
 
-    @SuppressWarnings({"unchecked", "varargs"})
-    default @Nullable T getNullable(@NotNull Query<T> q, @NotNull FieldGetter<T, ?> field, @NotNull FieldGetter<T, ?>... fields) {
-        SqlProvider.clearSelectColumns(q);
-        q.select(field);
-        q.select(fields);
-        return getNullable(q);
-    }
-
-    @SuppressWarnings({"unchecked", "varargs"})
-    default @NotNull T get(@NotNull Query<T> q, @NotNull FieldGetter<T, ?> field, @NotNull FieldGetter<T, ?>... fields) {
-        SqlProvider.clearSelectColumns(q);
-        q.select(field);
-        q.select(fields);
-        return get(q);
-    }
-
-    @SuppressWarnings({"unchecked", "varargs"})
-    default @NotNull Map<ID, T> map(@Nullable ID... ids) {
+    default @NotNull Map<ID, T> map(@Nullable ID[] ids) {
         return ArrayUtil.isEmpty(ids) ? Collections.emptyMap() : SqlProvider.map(this, ids);
     }
 
@@ -258,8 +234,21 @@ public interface OrmDao<T, ID> {
         return CollUtil.isEmpty(ids) ? Collections.emptyMap() : SqlProvider.map(this, ids);
     }
 
-    default @NotNull <R> Map<R, T> map(@NotNull FieldGetter<T, R> field, @NotNull Query<T> q) {
-        return CollStreamUtil.toIdentityMap(list(q), field::get);
+    default @NotNull <R> Map<R, T> map(@NotNull FieldGetter<T, R> key, @NotNull Query<T> q) {
+        return CollStreamUtil.toIdentityMap(list(q), key::get);
+    }
+
+    default @NotNull <K, V> Map<K, V> map(@NotNull FieldGetter<T, K> key, @NotNull FieldGetter<T, V> val, @NotNull Query<T> q) {
+        var list = list(q.select(key, val));
+        var ret = new HashMap<K, V>(list.size());
+        for (int i = 0, size = list.size(); i < size; i++) {
+            T t = list.get(i);
+            V value = val.get(t);
+            if (value != null) {
+                ret.put(key.get(t), value);
+            }
+        }
+        return ret;
     }
 
     default @NotNull <IN> Page<T> page(@NonNull Page<IN> page, @NotNull Query<T> q) {

@@ -69,7 +69,7 @@ public interface OrmMultiIdsDao<T, ID> extends OrmDao<T, ID> {
     }
 
     @Override
-    default @NotNull Map<ID, T> map(@Nullable ID... ids) {
+    default @NotNull Map<ID, T> map(@Nullable ID[] ids) {
         throw new OrmException("该方法暂时不支持多主键");
     }
 
