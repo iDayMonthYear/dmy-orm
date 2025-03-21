@@ -43,6 +43,14 @@ public abstract class Where<T, CRUD extends Where<T, CRUD>> extends Crud<T, CRUD
 
     //region 比较操作
     // 等于
+    public @NotNull CRUD isTrue(@NotNull FieldGetter<T, Boolean> field) {
+        return addNode(new SqlCond(entityType, field, Op.EQ, true));
+    }
+
+    public @NotNull CRUD isFalse(@NotNull FieldGetter<T, Boolean> field) {
+        return addNode(new SqlCond(entityType, field, Op.EQ, false));
+    }
+
     public @NotNull CRUD eq(@NonNull Object id) {
         if (ObjUtil.isEmpty(id)) {
             throw new OrmException("主键不能为空");

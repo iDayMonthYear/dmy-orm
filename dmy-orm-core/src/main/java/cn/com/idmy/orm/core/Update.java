@@ -43,23 +43,53 @@ public class Update<T> extends Where<T, Update<T>> {
     }
 
     @NotNull
+    public Update<T> setTrue(@NotNull FieldGetter<T, Boolean> field) {
+        return addNode(new SqlSet(entityType, field, true));
+    }
+
+    @NotNull
+    public Update<T> setTrue(boolean if0, @NotNull FieldGetter<T, Boolean> field) {
+        return if0 ? setTrue(field) : crud;
+    }
+
+    @NotNull
+    public Update<T> setFalse(@NotNull FieldGetter<T, Boolean> field) {
+        return addNode(new SqlSet(entityType, field, false));
+    }
+
+    @NotNull
+    public Update<T> setFalse(boolean if0, @NotNull FieldGetter<T, Boolean> field) {
+        return if0 ? setFalse(field) : crud;
+    }
+
+    @NotNull
+    public Update<T> setNull(@NotNull FieldGetter<T, ?> field) {
+        return addNode(new SqlSet(entityType, field, null));
+    }
+
+    @NotNull
+    public Update<T> setNull(boolean if0, @NotNull FieldGetter<T, ?> field) {
+        return if0 ? setNull(field) : crud;
+    }
+
+    @NotNull
+    public Update<T> setZero(@NotNull FieldGetter<T, Number> field) {
+        return addNode(new SqlSet(entityType, field, 0));
+    }
+
+    @NotNull
+    public Update<T> setZero(boolean if0, @NotNull FieldGetter<T, Number> field) {
+        return if0 ? setZero(field) : crud;
+    }
+
+    @NotNull
     public Update<T> setNullable(@NotNull FieldGetter<T, ?> field, @Nullable Object val) {
         return addNode(new SqlSet(entityType, field, val));
     }
 
     @NotNull
-    public Update<T> setNullable(@NotNull FieldGetter<T, ?> field, @Nullable SqlOpExpr expr) {
-        return addNode(new SqlSet(entityType, field, expr));
-    }
-
-    @NotNull
     public Update<T> setNullable(boolean if0, @NotNull FieldGetter<T, ?> field, @Nullable Object val) {
         return if0 ? setNullable(field, val) : crud;
-    }
-
-    @NotNull
-    public Update<T> setNullable(boolean if0, @NotNull FieldGetter<T, ?> field, @Nullable SqlOpExpr expr) {
-        return if0 ? setNullable(field, expr) : crud;
     }
 
     @NotNull
