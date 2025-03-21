@@ -20,8 +20,7 @@ import java.util.Map;
 
 @Slf4j
 class MybatisParameterHandler extends DefaultParameterHandler {
-    @NotNull
-    private final TypeHandlerRegistry typeHandlerRegistry;
+    private final @NotNull TypeHandlerRegistry typeHandlerRegistry;
 
     public MybatisParameterHandler(@NotNull MappedStatement ms, @NotNull Object param, @NotNull BoundSql boundSql) {
         super(ms, param, boundSql);
@@ -60,8 +59,7 @@ class MybatisParameterHandler extends DefaultParameterHandler {
                 }
                 int curIdx = idx;
                 for (int i = 0, len = arr.length; i < len; i++) {
-                    var item = arr[i];
-                    curIdx = setParameter(ps, curIdx, item, params);
+                    curIdx = setParameter(ps, curIdx, arr[i], params);
                 }
                 return curIdx;
             }

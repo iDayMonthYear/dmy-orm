@@ -13,7 +13,7 @@ import java.sql.Connection;
 @Intercepts({@Signature(type = StatementHandler.class, method = "prepare", args = {Connection.class, Integer.class})})
 public class PageInterceptor implements Interceptor {
     @Override
-    public Object intercept(Invocation invocation) throws Throwable {
+    public @NotNull Object intercept(@NotNull Invocation invocation) throws Throwable {
         var statementHandler = (StatementHandler) invocation.getTarget();
         var boundSql = statementHandler.getBoundSql();
         var parameterObject = boundSql.getParameterObject();

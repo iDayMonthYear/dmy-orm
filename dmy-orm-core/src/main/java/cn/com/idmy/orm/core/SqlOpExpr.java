@@ -6,6 +6,5 @@ import org.jetbrains.annotations.NotNull;
 
 @FunctionalInterface
 public interface SqlOpExpr {
-    @NotNull
-    SqlOp<Number> op(@NonNull SqlOp<Number> col);
+    @NotNull SqlOp<Number> op(@NonNull SqlOp<Number> col);
 }

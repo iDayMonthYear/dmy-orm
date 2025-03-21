@@ -46,8 +46,8 @@ public class CustomIdGenerator implements KeyGenerator {
     }
 
     @Override
-    public void processBefore(Executor executor, MappedStatement ms, Statement st, Object parameter) {
-        var entity = ((Map<?, ?>) parameter).get(SqlProvider.ENTITY);
+    public void processBefore(@NotNull Executor executor, @NotNull MappedStatement ms, @NotNull Statement st, @NotNull Object param) {
+        var entity = ((Map<?, ?>) param).get(SqlProvider.ENTITY);
         try {
             var field = id.field();
             var existId = FieldUtil.getFieldValue(entity, field.getName());
@@ -56,7 +56,7 @@ public class CustomIdGenerator implements KeyGenerator {
                     loadIdGenerator();
                 }
                 var newId = ConvertUtil.convert(field.getType(), idGenerator.generate(entity.getClass(), id.value()));
-                var metaObject = configuration.newMetaObject(parameter).metaObjectForProperty(SqlProvider.ENTITY);
+                var metaObject = configuration.newMetaObject(param).metaObjectForProperty(SqlProvider.ENTITY);
                 setValue(metaObject, field.getName(), newId);
             }
         } catch (Exception e) {
@@ -65,11 +65,11 @@ public class CustomIdGenerator implements KeyGenerator {
     }
 
     @Override
-    public void processAfter(Executor executor, MappedStatement ms, Statement stmt, Object parameter) {
+    public void processAfter(@NotNull Executor executor, @NotNull MappedStatement ms, @NotNull Statement st, @NotNull Object param) {
 
     }
 
-    private void setValue(MetaObject metaParam, String fieldName, Object value) {
+    private void setValue(@NotNull MetaObject metaParam, @NotNull String fieldName, @NotNull Object value) {
         if (metaParam.hasSetter(fieldName)) {
             metaParam.setValue(fieldName, value);
         } else {

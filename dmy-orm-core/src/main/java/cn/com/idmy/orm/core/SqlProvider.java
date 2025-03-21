@@ -18,10 +18,7 @@ import org.dromara.hutool.core.reflect.FieldUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static cn.com.idmy.orm.core.Tables.getIdColumnName;
 import static cn.com.idmy.orm.core.Tables.getTableByMapperClass;
@@ -57,8 +54,7 @@ public class SqlProvider {
         }
     }
 
-    @NotNull
-    private static String genCommonSql(@NotNull Map<String, Object> params) {
+    private static @NotNull String genCommonSql(@NotNull Map<String, Object> params) {
         var where = (Crud<?, ?>) params.get(CRUD);
         putEntityType(params, where.entityType);
         var pair = where.sql();
@@ -70,14 +66,12 @@ public class SqlProvider {
         params.put(ENTITY_TYPE, entityType);
     }
 
-    @NotNull
-    public static Class<?> getEntityType(@NotNull Map<String, Object> params) {
+    public static @NotNull Class<?> getEntityType(@NotNull Map<String, Object> params) {
         return (Class<?>) params.get(ENTITY_TYPE);
     }
 
     @SuppressWarnings("unchecked")
-    @NotNull
-    public static Collection<Object> listEntities(@NotNull Map<String, Object> params) {
+    public static @NotNull Collection<Object> listEntities(@NotNull Map<String, Object> params) {
         return (Collection<Object>) params.get(ENTITIES);
     }
 
@@ -133,16 +127,14 @@ public class SqlProvider {
         }
     }
 
-    @NotNull
-    static <T, ID> Map<ID, T> map(@NotNull OrmDao<T, ID> dao, @NonNull Object ids) {
+    static @NotNull <T, ID> Map<ID, T> map(@NotNull OrmDao<T, ID> dao, @NonNull Object ids) {
         var q = dao.q();
         q.sqlParamsSize = 1;
         q.addNode(new SqlCond(getIdColumnName(dao), Op.IN, ids));
         return CollStreamUtil.toIdentityMap(dao.list(q), Tables::getIdValue);
     }
 
-    @NotNull
-    public static <T, ID, R> Page<T> page(@NotNull OrmDao<T, ID> dao, @NotNull Page<R> page, @NotNull Query<T> q) {
+    public static @NotNull <T, ID, R> Page<T> page(@NotNull OrmDao<T, ID> dao, @NotNull Page<R> page, @NotNull Query<T> q) {
         q.limit = page.pageSize();
         q.offset = page.offset();
         q.orderBy(page.sorts());
@@ -174,29 +166,23 @@ public class SqlProvider {
         }
     }
 
-
-    @NotNull
-    public String getNullable0(@NotNull Map<String, Object> params) {
+    public @NotNull String getNullable0(@NotNull Map<String, Object> params) {
         return genCommonSql(params);
     }
 
-    @NotNull
-    public String list0(@NotNull Map<String, Object> params) {
+    public @NotNull String list0(@NotNull Map<String, Object> params) {
         return genCommonSql(params);
     }
 
-    @NotNull
-    public String update(@NotNull Map<String, Object> params) {
+    public @NotNull String update(@NotNull Map<String, Object> params) {
         return genCommonSql(params);
     }
 
-    @NotNull
-    public String delete(@NotNull Map<String, Object> params) {
+    public @NotNull String delete(@NotNull Map<String, Object> params) {
         return genCommonSql(params);
     }
 
-    @NotNull
-    public String count(@NotNull Map<String, Object> params) {
+    public @NotNull String count(@NotNull Map<String, Object> params) {
         var q = (Query<?>) params.get(CRUD);
         clearSelectColumns(q);
         q.limit = null;
@@ -208,8 +194,7 @@ public class SqlProvider {
         return pair.l();
     }
 
-    @NotNull
-    public String create(@NotNull Map<String, Object> params) {
+    public @NotNull String create(@NotNull Map<String, Object> params) {
         var entity = params.get(ENTITY);
         var entityType = entity.getClass();
         var generator = new CreateSqlGenerator(entityType, entity);
@@ -219,8 +204,7 @@ public class SqlProvider {
         return pair.l();
     }
 
-    @NotNull
-    public String creates(@NotNull Map<String, Object> params) {
+    public @NotNull String creates(@NotNull Map<String, Object> params) {
         var ls = listEntities(params);
         if (ls.isEmpty()) {
             throw new OrmException("批量创建的实体集合不能为空");
@@ -234,10 +218,9 @@ public class SqlProvider {
         }
     }
 
-    @NotNull
-    public String updateBySql(@NotNull Map<String, Object> params, @NotNull ProviderContext ctx) {
+    public @NotNull String updateBySql(@NotNull Map<String, Object> params, @NotNull ProviderContext ctx) {
         var table = getTableByMapperClass(ctx.getMapperType());
-        putEntityType(params, table.entityType());
+        putEntityType(params, Objects.requireNonNull(table).entityType());
         return (String) params.get(CRUD);
     }
 }

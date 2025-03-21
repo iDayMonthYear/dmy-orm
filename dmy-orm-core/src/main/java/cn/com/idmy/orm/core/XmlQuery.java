@@ -12,15 +12,12 @@ import java.util.List;
 @Slf4j
 @Accessors(fluent = true, chain = true)
 public class XmlQuery<T> extends Query<T> {
-    @Nullable
-    private transient XmlQueryGenerator generator;
-    @Nullable
-    protected Boolean hasTotal;
+    private transient @Nullable XmlQueryGenerator generator;
+    protected @Nullable Boolean hasTotal;
     @Getter
     protected long total;
     protected Object params;
-    @Nullable
-    protected Page<T> page;
+    protected @Nullable Page<T> page;
 
     protected XmlQuery(@NotNull Class<T> entityType, boolean nullable) {
         super(entityType, nullable);
@@ -41,42 +38,35 @@ public class XmlQuery<T> extends Query<T> {
         orderBy(page.sorts());
     }
 
-    @NotNull
-    private XmlQueryGenerator generator() {
+    private @NotNull XmlQueryGenerator generator() {
         if (generator == null) {
             generator = XmlQueryGenerator.of(this);
         }
         return generator;
     }
 
-    @Nullable
-    public String getWhere() {
+    public @Nullable String getWhere() {
         return generator().getWhereString();
     }
 
-    @Nullable
-    public String getOrderBy() {
+    public @Nullable String getOrderBy() {
         return generator().getOrderByString();
     }
 
-    @Nullable
-    public String getGroupBy() {
+    public @Nullable String getGroupBy() {
         return generator().getGroupByString();
     }
 
-    @NotNull
-    public List<Object> getValues() {
+    public @NotNull List<Object> getValues() {
         return generator().values;
     }
 
-    @NotNull
-    public Object getParams() {
+    public @NotNull Object getParams() {
         return params;
     }
 
     @Override
-    @NotNull
-    public XmlQuery<T> addNode(@NotNull SqlNode node) {
+    public @NotNull XmlQuery<T> addNode(@NotNull SqlNode node) {
         super.addNode(node);
         this.generator = null;
         return this;

@@ -51,14 +51,10 @@ public abstract class SqlGenerator {
     protected static final String EQUAL = " = ";
     protected static final String BETWEEN = "? and ?";
 
-    @NotNull
-    protected final Class<?> entityType;
-    @NotNull
-    protected final TableInfo tableInfo;
-    @NotNull
-    protected final List<SqlNode> nodes;
-    @NotNull
-    protected final StringBuilder sql = new StringBuilder();
+    protected final @NotNull Class<?> entityType;
+    protected final @NotNull TableInfo tableInfo;
+    protected final @NotNull List<SqlNode> nodes;
+    protected final @NotNull StringBuilder sql = new StringBuilder();
     protected List<Object> values;
 
     public SqlGenerator(@NotNull Class<?> entityType, @NotNull List<SqlNode> notes) {
@@ -192,6 +188,5 @@ public abstract class SqlGenerator {
         return doGenerate();
     }
 
-    @NotNull
-    protected abstract Pair<String, List<Object>> doGenerate();
+    protected abstract @NotNull Pair<String, List<Object>> doGenerate();
 }

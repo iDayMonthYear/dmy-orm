@@ -24,8 +24,7 @@ import static cn.com.idmy.orm.core.SqlFnName.COUNT;
 @Accessors(fluent = true)
 @RequiredArgsConstructor
 public class SqlNode {
-    @NotNull
-    final SqlNode.Type type;
+    final @NotNull SqlNode.Type type;
 
     public enum Type {
         COND,
@@ -40,19 +39,15 @@ public class SqlNode {
     }
 
     public interface SqlColumn {
-        @NotNull
-        String column();
+        @NotNull String column();
     }
 
     @Getter
     @Accessors(fluent = true)
     public static class SqlCond extends SqlNode implements SqlColumn {
-        @NotNull
-        final String column;
-        @NotNull
-        final Op op;
-        @NotNull
-        final Object expr;
+        final @NotNull String column;
+        final @NotNull Op op;
+        final @NotNull Object expr;
 
         public SqlCond(@NotNull String col, @NonNull Op op, @NotNull Object expr) {
             super(Type.COND);
@@ -100,10 +95,8 @@ public class SqlNode {
     @Getter
     @Accessors(fluent = true)
     public static class SqlSet extends SqlNode implements SqlColumn {
-        @NotNull
-        final String column;
-        @Nullable
-        final Object expr;
+        final @NotNull String column;
+        final @Nullable Object expr;
         Field field;
 
         public SqlSet(TableColumn col, @Nullable Object val) {
@@ -142,8 +135,7 @@ public class SqlNode {
     @Getter
     @Accessors(fluent = true)
     public static class SqlGroupBy extends SqlNode implements SqlColumn {
-        @NotNull
-        final String column;
+        final @NotNull String column;
 
         public SqlGroupBy(@NotNull String col) {
             super(Type.GROUP_BY);
@@ -154,8 +146,7 @@ public class SqlNode {
     @Getter
     @Accessors(fluent = true)
     public static class SqlOrderBy extends SqlNode implements SqlColumn {
-        @NotNull
-        final String column;
+        final @NotNull String column;
         final boolean desc;
 
         public SqlOrderBy(@NotNull String col, boolean desc) {
@@ -168,10 +159,8 @@ public class SqlNode {
     @Getter
     @Accessors(fluent = true)
     public static class SelectSqlColumn extends SqlNode implements SqlColumn {
-        @NotNull
-        String column;
-        @Nullable
-        SqlFnExpr<?> expr;
+        @NotNull String column;
+        @Nullable SqlFnExpr<?> expr;
 
         public SelectSqlColumn(@NotNull String col) {
             super(Type.SELECT_COLUMN);
@@ -195,8 +184,7 @@ public class SqlNode {
     @Getter
     @Accessors(fluent = true)
     public static class SqlDistinct extends SqlNode implements SqlColumn {
-        @NotNull
-        String column;
+        @NotNull String column;
 
         public SqlDistinct() {
             super(Type.DISTINCT);

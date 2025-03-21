@@ -299,44 +299,44 @@ public interface OrmDao<T, ID> {
     }
 
     @InsertProvider(type = SqlProvider.class, method = SqlProvider.create)
-    int create(@NonNull @Param(SqlProvider.ENTITY) T entity);
+    int create(@NonNull @Param(SqlProvider.ENTITY) T t);
 
     @InsertProvider(type = SqlProvider.class, method = SqlProvider.creates)
-    int creates(@NonNull @Param(SqlProvider.ENTITIES) Collection<T> entities);
+    int creates(@NonNull @Param(SqlProvider.ENTITIES) Collection<T> ls);
 
-    default int creates(@Nullable Collection<T> entities, int size) {
-        return SqlProvider.creates(this, entities, size);
+    default int creates(@Nullable Collection<T> ls, int size) {
+        return SqlProvider.creates(this, ls, size);
     }
 
-    default int createOrUpdate(@NonNull T entity, boolean ignoreNull) {
-        ID idVal = Tables.getIdValue(entity);
+    default int createOrUpdate(@NonNull T t, boolean ignoreNull) {
+        ID idVal = Tables.getIdValue(t);
         if (idVal == null) {
-            return create(entity);
+            return create(t);
         } else {
-            return has(idVal) ? SqlProvider.update(this, entity, ignoreNull) : create(entity);
+            return has(idVal) ? SqlProvider.update(this, t, ignoreNull) : create(t);
         }
     }
 
-    default int createOrUpdate(@NonNull T entity) {
-        return createOrUpdate(entity, true);
+    default int createOrUpdate(@NonNull T t) {
+        return createOrUpdate(t, true);
     }
 
     @UpdateProvider(type = SqlProvider.class, method = SqlProvider.update)
-    int update(@NotNull @Param(SqlProvider.CRUD) Update<T> update);
+    int update(@NotNull @Param(SqlProvider.CRUD) Update<T> u);
 
-    default int update(@NonNull T entity) {
-        return update(entity, true);
+    default int update(@NonNull T t) {
+        return update(t, true);
     }
 
-    default int update(@NonNull T entity, boolean ignoreNull) {
-        return SqlProvider.update(this, entity, ignoreNull);
+    default int update(@NonNull T t, boolean ignoreNull) {
+        return SqlProvider.update(this, t, ignoreNull);
     }
 
-    default int[] update(@Nullable Collection<T> entities, int size, boolean ignoreNull) {
-        if (entities == null) {
+    default int[] update(@Nullable Collection<T> ls, int size, boolean ignoreNull) {
+        if (ls == null) {
             return new int[]{0};
         } else {
-            return SqlProvider.update(this, entities, size, ignoreNull);
+            return SqlProvider.update(this, ls, size, ignoreNull);
         }
     }
 
@@ -364,18 +364,15 @@ public interface OrmDao<T, ID> {
         }
     }
 
-    @NotNull
-    default <E> XmlQuery<E> xml(@NotNull Page<E> page, boolean nullable) {
+    default @NotNull <E> XmlQuery<E> xml(@NotNull Page<E> page, boolean nullable) {
         return new XmlQuery<>(page, nullable);
     }
 
-    @NotNull
-    default <E> XmlQuery<E> xml(@NotNull Page<E> page) {
+    default @NotNull <E> XmlQuery<E> xml(@NotNull Page<E> page) {
         return xml(page, true);
     }
 
-    @NotNull
-    default <E> XmlQuery<E> xml(@NotNull E params, boolean nullable) {
+    default @NotNull <E> XmlQuery<E> xml(@NotNull E params, boolean nullable) {
         @SuppressWarnings({"unchecked"})
         var outType = (Class<E>) params.getClass();
         var q = new XmlQuery<>(outType, nullable);
@@ -383,8 +380,7 @@ public interface OrmDao<T, ID> {
         return q;
     }
 
-    @NotNull
-    default <E> XmlQuery<E> xml(@NotNull E params) {
+    default @NotNull <E> XmlQuery<E> xml(@NotNull E params) {
         return xml(params, true);
     }
 }

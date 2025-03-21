@@ -13,15 +13,13 @@ import java.util.List;
 @Getter
 @Accessors(fluent = true, chain = false)
 public class Delete<T> extends Where<T, Delete<T>> {
-
     protected Delete(@NotNull Class<T> entityType, boolean nullable) {
         super(entityType);
         this.nullable = nullable;
     }
 
-    @NotNull
     @Override
-    public Pair<String, List<Object>> sql() {
+    public @NotNull Pair<String, List<Object>> sql() {
         return new DeleteSqlGenerator(this).generate();
     }
 }

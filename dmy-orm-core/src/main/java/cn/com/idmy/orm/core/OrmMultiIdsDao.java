@@ -27,8 +27,7 @@ public interface OrmMultiIdsDao<T, ID> extends OrmDao<T, ID> {
         return has(q);
     }
 
-    @Nullable
-    default T getNullable(@NonNull ID id) {
+    default @Nullable T getNullable(@NonNull ID id) {
         var q = q();
         q.sqlParamsSize = 1;
         OrmUtil.multiIdsAddEqNode(id, q);
@@ -46,25 +45,22 @@ public interface OrmMultiIdsDao<T, ID> extends OrmDao<T, ID> {
     }
 
     @Override
-    default int[] update(@Nullable Collection<T> entities, int size, boolean ignoreNull) {
+    default int[] update(@Nullable Collection<T> ls, int size, boolean ignoreNull) {
         throw new OrmException("该方法暂时不支持多主键，请使用链式更新");
     }
 
     @Override
-    @Nullable
-    default <R> R getNullable(@NotNull FieldGetter<T, R> field, @NonNull ID id) {
+    default @Nullable <R> R getNullable(@NotNull FieldGetter<T, R> field, @NonNull ID id) {
         throw new OrmException("该方法暂时不支持多主键");
     }
 
     @Override
-    @NotNull
-    default <R> R get(@NotNull FieldGetter<T, R> field, @NonNull ID id) {
+    default @NotNull <R> R get(@NotNull FieldGetter<T, R> field, @NonNull ID id) {
         throw new OrmException("该方法暂时不支持多主键");
     }
 
     @Override
-    @NotNull
-    default <R> R get(@NotNull FieldGetter<T, R> field, @NonNull ID id, @NotNull String msg, @NotNull Object... params) {
+    default @NotNull <R> R get(@NotNull FieldGetter<T, R> field, @NonNull ID id, @NotNull String msg, @NotNull Object... params) {
         throw new OrmException("该方法暂时不支持多主键");
     }
 

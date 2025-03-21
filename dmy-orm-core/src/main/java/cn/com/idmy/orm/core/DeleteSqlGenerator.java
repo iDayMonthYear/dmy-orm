@@ -13,8 +13,7 @@ import java.util.List;
 
 @Slf4j
 class DeleteSqlGenerator extends SqlGenerator {
-    @NotNull
-    protected Delete<?> delete;
+    protected @NotNull Delete<?> delete;
 
     protected DeleteSqlGenerator(@NotNull Delete<?> d) {
         super(d.entityType, d.nodes);

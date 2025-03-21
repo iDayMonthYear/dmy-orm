@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 
@@ -20,81 +21,90 @@ public class Update<T> extends Where<T, Update<T>> {
         this.nullable = nullable;
     }
 
-    @NotNull
-    public Update<T> set(@NotNull FieldGetter<T, ?> field, @NotNull Object val) {
+    public @NotNull Update<T> set(@NotNull FieldGetter<T, ?> field, @NotNull Object val) {
         Assert.notNull(val, "set 语句值不能为空，请使用 setNullable 方法设置 null 值");
         return addNode(new SqlSet(entityType, field, val));
     }
 
-    @NotNull
-    public Update<T> set(@NotNull FieldGetter<T, ?> field, @NotNull SqlOpExpr expr) {
+    public @NotNull Update<T> set(@NotNull FieldGetter<T, ?> field, @NotNull SqlOpExpr expr) {
         Assert.notNull(expr, "set 语句值不能为空，请使用 setNullable 方法设置 null 值");
         return addNode(new SqlSet(entityType, field, expr));
     }
 
-    @NotNull
-    public Update<T> set(boolean if0, @NotNull FieldGetter<T, ?> field, @NotNull Object val) {
+    public @NotNull Update<T> set(boolean if0, @NotNull FieldGetter<T, ?> field, @NotNull Object val) {
         return if0 ? set(field, val) : crud;
     }
 
-    @NotNull
-    public Update<T> set(boolean if0, @NotNull FieldGetter<T, ?> field, @NotNull SqlOpExpr expr) {
+    public @NotNull Update<T> set(boolean if0, @NotNull FieldGetter<T, ?> field, @NotNull SqlOpExpr expr) {
         return if0 ? set(field, expr) : crud;
     }
 
-    @NotNull
-    public Update<T> setTrue(@NotNull FieldGetter<T, Boolean> field) {
+    public @NotNull Update<T> setPlus(@NotNull FieldGetter<T, Number> field, @NotNull Number val) {
+        return set(field, r -> r.plus(val));
+    }
+
+    public @NotNull Update<T> setPlus(boolean if0, @NotNull FieldGetter<T, Number> field, @NotNull Number val) {
+        return if0 ? setPlus(field, val) : crud;
+    }
+
+    public @NotNull Update<T> setMinus(@NotNull FieldGetter<T, Number> field, @NotNull Number val) {
+        return set(field, r -> r.minus(val));
+    }
+
+    public @NotNull Update<T> setMinus(boolean if0, @NotNull FieldGetter<T, Number> field, @NotNull Number val) {
+        return if0 ? setMinus(field, val) : crud;
+    }
+
+    public @NotNull Update<T> setTrue(@NotNull FieldGetter<T, Boolean> field) {
         return addNode(new SqlSet(entityType, field, true));
     }
 
-    @NotNull
-    public Update<T> setTrue(boolean if0, @NotNull FieldGetter<T, Boolean> field) {
+    public @NotNull Update<T> setTrue(boolean if0, @NotNull FieldGetter<T, Boolean> field) {
         return if0 ? setTrue(field) : crud;
     }
 
-    @NotNull
-    public Update<T> setFalse(@NotNull FieldGetter<T, Boolean> field) {
+    public @NotNull Update<T> setFalse(@NotNull FieldGetter<T, Boolean> field) {
         return addNode(new SqlSet(entityType, field, false));
     }
 
-    @NotNull
-    public Update<T> setFalse(boolean if0, @NotNull FieldGetter<T, Boolean> field) {
+    public @NotNull Update<T> setFalse(boolean if0, @NotNull FieldGetter<T, Boolean> field) {
         return if0 ? setFalse(field) : crud;
     }
 
-    @NotNull
-    public Update<T> setNull(@NotNull FieldGetter<T, ?> field) {
+    public @NotNull Update<T> setNull(@NotNull FieldGetter<T, ?> field) {
         return addNode(new SqlSet(entityType, field, null));
     }
 
-    @NotNull
-    public Update<T> setNull(boolean if0, @NotNull FieldGetter<T, ?> field) {
+    public @NotNull Update<T> setNull(boolean if0, @NotNull FieldGetter<T, ?> field) {
         return if0 ? setNull(field) : crud;
     }
 
-    @NotNull
-    public Update<T> setZero(@NotNull FieldGetter<T, Number> field) {
+    public @NotNull Update<T> setZero(@NotNull FieldGetter<T, Number> field) {
         return addNode(new SqlSet(entityType, field, 0));
     }
 
-    @NotNull
-    public Update<T> setZero(boolean if0, @NotNull FieldGetter<T, Number> field) {
+    public @NotNull Update<T> setZero(boolean if0, @NotNull FieldGetter<T, Number> field) {
         return if0 ? setZero(field) : crud;
     }
 
-    @NotNull
-    public Update<T> setNullable(@NotNull FieldGetter<T, ?> field, @Nullable Object val) {
+    public @NotNull Update<T> setNow(@NotNull FieldGetter<T, LocalDateTime> field) {
+        return addNode(new SqlSet(entityType, field, LocalDateTime.now()));
+    }
+
+    public @NotNull Update<T> setNow(boolean if0, @NotNull FieldGetter<T, LocalDateTime> field) {
+        return if0 ? setNow(field) : crud;
+    }
+
+    public @NotNull Update<T> setNullable(@NotNull FieldGetter<T, ?> field, @Nullable Object val) {
         return addNode(new SqlSet(entityType, field, val));
     }
 
-    @NotNull
-    public Update<T> setNullable(boolean if0, @NotNull FieldGetter<T, ?> field, @Nullable Object val) {
+    public @NotNull Update<T> setNullable(boolean if0, @NotNull FieldGetter<T, ?> field, @Nullable Object val) {
         return if0 ? setNullable(field, val) : crud;
     }
 
-    @NotNull
     @Override
-    public Pair<String, List<Object>> sql() {
+    public @NotNull Pair<String, List<Object>> sql() {
         return new UpdateSqlGenerator(this).generate();
     }
 }

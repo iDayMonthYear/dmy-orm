@@ -37,7 +37,7 @@ public class MybatisUtil {
         }
     }
 
-    public static <M, E> int[] batch(SqlSessionFactory factory, Collection<E> ls, int size, Class<M> mapperClass, BiConsumer<M, E> consumer) {
+    public static <M, E> int[] batch(@NotNull SqlSessionFactory factory, Collection<E> ls, int size, @NotNull Class<M> mapperClass, BiConsumer<M, E> consumer) {
         if (ls == null || ls.isEmpty()) {
             return new int[]{0};
         }

@@ -18,15 +18,11 @@ import java.util.Objects;
 @Accessors(fluent = true, chain = true)
 abstract class Crud<T, CRUD extends Crud<T, CRUD>> {
     @SuppressWarnings({"unchecked"})
-    @NotNull
-    protected final CRUD crud = (CRUD) this;
-    @NotNull
-    protected List<SqlNode> nodes = new ArrayList<>();
-    @NotNull
+    protected final @NotNull CRUD crud = (CRUD) this;
+    protected @NotNull List<SqlNode> nodes = new ArrayList<>();
     @Getter
-    protected Class<T> entityType;
-    // sql参数数量，优化手段
-    protected int sqlParamsSize;
+    protected @NotNull Class<T> entityType;
+    protected int sqlParamsSize; // sql 参数数量，优化手段减少数组分配大小
     protected boolean nullable;
     protected boolean hasCond;
     protected boolean force;

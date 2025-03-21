@@ -14,8 +14,7 @@ import java.util.Collections;
 import java.util.List;
 
 class CreateSqlGenerator extends SqlGenerator {
-    @NotNull
-    protected final Object input;
+    protected final @NotNull Object input;
 
     public CreateSqlGenerator(@NotNull Class<?> entityType, @NotNull Object input) {
         super(entityType, Collections.emptyList());
@@ -33,8 +32,7 @@ class CreateSqlGenerator extends SqlGenerator {
         }
     }
 
-    @Nullable
-    protected Object getTypeHandlerValue(@NotNull TableColumn col, @Nullable Object val) {
+    protected @Nullable Object getTypeHandlerValue(@NotNull TableColumn col, @Nullable Object val) {
         var th = Tables.getTypeHandler(col.field());
         if (th == null || val == null) {
             return val;
@@ -47,8 +45,7 @@ class CreateSqlGenerator extends SqlGenerator {
         sql.append(INSERT_INTO).append(tableInfo.schema()).append(STRESS_MARK).append(tableInfo.name()).append(STRESS_MARK).append(BLANK).append(BRACKET_LEFT);
     }
 
-    @NotNull
-    private Pair<String, List<Object>> genInsert(@NotNull Object entity) {
+    private @NotNull Pair<String, List<Object>> genInsert(@NotNull Object entity) {
         genInsertHeader();
         var table = Tables.getTable(entity.getClass());
         var columns = table.columns();
@@ -80,8 +77,7 @@ class CreateSqlGenerator extends SqlGenerator {
         }
     }
 
-    @NotNull
-    private Pair<String, List<Object>> genInsert(@NotNull Collection<?> ls) {
+    private @NotNull Pair<String, List<Object>> genInsert(@NotNull Collection<?> ls) {
         if (ls.isEmpty()) {
             throw new IllegalArgumentException("实体集合不能为空");
         }

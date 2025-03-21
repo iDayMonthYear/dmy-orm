@@ -6,6 +6,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.Collection;
 
 /**
  * XML查询生成器，用于生成XML查询所需的条件、排序和分组字符串
@@ -104,7 +105,7 @@ public class XmlQueryGenerator extends QuerySqlGenerator {
 
         sql.append(keyword(tableInfo.name())).append(".").append(keyword(col)).append(BLANK).append(cond.op.getSymbol()).append(BLANK);
 
-        Object expr = cond.expr;
+        var expr = cond.expr;
         if (expr instanceof SqlOpExpr) {
             sql.append(keyword(col));
         } else {
@@ -130,7 +131,7 @@ public class XmlQueryGenerator extends QuerySqlGenerator {
                             }
                         }
                         sql.append(")");
-                    } else if (expr instanceof java.util.Collection<?> coll) {
+                    } else if (expr instanceof Collection<?> coll) {
                         sql.append("(");
                         int i = 0;
                         for (var item : coll) {
@@ -152,23 +153,19 @@ public class XmlQueryGenerator extends QuerySqlGenerator {
         }
     }
 
-    @Nullable
-    public String getWhereString() {
+    public @Nullable String getWhereString() {
         return StrUtil.isNotBlank(whereString) ? whereString : null;
     }
 
-    @Nullable
-    public String getOrderByString() {
+    public @Nullable String getOrderByString() {
         return StrUtil.isNotBlank(orderByString) ? orderByString : null;
     }
 
-    @Nullable
-    public String getGroupByString() {
+    public @Nullable String getGroupByString() {
         return StrUtil.isNotBlank(groupByString) ? groupByString : null;
     }
 
-    @NotNull
-    public static XmlQueryGenerator of(@NotNull Query<?> query) {
+    public static @NotNull XmlQueryGenerator of(@NotNull Query<?> query) {
         return new XmlQueryGenerator(query);
     }
 } 

@@ -27,7 +27,7 @@ public class EntitiesIdGenerator implements KeyGenerator {
     }
 
     @Override
-    public void processAfter(Executor executor, MappedStatement ms, Statement st, Object param) {
+    public void processAfter(@NotNull Executor executor, @NotNull MappedStatement ms, @NotNull Statement st, @NotNull Object param) {
         //批量插入不支持回写ID，意义不大影响性能。
     }
 }

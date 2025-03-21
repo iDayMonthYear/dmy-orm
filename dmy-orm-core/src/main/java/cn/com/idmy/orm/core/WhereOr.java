@@ -16,9 +16,8 @@ public class WhereOr<T> extends Where<T, WhereOr<T>> {
         throw new UnsupportedOperationException("不支持");
     }
 
-    @NotNull
     @Override
-    public Pair<String, List<Object>> sql() {
+    public @NotNull Pair<String, List<Object>> sql() {
         throw new UnsupportedOperationException("不支持");
     }
 }

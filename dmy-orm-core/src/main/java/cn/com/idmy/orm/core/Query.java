@@ -28,11 +28,9 @@ import static cn.com.idmy.orm.core.Tables.getIdField;
 @Accessors(fluent = true, chain = false)
 public class Query<T> extends Where<T, Query<T>> {
     @Getter
-    @Nullable
-    protected Integer offset;
+    protected @Nullable Integer offset;
     @Getter
-    @Nullable
-    protected Integer limit;
+    protected @Nullable Integer limit;
     protected boolean hasCommon;
     protected boolean hasSelectColumn;
     protected boolean hasAggregate;
@@ -48,32 +46,27 @@ public class Query<T> extends Where<T, Query<T>> {
         this.dao = dao;
     }
 
-    @NotNull
-    public Query<T> limit(int limit) {
+    public @NotNull Query<T> limit(int limit) {
         this.limit = limit;
         return crud;
     }
 
-    @NotNull
-    public Query<T> offset(int offset) {
+    public @NotNull Query<T> offset(int offset) {
         this.offset = offset;
         return crud;
     }
 
-    @NotNull
-    public Query<T> one() {
+    public @NotNull Query<T> one() {
         limit = 1;
         return crud;
     }
 
-    @NotNull
-    public Query<T> distinct() {
+    public @NotNull Query<T> distinct() {
         hasSelectColumn = true;
         return addNode(new SqlDistinct());
     }
 
-    @NotNull
-    public Query<T> distinct(@NotNull FieldGetter<T, ?> field) {
+    public @NotNull Query<T> distinct(@NotNull FieldGetter<T, ?> field) {
         hasSelectColumn = true;
         return addNode(new SqlDistinct(getColumnName(entityType, field)));
     }
@@ -82,23 +75,19 @@ public class Query<T> extends Where<T, Query<T>> {
         nodes = nodes.stream().filter(node -> node.type != Type.SELECT_COLUMN && node.type != Type.DISTINCT).collect(Collectors.toList());
     }
 
-    @NotNull
-    public Query<T> select(@NotNull SqlFnExpr<T> expr) {
+    public @NotNull Query<T> select(@NotNull SqlFnExpr<T> expr) {
         hasSelectColumn = true;
         hasAggregate = true;
         return addNode(new SelectSqlColumn(expr));
     }
 
-    @NotNull
-    public Query<T> select(@NotNull SqlFnExpr<T> expr, @NotNull FieldGetter<T, ?> alias) {
+    public @NotNull Query<T> select(@NotNull SqlFnExpr<T> expr, @NotNull FieldGetter<T, ?> alias) {
         hasSelectColumn = true;
         hasAggregate = true;
         return addNode(new SelectSqlColumn(expr, getColumnName(entityType, alias)));
     }
 
-    @SafeVarargs
-    @NotNull
-    public final Query<T> select(@NotNull FieldGetter<T, ?>... fields) {
+    public final @SafeVarargs @NotNull Query<T> select(@NotNull FieldGetter<T, ?>... fields) {
         if (ArrayUtil.isNotEmpty(fields)) {
             hasSelectColumn = true;
             for (int i = 0, len = fields.length; i < len; i++) {
@@ -108,15 +97,12 @@ public class Query<T> extends Where<T, Query<T>> {
         return this;
     }
 
-    @NotNull
-    public Query<T> groupBy(@NotNull FieldGetter<T, ?> field) {
+    public @NotNull Query<T> groupBy(@NotNull FieldGetter<T, ?> field) {
         hasAggregate = true;
         return addNode(new SqlGroupBy(getColumnName(entityType, field)));
     }
 
-    @NotNull
-    @SafeVarargs
-    public final Query<T> groupBy(@NotNull FieldGetter<T, ?>... fields) {
+    public final @SafeVarargs @NotNull Query<T> groupBy(@NotNull FieldGetter<T, ?>... fields) {
         hasAggregate = true;
         for (int i = 0, len = fields.length; i < len; i++) {
             addNode(new SqlGroupBy(getColumnName(entityType, fields[i])));
@@ -124,53 +110,43 @@ public class Query<T> extends Where<T, Query<T>> {
         return this;
     }
 
-    @NotNull
-    public Query<T> orderBy(@NotNull FieldGetter<T, ?> field) {
+    public @NotNull Query<T> orderBy(@NotNull FieldGetter<T, ?> field) {
         return addNode(new SqlOrderBy(getColumnName(entityType, field), false));
     }
 
-    @NotNull
-    public Query<T> orderBy(@NotNull FieldGetter<T, ?> field, boolean desc) {
+    public @NotNull Query<T> orderBy(@NotNull FieldGetter<T, ?> field, boolean desc) {
         return addNode(new SqlOrderBy(getColumnName(entityType, field), desc));
     }
 
-    @NotNull
-    public Query<T> orderByDesc(@NotNull FieldGetter<T, ?> field) {
+    public @NotNull Query<T> orderByDesc(@NotNull FieldGetter<T, ?> field) {
         return orderBy(field, true);
     }
 
-    @NotNull
-    public Query<T> orderBy(@NotNull FieldGetter<T, ?> field1, boolean desc1, @NotNull FieldGetter<T, ?> field2, boolean desc2) {
+    public @NotNull Query<T> orderBy(@NotNull FieldGetter<T, ?> field1, boolean desc1, @NotNull FieldGetter<T, ?> field2, boolean desc2) {
         return addNode(new SqlOrderBy(getColumnName(entityType, field1), desc1)).addNode(new SqlOrderBy(getColumnName(entityType, field2), desc2));
     }
 
-    @NotNull
-    public Query<T> orderBy(@NotNull FieldGetter<T, ?> field1, boolean desc1, @NotNull FieldGetter<T, ?> field2, boolean desc2, @NotNull FieldGetter<T, ?> field3, boolean desc3) {
+    public @NotNull Query<T> orderBy(@NotNull FieldGetter<T, ?> field1, boolean desc1, @NotNull FieldGetter<T, ?> field2, boolean desc2, @NotNull FieldGetter<T, ?> field3, boolean desc3) {
         return addNode(new SqlOrderBy(getColumnName(entityType, field1), desc1)).addNode(new SqlOrderBy(getColumnName(entityType, field2), desc2)).addNode(new SqlOrderBy(getColumnName(entityType, field3), desc3));
     }
 
-    @NotNull
-    public Query<T> orderBy(@NotNull FieldGetter<T, ?> field1, @NotNull FieldGetter<T, ?> field2) {
+    public @NotNull Query<T> orderBy(@NotNull FieldGetter<T, ?> field1, @NotNull FieldGetter<T, ?> field2) {
         return orderBy(field1, false, field2, false);
     }
 
-    @NotNull
-    public Query<T> orderBy(@NotNull FieldGetter<T, ?> field1, @NotNull FieldGetter<T, ?> field2, @NotNull FieldGetter<T, ?> field3) {
+    public @NotNull Query<T> orderBy(@NotNull FieldGetter<T, ?> field1, @NotNull FieldGetter<T, ?> field2, @NotNull FieldGetter<T, ?> field3) {
         return orderBy(field1, false, field2, false, field3, false);
     }
 
-    @NotNull
-    public Query<T> orderByDesc(@NotNull FieldGetter<T, ?> field1, @NotNull FieldGetter<T, ?> field2) {
+    public @NotNull Query<T> orderByDesc(@NotNull FieldGetter<T, ?> field1, @NotNull FieldGetter<T, ?> field2) {
         return orderBy(field1, true, field2, true);
     }
 
-    @NotNull
-    public Query<T> orderByDesc(@NotNull FieldGetter<T, ?> field1, @NotNull FieldGetter<T, ?> field2, @NotNull FieldGetter<T, ?> field3) {
+    public @NotNull Query<T> orderByDesc(@NotNull FieldGetter<T, ?> field1, @NotNull FieldGetter<T, ?> field2, @NotNull FieldGetter<T, ?> field3) {
         return orderBy(field1, true, field2, true, field3, true);
     }
 
-    @NotNull
-    public Query<T> orderBy(@Nullable String[] orders) {
+    public @NotNull Query<T> orderBy(@Nullable String[] orders) {
         if (ArrayUtil.isNotEmpty(orders)) {
             if (orders.length % 2 != 0) {
                 throw new OrmException("排序列名不成对，必须为：['name', 'asc', 'gender', 'desc']");
@@ -185,8 +161,7 @@ public class Query<T> extends Where<T, Query<T>> {
         return crud;
     }
 
-    @NotNull
-    public Query<T> common(@Nullable Object params) {
+    public @NotNull Query<T> common(@Nullable Object params) {
         if (!hasCommon && params != null) {
             hasCommon = true;
             var createdAtName = DefaultConfig.createdAtName;
@@ -220,7 +195,7 @@ public class Query<T> extends Where<T, Query<T>> {
         return crud;
     }
 
-    public <E> List<E> list(Class<E> type) {
+    public @NotNull <E> List<E> list(Class<E> type) {
         if (type == entityType) {
             throw new OrmException("不能查询为当前实体");
         } else {
@@ -229,7 +204,7 @@ public class Query<T> extends Where<T, Query<T>> {
         }
     }
 
-    public <E> E get(Class<E> type) {
+    public @NotNull <E> E get(Class<E> type) {
         if (type == entityType) {
             throw new OrmException("不能查询为当前实体");
         } else {
@@ -238,7 +213,7 @@ public class Query<T> extends Where<T, Query<T>> {
         }
     }
 
-    public <E> Page<E> page(Page<?> in, Class<E> type) {
+    public @NotNull <E> Page<E> page(Page<?> in, Class<E> type) {
         if (type == entityType) {
             throw new OrmException("不能查询为当前实体");
         } else {
@@ -251,9 +226,8 @@ public class Query<T> extends Where<T, Query<T>> {
         }
     }
 
-    @NotNull
     @Override
-    public Pair<String, List<Object>> sql() {
+    public @NotNull Pair<String, List<Object>> sql() {
         return new QuerySqlGenerator(this).generate();
     }
 }

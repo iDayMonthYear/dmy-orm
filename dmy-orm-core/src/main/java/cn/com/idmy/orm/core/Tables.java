@@ -23,14 +23,13 @@ import org.jetbrains.annotations.Nullable;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 @NoArgsConstructor(access = lombok.AccessLevel.PRIVATE)
 public class Tables {
-    private static final Map<Class<?>, TableInfo> mapperTables = new ConcurrentHashMap<>();
-    private static final Map<Class<?>, TableInfo> entityTables = new ConcurrentHashMap<>();
-    private static final Map<Field, TypeHandler<?>> typeHandlers = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<Class<?>, TableInfo> mapperTables = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<Class<?>, TableInfo> entityTables = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<Field, TypeHandler<?>> typeHandlers = new ConcurrentHashMap<>();
     private static final OrmConfig config = OrmConfig.config();
 
     public static <T, R> void bindTypeHandler(@NotNull Class<T> entityType, @NotNull FieldGetter<T, R> getter, @NotNull TypeHandler<?> handler) {
@@ -44,18 +43,15 @@ public class Tables {
         typeHandlers.clear();
     }
 
-    @Nullable
-    public static TypeHandler<?> getTypeHandler(@NotNull Field field) {
+    public static @Nullable TypeHandler<?> getTypeHandler(@NotNull Field field) {
         return typeHandlers.get(field);
     }
 
-    @NotNull
-    public static TableInfo getTable(@NotNull Class<?> entityType) {
+    public static @NotNull TableInfo getTable(@NotNull Class<?> entityType) {
         return entityTables.computeIfAbsent(entityType, Tables::init);
     }
 
-    @Nullable
-    public static TableInfo getTable(@NotNull String className) {
+    public static @Nullable TableInfo getTable(@NotNull String className) {
         try {
             return getTableByMapperClass(Class.forName(className));
         } catch (ClassNotFoundException e) {
@@ -63,8 +59,7 @@ public class Tables {
         }
     }
 
-    @Nullable
-    public static TableInfo getTableByMapperClass(@NotNull Class<?> mapperClass) {
+    public static @Nullable TableInfo getTableByMapperClass(@NotNull Class<?> mapperClass) {
         return MapUtil.computeIfAbsent(mapperTables, mapperClass, key -> {
             Class<?> typeArgument = ClassUtil.getTypeArgument(mapperClass);
             if (typeArgument == null) {
@@ -75,8 +70,7 @@ public class Tables {
         });
     }
 
-    @NotNull
-    private static TableInfo init(@NotNull Class<?> entityType) {
+    private static @NotNull TableInfo init(@NotNull Class<?> entityType) {
         final String tableName;
         final String tableTitle;
         Table table = null;
@@ -149,13 +143,11 @@ public class Tables {
         }
     }
 
-    @NotNull
-    public static String getTableName(@NotNull Class<?> entityType) {
+    public static @NotNull String getTableName(@NotNull Class<?> entityType) {
         return getTable(entityType).name();
     }
 
-    @NotNull
-    public static TableId getId(@NotNull Class<?> entityType) {
+    public static @NotNull TableId getId(@NotNull Class<?> entityType) {
         return getTable(entityType).id();
     }
 
@@ -168,25 +160,22 @@ public class Tables {
         return getId(entityType).name();
     }
 
-    @NotNull
-    public static String getIdColumnName(@NotNull OrmDao<?, ?> dao) {
+    public static @NotNull String getIdColumnName(@NotNull OrmDao<?, ?> dao) {
         return getId(dao.entityType()).name();
     }
 
-    @Nullable
     @SuppressWarnings("unchecked")
-    public static <T> T getIdValue(@NotNull Object entity) {
+    public static @Nullable <T> T getIdValue(@NotNull Object entity) {
         var table = getTable(entity.getClass());
         return (T) FieldUtil.getFieldValue(entity, table.id().field());
     }
 
-    @NotNull
-    public static Field getIdField(@NotNull Class<?> entityType) {
+
+    public static @NotNull Field getIdField(@NotNull Class<?> entityType) {
         return getTable(entityType).id().field();
     }
 
-    @Nullable
-    public static Field[] listIdFields(@NotNull Class<?> entityType) {
+    public static @Nullable Field[] listIdFields(@NotNull Class<?> entityType) {
         var ids = getTable(entityType).ids();
         if (ids == null) {
             return null;
@@ -199,8 +188,7 @@ public class Tables {
         }
     }
 
-    @Nullable
-    public static Object[] listIdValues(@NotNull Object entity) {
+    public static @Nullable Object[] listIdValues(@NotNull Object entity) {
         var table = getTable(entity.getClass());
         var ids = table.ids();
         if (ids == null) {
@@ -214,8 +202,7 @@ public class Tables {
         }
     }
 
-    @Nullable
-    public static TableColumn getColum(@NotNull Class<?> entityType, @NotNull String fieldName) {
+    public static @Nullable TableColumn getColum(@NotNull Class<?> entityType, @NotNull String fieldName) {
         var table = getTable(entityType);
         var columnMap = table.columnMap();
         if (CollUtil.isEmpty(columnMap)) {
@@ -225,8 +212,7 @@ public class Tables {
         }
     }
 
-    @NotNull
-    public static <T> TableColumn getColum(@NotNull Class<?> entityType, @NotNull FieldGetter<T, ?> field) {
+    public static @NotNull <T> TableColumn getColum(@NotNull Class<?> entityType, @NotNull FieldGetter<T, ?> field) {
         var table = getTable(entityType);
         var columnMap = table.columnMap();
         if (CollUtil.isEmpty(columnMap)) {
@@ -242,8 +228,7 @@ public class Tables {
         }
     }
 
-    @Nullable
-    public static String getColumnName(@NotNull Class<?> entityType, @NotNull String fieldName) {
+    public static @Nullable String getColumnName(@NotNull Class<?> entityType, @NotNull String fieldName) {
         var colum = getColum(entityType, fieldName);
         if (colum == null) {
             return null;
@@ -252,8 +237,7 @@ public class Tables {
         }
     }
 
-    @NotNull
-    public static <T> String getColumnName(@NotNull Class<?> entityType, @NotNull FieldGetter<T, ?> field) {
+    public static @NotNull <T> String getColumnName(@NotNull Class<?> entityType, @NotNull FieldGetter<T, ?> field) {
         return getColum(entityType, field).name();
     }
 

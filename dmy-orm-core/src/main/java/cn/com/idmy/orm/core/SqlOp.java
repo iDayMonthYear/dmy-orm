@@ -13,33 +13,26 @@ import org.jetbrains.annotations.NotNull;
 @AllArgsConstructor
 @Accessors(fluent = true, chain = false)
 public class SqlOp<V extends Number> {
-    @NotNull
-    private String op;
-    @NotNull
-    private V value;
+    private @NotNull String op;
+    private @NotNull V value;
 
-    @NotNull
-    public SqlOp<V> plus(@NonNull V val) {
+    public @NotNull SqlOp<V> plus(@NonNull V val) {
         return new SqlOp<>("+", val);
     }
 
-    @NotNull
-    public SqlOp<V> minus(@NonNull V val) {
+    public @NotNull SqlOp<V> minus(@NonNull V val) {
         return new SqlOp<>("-", val);
     }
 
-    @NotNull
-    public SqlOp<V> multiply(@NonNull V val) {
+    public @NotNull SqlOp<V> multiply(@NonNull V val) {
         return new SqlOp<>("*", val);
     }
 
-    @NotNull
-    public SqlOp<V> divide(@NonNull V val) {
+    public @NotNull SqlOp<V> divide(@NonNull V val) {
         return new SqlOp<>("/", val);
     }
 
-    @NotNull
-    public SqlOp<V> mod(@NonNull V val) {
+    public @NotNull SqlOp<V> mod(@NonNull V val) {
         return new SqlOp<>("%", val);
     }
 }
