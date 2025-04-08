@@ -111,7 +111,7 @@ public class Tables {
                 ids.add(tableId);
             }
 
-            if (!field.isAnnotationPresent(Column.class)) {
+            if (!field.isAnnotationPresent(Column.class) || field.getAnnotation(Column.class) != null) {
                 Column column = field.getAnnotation(Column.class);
                 String name = null;
                 String title = null;
