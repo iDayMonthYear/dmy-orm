@@ -61,7 +61,7 @@ public class Tables {
 
     public static @Nullable TableInfo getTableByMapperClass(@NotNull Class<?> mapperClass) {
         return MapUtil.computeIfAbsent(mapperTables, mapperClass, key -> {
-            Class<?> typeArgument = ClassUtil.getTypeArgument(mapperClass);
+            var typeArgument = ClassUtil.getTypeArgument(mapperClass);
             if (typeArgument == null) {
                 return null;
             } else {

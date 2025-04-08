@@ -134,7 +134,7 @@ class MybatisModifier {
             var mappings = new ArrayList<ResultMapping>();
             var fields = FieldUtil.getFields(clazz);
             for (var field : fields) {
-                if (field.isAnnotationPresent(Column.class) && field.getAnnotation(Column.class).ignore()) {
+                if (field.isAnnotationPresent(Column.class) && !field.getAnnotation(Column.class).exist()) {
                     continue;
                 }
                 String columnName;
