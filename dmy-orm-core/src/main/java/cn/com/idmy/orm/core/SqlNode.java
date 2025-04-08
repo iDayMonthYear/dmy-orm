@@ -64,6 +64,9 @@ public class SqlNode {
                 column = Tables.getColumnName(entityType, field);
             } else {
                 var col = Tables.getColum(entityType, field);
+                if (!col.exist()) {
+                    throw new OrmException("字段「{}」不存在！", col.name());
+                }
                 if (ObjUtil.isNotEmpty(expr) && op != Op.IS_NULL && op != Op.IS_NOT_NULL) {
                     var type1 = col.field().getType();
                     var type2 = expr.getClass();
@@ -101,6 +104,9 @@ public class SqlNode {
 
         public SqlSet(TableColumn col, @Nullable Object val) {
             super(Type.SET);
+            if (!col.exist()) {
+                throw new OrmException("字段「{}」不存在！", col.name());
+            }
             check(col, val);
             this.expr = val;
             this.column = col.name();

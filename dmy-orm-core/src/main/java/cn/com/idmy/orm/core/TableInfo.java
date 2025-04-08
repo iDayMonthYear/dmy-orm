@@ -25,7 +25,7 @@ public record TableInfo(@NotNull Class<?> entityType,
                           @Nullable String title) {
     }
 
-    public record TableColumn(@NotNull Field field, @NotNull String name, @Nullable String title) {
+    public record TableColumn(@NotNull Field field, @NotNull String name, @Nullable String title, boolean exist) {
     }
 
     public boolean isMultiIds() {

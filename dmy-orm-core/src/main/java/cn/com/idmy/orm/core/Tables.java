@@ -111,13 +111,15 @@ public class Tables {
                 ids.add(tableId);
             }
 
-            if (!field.isAnnotationPresent(Column.class) || !field.getAnnotation(Column.class).ignore()) {
+            if (!field.isAnnotationPresent(Column.class)) {
                 Column column = field.getAnnotation(Column.class);
                 String name = null;
                 String title = null;
+                boolean exist = true;
                 if (column != null) {
                     name = column.name();
                     title = column.value();
+                    exist = column.exist();
                 }
                 if (StrUtil.isBlank(name)) {
                     name = config.toColumnName(field.getName());
@@ -126,7 +128,7 @@ public class Tables {
                     title = null;
                 }
                 if (!columnMap.containsKey(field.getName())) {
-                    var tableColumn = new TableColumn(field, name, title);
+                    var tableColumn = new TableColumn(field, name, title, exist);
                     columns.add(tableColumn);
                     columnMap.put(field.getName(), tableColumn);
                 }
