@@ -1,5 +1,6 @@
 package cn.com.idmy.orm.core;
 
+import cn.com.idmy.orm.core.SqlNode.SqlOr;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.hutool.core.text.StrUtil;
 import org.jetbrains.annotations.NotNull;
@@ -29,8 +30,8 @@ public class XmlQueryGenerator extends QuerySqlGenerator {
         for (int i = 0, size = nodes.size(); i < size; i++) {
             if (nodes.get(i) instanceof SqlNode.SqlCond cond) {
                 wheres.add(cond);
-            } else if (nodes.get(i) instanceof SqlNode.SqlOr or) {
-                skipAdjoinOr(or, wheres);
+            } else if (nodes.get(i) == SqlOr.OR) {
+                skipAdjoinOr(wheres);
             }
         }
 

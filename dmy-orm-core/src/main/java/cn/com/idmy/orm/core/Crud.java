@@ -61,6 +61,6 @@ abstract class Crud<T, CRUD extends Crud<T, CRUD>> {
     }
 
     public @NotNull CRUD or() {
-        return addNode(new SqlOr());
+        return addNode(SqlOr.OR);
     }
 }

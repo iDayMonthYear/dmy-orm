@@ -2,6 +2,7 @@ package cn.com.idmy.orm.core;
 
 import cn.com.idmy.base.model.Pair;
 import cn.com.idmy.orm.OrmException;
+import cn.com.idmy.orm.core.SqlNode.SqlBracket;
 import cn.com.idmy.orm.core.SqlNode.SqlCond;
 import cn.com.idmy.orm.core.SqlNode.SqlOr;
 import cn.com.idmy.orm.core.SqlNode.Type;
@@ -85,20 +86,20 @@ public abstract class SqlGenerator {
         ph.append(BRACKET_RIGHT);
     }
 
-    protected static void skipAdjoinOr(@NonNull SqlNode node, @NonNull List<SqlNode> wheres) {
+    protected static void skipAdjoinOr(@NonNull List<SqlNode> wheres) {
         if (CollUtil.isNotEmpty(wheres)) {
-            if (wheres.getLast().type == Type.OR) {
+            if (wheres.getLast() == SqlOr.OR) {
                 if (log.isDebugEnabled()) {
                     log.warn("存在相邻的 or，已自动移除");
                 }
             } else {
-                wheres.add(node);
+                wheres.add(SqlOr.OR);
             }
         }
     }
 
     protected static void removeLastOr(@NonNull List<SqlNode> ls) {
-        if (CollUtil.isNotEmpty(ls) && ls.getLast() instanceof SqlOr) {
+        if (CollUtil.isNotEmpty(ls) && ls.getLast() == SqlOr.OR) {
             ls.removeLast();
             if (log.isDebugEnabled()) {
                 log.warn("where 条件最后存在 or，已自动移除");
@@ -153,13 +154,13 @@ public abstract class SqlGenerator {
     }
 
     protected void genWhereNode(@NonNull SqlNode node) {
-        if (node instanceof SqlOr) {
+        if (node == SqlOr.OR) {
             sql.append(OR);
         } else if (node instanceof SqlCond cond) {
             genCond(cond);
-        } else if (node.type == Type.LEFT_BRACKET) {
+        } else if (node == SqlBracket.LEFT) {
             sql.append(BRACKET_LEFT);
-        } else if (node.type == Type.RIGHT_BRACKET) {
+        } else if (node == SqlBracket.RIGHT) {
             sql.append(BRACKET_RIGHT);
         }
     }
@@ -170,38 +171,20 @@ public abstract class SqlGenerator {
         }
         removeLastOr(ls);
         sql.append(WHERE);
-        boolean isClosingBracket = false;
+
         for (int i = 0, size = ls.size(); i < size; i++) {
             var node = ls.get(i);
-            // 处理不同类型的节点
-            if (node.type == Type.LEFT_BRACKET) {
-                genWhereNode(node);
-            } else if (node.type == Type.RIGHT_BRACKET) {
-                genWhereNode(node);
-                isClosingBracket = true;
-            } else {
-                genWhereNode(node);
-                // 处理连接符逻辑
-                if (i < size - 1) {
-                    var nextNode = ls.get(i + 1);
-                    // 只有在以下条件都不满足时才添加AND
-                    if (nextNode.type != Type.OR && nextNode.type != Type.RIGHT_BRACKET && node.type != Type.OR) {
-                        // 处理闭括号后的条件
-                        if (!(isClosingBracket && nextNode.type == Type.COND)) {
-                            // 当前条件与下一个条件之间需要AND
-                            if ((nextNode.type == Type.COND && node.type == Type.COND) || (nextNode.type == Type.LEFT_BRACKET && node.type == Type.COND)) {
-                                sql.append(AND);
-                            }
-                        } else {
-                            // 闭括号后跟条件节点，不需要添加AND
-                            isClosingBracket = false;
-                        }
-                    }
+            // 处理节点
+            genWhereNode(node);
+            // 处理连接符逻辑
+            if (i < size - 1) {
+                var nextNode = ls.get(i + 1);
+                // 只有在以下条件都满足时才添加AND:
+                // 1. 当前节点不是左括号或OR
+                // 2. 下一个节点不是右括号或OR
+                if ((node.type != Type.LEFT_BRACKET && node.type != Type.OR) && (nextNode.type != Type.RIGHT_BRACKET && nextNode.type != Type.OR)) {
+                    sql.append(AND);
                 }
-            }
-            // 如果当前处理的不是右括号，则重置isClosingBracket标志
-            if (node.type != Type.RIGHT_BRACKET) {
-                isClosingBracket = false;
             }
         }
     }

@@ -39,10 +39,11 @@ class QuerySqlGenerator extends SqlGenerator {
         for (int i = 0, size = nodes.size(); i < size; i++) {
             switch (nodes.get(i)) {
                 case SqlCond cond -> wheres.add(cond);
+                case SqlBracket bracket -> wheres.add(bracket);
+                case SqlOr ignored -> skipAdjoinOr(wheres);
                 case SelectSqlColumn select -> selects.add(select);
                 case SqlGroupBy groupBy -> groups.add(groupBy);
                 case SqlOrderBy orderBy -> orders.add(orderBy);
-                case SqlOr or -> skipAdjoinOr(or, wheres);
                 case SqlDistinct d -> distinct = d;
                 case null, default -> {
                 }

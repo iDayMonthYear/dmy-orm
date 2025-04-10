@@ -92,14 +92,20 @@ public class SqlNode {
     }
 
     public static class SqlOr extends SqlNode {
-        public SqlOr() {
+        public static final SqlOr OR = new SqlOr();
+
+        private SqlOr() {
             super(Type.OR);
         }
     }
 
-    public static class SqlRightBracket extends SqlNode {
-        public SqlRightBracket() {
-            super(Type.LEFT_BRACKET);
+
+    public static class SqlBracket extends SqlNode {
+        public static final SqlBracket LEFT = new SqlBracket(Type.LEFT_BRACKET);
+        public static final SqlBracket RIGHT = new SqlBracket(Type.RIGHT_BRACKET);
+
+        private SqlBracket(Type type) {
+            super(type);
         }
     }
 

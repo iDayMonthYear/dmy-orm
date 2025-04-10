@@ -2,10 +2,7 @@ package cn.com.idmy.orm.core;
 
 import cn.com.idmy.base.model.Pair;
 import cn.com.idmy.orm.OrmException;
-import cn.com.idmy.orm.core.SqlNode.SqlCond;
-import cn.com.idmy.orm.core.SqlNode.SqlOr;
-import cn.com.idmy.orm.core.SqlNode.SqlSet;
-import cn.com.idmy.orm.core.SqlNode.Type;
+import cn.com.idmy.orm.core.SqlNode.*;
 import cn.com.idmy.orm.mybatis.handler.TypeHandlerValue;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
@@ -36,10 +33,10 @@ class UpdateSqlGenerator extends SqlGenerator {
             var node = nodes.get(i);
             if (node instanceof SqlSet set) {
                 sets.add(set);
-            } else if (node instanceof SqlCond cond) {
-                wheres.add(cond);
-            } else if (node instanceof SqlOr) {
-                skipAdjoinOr(node, wheres);
+            } else if (node instanceof SqlCond || node instanceof SqlBracket) {
+                wheres.add(node);
+            } else if (node == SqlOr.OR) {
+                skipAdjoinOr(wheres);
             }
         }
 

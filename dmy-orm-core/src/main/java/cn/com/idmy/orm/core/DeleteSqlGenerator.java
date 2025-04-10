@@ -2,6 +2,7 @@ package cn.com.idmy.orm.core;
 
 import cn.com.idmy.base.model.Pair;
 import cn.com.idmy.orm.OrmException;
+import cn.com.idmy.orm.core.SqlNode.SqlBracket;
 import cn.com.idmy.orm.core.SqlNode.SqlCond;
 import cn.com.idmy.orm.core.SqlNode.SqlOr;
 import lombok.extern.slf4j.Slf4j;
@@ -28,10 +29,10 @@ class DeleteSqlGenerator extends SqlGenerator {
         var wheres = new ArrayList<SqlNode>(nodes.size());
         for (int i = 0, size = nodes.size(); i < size; i++) {
             var node = nodes.get(i);
-            if (node instanceof SqlCond) {
+            if (node instanceof SqlCond || node instanceof SqlBracket) {
                 wheres.add(node);
-            } else if (node instanceof SqlOr) {
-                skipAdjoinOr(node, wheres);
+            } else if (node == SqlOr.OR) {
+                skipAdjoinOr(wheres);
             }
         }
 
