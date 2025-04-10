@@ -537,6 +537,7 @@ public abstract class Where<T, CRUD extends Where<T, CRUD>> extends Crud<T, CRUD
 
     public @NotNull CRUD or(@NotNull Consumer<WhereOr<T>> consumer) {
         var where = new WhereOr<>(entityType);
+        where.nullable = nullable;
         consumer.accept(where);
         addNode(new SqlOr());
         nodes.addAll(where.nodes);
