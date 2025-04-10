@@ -152,7 +152,7 @@ public abstract class SqlGenerator {
         sql.append(keyword(col)).append(BLANK).append(where.op.getSymbol()).append(BLANK).append(str);
     }
 
-    protected void genWhereOr(@NonNull SqlNode node) {
+    protected void genWhereLogic(@NonNull SqlNode node) {
         switch (node.type) {
             case OR -> sql.append(OR);
             case WHERE -> {
@@ -174,7 +174,7 @@ public abstract class SqlGenerator {
         sql.append(WHERE);
         for (int i = 0, size = ls.size(); i < size; i++) {
             var node = ls.get(i);
-            genWhereOr(node);
+            genWhereLogic(node);
             if (i < size - 1) {
                 var nextNode = ls.get(i + 1);
                 if (nextNode.type == Type.WHERE && node.type != Type.OR && node.type != Type.LEFT_BRACKET) {

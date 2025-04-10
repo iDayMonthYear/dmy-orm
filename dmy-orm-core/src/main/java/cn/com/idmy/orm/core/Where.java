@@ -3,6 +3,7 @@ package cn.com.idmy.orm.core;
 import cn.com.idmy.base.FieldGetter;
 import cn.com.idmy.base.exception.BizException;
 import cn.com.idmy.orm.OrmException;
+import cn.com.idmy.orm.core.SqlNode.SqlOr;
 import cn.com.idmy.orm.core.SqlNode.SqlWhere;
 import cn.com.idmy.orm.core.SqlNode.Type;
 import lombok.Getter;
@@ -535,7 +536,7 @@ public abstract class Where<T, CRUD extends Where<T, CRUD>> extends Crud<T, CRUD
     public @NotNull CRUD or(@NotNull Consumer<WhereLogic<T>> consumer) {
         var where = new WhereLogic<>(entityType);
         where.nullable = false;
-        addNode(new SqlNode(Type.OR));
+        addNode(new SqlOr());
         addNode(new SqlNode(Type.LEFT_BRACKET));
         consumer.accept(where);
         nodes.addAll(where.nodes);
@@ -550,7 +551,6 @@ public abstract class Where<T, CRUD extends Where<T, CRUD>> extends Crud<T, CRUD
     public @NotNull CRUD and(@NotNull Consumer<WhereLogic<T>> consumer) {
         var where = new WhereLogic<>(entityType);
         where.nullable = false;
-        addNode(new SqlNode(Type.AND));
         addNode(new SqlNode(Type.LEFT_BRACKET));
         consumer.accept(where);
         nodes.addAll(where.nodes);

@@ -1,6 +1,7 @@
 package cn.com.idmy.orm.core;
 
 import cn.com.idmy.base.model.Pair;
+import cn.com.idmy.orm.core.SqlNode.SqlOr;
 import cn.com.idmy.orm.core.SqlNode.Type;
 import org.jetbrains.annotations.NotNull;
 
@@ -16,16 +17,16 @@ public class WhereLogic<T> extends Where<T, WhereLogic<T>> {
     public @NotNull WhereLogic<T> or(@NotNull Consumer<WhereLogic<T>> consumer) {
         var subWhere = new WhereLogic<>(entityType);
         subWhere.nullable = false;
-        consumer.accept(subWhere);
-        addNode(new SqlNode(Type.OR));
+        addNode(new SqlOr());
         addNode(new SqlNode(Type.LEFT_BRACKET));
+        consumer.accept(subWhere);
         nodes.addAll(subWhere.nodes);
         addNode(new SqlNode(Type.RIGHT_BRACKET));
         return this;
     }
 
     public @NotNull WhereLogic<T> or() {
-        addNode(new SqlNode(Type.OR));
+        addNode(new SqlOr());
         return this;
     }
 
@@ -33,9 +34,8 @@ public class WhereLogic<T> extends Where<T, WhereLogic<T>> {
     public @NotNull WhereLogic<T> and(@NotNull Consumer<WhereLogic<T>> consumer) {
         var subWhere = new WhereLogic<>(entityType);
         subWhere.nullable = false;
-        consumer.accept(subWhere);
-        addNode(new SqlNode(Type.AND));
         addNode(new SqlNode(Type.LEFT_BRACKET));
+        consumer.accept(subWhere);
         nodes.addAll(subWhere.nodes);
         addNode(new SqlNode(Type.RIGHT_BRACKET));
         return this;
