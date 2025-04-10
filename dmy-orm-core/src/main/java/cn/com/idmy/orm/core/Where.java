@@ -5,6 +5,7 @@ import cn.com.idmy.base.exception.BizException;
 import cn.com.idmy.orm.OrmException;
 import cn.com.idmy.orm.core.SqlNode.SqlCond;
 import cn.com.idmy.orm.core.SqlNode.SqlOr;
+import cn.com.idmy.orm.core.SqlNode.Type;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.experimental.Accessors;
@@ -531,15 +532,29 @@ public abstract class Where<T, CRUD extends Where<T, CRUD>> extends Crud<T, CRUD
     }
 
     //endregion
-    public @NotNull CRUD or(boolean if0, @NotNull Consumer<WhereOr<T>> consumer) {
+
+    public @NotNull CRUD or(@NotNull Consumer<WhereLogic<T>> consumer) {
+        var where = new WhereLogic<>(entityType);
+        where.nullable = false;
+        addNode(new SqlOr());
+        addNode(new SqlNode(Type.LEFT_BRACKET));
+        consumer.accept(where);
+        nodes.addAll(where.nodes);
+        addNode(new SqlNode(Type.RIGHT_BRACKET));
+        return crud;
+    }
+
+    public @NotNull CRUD or(boolean if0, @NotNull Consumer<WhereLogic<T>> consumer) {
         return if0 ? or(consumer) : crud;
     }
 
-    public @NotNull CRUD or(@NotNull Consumer<WhereOr<T>> consumer) {
-        var where = new WhereOr<>(entityType);
+    public @NotNull CRUD and(@NotNull Consumer<WhereLogic<T>> consumer) {
+        var where = new WhereLogic<>(entityType);
+        where.nullable = false;
+        addNode(new SqlNode(Type.LEFT_BRACKET));
         consumer.accept(where);
-        addNode(new SqlOr());
         nodes.addAll(where.nodes);
+        addNode(new SqlNode(Type.RIGHT_BRACKET));
         return crud;
     }
 }
