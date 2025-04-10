@@ -1,6 +1,7 @@
 package cn.com.idmy.orm.core;
 
 import cn.com.idmy.orm.core.SqlNode.SqlOr;
+import cn.com.idmy.orm.core.SqlNode.Type;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.hutool.core.text.StrUtil;
 import org.jetbrains.annotations.NotNull;
@@ -28,22 +29,28 @@ public class XmlQueryGenerator extends QuerySqlGenerator {
         // 收集条件节点
         var wheres = new ArrayList<SqlNode>(nodes.size());
         for (int i = 0, size = nodes.size(); i < size; i++) {
-            if (nodes.get(i) instanceof SqlNode.SqlCond cond) {
-                wheres.add(cond);
-            } else if (nodes.get(i) == SqlOr.OR) {
+            var node = nodes.get(i);
+            if (node instanceof SqlNode.SqlCond || node instanceof SqlNode.SqlBracket) {
+                wheres.add(node);
+            } else if (node == SqlOr.OR) {
                 skipAdjoinOr(wheres);
             }
         }
 
         // 生成条件字符串
         if (!wheres.isEmpty()) {
-            StringBuilder condSql = new StringBuilder();
+            var condSql = new StringBuilder();
             removeLastOr(wheres);
             for (int i = 0, size = wheres.size(); i < size; i++) {
                 var node = wheres.get(i);
                 genWhereForXml(condSql, node);
+                // 处理连接符逻辑
                 if (i < size - 1) {
-                    if (wheres.get(i + 1).type != SqlNode.Type.OR && node.type != SqlNode.Type.OR) {
+                    var nextNode = wheres.get(i + 1);
+                    // 只有在以下条件都满足时才添加AND:
+                    // 1. 当前节点不是左括号或OR
+                    // 2. 下一个节点不是右括号或OR
+                    if ((node.type != Type.LEFT_BRACKET && node.type != Type.OR) && (nextNode.type != Type.RIGHT_BRACKET && nextNode.type != Type.OR)) {
                         condSql.append(AND);
                     }
                 }
@@ -94,10 +101,18 @@ public class XmlQueryGenerator extends QuerySqlGenerator {
     }
 
     private void genWhereForXml(@NotNull StringBuilder sql, @NotNull SqlNode node) {
-        if (node instanceof SqlNode.SqlOr) {
-            sql.append(OR);
-        } else if (node instanceof SqlNode.SqlCond cond) {
-            genWhereForXml(sql, cond);
+        switch (node) {
+            case SqlOr ignored -> sql.append(OR);
+            case SqlNode.SqlCond cond -> genWhereForXml(sql, cond);
+            case SqlNode.SqlBracket ignored -> {
+                if (node == SqlNode.SqlBracket.LEFT) {
+                    sql.append(BRACKET_LEFT);
+                } else {
+                    sql.append(BRACKET_RIGHT);
+                }
+            }
+            default -> {
+            }
         }
     }
 
