@@ -2,8 +2,8 @@ package cn.com.idmy.orm.core;
 
 import cn.com.idmy.base.model.Page;
 import cn.com.idmy.orm.OrmException;
-import cn.com.idmy.orm.core.SqlNode.SqlCond;
 import cn.com.idmy.orm.core.SqlNode.SqlSet;
+import cn.com.idmy.orm.core.SqlNode.SqlWhere;
 import cn.com.idmy.orm.mybatis.MybatisUtil;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -83,7 +83,7 @@ public class SqlProvider {
         if (idValue == null) {
             throw new OrmException("主键不能为空");
         }
-        var u = dao.u().addNode(new SqlCond(id.name(), Op.EQ, idValue));
+        var u = dao.u().addNode(new SqlWhere(id.name(), Op.EQ, idValue));
         var cols = table.columns();
         int size = cols.length;
         for (int i = 0; i < size; i++) {
@@ -130,7 +130,7 @@ public class SqlProvider {
     static @NotNull <T, ID> Map<ID, T> map(@NotNull OrmDao<T, ID> dao, @NonNull Object ids) {
         var q = dao.q();
         q.sqlParamsSize = 1;
-        q.addNode(new SqlCond(getIdColumnName(dao), Op.IN, ids));
+        q.addNode(new SqlWhere(getIdColumnName(dao), Op.IN, ids));
         return CollStreamUtil.toIdentityMap(dao.list(q), Tables::getIdValue);
     }
 

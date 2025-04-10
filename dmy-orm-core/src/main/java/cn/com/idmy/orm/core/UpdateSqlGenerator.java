@@ -2,15 +2,14 @@ package cn.com.idmy.orm.core;
 
 import cn.com.idmy.base.model.Pair;
 import cn.com.idmy.orm.OrmException;
-import cn.com.idmy.orm.core.SqlNode.SqlCond;
 import cn.com.idmy.orm.core.SqlNode.SqlOr;
 import cn.com.idmy.orm.core.SqlNode.SqlSet;
+import cn.com.idmy.orm.core.SqlNode.SqlWhere;
 import cn.com.idmy.orm.core.SqlNode.Type;
 import cn.com.idmy.orm.mybatis.handler.TypeHandlerValue;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,7 +26,7 @@ class UpdateSqlGenerator extends SqlGenerator {
 
     @Override
     protected @NotNull Pair<String, List<Object>> doGenerate() {
-        if (!update.hasCond && !update.force) {
+        if (!update.hasWhere && !update.force) {
             throw new OrmException("更新语句没有条件！使用 force() 强制更新全部数据");
         }
         var sets = new ArrayList<SqlSet>(nodes.size());
@@ -36,8 +35,8 @@ class UpdateSqlGenerator extends SqlGenerator {
             var node = nodes.get(i);
             if (node instanceof SqlSet set) {
                 sets.add(set);
-            } else if (node instanceof SqlCond cond) {
-                wheres.add(cond);
+            } else if (node instanceof SqlWhere where) {
+                wheres.add(where);
             } else if (node instanceof SqlOr) {
                 skipAdjoinOr(node, wheres);
             }
@@ -58,15 +57,15 @@ class UpdateSqlGenerator extends SqlGenerator {
         return new Pair<>(sql.toString(), values);
     }
 
-    protected String genSet(@NonNull String col, @NonNull SqlOpExpr expr) {
-        var sqlOp = expr.op(new SqlOp<>());
-        values.add(sqlOp.value());
-        return keyword(col) + BLANK + sqlOp.op() + BLANK + PLACEHOLDER;
-    }
-
-    protected String genSet(@NonNull String col, @Nullable Object val) {
-        values.add(val);
-        return PLACEHOLDER;
+    protected String genSet(@NonNull String col, Object val) {
+        if (val instanceof SqlOpExpr expr) {
+            var sqlOp = expr.op(new SqlOp<>());
+            values.add(sqlOp.value());
+            return keyword(col) + BLANK + sqlOp.op() + BLANK + PLACEHOLDER;
+        } else {
+            values.add(val);
+            return PLACEHOLDER;
+        }
     }
 
     protected void genSet(@NotNull SqlNode.SqlSet set) {

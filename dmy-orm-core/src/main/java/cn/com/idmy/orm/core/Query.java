@@ -169,7 +169,7 @@ public class Query<T> extends Where<T, Query<T>> {
             if (cats instanceof Object[] ats && ArrayUtil.isNotEmpty(ats) && ats.length == 2) {
                 var createdAt = getColumnName(entityType, createdAtName);
                 if (createdAt != null) {
-                    addNode(new SqlCond(createdAt, Op.BETWEEN, ats));
+                    addNode(new SqlWhere(createdAt, Op.BETWEEN, ats));
                 }
             }
             var updatedAtName = DefaultConfig.updatedAtName;
@@ -177,18 +177,18 @@ public class Query<T> extends Where<T, Query<T>> {
             if (uats instanceof Object[] ats && ArrayUtil.isNotEmpty(ats) && ats.length == 2) {
                 var createdAt = getColumnName(entityType, updatedAtName);
                 if (createdAt != null) {
-                    addNode(new SqlCond(createdAt, Op.BETWEEN, ats));
+                    addNode(new SqlWhere(createdAt, Op.BETWEEN, ats));
                 }
             }
 
             var idField = getIdField(entityType);
             var idVal = FieldUtil.getFieldValue(params, idField);
             if (idVal != null) {
-                addNode(new SqlCond(Tables.getIdColumnName(entityType), Op.EQ, idVal));
+                addNode(new SqlWhere(Tables.getIdColumnName(entityType), Op.EQ, idVal));
             } else {
                 var ids = FieldUtil.getFieldValue(params, idField.getName() + "s");
                 if (ObjUtil.isNotEmpty(ids)) {
-                    addNode(new SqlCond(Tables.getIdColumnName(entityType), Op.IN, ids));
+                    addNode(new SqlWhere(Tables.getIdColumnName(entityType), Op.IN, ids));
                 }
             }
         }

@@ -5,7 +5,7 @@ import cn.com.idmy.base.model.Triple;
 import cn.com.idmy.orm.core.Op;
 import cn.com.idmy.orm.core.SqlNode;
 import cn.com.idmy.orm.core.SqlNode.SqlColumn;
-import cn.com.idmy.orm.core.SqlNode.SqlCond;
+import cn.com.idmy.orm.core.SqlNode.SqlWhere;
 import cn.com.idmy.orm.core.Tables;
 import cn.com.idmy.orm.core.Where;
 import lombok.experimental.UtilityClass;
@@ -35,25 +35,25 @@ public class OrmUtil {
             var ids = table.ids();
             switch (id) {
                 case Pair<?, ?> pair -> {
-                    where.addNode(new SqlCond(ids[0].name(), Op.EQ, pair.l()));
-                    where.addNode(new SqlCond(ids[1].name(), Op.EQ, pair.r()));
+                    where.addNode(new SqlWhere(ids[0].name(), Op.EQ, pair.l()));
+                    where.addNode(new SqlWhere(ids[1].name(), Op.EQ, pair.r()));
                 }
                 case Triple<?, ?, ?> triple -> {
-                    where.addNode(new SqlCond(ids[0].name(), Op.EQ, triple.l()));
-                    where.addNode(new SqlCond(ids[1].name(), Op.EQ, triple.m()));
-                    where.addNode(new SqlCond(ids[2].name(), Op.EQ, triple.r()));
+                    where.addNode(new SqlWhere(ids[0].name(), Op.EQ, triple.l()));
+                    where.addNode(new SqlWhere(ids[1].name(), Op.EQ, triple.m()));
+                    where.addNode(new SqlWhere(ids[2].name(), Op.EQ, triple.r()));
                 }
                 case Object[] arr -> {
                     for (int i = 0, len = ids.length; i < len; i++) {
                         var tmp = ids[i];
-                        where.addNode(new SqlCond(tmp.name(), Op.EQ, arr[i]));
+                        where.addNode(new SqlWhere(tmp.name(), Op.EQ, arr[i]));
                     }
                 }
                 default -> {
                 }
             }
         } else {
-            where.addNode(new SqlCond(Tables.getIdColumnName(entityType), Op.EQ, id));
+            where.addNode(new SqlWhere(Tables.getIdColumnName(entityType), Op.EQ, id));
         }
     }
 }
