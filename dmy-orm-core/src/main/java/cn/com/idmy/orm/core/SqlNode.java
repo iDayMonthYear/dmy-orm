@@ -34,7 +34,9 @@ public class SqlNode {
         OR,
         AND,
         SELECT_COLUMN,
-        DISTINCT
+        DISTINCT,
+        LEFT_BRACKET,
+        RIGHT_BRACKET
     }
 
     public interface SqlColumn {

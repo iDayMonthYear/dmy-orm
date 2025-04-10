@@ -153,10 +153,16 @@ public abstract class SqlGenerator {
     }
 
     protected void genWhereOr(@NonNull SqlNode node) {
-        if (node instanceof SqlOr) {
-            sql.append(OR);
-        } else if (node instanceof SqlWhere cond) {
-            genWhere(cond);
+        switch (node.type) {
+            case OR -> sql.append(OR);
+            case WHERE -> {
+                if (node instanceof SqlWhere cond) {
+                    genWhere(cond);
+                }
+            }
+            case LEFT_BRACKET -> sql.append("(");
+            case RIGHT_BRACKET -> sql.append(")");
+            default -> {}
         }
     }
 
@@ -170,7 +176,8 @@ public abstract class SqlGenerator {
             var node = ls.get(i);
             genWhereOr(node);
             if (i < size - 1) {
-                if (ls.get(i + 1).type == Type.WHERE && node.type != Type.OR) {
+                var nextNode = ls.get(i + 1);
+                if (nextNode.type == Type.WHERE && node.type != Type.OR && node.type != Type.LEFT_BRACKET) {
                     sql.append(AND);
                 }
             }
