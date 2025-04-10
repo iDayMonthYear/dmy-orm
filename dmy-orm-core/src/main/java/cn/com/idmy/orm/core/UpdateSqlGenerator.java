@@ -58,15 +58,15 @@ class UpdateSqlGenerator extends SqlGenerator {
         return new Pair<>(sql.toString(), values);
     }
 
-    protected String genSet(@NonNull String col, @NonNull SqlOpExpr expr) {
-        var sqlOp = expr.op(new SqlOp<>());
-        values.add(sqlOp.value());
-        return keyword(col) + BLANK + sqlOp.op() + BLANK + PLACEHOLDER;
-    }
-
     protected String genSet(@NonNull String col, @Nullable Object val) {
-        values.add(val);
-        return PLACEHOLDER;
+        if (val instanceof SqlOpExpr expr) {
+            var sqlOp = expr.op(new SqlOp<>());
+            values.add(sqlOp.value());
+            return keyword(col) + BLANK + sqlOp.op() + BLANK + PLACEHOLDER;
+        } else {
+            values.add(val);
+            return PLACEHOLDER;
+        }
     }
 
     protected void genSet(@NotNull SqlNode.SqlSet set) {
