@@ -120,7 +120,7 @@ public class SqlNode {
         }
 
         protected void check(TableColumn col, @Nullable Object val) {
-            if (ObjUtil.isNotEmpty(val)) {
+            if (ObjUtil.isNotEmpty(val) && !(val instanceof SqlOpExpr)) {
                 if (val instanceof Object[] || val instanceof Collection<?>) {
                     throw new OrmException("update 语句 set 不支持集合或数组");
                 } else {
