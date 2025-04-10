@@ -32,9 +32,6 @@ public class XmlQuery<T> extends Query<T> {
         offset = page.offset();
         limit = page.pageSize();
         hasTotal = page.hasTotal();
-        if (page.pageSize() == 1 && page.pageNo() == 1 && hasTotal == null) {
-            hasTotal = false;
-        }
         orderBy(page.sorts());
     }
 

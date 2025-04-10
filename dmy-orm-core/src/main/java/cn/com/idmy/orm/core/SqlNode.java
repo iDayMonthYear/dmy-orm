@@ -97,6 +97,12 @@ public class SqlNode {
         }
     }
 
+    public static class SqlRightBracket extends SqlNode {
+        public SqlRightBracket() {
+            super(Type.LEFT_BRACKET);
+        }
+    }
+
     @Getter
     @Accessors(fluent = true)
     public static class SqlSet extends SqlNode implements SqlColumn {

@@ -152,11 +152,15 @@ public abstract class SqlGenerator {
         sql.append(keyword(col)).append(BLANK).append(cond.op.getSymbol()).append(BLANK).append(str);
     }
 
-    protected void genCondOr(@NonNull SqlNode node) {
+    protected void genWhereNode(@NonNull SqlNode node) {
         if (node instanceof SqlOr) {
             sql.append(OR);
         } else if (node instanceof SqlCond cond) {
             genCond(cond);
+        } else if (node.type == Type.LEFT_BRACKET) {
+            sql.append(BRACKET_LEFT);
+        } else if (node.type == Type.RIGHT_BRACKET) {
+            sql.append(BRACKET_RIGHT);
         }
     }
 
@@ -166,13 +170,38 @@ public abstract class SqlGenerator {
         }
         removeLastOr(ls);
         sql.append(WHERE);
+        boolean isClosingBracket = false;
         for (int i = 0, size = ls.size(); i < size; i++) {
             var node = ls.get(i);
-            genCondOr(node);
-            if (i < size - 1) {
-                if (ls.get(i + 1).type == Type.COND && node.type != Type.OR) {
-                    sql.append(AND);
+            // 处理不同类型的节点
+            if (node.type == Type.LEFT_BRACKET) {
+                genWhereNode(node);
+            } else if (node.type == Type.RIGHT_BRACKET) {
+                genWhereNode(node);
+                isClosingBracket = true;
+            } else {
+                genWhereNode(node);
+                // 处理连接符逻辑
+                if (i < size - 1) {
+                    var nextNode = ls.get(i + 1);
+                    // 只有在以下条件都不满足时才添加AND
+                    if (nextNode.type != Type.OR && nextNode.type != Type.RIGHT_BRACKET && node.type != Type.OR) {
+                        // 处理闭括号后的条件
+                        if (!(isClosingBracket && nextNode.type == Type.COND)) {
+                            // 当前条件与下一个条件之间需要AND
+                            if ((nextNode.type == Type.COND && node.type == Type.COND) || (nextNode.type == Type.LEFT_BRACKET && node.type == Type.COND)) {
+                                sql.append(AND);
+                            }
+                        } else {
+                            // 闭括号后跟条件节点，不需要添加AND
+                            isClosingBracket = false;
+                        }
+                    }
                 }
+            }
+            // 如果当前处理的不是右括号，则重置isClosingBracket标志
+            if (node.type != Type.RIGHT_BRACKET) {
+                isClosingBracket = false;
             }
         }
     }

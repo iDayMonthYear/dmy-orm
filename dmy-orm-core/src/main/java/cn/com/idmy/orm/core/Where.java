@@ -557,4 +557,8 @@ public abstract class Where<T, CRUD extends Where<T, CRUD>> extends Crud<T, CRUD
         addNode(new SqlNode(Type.RIGHT_BRACKET));
         return crud;
     }
+
+    public @NotNull CRUD and(boolean if0, @NotNull Consumer<WhereLogic<T>> consumer) {
+        return if0 ? and(consumer) : crud;
+    }
 }
