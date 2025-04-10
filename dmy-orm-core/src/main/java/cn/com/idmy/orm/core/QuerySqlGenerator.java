@@ -24,7 +24,7 @@ class QuerySqlGenerator extends SqlGenerator {
 
     @Override
     protected @NotNull Pair<String, List<Object>> doGenerate() {
-        if (!query.hasWhere && !query.force) {
+        if (!query.hasCond && !query.force) {
             if (query.limit == null && query.offset == null) {
                 if (!query.hasAggregate) {
                     throw new OrmException("查询语句没有条件！使用 force() 强制查询全部数据");
@@ -38,7 +38,7 @@ class QuerySqlGenerator extends SqlGenerator {
         SqlDistinct distinct = null;
         for (int i = 0, size = nodes.size(); i < size; i++) {
             switch (nodes.get(i)) {
-                case SqlWhere where -> wheres.add(where);
+                case SqlCond cond -> wheres.add(cond);
                 case SelectSqlColumn select -> selects.add(select);
                 case SqlGroupBy groupBy -> groups.add(groupBy);
                 case SqlOrderBy orderBy -> orders.add(orderBy);

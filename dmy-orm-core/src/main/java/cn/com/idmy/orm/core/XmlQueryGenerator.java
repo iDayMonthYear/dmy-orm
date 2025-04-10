@@ -1,6 +1,5 @@
 package cn.com.idmy.orm.core;
 
-import cn.com.idmy.orm.core.SqlNode.SqlWhere;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.hutool.core.text.StrUtil;
 import org.jetbrains.annotations.NotNull;
@@ -28,7 +27,7 @@ public class XmlQueryGenerator extends QuerySqlGenerator {
         // 收集条件节点
         var wheres = new ArrayList<SqlNode>(nodes.size());
         for (int i = 0, size = nodes.size(); i < size; i++) {
-            if (nodes.get(i) instanceof SqlWhere cond) {
+            if (nodes.get(i) instanceof SqlNode.SqlCond cond) {
                 wheres.add(cond);
             } else if (nodes.get(i) instanceof SqlNode.SqlOr or) {
                 skipAdjoinOr(or, wheres);
@@ -96,12 +95,12 @@ public class XmlQueryGenerator extends QuerySqlGenerator {
     private void genWhereForXml(@NotNull StringBuilder sql, @NotNull SqlNode node) {
         if (node instanceof SqlNode.SqlOr) {
             sql.append(OR);
-        } else if (node instanceof SqlWhere cond) {
+        } else if (node instanceof SqlNode.SqlCond cond) {
             genWhereForXml(sql, cond);
         }
     }
 
-    private void genWhereForXml(@NotNull StringBuilder sql, @NotNull SqlNode.SqlWhere cond) {
+    private void genWhereForXml(@NotNull StringBuilder sql, @NotNull SqlNode.SqlCond cond) {
         var col = cond.column;
 
         sql.append(keyword(tableInfo.name())).append(".").append(keyword(col)).append(BLANK).append(cond.op.getSymbol()).append(BLANK);

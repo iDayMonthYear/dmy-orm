@@ -27,6 +27,7 @@ public class SqlNode {
     final @NotNull SqlNode.Type type;
 
     public enum Type {
+        COND,
         WHERE,
         ORDER_BY,
         GROUP_BY,
@@ -45,20 +46,20 @@ public class SqlNode {
 
     @Getter
     @Accessors(fluent = true)
-    public static class SqlWhere extends SqlNode implements SqlColumn {
+    public static class SqlCond extends SqlNode implements SqlColumn {
         final @NotNull String column;
         final @NotNull Op op;
         final @NotNull Object expr;
 
-        public SqlWhere(@NotNull String col, @NonNull Op op, @NotNull Object expr) {
-            super(Type.WHERE);
+        public SqlCond(@NotNull String col, @NonNull Op op, @NotNull Object expr) {
+            super(Type.COND);
             this.column = SqlUtil.checkColumn(col);
             this.op = op;
             this.expr = expr;
         }
 
-        public <T> SqlWhere(Class<T> entityType, FieldGetter<T, ?> field, @NonNull Op op, @NotNull Object expr) {
-            super(Type.WHERE);
+        public <T> SqlCond(Class<T> entityType, FieldGetter<T, ?> field, @NonNull Op op, @NotNull Object expr) {
+            super(Type.COND);
             this.op = op;
             this.expr = expr;
             if (expr instanceof SqlOpExpr) {
@@ -119,7 +120,7 @@ public class SqlNode {
         }
 
         protected void check(TableColumn col, @Nullable Object val) {
-            if (ObjUtil.isNotEmpty(val) && !(val instanceof SqlOpExpr)) {
+            if (ObjUtil.isNotEmpty(val)) {
                 if (val instanceof Object[] || val instanceof Collection<?>) {
                     throw new OrmException("update 语句 set 不支持集合或数组");
                 } else {

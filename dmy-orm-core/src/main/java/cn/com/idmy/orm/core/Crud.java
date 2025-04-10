@@ -24,7 +24,7 @@ abstract class Crud<T, CRUD extends Crud<T, CRUD>> {
     protected @NotNull Class<T> entityType;
     protected int sqlParamsSize; // sql 参数数量，优化手段减少数组分配大小
     protected boolean nullable;
-    protected boolean hasWhere;
+    protected boolean hasCond;
     protected boolean force;
 
     protected Crud(@NotNull Class<T> entityType) {

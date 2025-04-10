@@ -4,7 +4,6 @@ import cn.com.idmy.base.FieldGetter;
 import cn.com.idmy.base.model.Pair;
 import cn.com.idmy.base.util.Assert;
 import cn.com.idmy.orm.core.SqlNode.SqlSet;
-import lombok.NonNull;
 import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
@@ -41,7 +40,7 @@ public class Update<T> extends Where<T, Update<T>> {
     }
 
     public @NotNull Update<T> setPlus(@NotNull FieldGetter<T, Number> field, @NotNull Number val) {
-        return set(field, (@NonNull SqlOp<Number> r) -> r.plus(val));
+        return set(field, r -> r.plus(val));
     }
 
     public @NotNull Update<T> setPlus(boolean if0, @NotNull FieldGetter<T, Number> field, @NotNull Number val) {
@@ -49,7 +48,7 @@ public class Update<T> extends Where<T, Update<T>> {
     }
 
     public @NotNull Update<T> setMinus(@NotNull FieldGetter<T, Number> field, @NotNull Number val) {
-        return set(field, (@NonNull SqlOp<Number> r) -> r.minus(val));
+        return set(field, r -> r.minus(val));
     }
 
     public @NotNull Update<T> setMinus(boolean if0, @NotNull FieldGetter<T, Number> field, @NotNull Number val) {

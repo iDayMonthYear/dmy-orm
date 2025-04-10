@@ -2,8 +2,8 @@ package cn.com.idmy.orm.core;
 
 import cn.com.idmy.base.model.Pair;
 import cn.com.idmy.orm.OrmException;
+import cn.com.idmy.orm.core.SqlNode.SqlCond;
 import cn.com.idmy.orm.core.SqlNode.SqlOr;
-import cn.com.idmy.orm.core.SqlNode.SqlWhere;
 import cn.com.idmy.orm.core.SqlNode.Type;
 import lombok.Getter;
 import lombok.NonNull;
@@ -110,13 +110,13 @@ public abstract class SqlGenerator {
         return STRESS_MARK + val + STRESS_MARK;
     }
 
-    protected String genWhere(@NonNull String col, @NonNull SqlOpExpr expr) {
+    protected String genCond(@NonNull String col, @NonNull SqlOpExpr expr) {
         var sqlOp = expr.op(new SqlOp<>());
         values.add(sqlOp.value());
         return keyword(col) + BLANK + sqlOp.op() + BLANK + PLACEHOLDER;
     }
 
-    protected String genWhere(@NonNull Op op, @NonNull Object val) {
+    protected String genCond(@NonNull Op op, @NonNull Object val) {
         var placeholder = new StringBuilder();
         if (op == Op.IS_NULL || op == Op.IS_NOT_NULL) {
             return EMPTY;
@@ -140,29 +140,23 @@ public abstract class SqlGenerator {
         }
     }
 
-    protected void genWhere(@NonNull SqlNode.SqlWhere where) {
-        var col = where.column;
+    protected void genCond(@NonNull SqlNode.SqlCond cond) {
+        var col = cond.column;
         String str;
-        Object expr = where.expr;
+        Object expr = cond.expr;
         if (expr instanceof SqlOpExpr e) {
-            str = genWhere(where.column, e);
+            str = genCond(cond.column, e);
         } else {
-            str = genWhere(where.op, expr);
+            str = genCond(cond.op, expr);
         }
-        sql.append(keyword(col)).append(BLANK).append(where.op.getSymbol()).append(BLANK).append(str);
+        sql.append(keyword(col)).append(BLANK).append(cond.op.getSymbol()).append(BLANK).append(str);
     }
 
-    protected void genWhereLogic(@NonNull SqlNode node) {
-        switch (node.type) {
-            case OR -> sql.append(OR);
-            case WHERE -> {
-                if (node instanceof SqlWhere cond) {
-                    genWhere(cond);
-                }
-            }
-            case LEFT_BRACKET -> sql.append("(");
-            case RIGHT_BRACKET -> sql.append(")");
-            default -> {}
+    protected void genCondOr(@NonNull SqlNode node) {
+        if (node instanceof SqlOr) {
+            sql.append(OR);
+        } else if (node instanceof SqlCond cond) {
+            genCond(cond);
         }
     }
 
@@ -174,10 +168,9 @@ public abstract class SqlGenerator {
         sql.append(WHERE);
         for (int i = 0, size = ls.size(); i < size; i++) {
             var node = ls.get(i);
-            genWhereLogic(node);
+            genCondOr(node);
             if (i < size - 1) {
-                var nextNode = ls.get(i + 1);
-                if (nextNode.type == Type.WHERE && node.type != Type.OR && node.type != Type.LEFT_BRACKET) {
+                if (ls.get(i + 1).type == Type.COND && node.type != Type.OR) {
                     sql.append(AND);
                 }
             }

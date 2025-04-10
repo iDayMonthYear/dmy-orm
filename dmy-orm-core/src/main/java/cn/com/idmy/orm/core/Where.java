@@ -3,9 +3,8 @@ package cn.com.idmy.orm.core;
 import cn.com.idmy.base.FieldGetter;
 import cn.com.idmy.base.exception.BizException;
 import cn.com.idmy.orm.OrmException;
+import cn.com.idmy.orm.core.SqlNode.SqlCond;
 import cn.com.idmy.orm.core.SqlNode.SqlOr;
-import cn.com.idmy.orm.core.SqlNode.SqlWhere;
-import cn.com.idmy.orm.core.SqlNode.Type;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.experimental.Accessors;
@@ -30,46 +29,46 @@ public abstract class Where<T, CRUD extends Where<T, CRUD>> extends Crud<T, CRUD
         super(entityType);
     }
 
-    public @NotNull CRUD addNode(@NotNull SqlNode.SqlWhere node) {
+    public @NotNull CRUD addNode(@NotNull SqlCond node) {
         if (ObjUtil.isEmpty(node.expr)) {
             if (nullable) {
                 return crud;
             } else {
-                throw new OrmException("【{}】参数【{}】不能为空", node.type.name().toLowerCase(), node.column);
+                throw new OrmException("表达式【{}】参数【{}】不能为空", node.type, node.column);
             }
         }
-        hasWhere = true;
+        hasCond = true;
         return super.addNode(node);
     }
 
     //region 比较操作
     // 等于
     public @NotNull CRUD isTrue(@NotNull FieldGetter<T, Boolean> field) {
-        return addNode(new SqlWhere(entityType, field, Op.EQ, true));
+        return addNode(new SqlCond(entityType, field, Op.EQ, true));
     }
 
     public @NotNull CRUD isFalse(@NotNull FieldGetter<T, Boolean> field) {
-        return addNode(new SqlWhere(entityType, field, Op.EQ, false));
+        return addNode(new SqlCond(entityType, field, Op.EQ, false));
     }
 
     public @NotNull CRUD eq(@NonNull Object id) {
         if (ObjUtil.isEmpty(id)) {
             throw new OrmException("主键不能为空");
         } else {
-            return addNode(new SqlWhere(Tables.getIdColumnName(entityType), Op.EQ, id));
+            return addNode(new SqlCond(Tables.getIdColumnName(entityType), Op.EQ, id));
         }
     }
 
     public @NotNull CRUD eqZero(@NotNull FieldGetter<T, ?> field) {
-        return addNode(new SqlWhere(entityType, field, Op.EQ, 0));
+        return addNode(new SqlCond(entityType, field, Op.EQ, 0));
     }
 
     public @NotNull CRUD eq(@NotNull FieldGetter<T, ?> field, @Nullable Object val) {
-        return addNode(new SqlWhere(entityType, field, Op.EQ, val));
+        return addNode(new SqlCond(entityType, field, Op.EQ, val));
     }
 
     public @NotNull CRUD eq(@NotNull FieldGetter<T, ?> field, @NotNull SqlOpExpr expr) {
-        return addNode(new SqlWhere(entityType, field, Op.EQ, expr));
+        return addNode(new SqlCond(entityType, field, Op.EQ, expr));
     }
 
     public @NotNull CRUD eq(boolean if0, @NotNull FieldGetter<T, ?> field, @Nullable Object val) {
@@ -81,7 +80,7 @@ public abstract class Where<T, CRUD extends Where<T, CRUD>> extends Crud<T, CRUD
     }
 
     public @NotNull CRUD eq(@NotNull FieldGetter<T, ?> field, @Nullable String val) {
-        return addNode(new SqlWhere(entityType, field, Op.EQ, val));
+        return addNode(new SqlCond(entityType, field, Op.EQ, val));
     }
 
     // 不等于
@@ -89,20 +88,20 @@ public abstract class Where<T, CRUD extends Where<T, CRUD>> extends Crud<T, CRUD
         if (ObjUtil.isEmpty(id)) {
             throw new BizException("主键不能为空");
         } else {
-            return addNode(new SqlWhere(Tables.getIdColumnName(entityType), Op.EQ, id));
+            return addNode(new SqlCond(Tables.getIdColumnName(entityType), Op.EQ, id));
         }
     }
 
     public @NotNull CRUD neZero(@NotNull FieldGetter<T, ?> field) {
-        return addNode(new SqlWhere(entityType, field, Op.NE, 0));
+        return addNode(new SqlCond(entityType, field, Op.NE, 0));
     }
 
     public @NotNull CRUD ne(@NotNull FieldGetter<T, ?> field, @Nullable Object val) {
-        return addNode(new SqlWhere(entityType, field, Op.NE, val));
+        return addNode(new SqlCond(entityType, field, Op.NE, val));
     }
 
     public @NotNull CRUD ne(@NotNull FieldGetter<T, ?> field, @NotNull SqlOpExpr expr) {
-        return addNode(new SqlWhere(entityType, field, Op.NE, expr));
+        return addNode(new SqlCond(entityType, field, Op.NE, expr));
     }
 
     public @NotNull CRUD ne(boolean if0, @NotNull FieldGetter<T, ?> field, @Nullable Object val) {
@@ -114,27 +113,27 @@ public abstract class Where<T, CRUD extends Where<T, CRUD>> extends Crud<T, CRUD
     }
 
     public @NotNull CRUD ne(@NotNull FieldGetter<T, ?> field, @Nullable String val) {
-        return addNode(new SqlWhere(entityType, field, Op.NE, val));
+        return addNode(new SqlCond(entityType, field, Op.NE, val));
     }
 
     // 大于
     public @NotNull CRUD gtZero(@NotNull FieldGetter<T, ?> field) {
-        return addNode(new SqlWhere(entityType, field, Op.GT, 0));
+        return addNode(new SqlCond(entityType, field, Op.GT, 0));
     }
 
     public @NotNull CRUD gt(@NotNull FieldGetter<T, ?> field, @Nullable Object val) {
-        return addNode(new SqlWhere(entityType, field, Op.GT, val));
+        return addNode(new SqlCond(entityType, field, Op.GT, val));
     }
 
     public @NotNull CRUD gt(@NotNull FieldGetter<T, ?> field, @NotNull SqlOpExpr expr) {
-        return addNode(new SqlWhere(entityType, field, Op.GT, expr));
+        return addNode(new SqlCond(entityType, field, Op.GT, expr));
     }
 
     public @NotNull CRUD gt(@NotNull FieldGetter<T, ?> field, @Nullable LocalDateTime val) {
         if (val != null) {
             val = val.withHour(0).withMinute(0).withSecond(0).withNano(0);
         }
-        return addNode(new SqlWhere(entityType, field, Op.GT, val));
+        return addNode(new SqlCond(entityType, field, Op.GT, val));
     }
 
     public @NotNull CRUD gt(boolean if0, @NotNull FieldGetter<T, ?> field, @Nullable Object val) {
@@ -151,15 +150,15 @@ public abstract class Where<T, CRUD extends Where<T, CRUD>> extends Crud<T, CRUD
 
     // 大于等于
     public @NotNull CRUD geZero(@NotNull FieldGetter<T, ?> field) {
-        return addNode(new SqlWhere(entityType, field, Op.GE, 0));
+        return addNode(new SqlCond(entityType, field, Op.GE, 0));
     }
 
     public @NotNull CRUD ge(@NotNull FieldGetter<T, ?> field, @Nullable Object val) {
-        return addNode(new SqlWhere(entityType, field, Op.GE, val));
+        return addNode(new SqlCond(entityType, field, Op.GE, val));
     }
 
     public @NotNull CRUD ge(@NotNull FieldGetter<T, ?> field, @NotNull SqlOpExpr expr) {
-        return addNode(new SqlWhere(entityType, field, Op.GE, expr));
+        return addNode(new SqlCond(entityType, field, Op.GE, expr));
     }
 
     public @NotNull CRUD ge(boolean if0, @NotNull FieldGetter<T, ?> field, @Nullable Object val) {
@@ -172,22 +171,22 @@ public abstract class Where<T, CRUD extends Where<T, CRUD>> extends Crud<T, CRUD
 
     // 小于
     public @NotNull CRUD ltZero(@NotNull FieldGetter<T, ?> field) {
-        return addNode(new SqlWhere(entityType, field, Op.LT, 0));
+        return addNode(new SqlCond(entityType, field, Op.LT, 0));
     }
 
     public @NotNull CRUD lt(@NotNull FieldGetter<T, ?> field, @Nullable Object val) {
-        return addNode(new SqlWhere(entityType, field, Op.LT, val));
+        return addNode(new SqlCond(entityType, field, Op.LT, val));
     }
 
     public @NotNull CRUD lt(@NotNull FieldGetter<T, ?> field, @NotNull SqlOpExpr expr) {
-        return addNode(new SqlWhere(entityType, field, Op.LT, expr));
+        return addNode(new SqlCond(entityType, field, Op.LT, expr));
     }
 
     public @NotNull CRUD lt(@NotNull FieldGetter<T, ?> field, @Nullable LocalDateTime val) {
         if (val != null) {
             val = val.withHour(23).withMinute(59).withSecond(59).withNano(999_999_999);
         }
-        return addNode(new SqlWhere(entityType, field, Op.LT, val));
+        return addNode(new SqlCond(entityType, field, Op.LT, val));
     }
 
     public @NotNull CRUD lt(boolean if0, @NotNull FieldGetter<T, ?> field, @Nullable Object val) {
@@ -204,15 +203,15 @@ public abstract class Where<T, CRUD extends Where<T, CRUD>> extends Crud<T, CRUD
 
     // 小于等于
     public @NotNull CRUD leZero(@NotNull FieldGetter<T, ?> field) {
-        return addNode(new SqlWhere(entityType, field, Op.LE, 0));
+        return addNode(new SqlCond(entityType, field, Op.LE, 0));
     }
 
     public @NotNull CRUD le(@NotNull FieldGetter<T, ?> field, @Nullable Object val) {
-        return addNode(new SqlWhere(entityType, field, Op.LE, val));
+        return addNode(new SqlCond(entityType, field, Op.LE, val));
     }
 
     public @NotNull CRUD le(@NotNull FieldGetter<T, ?> field, SqlOpExpr expr) {
-        return addNode(new SqlWhere(entityType, field, Op.LE, expr));
+        return addNode(new SqlCond(entityType, field, Op.LE, expr));
     }
 
     public @NotNull CRUD le(boolean if0, @NotNull FieldGetter<T, ?> field, @Nullable Object val) {
@@ -226,7 +225,7 @@ public abstract class Where<T, CRUD extends Where<T, CRUD>> extends Crud<T, CRUD
     //endregion
     //region 字符串操作
     public @NotNull CRUD contains(@NotNull FieldGetter<T, String> field, @Nullable String val) {
-        return StrUtil.isBlank(val) ? crud : addNode(new SqlWhere(entityType, field, Op.LIKE, "%" + val + "%"));
+        return StrUtil.isBlank(val) ? crud : addNode(new SqlCond(entityType, field, Op.LIKE, "%" + val + "%"));
     }
 
     public @NotNull CRUD contains(boolean if0, @NotNull FieldGetter<T, String> field, @Nullable String val) {
@@ -234,7 +233,7 @@ public abstract class Where<T, CRUD extends Where<T, CRUD>> extends Crud<T, CRUD
     }
 
     public @NotNull CRUD startsWith(@NotNull FieldGetter<T, String> field, @Nullable String val) {
-        return StrUtil.isBlank(val) ? crud : addNode(new SqlWhere(entityType, field, Op.LIKE, val + "%"));
+        return StrUtil.isBlank(val) ? crud : addNode(new SqlCond(entityType, field, Op.LIKE, val + "%"));
     }
 
     public @NotNull CRUD startsWith(boolean if0, @NotNull FieldGetter<T, String> field, @Nullable String val) {
@@ -242,7 +241,7 @@ public abstract class Where<T, CRUD extends Where<T, CRUD>> extends Crud<T, CRUD
     }
 
     public @NotNull CRUD endsWith(@NotNull FieldGetter<T, String> field, @Nullable String val) {
-        return StrUtil.isBlank(val) ? crud : addNode(new SqlWhere(entityType, field, Op.LIKE, "%" + val));
+        return StrUtil.isBlank(val) ? crud : addNode(new SqlCond(entityType, field, Op.LIKE, "%" + val));
     }
 
     public @NotNull CRUD endsWith(boolean if0, @NotNull FieldGetter<T, String> field, @Nullable String val) {
@@ -250,7 +249,7 @@ public abstract class Where<T, CRUD extends Where<T, CRUD>> extends Crud<T, CRUD
     }
 
     public @NotNull CRUD notContains(@NotNull FieldGetter<T, String> field, @Nullable String val) {
-        return StrUtil.isBlank(val) ? crud : addNode(new SqlWhere(entityType, field, Op.NOT_LIKE, "%" + val + "%"));
+        return StrUtil.isBlank(val) ? crud : addNode(new SqlCond(entityType, field, Op.NOT_LIKE, "%" + val + "%"));
     }
 
     public @NotNull CRUD notContains(boolean if0, @NotNull FieldGetter<T, String> field, @Nullable String val) {
@@ -258,7 +257,7 @@ public abstract class Where<T, CRUD extends Where<T, CRUD>> extends Crud<T, CRUD
     }
 
     public @NotNull CRUD notStartsWith(@NotNull FieldGetter<T, String> field, @Nullable String val) {
-        return StrUtil.isBlank(val) ? crud : addNode(new SqlWhere(entityType, field, Op.NOT_LIKE, val + "%"));
+        return StrUtil.isBlank(val) ? crud : addNode(new SqlCond(entityType, field, Op.NOT_LIKE, val + "%"));
     }
 
     public @NotNull CRUD notStartsWith(boolean if0, @NotNull FieldGetter<T, String> field, @Nullable String val) {
@@ -266,7 +265,7 @@ public abstract class Where<T, CRUD extends Where<T, CRUD>> extends Crud<T, CRUD
     }
 
     public @NotNull CRUD notEndsWith(@NotNull FieldGetter<T, String> field, @Nullable String val) {
-        return StrUtil.isBlank(val) ? crud : addNode(new SqlWhere(entityType, field, Op.NOT_LIKE, "%" + val));
+        return StrUtil.isBlank(val) ? crud : addNode(new SqlCond(entityType, field, Op.NOT_LIKE, "%" + val));
     }
 
     public @NotNull CRUD notEndsWith(boolean if0, @NotNull FieldGetter<T, String> field, @Nullable String val) {
@@ -278,15 +277,15 @@ public abstract class Where<T, CRUD extends Where<T, CRUD>> extends Crud<T, CRUD
     // IN
     public @NotNull CRUD in(@NotNull FieldGetter<T, ?> field, @NotNull Object val, @Nullable Object... vals) {
         var arr = ArrayUtil.isEmpty(vals) ? new Object[]{val} : ArrayUtil.addAll(new Object[]{val}, vals);
-        return addNode(new SqlWhere(entityType, field, Op.IN, arr));
+        return addNode(new SqlCond(entityType, field, Op.IN, arr));
     }
 
     public @NotNull CRUD in(@NotNull FieldGetter<T, ?> field, @Nullable Object[] vals) {
-        return addNode(new SqlWhere(entityType, field, Op.IN, vals));
+        return addNode(new SqlCond(entityType, field, Op.IN, vals));
     }
 
     public @NotNull CRUD in(@NotNull FieldGetter<T, ?> field, @Nullable Collection<?> vals) {
-        return addNode(new SqlWhere(entityType, field, Op.IN, vals));
+        return addNode(new SqlCond(entityType, field, Op.IN, vals));
     }
 
     public @NotNull CRUD in(boolean if0, @NotNull FieldGetter<T, ?> field, @Nullable Collection<?> vals) {
@@ -300,15 +299,15 @@ public abstract class Where<T, CRUD extends Where<T, CRUD>> extends Crud<T, CRUD
     // NOT IN
     public @NotNull CRUD notIn(@NotNull FieldGetter<T, ?> field, @NotNull Object val, @Nullable Object... vals) {
         var arr = ArrayUtil.isEmpty(vals) ? new Object[]{val} : ArrayUtil.addAll(new Object[]{val}, vals);
-        return addNode(new SqlWhere(entityType, field, Op.NOT_IN, arr));
+        return addNode(new SqlCond(entityType, field, Op.NOT_IN, arr));
     }
 
     public @NotNull CRUD notIn(@NotNull FieldGetter<T, ?> field, @Nullable Object[] vals) {
-        return addNode(new SqlWhere(entityType, field, Op.NOT_IN, vals));
+        return addNode(new SqlCond(entityType, field, Op.NOT_IN, vals));
     }
 
     public @NotNull CRUD notIn(@NotNull FieldGetter<T, ?> field, @Nullable Collection<?> vals) {
-        return addNode(new SqlWhere(entityType, field, Op.NOT_IN, vals));
+        return addNode(new SqlCond(entityType, field, Op.NOT_IN, vals));
     }
 
     public @NotNull CRUD notIn(boolean if0, @NotNull FieldGetter<T, ?> field, @Nullable Collection<?> vals) {
@@ -325,9 +324,9 @@ public abstract class Where<T, CRUD extends Where<T, CRUD>> extends Crud<T, CRUD
         if (bol == null) {
             return crud;
         } else if (bol) {
-            return addNode(new SqlWhere(entityType, field, Op.IS_NULL, true));
+            return addNode(new SqlCond(entityType, field, Op.IS_NULL, true));
         } else {
-            return addNode(new SqlWhere(entityType, field, Op.IS_NOT_NULL, true));
+            return addNode(new SqlCond(entityType, field, Op.IS_NOT_NULL, true));
         }
     }
 
@@ -355,14 +354,14 @@ public abstract class Where<T, CRUD extends Where<T, CRUD>> extends Crud<T, CRUD
     //region 范围操作
     // BETWEEN - 通用类型
     public @NotNull CRUD between(@NotNull FieldGetter<T, ?> field, @Nullable Object[] pair) {
-        return addNode(new SqlWhere(entityType, field, Op.BETWEEN, pair));
+        return addNode(new SqlCond(entityType, field, Op.BETWEEN, pair));
     }
 
     public @NotNull CRUD between(@NotNull FieldGetter<T, ?> field, @Nullable Object start, @Nullable Object end) {
         if (start == null || end == null) {
             return crud;
         } else {
-            return addNode(new SqlWhere(entityType, field, Op.BETWEEN, new Object[]{start, end}));
+            return addNode(new SqlCond(entityType, field, Op.BETWEEN, new Object[]{start, end}));
         }
     }
 
@@ -446,11 +445,11 @@ public abstract class Where<T, CRUD extends Where<T, CRUD>> extends Crud<T, CRUD
 
     // NOT BETWEEN - 通用类型
     public @NotNull CRUD notBetween(@NotNull FieldGetter<T, ?> field, @Nullable Object[] pair) {
-        return addNode(new SqlWhere(entityType, field, Op.NOT_BETWEEN, pair));
+        return addNode(new SqlCond(entityType, field, Op.NOT_BETWEEN, pair));
     }
 
     public @NotNull CRUD notBetween(@NotNull FieldGetter<T, ?> field, @Nullable Object start, @Nullable Object end) {
-        return addNode(new SqlWhere(entityType, field, Op.NOT_BETWEEN, new Object[]{start, end}));
+        return addNode(new SqlCond(entityType, field, Op.NOT_BETWEEN, new Object[]{start, end}));
     }
 
     public @NotNull CRUD notBetween(boolean if0, @NotNull FieldGetter<T, ?> field, @Nullable Object[] pair) {
@@ -532,33 +531,15 @@ public abstract class Where<T, CRUD extends Where<T, CRUD>> extends Crud<T, CRUD
     }
 
     //endregion
-
-    public @NotNull CRUD or(@NotNull Consumer<WhereLogic<T>> consumer) {
-        var where = new WhereLogic<>(entityType);
-        where.nullable = false;
-        addNode(new SqlOr());
-        addNode(new SqlNode(Type.LEFT_BRACKET));
-        consumer.accept(where);
-        nodes.addAll(where.nodes);
-        addNode(new SqlNode(Type.RIGHT_BRACKET));
-        return crud;
-    }
-
-    public @NotNull CRUD or(boolean if0, @NotNull Consumer<WhereLogic<T>> consumer) {
+    public @NotNull CRUD or(boolean if0, @NotNull Consumer<WhereOr<T>> consumer) {
         return if0 ? or(consumer) : crud;
     }
 
-    public @NotNull CRUD and(@NotNull Consumer<WhereLogic<T>> consumer) {
-        var where = new WhereLogic<>(entityType);
-        where.nullable = false;
-        addNode(new SqlNode(Type.LEFT_BRACKET));
+    public @NotNull CRUD or(@NotNull Consumer<WhereOr<T>> consumer) {
+        var where = new WhereOr<>(entityType);
         consumer.accept(where);
+        addNode(new SqlOr());
         nodes.addAll(where.nodes);
-        addNode(new SqlNode(Type.RIGHT_BRACKET));
         return crud;
-    }
-
-    public @NotNull CRUD and(boolean if0, @NotNull Consumer<WhereLogic<T>> consumer) {
-        return if0 ? and(consumer) : crud;
     }
 }

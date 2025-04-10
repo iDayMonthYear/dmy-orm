@@ -4,7 +4,7 @@ import cn.com.idmy.base.FieldGetter;
 import cn.com.idmy.base.model.Page;
 import cn.com.idmy.base.util.Assert;
 import cn.com.idmy.orm.OrmException;
-import cn.com.idmy.orm.core.SqlNode.SqlWhere;
+import cn.com.idmy.orm.core.SqlNode.SqlCond;
 import lombok.NonNull;
 import org.apache.ibatis.annotations.*;
 import org.dromara.hutool.core.array.ArrayUtil;
@@ -66,7 +66,7 @@ public interface OrmDao<T, ID> {
     default boolean has(@NonNull ID id) {
         var q = q();
         q.sqlParamsSize = 1;
-        q.addNode(new SqlWhere(Tables.getIdColumnName(this), Op.EQ, id));
+        q.addNode(new SqlCond(Tables.getIdColumnName(this), Op.EQ, id));
         return has(q);
     }
 
@@ -106,7 +106,7 @@ public interface OrmDao<T, ID> {
     @NotNull List<T> list0(@NotNull @Param(SqlProvider.CRUD) Query<T> q);
 
     default @NotNull List<T> list(@NotNull Query<T> q) {
-        if (!q.hasWhere && !q.hasAggregate && !q.force) {
+        if (!q.hasCond && !q.hasAggregate && !q.force) {
             return new ArrayList<>(0);
         } else {
             return list0(q);
@@ -127,7 +127,7 @@ public interface OrmDao<T, ID> {
         } else {
             var q = q();
             q.sqlParamsSize = 1;
-            q.addNode(new SqlWhere(Tables.getIdColumnName(this), Op.IN, ids));
+            q.addNode(new SqlCond(Tables.getIdColumnName(this), Op.IN, ids));
             return list(q);
         }
     }
@@ -142,7 +142,7 @@ public interface OrmDao<T, ID> {
         } else {
             var q = q().select(field);
             q.sqlParamsSize = 1;
-            q.addNode(new SqlWhere(Tables.getIdColumnName(this), Op.IN, ids));
+            q.addNode(new SqlCond(Tables.getIdColumnName(this), Op.IN, ids));
             return list(q).stream().map(field::get).toList();
         }
     }
@@ -157,7 +157,7 @@ public interface OrmDao<T, ID> {
     @Nullable T getNullable0(@NotNull @Param(SqlProvider.CRUD) Query<T> q);
 
     default @Nullable T getNullable(@NotNull Query<T> q) {
-        if (!q.hasWhere && !q.hasAggregate && !q.force) {
+        if (!q.hasCond && !q.hasAggregate && !q.force) {
             return null;
         } else {
             return getNullable0(q);
@@ -175,7 +175,7 @@ public interface OrmDao<T, ID> {
     default @Nullable T getNullable(@NonNull ID id) {
         var q = q();
         q.sqlParamsSize = 1;
-        q.addNode(new SqlWhere(Tables.getIdColumnName(this), Op.EQ, id));
+        q.addNode(new SqlCond(Tables.getIdColumnName(this), Op.EQ, id));
         return getNullable(q);
     }
 
@@ -186,7 +186,7 @@ public interface OrmDao<T, ID> {
     default @Nullable <R> R getNullable(@NotNull FieldGetter<T, R> field, @NonNull ID id) {
         var q = q().select(field);
         q.sqlParamsSize = 1;
-        q.addNode(new SqlWhere(Tables.getIdColumnName(this), Op.EQ, id));
+        q.addNode(new SqlCond(Tables.getIdColumnName(this), Op.EQ, id));
         T t = getNullable(q);
         return t == null ? null : field.get(t);
     }
@@ -256,7 +256,7 @@ public interface OrmDao<T, ID> {
     }
 
     default @Nullable <R extends Number> R sqlFn(@NotNull SqlFnName name, @NotNull FieldGetter<T, R> field, @NotNull Query<T> q) {
-        if (!q.force && !q.hasWhere) {
+        if (!q.force && !q.hasCond) {
             return null;
         } else if (name == SqlFnName.IF_NULL) {
             throw new OrmException("不支持ifnull");
@@ -349,7 +349,7 @@ public interface OrmDao<T, ID> {
     default int delete(@NonNull ID id) {
         var d = d();
         d.sqlParamsSize = 1;
-        d.addNode(new SqlWhere(Tables.getIdColumnName(this), Op.EQ, id));
+        d.addNode(new SqlCond(Tables.getIdColumnName(this), Op.EQ, id));
         return delete(d);
     }
 
@@ -359,7 +359,7 @@ public interface OrmDao<T, ID> {
         } else {
             var d = d();
             d.sqlParamsSize = 1;
-            d.addNode(new SqlWhere(Tables.getIdColumnName(this), Op.IN, ids));
+            d.addNode(new SqlCond(Tables.getIdColumnName(this), Op.IN, ids));
             return delete(d);
         }
     }
