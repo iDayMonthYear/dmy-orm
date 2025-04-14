@@ -20,7 +20,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Collection;
-import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 
 @Slf4j
@@ -54,10 +53,6 @@ public abstract class Where<T, CRUD extends Where<T, CRUD>> extends Crud<T, CRUD
         return if0 ? eqToday(field) : crud;
     }
 
-    public @NotNull CRUD eqToday(BooleanSupplier if0, @NotNull FieldGetter<T, LocalDateTime> field) {
-        return if0.getAsBoolean() ? eqToday(field) : crud;
-    }
-
     public @NotNull CRUD isTrue(@NotNull FieldGetter<T, Boolean> field) {
         return addNode(new SqlCond(entityType, field, Op.EQ, true));
     }
@@ -66,20 +61,12 @@ public abstract class Where<T, CRUD extends Where<T, CRUD>> extends Crud<T, CRUD
         return if0 ? isTrue(field) : crud;
     }
 
-    public @NotNull CRUD isTrue(BooleanSupplier if0, @NotNull FieldGetter<T, Boolean> field) {
-        return if0.getAsBoolean() ? isTrue(field) : crud;
-    }
-
     public @NotNull CRUD isFalse(@NotNull FieldGetter<T, Boolean> field) {
         return addNode(new SqlCond(entityType, field, Op.EQ, false));
     }
 
     public @NotNull CRUD isFalse(boolean if0, @NotNull FieldGetter<T, Boolean> field) {
         return if0 ? isFalse(field) : crud;
-    }
-
-    public @NotNull CRUD isFalse(BooleanSupplier if0, @NotNull FieldGetter<T, Boolean> field) {
-        return if0.getAsBoolean() ? isFalse(field) : crud;
     }
 
     public @NotNull CRUD eq(@NonNull Object id) {
@@ -94,10 +81,6 @@ public abstract class Where<T, CRUD extends Where<T, CRUD>> extends Crud<T, CRUD
         return if0 ? eq(id) : crud;
     }
 
-    public @NotNull CRUD eq(BooleanSupplier if0, @NonNull Object id) {
-        return if0.getAsBoolean() ? eq(id) : crud;
-    }
-
     public @NotNull CRUD eqZero(@NotNull FieldGetter<T, ?> field) {
         return addNode(new SqlCond(entityType, field, Op.EQ, 0));
     }
@@ -105,11 +88,6 @@ public abstract class Where<T, CRUD extends Where<T, CRUD>> extends Crud<T, CRUD
     public @NotNull CRUD eqZero(boolean if0, @NotNull FieldGetter<T, ?> field) {
         return if0 ? eqZero(field) : crud;
     }
-
-    public @NotNull CRUD eqZero(BooleanSupplier if0, @NotNull FieldGetter<T, ?> field) {
-        return if0.getAsBoolean() ? eqZero(field) : crud;
-    }
-
 
     public @NotNull CRUD eq(@NotNull FieldGetter<T, ?> field, @Nullable Object val) {
         return addNode(new SqlCond(entityType, field, Op.EQ, val));
@@ -125,14 +103,6 @@ public abstract class Where<T, CRUD extends Where<T, CRUD>> extends Crud<T, CRUD
 
     public @NotNull CRUD eq(boolean if0, @NotNull FieldGetter<T, ?> field, @NotNull SqlOpExpr expr) {
         return if0 ? eq(field, expr) : crud;
-    }
-
-    public @NotNull CRUD eq(BooleanSupplier if0, @NotNull FieldGetter<T, ?> field, @Nullable Object val) {
-        return if0.getAsBoolean() ? eq(field, val) : crud;
-    }
-
-    public @NotNull CRUD eq(BooleanSupplier if0, @NotNull FieldGetter<T, ?> field, @NotNull SqlOpExpr expr) {
-        return if0.getAsBoolean() ? eq(field, expr) : crud;
     }
 
     public @NotNull CRUD eq(@NotNull FieldGetter<T, ?> field, @Nullable String val) {
@@ -168,14 +138,6 @@ public abstract class Where<T, CRUD extends Where<T, CRUD>> extends Crud<T, CRUD
         return if0 ? ne(field, expr) : crud;
     }
 
-    public @NotNull CRUD ne(BooleanSupplier if0, @NotNull FieldGetter<T, ?> field, @Nullable Object val) {
-        return if0.getAsBoolean() ? ne(field, val) : crud;
-    }
-
-    public @NotNull CRUD ne(BooleanSupplier if0, @NotNull FieldGetter<T, ?> field, @NotNull SqlOpExpr expr) {
-        return if0.getAsBoolean() ? ne(field, expr) : crud;
-    }
-
     public @NotNull CRUD ne(@NotNull FieldGetter<T, ?> field, @Nullable String val) {
         return addNode(new SqlCond(entityType, field, Op.NE, val));
     }
@@ -187,10 +149,6 @@ public abstract class Where<T, CRUD extends Where<T, CRUD>> extends Crud<T, CRUD
 
     public @NotNull CRUD gtZero(boolean if0, @NotNull FieldGetter<T, ?> field) {
         return if0 ? gtZero(field) : crud;
-    }
-
-    public @NotNull CRUD gtZero(BooleanSupplier if0, @NotNull FieldGetter<T, ?> field) {
-        return if0.getAsBoolean() ? gtZero(field) : crud;
     }
 
     public @NotNull CRUD gt(@NotNull FieldGetter<T, ?> field, @Nullable Object val) {
@@ -220,18 +178,6 @@ public abstract class Where<T, CRUD extends Where<T, CRUD>> extends Crud<T, CRUD
         return if0 ? gt(field, val) : crud;
     }
 
-    public @NotNull CRUD gt(BooleanSupplier if0, @NotNull FieldGetter<T, ?> field, @Nullable Object val) {
-        return if0.getAsBoolean() ? gt(field, val) : crud;
-    }
-
-    public @NotNull CRUD gt(BooleanSupplier if0, @NotNull FieldGetter<T, ?> field, @NotNull SqlOpExpr expr) {
-        return if0.getAsBoolean() ? gt(field, expr) : crud;
-    }
-
-    public @NotNull CRUD gt(BooleanSupplier if0, @NotNull FieldGetter<T, ?> field, @Nullable LocalDateTime val) {
-        return if0.getAsBoolean() ? gt(field, val) : crud;
-    }
-
     // 大于等于
     public @NotNull CRUD geZero(@NotNull FieldGetter<T, ?> field) {
         return addNode(new SqlCond(entityType, field, Op.GE, 0));
@@ -251,14 +197,6 @@ public abstract class Where<T, CRUD extends Where<T, CRUD>> extends Crud<T, CRUD
 
     public @NotNull CRUD ge(boolean if0, @NotNull FieldGetter<T, ?> field, @NotNull SqlOpExpr expr) {
         return if0 ? ge(field, expr) : crud;
-    }
-
-    public @NotNull CRUD ge(BooleanSupplier if0, @NotNull FieldGetter<T, ?> field, @Nullable Object val) {
-        return if0.getAsBoolean() ? ge(field, val) : crud;
-    }
-
-    public @NotNull CRUD ge(BooleanSupplier if0, @NotNull FieldGetter<T, ?> field, @NotNull SqlOpExpr expr) {
-        return if0.getAsBoolean() ? ge(field, expr) : crud;
     }
 
     // 小于
@@ -293,18 +231,6 @@ public abstract class Where<T, CRUD extends Where<T, CRUD>> extends Crud<T, CRUD
         return if0 ? lt(field, val) : crud;
     }
 
-    public @NotNull CRUD lt(BooleanSupplier if0, @NotNull FieldGetter<T, ?> field, @Nullable Object val) {
-        return if0.getAsBoolean() ? lt(field, val) : crud;
-    }
-
-    public @NotNull CRUD lt(BooleanSupplier if0, @NotNull FieldGetter<T, ?> field, SqlOpExpr expr) {
-        return if0.getAsBoolean() ? lt(field, expr) : crud;
-    }
-
-    public @NotNull CRUD lt(BooleanSupplier if0, @NotNull FieldGetter<T, ?> field, LocalDateTime val) {
-        return if0.getAsBoolean() ? lt(field, val) : crud;
-    }
-
     // 小于等于
     public @NotNull CRUD leZero(@NotNull FieldGetter<T, ?> field) {
         return addNode(new SqlCond(entityType, field, Op.LE, 0));
@@ -312,10 +238,6 @@ public abstract class Where<T, CRUD extends Where<T, CRUD>> extends Crud<T, CRUD
 
     public @NotNull CRUD leZero(boolean if0, @NotNull FieldGetter<T, ?> field) {
         return if0 ? leZero(field) : crud;
-    }
-
-    public @NotNull CRUD leZero(BooleanSupplier if0, @NotNull FieldGetter<T, ?> field) {
-        return if0.getAsBoolean() ? leZero(field) : crud;
     }
 
     public @NotNull CRUD le(@NotNull FieldGetter<T, ?> field, @Nullable Object val) {
@@ -334,14 +256,6 @@ public abstract class Where<T, CRUD extends Where<T, CRUD>> extends Crud<T, CRUD
         return if0 ? le(field, expr) : crud;
     }
 
-    public @NotNull CRUD le(BooleanSupplier if0, @NotNull FieldGetter<T, ?> field, @Nullable Object val) {
-        return if0.getAsBoolean() ? le(field, val) : crud;
-    }
-
-    public @NotNull CRUD le(BooleanSupplier if0, @NotNull FieldGetter<T, ?> field, SqlOpExpr expr) {
-        return if0.getAsBoolean() ? le(field, expr) : crud;
-    }
-
     //endregion
     //region 字符串操作
     public @NotNull CRUD contains(@NotNull FieldGetter<T, String> field, @Nullable String val) {
@@ -352,20 +266,12 @@ public abstract class Where<T, CRUD extends Where<T, CRUD>> extends Crud<T, CRUD
         return if0 ? contains(field, val) : crud;
     }
 
-    public @NotNull CRUD contains(BooleanSupplier if0, @NotNull FieldGetter<T, String> field, @Nullable String val) {
-        return if0.getAsBoolean() ? contains(field, val) : crud;
-    }
-
     public @NotNull CRUD startsWith(@NotNull FieldGetter<T, String> field, @Nullable String val) {
         return StrUtil.isBlank(val) ? crud : addNode(new SqlCond(entityType, field, Op.LIKE, val + "%"));
     }
 
     public @NotNull CRUD startsWith(boolean if0, @NotNull FieldGetter<T, String> field, @Nullable String val) {
         return if0 ? startsWith(field, val) : crud;
-    }
-
-    public @NotNull CRUD startsWith(BooleanSupplier if0, @NotNull FieldGetter<T, String> field, @Nullable String val) {
-        return if0.getAsBoolean() ? startsWith(field, val) : crud;
     }
 
     public @NotNull CRUD endsWith(@NotNull FieldGetter<T, String> field, @Nullable String val) {
@@ -376,20 +282,12 @@ public abstract class Where<T, CRUD extends Where<T, CRUD>> extends Crud<T, CRUD
         return if0 ? endsWith(field, val) : crud;
     }
 
-    public @NotNull CRUD endsWith(BooleanSupplier if0, @NotNull FieldGetter<T, String> field, @Nullable String val) {
-        return if0.getAsBoolean() ? endsWith(field, val) : crud;
-    }
-
     public @NotNull CRUD notContains(@NotNull FieldGetter<T, String> field, @Nullable String val) {
         return StrUtil.isBlank(val) ? crud : addNode(new SqlCond(entityType, field, Op.NOT_LIKE, "%" + val + "%"));
     }
 
     public @NotNull CRUD notContains(boolean if0, @NotNull FieldGetter<T, String> field, @Nullable String val) {
         return if0 ? notContains(field, val) : crud;
-    }
-
-    public @NotNull CRUD notContains(BooleanSupplier if0, @NotNull FieldGetter<T, String> field, @Nullable String val) {
-        return if0.getAsBoolean() ? notContains(field, val) : crud;
     }
 
     public @NotNull CRUD notStartsWith(@NotNull FieldGetter<T, String> field, @Nullable String val) {
@@ -400,20 +298,12 @@ public abstract class Where<T, CRUD extends Where<T, CRUD>> extends Crud<T, CRUD
         return if0 ? notStartsWith(field, val) : crud;
     }
 
-    public @NotNull CRUD notStartsWith(BooleanSupplier if0, @NotNull FieldGetter<T, String> field, @Nullable String val) {
-        return if0.getAsBoolean() ? notStartsWith(field, val) : crud;
-    }
-
     public @NotNull CRUD notEndsWith(@NotNull FieldGetter<T, String> field, @Nullable String val) {
         return StrUtil.isBlank(val) ? crud : addNode(new SqlCond(entityType, field, Op.NOT_LIKE, "%" + val));
     }
 
     public @NotNull CRUD notEndsWith(boolean if0, @NotNull FieldGetter<T, String> field, @Nullable String val) {
         return if0 ? notEndsWith(field, val) : crud;
-    }
-
-    public @NotNull CRUD notEndsWith(BooleanSupplier if0, @NotNull FieldGetter<T, String> field, @Nullable String val) {
-        return if0.getAsBoolean() ? notEndsWith(field, val) : crud;
     }
 
     //endregion
@@ -440,14 +330,6 @@ public abstract class Where<T, CRUD extends Where<T, CRUD>> extends Crud<T, CRUD
         return if0 ? in(field, vals) : crud;
     }
 
-    public @NotNull CRUD in(BooleanSupplier if0, @NotNull FieldGetter<T, ?> field, @Nullable Collection<?> vals) {
-        return if0.getAsBoolean() ? in(field, vals) : crud;
-    }
-
-    public @NotNull CRUD in(BooleanSupplier if0, @NotNull FieldGetter<T, ?> field, @Nullable Object[] vals) {
-        return if0.getAsBoolean() ? in(field, vals) : crud;
-    }
-
     // NOT IN
     public @NotNull CRUD notIn(@NotNull FieldGetter<T, ?> field, @NotNull Object val, @Nullable Object... vals) {
         var arr = ArrayUtil.isEmpty(vals) ? new Object[]{val} : ArrayUtil.addAll(new Object[]{val}, vals);
@@ -470,14 +352,6 @@ public abstract class Where<T, CRUD extends Where<T, CRUD>> extends Crud<T, CRUD
         return if0 ? in(field, vals) : crud;
     }
 
-    public @NotNull CRUD notIn(BooleanSupplier if0, @NotNull FieldGetter<T, ?> field, @Nullable Collection<?> vals) {
-        return if0.getAsBoolean() ? in(field, vals) : crud;
-    }
-
-    public @NotNull CRUD notIn(BooleanSupplier if0, @NotNull FieldGetter<T, ?> field, @Nullable Object[] vals) {
-        return if0.getAsBoolean() ? in(field, vals) : crud;
-    }
-
     //endregion
     //region NULL值操作
     public @NotNull CRUD nulls(@NotNull FieldGetter<T, ?> field, @Nullable Boolean bol) {
@@ -494,10 +368,6 @@ public abstract class Where<T, CRUD extends Where<T, CRUD>> extends Crud<T, CRUD
         return if0 ? nulls(field, bol) : crud;
     }
 
-    public @NotNull CRUD nulls(BooleanSupplier if0, @NotNull FieldGetter<T, ?> field, @Nullable Boolean bol) {
-        return if0.getAsBoolean() ? nulls(field, bol) : crud;
-    }
-
     public @NotNull CRUD isNull(@NotNull FieldGetter<T, ?> field) {
         return nulls(field, true);
     }
@@ -506,20 +376,12 @@ public abstract class Where<T, CRUD extends Where<T, CRUD>> extends Crud<T, CRUD
         return if0 ? nulls(field, true) : crud;
     }
 
-    public @NotNull CRUD isNull(BooleanSupplier if0, @NotNull FieldGetter<T, ?> field) {
-        return if0.getAsBoolean() ? nulls(field, true) : crud;
-    }
-
     public @NotNull CRUD isNotNull(@NotNull FieldGetter<T, ?> field) {
         return nulls(field, false);
     }
 
     public @NotNull CRUD isNotNull(boolean if0, @NotNull FieldGetter<T, ?> field) {
         return if0 ? nulls(field, false) : crud;
-    }
-
-    public @NotNull CRUD isNotNull(BooleanSupplier if0, @NotNull FieldGetter<T, ?> field) {
-        return if0.getAsBoolean() ? nulls(field, false) : crud;
     }
 
     //endregion
@@ -543,14 +405,6 @@ public abstract class Where<T, CRUD extends Where<T, CRUD>> extends Crud<T, CRUD
 
     public @NotNull CRUD between(boolean if0, @NotNull FieldGetter<T, ?> field, @Nullable Object start, @Nullable Object end) {
         return if0 ? between(field, start, end) : crud;
-    }
-
-    public @NotNull CRUD between(BooleanSupplier if0, @NotNull FieldGetter<T, ?> field, @Nullable Object[] pair) {
-        return if0.getAsBoolean() ? between(field, pair) : crud;
-    }
-
-    public @NotNull CRUD between(BooleanSupplier if0, @NotNull FieldGetter<T, ?> field, @Nullable Object start, @Nullable Object end) {
-        return if0.getAsBoolean() ? between(field, start, end) : crud;
     }
 
     // BETWEEN - LocalDateTime
@@ -579,10 +433,6 @@ public abstract class Where<T, CRUD extends Where<T, CRUD>> extends Crud<T, CRUD
         return if0 ? between(field, start, end) : crud;
     }
 
-    public @NotNull CRUD between(BooleanSupplier if0, @NotNull FieldGetter<T, LocalDateTime> field, @Nullable LocalDateTime start, @Nullable LocalDateTime end) {
-        return if0.getAsBoolean() ? between(field, start, end) : crud;
-    }
-
     // BETWEEN - LocalDate
     public @NotNull CRUD between(@NotNull FieldGetter<T, LocalDate> field, @Nullable LocalDate start, @Nullable LocalDate end) {
         if (start == null && end == null) {
@@ -601,10 +451,6 @@ public abstract class Where<T, CRUD extends Where<T, CRUD>> extends Crud<T, CRUD
 
     public @NotNull CRUD between(boolean if0, @NotNull FieldGetter<T, LocalDate> field, @Nullable LocalDate start, @Nullable LocalDate end) {
         return if0 ? between(field, start, end) : crud;
-    }
-
-    public @NotNull CRUD between(BooleanSupplier if0, @NotNull FieldGetter<T, LocalDate> field, @Nullable LocalDate start, @Nullable LocalDate end) {
-        return if0.getAsBoolean() ? between(field, start, end) : crud;
     }
 
     // BETWEEN - LocalTime
@@ -631,10 +477,6 @@ public abstract class Where<T, CRUD extends Where<T, CRUD>> extends Crud<T, CRUD
         return if0 ? between(field, start, end) : crud;
     }
 
-    public @NotNull CRUD between(BooleanSupplier if0, @NotNull FieldGetter<T, LocalTime> field, @Nullable LocalTime start, @Nullable LocalTime end) {
-        return if0.getAsBoolean() ? between(field, start, end) : crud;
-    }
-
     // NOT BETWEEN - 通用类型
     public @NotNull CRUD notBetween(@NotNull FieldGetter<T, ?> field, @Nullable Object[] pair) {
         return addNode(new SqlCond(entityType, field, Op.NOT_BETWEEN, pair));
@@ -650,14 +492,6 @@ public abstract class Where<T, CRUD extends Where<T, CRUD>> extends Crud<T, CRUD
 
     public @NotNull CRUD notBetween(boolean if0, @NotNull FieldGetter<T, ?> field, @Nullable Object start, @Nullable Object end) {
         return if0 ? notBetween(field, start, end) : crud;
-    }
-
-    public @NotNull CRUD notBetween(BooleanSupplier if0, @NotNull FieldGetter<T, ?> field, @Nullable Object[] pair) {
-        return if0.getAsBoolean() ? notBetween(field, pair) : crud;
-    }
-
-    public @NotNull CRUD notBetween(BooleanSupplier if0, @NotNull FieldGetter<T, ?> field, @Nullable Object start, @Nullable Object end) {
-        return if0.getAsBoolean() ? notBetween(field, start, end) : crud;
     }
 
     // NOT BETWEEN - LocalDateTime
@@ -686,10 +520,6 @@ public abstract class Where<T, CRUD extends Where<T, CRUD>> extends Crud<T, CRUD
         return if0 ? notBetween(field, start, end) : crud;
     }
 
-    public @NotNull CRUD notBetween(BooleanSupplier if0, @NotNull FieldGetter<T, LocalDateTime> field, @Nullable LocalDateTime start, @Nullable LocalDateTime end) {
-        return if0.getAsBoolean() ? notBetween(field, start, end) : crud;
-    }
-
     // NOT BETWEEN - LocalDate
     public @NotNull CRUD notBetween(@NotNull FieldGetter<T, LocalDate> field, @Nullable LocalDate start, @Nullable LocalDate end) {
         if (start == null && end == null) {
@@ -708,10 +538,6 @@ public abstract class Where<T, CRUD extends Where<T, CRUD>> extends Crud<T, CRUD
 
     public @NotNull CRUD notBetween(boolean if0, @NotNull FieldGetter<T, LocalDate> field, @Nullable LocalDate start, @Nullable LocalDate end) {
         return if0 ? notBetween(field, start, end) : crud;
-    }
-
-    public @NotNull CRUD notBetween(BooleanSupplier if0, @NotNull FieldGetter<T, LocalDate> field, @Nullable LocalDate start, @Nullable LocalDate end) {
-        return if0.getAsBoolean() ? notBetween(field, start, end) : crud;
     }
 
     // NOT BETWEEN - LocalTime
@@ -738,10 +564,6 @@ public abstract class Where<T, CRUD extends Where<T, CRUD>> extends Crud<T, CRUD
         return if0 ? notBetween(field, start, end) : crud;
     }
 
-    public @NotNull CRUD notBetween(BooleanSupplier if0, @NotNull FieldGetter<T, LocalTime> field, @Nullable LocalTime start, @Nullable LocalTime end) {
-        return if0.getAsBoolean() ? notBetween(field, start, end) : crud;
-    }
-
     //endregion
 
     public @NotNull CRUD or(@NotNull Consumer<WhereLogic<T>> consumer) {
@@ -759,10 +581,6 @@ public abstract class Where<T, CRUD extends Where<T, CRUD>> extends Crud<T, CRUD
         return if0 ? or(consumer) : crud;
     }
 
-    public @NotNull CRUD or(BooleanSupplier if0, @NotNull Consumer<WhereLogic<T>> consumer) {
-        return if0.getAsBoolean() ? or(consumer) : crud;
-    }
-
     public @NotNull CRUD and(@NotNull Consumer<WhereLogic<T>> consumer) {
         var where = new WhereLogic<>(entityType);
         where.nullable = false;
@@ -775,9 +593,5 @@ public abstract class Where<T, CRUD extends Where<T, CRUD>> extends Crud<T, CRUD
 
     public @NotNull CRUD and(boolean if0, @NotNull Consumer<WhereLogic<T>> consumer) {
         return if0 ? and(consumer) : crud;
-    }
-
-    public @NotNull CRUD and(BooleanSupplier if0, @NotNull Consumer<WhereLogic<T>> consumer) {
-        return if0.getAsBoolean() ? and(consumer) : crud;
     }
 }
