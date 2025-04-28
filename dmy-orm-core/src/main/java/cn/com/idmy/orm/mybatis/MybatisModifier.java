@@ -116,9 +116,15 @@ class MybatisModifier {
             add(new Builder(cfg, id.field().getName(), id.name(), id.field().getType()).flags(List.of(ResultFlag.ID)).build());
         }};
         for (var col : table.columns()) {
-            var builder = new ResultMapping.Builder(cfg, col.field().getName(), col.name(), col.field().getType());
+            var javaType = col.field().getType();
+            var builder = new ResultMapping.Builder(cfg, col.field().getName(), col.name(), javaType);
             var handler = Tables.getTypeHandler(col.field());
-            if (handler != null) {
+            if (handler == null) {
+                var typeHandler = cfg.getTypeHandlerRegistry().getTypeHandler(javaType, null);
+                if (typeHandler == null && !col.exist()) {
+                    continue;
+                }
+            } else {
                 builder.typeHandler(handler);
             }
             mappings.add(builder.build());
