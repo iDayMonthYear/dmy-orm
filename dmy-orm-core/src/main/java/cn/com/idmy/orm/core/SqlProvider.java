@@ -88,11 +88,13 @@ public class SqlProvider {
         int size = cols.length;
         for (int i = 0; i < size; i++) {
             var column = cols[i];
-            var field = column.field();
-            if (field != idField) {
-                var value = FieldUtil.getFieldValue(entity, field);
-                if (!ignoreNull || value != null) {
-                    u.addNode(new SqlSet(column, value));
+            if (column.exist()) {
+                var field = column.field();
+                if (field != idField) {
+                    var value = FieldUtil.getFieldValue(entity, field);
+                    if (!ignoreNull || value != null) {
+                        u.addNode(new SqlSet(column, value));
+                    }
                 }
             }
         }

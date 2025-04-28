@@ -57,11 +57,13 @@ class CreateSqlGenerator extends SqlGenerator {
 
         for (int i = 0, size = columns.length; i < size; i++) {
             var col = columns[i];
-            var val = FieldUtil.getFieldValue(entity, col.field());
-            if (val != null) {
-                cols.add(STRESS_MARK + col.name() + STRESS_MARK);
-                vals.add(PLACEHOLDER);
-                values.add(getTypeHandlerValue(col, val));
+            if (col.exist()) {
+                var val = FieldUtil.getFieldValue(entity, col.field());
+                if (val != null) {
+                    cols.add(STRESS_MARK + col.name() + STRESS_MARK);
+                    vals.add(PLACEHOLDER);
+                    values.add(getTypeHandlerValue(col, val));
+                }
             }
         }
         sql.append(String.join(DELIMITER, cols))
@@ -88,10 +90,12 @@ class CreateSqlGenerator extends SqlGenerator {
         var colIndices = new ArrayList<Integer>();
         for (int i = 0; i < cols.length; i++) {
             var col = cols[i];
-            var hasNotNull = ls.stream().anyMatch(entity -> FieldUtil.getFieldValue(entity, col.field()) != null);
-            if (hasNotNull) {
-                colIndices.add(i);
-                sql.append(STRESS_MARK).append(col.name()).append(STRESS_MARK).append(DELIMITER);
+            if (col.exist()) {
+                var hasNotNull = ls.stream().anyMatch(entity -> FieldUtil.getFieldValue(entity, col.field()) != null);
+                if (hasNotNull) {
+                    colIndices.add(i);
+                    sql.append(STRESS_MARK).append(col.name()).append(STRESS_MARK).append(DELIMITER);
+                }
             }
         }
         sql.setLength(sql.length() - DELIMITER.length());
