@@ -73,9 +73,17 @@ public class SqlNode {
                     var type1 = col.field().getType();
                     var type2 = expr.getClass();
                     if (expr instanceof Object[] arr) {
-                        type2 = arr[0].getClass();
+                        var first = arr[0];
+                        if (first == null) {
+                            throw new OrmException("字段「{}」数组第一个元素为空", col.name());
+                        }
+                        type2 = first.getClass();
                     } else if (expr instanceof Collection<?> ls) {
-                        type2 = IterUtil.getFirst(ls.iterator()).getClass();
+                        var first = IterUtil.getFirst(ls.iterator());
+                        if (first == null) {
+                            throw new OrmException("字段「{}」集合第一个元素为空", col.name());
+                        }
+                        type2 = first.getClass();
                     }
                     if (type1.isPrimitive()) {
                         type1 = ConvertUtil.wrap(type1);
