@@ -122,8 +122,10 @@ public interface OrmDao<T, ID> {
         return !has(ids);
     }
 
-    default boolean notHas(Collection<ID> ids, @NotNull String msg, @NotNull Object... params) {
-        return !notHas(ids);
+    default void notHas(Collection<ID> ids, @NotNull String msg, @NotNull Object... params) {
+        if (!notHas(ids)) {
+            throw new IllegalStateException(String.format(msg, params));
+        }
     }
 
     @SelectProvider(type = SqlProvider.class, method = SqlProvider.list0)
