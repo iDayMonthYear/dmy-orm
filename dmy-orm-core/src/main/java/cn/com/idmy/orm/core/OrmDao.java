@@ -82,6 +82,22 @@ public interface OrmDao<T, ID> {
         }
     }
 
+    default boolean has(Collection<ID> ids) {
+        if (ids.isEmpty()) {
+            return false;
+        }
+        var q = q();
+        q.sqlParamsSize = 1;
+        q.addNode(new SqlCond(Tables.getIdColumnName(this), Op.IN, ids));
+        return ids.size() == count(q);
+    }
+
+    default void has(Collection<ID> ids, @NotNull String msg, @NotNull Object... params) {
+        if (!has(ids)) {
+            throw new IllegalStateException(String.format(msg, params));
+        }
+    }
+
     default boolean notHas(@NotNull Query<T> q) {
         return !has(q);
     }
@@ -100,6 +116,14 @@ public interface OrmDao<T, ID> {
         if (!notHas(q)) {
             throw new IllegalStateException(String.format(msg, params));
         }
+    }
+
+    default boolean notHas(Collection<ID> ids) {
+        return !has(ids);
+    }
+
+    default boolean notHas(Collection<ID> ids, @NotNull String msg, @NotNull Object... params) {
+        return !notHas(ids);
     }
 
     @SelectProvider(type = SqlProvider.class, method = SqlProvider.list0)
