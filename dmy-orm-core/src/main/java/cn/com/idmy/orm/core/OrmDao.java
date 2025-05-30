@@ -213,12 +213,12 @@ public interface OrmDao<T, ID> {
         var q = q().select(field);
         q.sqlParamsSize = 1;
         q.addNode(new SqlCond(Tables.getIdColumnName(this), Op.EQ, id));
-        T t = getNullable(q);
+        var t = getNullable(q);
         return t == null ? null : field.get(t);
     }
 
     default @NotNull <R> R get(@NotNull FieldGetter<T, R> field, @NonNull ID id) {
-        R r = getNullable(field, id);
+        var r = getNullable(field, id);
         if (r == null) {
             var colum = Tables.getColum(entityType(), field);
             throw new OrmException("根据主键「{}」找不到「{}」", id, Optional.ofNullable(colum.title()).orElse(colum.name()));
@@ -234,7 +234,7 @@ public interface OrmDao<T, ID> {
     default @Nullable <R> R getNullable(@NotNull FieldGetter<T, R> field, @NotNull Query<T> q) {
         SqlProvider.clearSelectColumns(q);
         q.select(field);
-        T t = getNullable(q);
+        var t = getNullable(q);
         return t == null ? null : field.get(t);
     }
 
@@ -243,7 +243,7 @@ public interface OrmDao<T, ID> {
     }
 
     default @NotNull <R> R get(@NotNull FieldGetter<T, R> field, @NotNull Query<T> q) {
-        R r = getNullable(field, q);
+        var r = getNullable(field, q);
         if (r == null) {
             var col = Tables.getColum(entityType(), field);
             throw new OrmException("根据主键「查询条件」找不到「{}」", Optional.ofNullable(col.title()).orElse(col.name()));
@@ -288,7 +288,7 @@ public interface OrmDao<T, ID> {
             throw new OrmException("不支持ifnull");
         } else {
             SqlProvider.clearSelectColumns(q);
-            T t = getNullable(q.one().select(() -> new SqlFn<>(name, field)));
+            var t = getNullable(q.one().select(() -> new SqlFn<>(name, field)));
             return t == null ? null : field.get(t);
         }
     }

@@ -1,12 +1,12 @@
 package cn.com.idmy.orm.core;
 
-import cn.com.idmy.base.model.Pair;
 import cn.com.idmy.orm.core.SqlNode.SqlColumn;
 import cn.com.idmy.orm.core.SqlNode.SqlOr;
 import cn.com.idmy.orm.util.OrmUtil;
 import lombok.Getter;
 import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
+import org.dromara.hutool.core.lang.tuple.Pair;
 import org.dromara.hutool.core.text.StrUtil;
 import org.jetbrains.annotations.NotNull;
 
@@ -41,7 +41,7 @@ abstract class Crud<T, CRUD extends Crud<T, CRUD>> {
     @Override
     public String toString() {
         try {
-            return sql().l();
+            return sql().getLeft();
         } catch (Exception e) {
             return StrUtil.contains(e.getMessage(), "force") ? "" : e.getMessage();
         }

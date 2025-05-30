@@ -1,6 +1,5 @@
 package cn.com.idmy.orm.core;
 
-import cn.com.idmy.base.model.Pair;
 import cn.com.idmy.orm.OrmException;
 import cn.com.idmy.orm.core.SqlNode.SqlBracket;
 import cn.com.idmy.orm.core.SqlNode.SqlCond;
@@ -11,6 +10,7 @@ import lombok.NonNull;
 import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.hutool.core.collection.CollUtil;
+import org.dromara.hutool.core.lang.tuple.Pair;
 import org.dromara.hutool.core.util.ObjUtil;
 import org.jetbrains.annotations.NotNull;
 

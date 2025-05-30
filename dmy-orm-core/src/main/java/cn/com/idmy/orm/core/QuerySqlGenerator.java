@@ -1,10 +1,10 @@
 package cn.com.idmy.orm.core;
 
-import cn.com.idmy.base.model.Pair;
 import cn.com.idmy.base.util.Assert;
 import cn.com.idmy.orm.OrmException;
 import cn.com.idmy.orm.core.SqlNode.*;
 import lombok.extern.slf4j.Slf4j;
+import org.dromara.hutool.core.lang.tuple.Pair;
 import org.dromara.hutool.core.text.StrUtil;
 import org.jetbrains.annotations.NotNull;
 
@@ -72,7 +72,7 @@ class QuerySqlGenerator extends SqlGenerator {
             Assert.notNull(query.limit, "offset 必须与 limit 一起使用");
             sql.append(OFFSET).append(query.offset);
         }
-        return new Pair<>(sql.toString(), values);
+        return Pair.of(sql.toString(), values);
     }
 
     protected void genDistinct(SqlDistinct d) {

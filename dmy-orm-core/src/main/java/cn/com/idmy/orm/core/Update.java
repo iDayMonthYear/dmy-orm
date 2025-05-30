@@ -1,11 +1,11 @@
 package cn.com.idmy.orm.core;
 
 import cn.com.idmy.base.FieldGetter;
-import cn.com.idmy.base.model.Pair;
 import cn.com.idmy.base.util.Assert;
 import cn.com.idmy.orm.core.SqlNode.SqlSet;
 import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
+import org.dromara.hutool.core.lang.tuple.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

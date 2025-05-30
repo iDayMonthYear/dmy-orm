@@ -1,9 +1,9 @@
 package cn.com.idmy.orm.core;
 
-import cn.com.idmy.base.model.Pair;
 import lombok.Getter;
 import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
+import org.dromara.hutool.core.lang.tuple.Pair;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;

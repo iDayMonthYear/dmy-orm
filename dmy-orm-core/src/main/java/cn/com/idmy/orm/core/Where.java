@@ -11,6 +11,7 @@ import lombok.NonNull;
 import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.hutool.core.array.ArrayUtil;
+import org.dromara.hutool.core.lang.tuple.Pair;
 import org.dromara.hutool.core.text.StrUtil;
 import org.dromara.hutool.core.util.ObjUtil;
 import org.jetbrains.annotations.NotNull;
@@ -44,6 +45,13 @@ public abstract class Where<T, CRUD extends Where<T, CRUD>> extends Crud<T, CRUD
 
     //region 比较操作
     // 等于
+    public @NotNull CRUD compare(@NotNull FieldGetter<T, ? extends Number> field, @Nullable Pair<String, ? extends Number> pair) {
+        if (pair == null || pair.getLeft() == null || pair.getRight() == null) {
+            return crud;
+        }
+        return addNode(new SqlCond(entityType, field, Op.valueOf(pair.getLeft()), pair.getRight()));
+    }
+
     public @NotNull CRUD eqToday(@NotNull FieldGetter<T, LocalDateTime> field) {
         var now = LocalDateTime.now();
         return between(field, now, now);

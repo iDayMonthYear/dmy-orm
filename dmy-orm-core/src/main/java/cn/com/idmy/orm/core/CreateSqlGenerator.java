@@ -1,9 +1,9 @@
 package cn.com.idmy.orm.core;
 
-import cn.com.idmy.base.model.Pair;
 import cn.com.idmy.orm.OrmException;
 import cn.com.idmy.orm.core.TableInfo.TableColumn;
 import cn.com.idmy.orm.mybatis.handler.TypeHandlerValue;
+import org.dromara.hutool.core.lang.tuple.Pair;
 import org.dromara.hutool.core.reflect.FieldUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -75,7 +75,7 @@ class CreateSqlGenerator extends SqlGenerator {
         if (values.isEmpty()) {
             throw new OrmException("插入数据不能为空");
         } else {
-            return new Pair<>(sql.toString(), values);
+            return Pair.of(sql.toString(), values);
         }
     }
 
@@ -116,7 +116,7 @@ class CreateSqlGenerator extends SqlGenerator {
         if (values.isEmpty()) {
             throw new OrmException("插入数据不能为空");
         } else {
-            return new Pair<>(sql.toString(), values);
+            return Pair.of(sql.toString(), values);
         }
     }
 }

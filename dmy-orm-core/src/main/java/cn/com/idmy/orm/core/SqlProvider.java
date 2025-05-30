@@ -58,8 +58,8 @@ public class SqlProvider {
         var where = (Crud<?, ?>) params.get(CRUD);
         putEntityType(params, where.entityType);
         var pair = where.sql();
-        params.put(SQL_PARAMS, pair.r());
-        return pair.l();
+        params.put(SQL_PARAMS, pair.getRight());
+        return pair.getLeft();
     }
 
     public static void putEntityType(@NotNull Map<String, Object> params, @NotNull Class<?> entityType) {
@@ -99,7 +99,7 @@ public class SqlProvider {
             }
         }
         var sql = u.sql();
-        return dao.updateBySql(sql.l(), sql.r());
+        return dao.updateBySql(sql.getLeft(), sql.getRight());
     }
 
     public static <T, ID> int[] update(@NotNull OrmDao<T, ID> dao, @NotNull Collection<T> ls, int size, boolean ignoreNull) {
@@ -192,8 +192,8 @@ public class SqlProvider {
         q.select(SqlFn::count);
         putEntityType(params, q.entityType);
         var pair = q.sql();
-        params.put(SQL_PARAMS, pair.r());
-        return pair.l();
+        params.put(SQL_PARAMS, pair.getRight());
+        return pair.getLeft();
     }
 
     public @NotNull String create(@NotNull Map<String, Object> params) {
@@ -201,9 +201,9 @@ public class SqlProvider {
         var entityType = entity.getClass();
         var generator = new CreateSqlGenerator(entityType, entity);
         var pair = generator.generate();
-        params.put(SQL_PARAMS, pair.r());
+        params.put(SQL_PARAMS, pair.getRight());
         putEntityType(params, entityType);
-        return pair.l();
+        return pair.getLeft();
     }
 
     public @NotNull String creates(@NotNull Map<String, Object> params) {
@@ -214,9 +214,9 @@ public class SqlProvider {
             var entityType = ls.iterator().next().getClass();
             var generator = new CreateSqlGenerator(entityType, ls);
             var pair = generator.generate();
-            params.put(SQL_PARAMS, pair.r());
+            params.put(SQL_PARAMS, pair.getRight());
             putEntityType(params, entityType);
-            return pair.l();
+            return pair.getLeft();
         }
     }
 

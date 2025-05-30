@@ -1,7 +1,5 @@
 package cn.com.idmy.orm.util;
 
-import cn.com.idmy.base.model.Pair;
-import cn.com.idmy.base.model.Triple;
 import cn.com.idmy.orm.core.Op;
 import cn.com.idmy.orm.core.SqlNode;
 import cn.com.idmy.orm.core.SqlNode.SqlColumn;
@@ -10,6 +8,8 @@ import cn.com.idmy.orm.core.Tables;
 import cn.com.idmy.orm.core.Where;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
+import org.dromara.hutool.core.lang.tuple.Pair;
+import org.dromara.hutool.core.lang.tuple.Triple;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -34,14 +34,14 @@ public class OrmUtil {
         if (table.isMultiIds()) {
             var ids = table.ids();
             switch (id) {
-                case Pair<?, ?> pair -> {
-                    where.addNode(new SqlCond(ids[0].name(), Op.EQ, pair.l()));
-                    where.addNode(new SqlCond(ids[1].name(), Op.EQ, pair.r()));
-                }
                 case Triple<?, ?, ?> triple -> {
-                    where.addNode(new SqlCond(ids[0].name(), Op.EQ, triple.l()));
-                    where.addNode(new SqlCond(ids[1].name(), Op.EQ, triple.m()));
-                    where.addNode(new SqlCond(ids[2].name(), Op.EQ, triple.r()));
+                    where.addNode(new SqlCond(ids[0].name(), Op.EQ, triple.getLeft()));
+                    where.addNode(new SqlCond(ids[1].name(), Op.EQ, triple.getMiddle()));
+                    where.addNode(new SqlCond(ids[2].name(), Op.EQ, triple.getRight()));
+                }
+                case Pair<?, ?> pair -> {
+                    where.addNode(new SqlCond(ids[0].name(), Op.EQ, pair.getLeft()));
+                    where.addNode(new SqlCond(ids[1].name(), Op.EQ, pair.getRight()));
                 }
                 case Object[] arr -> {
                     for (int i = 0, len = ids.length; i < len; i++) {

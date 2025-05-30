@@ -1,8 +1,8 @@
 package cn.com.idmy.orm.core;
 
-import cn.com.idmy.base.model.Pair;
 import cn.com.idmy.orm.core.SqlNode.SqlOr;
 import cn.com.idmy.orm.core.SqlNode.Type;
+import org.dromara.hutool.core.lang.tuple.Pair;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;

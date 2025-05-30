@@ -1,11 +1,11 @@
 package cn.com.idmy.orm.core;
 
-import cn.com.idmy.base.model.Pair;
 import cn.com.idmy.orm.OrmException;
 import cn.com.idmy.orm.core.SqlNode.SqlBracket;
 import cn.com.idmy.orm.core.SqlNode.SqlCond;
 import cn.com.idmy.orm.core.SqlNode.SqlOr;
 import lombok.extern.slf4j.Slf4j;
+import org.dromara.hutool.core.lang.tuple.Pair;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -40,6 +40,6 @@ class DeleteSqlGenerator extends SqlGenerator {
         values = new ArrayList<>(delete.sqlParamsSize);
 
         genWhere(wheres);
-        return new Pair<>(sql.toString(), values);
+        return Pair.of(sql.toString(), values);
     }
 }

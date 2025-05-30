@@ -2,6 +2,7 @@
 <project version="4">
   <component name="JavaProjectCodeInsightSettings">
     <excluded-names>
+      <name>ch.qos.logback.core.joran.sanity.Pair</name>
       <name>jakarta.validation.constraints.NotNull</name>
       <name>jakarta.annotation.Nullable</name>
       <name>com.mybatisflex.core.paginate</name>
