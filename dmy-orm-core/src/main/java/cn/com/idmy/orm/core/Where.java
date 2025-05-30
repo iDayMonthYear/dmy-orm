@@ -362,17 +362,15 @@ public abstract class Where<T, CRUD extends Where<T, CRUD>> extends Crud<T, CRUD
 
     //endregion
     //region NULL值操作
-    public @NotNull CRUD nulls(@NotNull FieldGetter<T, ?> field, @Nullable Boolean bol) {
-        if (bol == null) {
-            return crud;
-        } else if (bol) {
+    public @NotNull CRUD nulls(@NotNull FieldGetter<T, ?> field, @Nullable Object bol) {
+        if (bol == null || bol == Boolean.FALSE) {
             return addNode(new SqlCond(entityType, field, Op.IS_NULL, true));
         } else {
             return addNode(new SqlCond(entityType, field, Op.IS_NOT_NULL, true));
         }
     }
 
-    public @NotNull CRUD nulls(boolean if0, @NotNull FieldGetter<T, ?> field, @Nullable Boolean bol) {
+    public @NotNull CRUD nulls(boolean if0, @NotNull FieldGetter<T, ?> field, @Nullable Object bol) {
         return if0 ? nulls(field, bol) : crud;
     }
 
